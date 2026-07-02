@@ -94,11 +94,14 @@ window.KafbeStorage = (function(){
     }
     try{
       const { db, firestore } = conn;
+      // Sengaja TIDAK pakai orderBy di query Firestore-nya, karena where + orderBy
+      // pada field berbeda butuh "composite index" yang harus dibuat manual di
+      // console Firebase. Supaya zero-setup, ambil semua entri game ini lalu
+      // urutkan di browser saja (aman untuk skala leaderboard kelas/organisasi).
       const q = firestore.query(
         firestore.collection(db, 'scores'),
         firestore.where('game', '==', gameId),
-        firestore.orderBy('score', 'desc'),
-        firestore.limit(limitN)
+        firestore.limit(200)
       );
       const snap = await firestore.getDocs(q);
       const out = [];
@@ -106,7 +109,8 @@ window.KafbeStorage = (function(){
         const d = doc.data();
         out.push({ name: d.name, score: d.score });
       });
-      return out;
+      out.sort((a,b) => b.score - a.score);
+      return out.slice(0, limitN);
     }catch(e){
       console.error('KafbeStorage: gagal ambil leaderboard dari Firebase, pakai fallback lokal.', e);
       return getLocalLeaderboard(gameId).slice(0, limitN);
