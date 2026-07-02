@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KAFBE Hub — Kelompok Asisten FBE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+      <span class="brand-text"><span class="blue">KA</span><span class="gold">FBE</span><span class="blue"> Hub</span></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Buka menu">☰</button>
+    <nav class="links" id="navLinks">
+      <a href="index.html#beranda">Beranda</a>
+      <a href="index.html#main-santai">Main Santai</a>
+      <a href="index.html#belajar-main">Belajar Sambil Main</a>
+      <a href="index.html#visualisasi">Visualisasi Materi</a>
+    </nav>
+  </div>
+</header>
+
+<!-- Hidden SVG symbol definition for the KAFBE owl, reused everywhere -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <path d="M92 66 Q78 26 68 10 Q104 18 116 54 Q104 58 92 66 Z" fill="var(--owl-dark)"/>
+    <path d="M208 66 Q222 26 232 10 Q196 18 184 54 Q196 58 208 66 Z" fill="var(--owl-dark)"/>
+    <path class="wing-l" d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path class="wing-r" d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/>
+      <path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/>
+      <path d="M142 192 q8 10 16 0"/>
+      <path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/>
+      <path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/>
+      <circle cx="177" cy="118" r="7" fill="#fff"/>
+      <circle cx="120" cy="136" r="3" fill="#fff" opacity="0.8"/>
+      <circle cx="190" cy="136" r="3" fill="#fff" opacity="0.8"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<!-- ============ HERO ============ -->
+<section id="beranda" class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="eyebrow">🦉 Kelompok Asisten FBE</span>
+      <h1>Belajar bareng <em>Si Hantu Biru</em> KAFBE</h1>
+      <p class="lead">Satu tempat buat asisten &amp; mahasiswa FBE main game, latihan materi kuliah lewat cara yang lebih seru, dan lihat langsung bagaimana algoritma dan rumus finance itu "bergerak" — bukan cuma dihafal dari slide.</p>
+      <div class="hero-cta">
+        <a href="games/flappy-owl.html" class="btn btn-primary">🎮 Main Flappy Owl</a>
+        <a href="#belajar-main" class="btn btn-ghost">Lihat Semua Fitur</a>
+      </div>
+    </div>
+    <div class="hero-owl-stage">
+      <svg class="hero-owl" viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURE OVERVIEW ============ -->
+<section class="wrap">
+  <div class="section-head">
+    <span class="kicker">Tiga Ruang di Hub Ini</span>
+    <h2>Main, belajar, dan lihat cara kerjanya.</h2>
+    <p>Semuanya bertema si burung hantu KAFBE, dari karakter game sampai visualisasi materi.</p>
+  </div>
+  <div class="card-grid">
+    <div class="feature-card">
+      <span class="badge badge-live">Aktif</span>
+      <div class="feature-icon">🎮</div>
+      <h3>Main Santai</h3>
+      <p>Game ringan buat refreshing sela-sela kuliah atau asistensi. Dimulai dengan <strong>Flappy Owl</strong> — versi Flappy Bird dengan maskot KAFBE.</p>
+      <a href="games/flappy-owl.html" class="btn btn-gold">Mainkan</a>
+    </div>
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">🧠</div>
+      <h3>Belajar Sambil Main</h3>
+      <p>Game yang dibungkus dari materi kuliah beneran — mulai dari statistik, operasional, sampai keuangan — biar konsep nempel tanpa harus baca ulang slide.</p>
+      <a href="#belajar-main" class="btn btn-ghost">Lihat Rencana</a>
+    </div>
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">📊</div>
+      <h3>Visualisasi Materi</h3>
+      <p>Lihat langkah demi langkah cara kerja Hungarian Algorithm, Critical Path Method, IRR, dan tax shield — bukan cuma rumus jadi, tapi prosesnya.</p>
+      <a href="#visualisasi" class="btn btn-ghost">Lihat Rencana</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MAIN SANTAI (preview only, game ada di halaman sendiri) ============ -->
+<section id="main-santai" class="wrap">
+  <div class="section-head">
+    <span class="kicker">Main Santai</span>
+    <h2>Flappy Owl 🦉</h2>
+    <p>Terbangin si hantu biru KAFBE melewati rak buku setinggi mungkin. Game-nya ada di halaman tersendiri.</p>
+  </div>
+  <div class="feature-card" style="max-width:420px;">
+    <span class="badge badge-live">Aktif</span>
+    <svg viewBox="0 0 300 300" style="width:80px;"><use href="#kafbe-owl"/></svg>
+    <h3>Flappy Owl</h3>
+    <p>Klik / ketuk / tekan Spasi untuk terbang. Skor terbaikmu tersimpan otomatis di browser ini.</p>
+    <a href="games/flappy-owl.html" class="btn btn-gold">Main Sekarang</a>
+  </div>
+</section>
+
+<!-- ============ BELAJAR SAMBIL MAIN ============ -->
+<section id="belajar-main" class="wrap">
+  <div class="section-head">
+    <span class="kicker">Belajar Sambil Main</span>
+    <h2>Rencana game pembelajaran</h2>
+    <p>Bagian ini sedang disiapkan tim KAFBE. Berikut ide-ide yang sedang dirancang:</p>
+  </div>
+  <div class="card-grid">
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">🔀</div>
+      <h3>Hungarian Assignment Hunt</h3>
+      <p>Puzzle drag-and-drop untuk latihan Hungarian Algorithm pada mata kuliah Manajemen Operasi — cocokkan tugas ke pekerja dengan biaya paling minimum.</p>
+    </div>
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">📈</div>
+      <h3>Kuis Cepat Manajemen Keuangan</h3>
+      <p>Tantangan hitung cepat seputar IRR, NPV, dan tax shield dengan skor &amp; waktu, biar makin terbiasa sebelum ujian.</p>
+    </div>
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">🧩</div>
+      <h3>Statistik Sprint</h3>
+      <p>Game tebak-distribusi &amp; latihan uji hipotesis singkat untuk mata kuliah statistik bisnis.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VISUALISASI MATERI ============ -->
+<section id="visualisasi" class="wrap">
+  <div class="section-head">
+    <span class="kicker">Visualisasi Materi</span>
+    <h2>Rencana visualisasi langkah kerja</h2>
+    <p>Fitur ini akan menampilkan animasi step-by-step, bukan cuma hasil akhir rumus:</p>
+  </div>
+  <div class="card-grid">
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">🧮</div>
+      <h3>Hungarian Algorithm</h3>
+      <p>Animasi reduksi baris/kolom dan penugasan optimal, langkah demi langkah, untuk Manajemen Operasi.</p>
+    </div>
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">🛠️</div>
+      <h3>Critical Path Method</h3>
+      <p>Diagram jaringan proyek interaktif yang menandai jalur kritis dan slack tiap aktivitas.</p>
+    </div>
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">💰</div>
+      <h3>IRR &amp; Tax Shield</h3>
+      <p>Simulasi arus kas tahun demi tahun untuk melihat bagaimana IRR dihitung dan bagaimana tax shield mengubah nilai proyek, untuk Manajemen Keuangan.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong> — Kelompok Asisten FBE. Info jadwal &amp; kegiatan resmi tetap lewat Instagram KAFBE.</p>
+</footer>
+
+<script src="shared/main.js"></script>
+</body>
+</html>
