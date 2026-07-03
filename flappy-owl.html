@@ -60,6 +60,9 @@
     font-size:0.8rem; background:rgba(240,185,61,0.16); border:1px solid rgba(240,185,61,0.4);
     color:#FCE7BB; padding:10px 14px; border-radius:12px; display:none;
   }
+  /* Blur di navbar cukup berat untuk GPU HP saat canvas game terus repaint
+     di bawahnya — dimatikan khusus di halaman ini demi performa. */
+  header.nav{ backdrop-filter:none; background:var(--bg); }
 </style>
 </head>
 <body>
@@ -438,14 +441,22 @@
   }
 
   let lastTime = null;
+  let accumulator = 0;
+  const FIXED_DT = 1/60;       // physics selalu melangkah dalam potongan waktu tetap
+  const MAX_FRAME_TIME = 0.25; // batas "kejar ketinggalan" kalau ada jeda panjang (ganti tab, dsb.)
+
   function loop(timestamp){
     if(lastTime === null) lastTime = timestamp;
-    // Cap dt supaya kalau ada jeda panjang (tab pindah, HP nge-lag sesaat),
-    // burung tidak "meloncat jauh" mengejar waktu yang hilang.
-    const dt = Math.min((timestamp - lastTime) / 1000, 1/30);
+    let frameTime = (timestamp - lastTime) / 1000;
     lastTime = timestamp;
+    if(frameTime > MAX_FRAME_TIME) frameTime = MAX_FRAME_TIME;
 
-    update(dt);
+    accumulator += frameTime;
+    while(accumulator >= FIXED_DT){
+      update(FIXED_DT);
+      accumulator -= FIXED_DT;
+    }
+
     render();
     requestAnimationFrame(loop);
   }
