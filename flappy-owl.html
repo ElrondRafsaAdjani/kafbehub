@@ -210,12 +210,12 @@
 
   // Semua kecepatan dalam satuan per DETIK (bukan per frame), supaya gerakan
   // tetap konsisten di HP dengan refresh rate/performa yang beda-beda.
-  const GRAVITY = 936;        // px/s^2
-  const FLAP = -336;          // px/s (kecepatan loncat instan)
+  const GRAVITY = 1300;       // px/s^2
+  const FLAP = -400;          // px/s (kecepatan loncat instan)
   const BIRD_R = 17;
   let pipes = [];
-  const PIPE_W = 62, PIPE_GAP = 190, PIPE_SPEED = 78; // px/s
-  const PIPE_INTERVAL = 2.58; // detik antar rak buku baru
+  const PIPE_W = 62, PIPE_GAP = 190, PIPE_SPEED = 115; // px/s
+  const PIPE_INTERVAL = 1.75; // detik antar rak buku baru
   let pipeTimer = 0, idleTimer = 0, score = 0, wingPhase = 0;
   let clouds = [];
   for(let i=0;i<5;i++){
@@ -388,69 +388,90 @@
     ctx.fillRect(0, H-GROUND_H, W, 6);
   }
 
+  const OWL_SPRITE_SIZE = 76;
+  const OWL_SPRITE_MID = OWL_SPRITE_SIZE / 2;
+
+  // Gambar bentuk burung ke context manapun (dipakai untuk pre-render sprite).
+  // targetCtx harus sudah di-translate ke titik pusat sebelum fungsi ini dipanggil.
+  function paintOwlShape(targetCtx, flapOffset){
+    // ear tufts - small equilateral triangles, not pointy horns
+    targetCtx.fillStyle = '#1F3A63';
+    targetCtx.beginPath();
+    targetCtx.moveTo(-13, -17);
+    targetCtx.lineTo(-4, -17);
+    targetCtx.lineTo(-8.5, -25.8);
+    targetCtx.closePath();
+    targetCtx.fill();
+    targetCtx.beginPath();
+    targetCtx.moveTo(13, -17);
+    targetCtx.lineTo(4, -17);
+    targetCtx.lineTo(8.5, -25.8);
+    targetCtx.closePath();
+    targetCtx.fill();
+
+    // wings
+    targetCtx.fillStyle = '#1F3A63';
+    targetCtx.beginPath();
+    targetCtx.ellipse(-14, 2+flapOffset*0.3, 11, 16, -0.4, 0, Math.PI*2);
+    targetCtx.fill();
+    targetCtx.beginPath();
+    targetCtx.ellipse(14, 2+flapOffset*0.3, 11, 16, 0.4, 0, Math.PI*2);
+    targetCtx.fill();
+
+    // body
+    targetCtx.fillStyle = '#B7DAE8';
+    targetCtx.beginPath();
+    targetCtx.ellipse(0, 0, 19, 21, 0, 0, Math.PI*2);
+    targetCtx.fill();
+
+    // belly
+    targetCtx.fillStyle = '#EEF7F9';
+    targetCtx.beginPath();
+    targetCtx.ellipse(0, 5, 11, 13, 0, 0, Math.PI*2);
+    targetCtx.fill();
+
+    // eyes
+    targetCtx.fillStyle = '#CFE7F0';
+    targetCtx.beginPath(); targetCtx.arc(-7, -4, 8.5, 0, Math.PI*2); targetCtx.fill();
+    targetCtx.beginPath(); targetCtx.arc(7, -4, 8.5, 0, Math.PI*2); targetCtx.fill();
+    targetCtx.fillStyle = '#16294A';
+    targetCtx.beginPath(); targetCtx.arc(-7, -4, 5, 0, Math.PI*2); targetCtx.fill();
+    targetCtx.beginPath(); targetCtx.arc(7, -4, 5, 0, Math.PI*2); targetCtx.fill();
+    targetCtx.fillStyle = '#fff';
+    targetCtx.beginPath(); targetCtx.arc(-8.5, -6, 1.6, 0, Math.PI*2); targetCtx.fill();
+    targetCtx.beginPath(); targetCtx.arc(5.5, -6, 1.6, 0, Math.PI*2); targetCtx.fill();
+
+    // beak
+    targetCtx.fillStyle = '#F0B93D';
+    targetCtx.beginPath();
+    targetCtx.moveTo(0, 1);
+    targetCtx.lineTo(-4, 6);
+    targetCtx.lineTo(4, 6);
+    targetCtx.closePath();
+    targetCtx.fill();
+  }
+
+  function renderOwlSprite(flapOffset){
+    const off = document.createElement('canvas');
+    off.width = OWL_SPRITE_SIZE;
+    off.height = OWL_SPRITE_SIZE;
+    const octx = off.getContext('2d');
+    octx.translate(OWL_SPRITE_MID, OWL_SPRITE_MID);
+    paintOwlShape(octx, flapOffset);
+    return off;
+  }
+
+  // Dua pose sayap saja (atas & bawah) cukup untuk kesan mengepak, dan jauh
+  // lebih murah daripada menghitung ulang seluruh bentuk tiap frame.
+  const owlSpriteWingUp = renderOwlSprite(-9);
+  const owlSpriteWingDown = renderOwlSprite(9);
+
   function drawOwl(){
+    const sprite = Math.sin(wingPhase) >= 0 ? owlSpriteWingUp : owlSpriteWingDown;
     ctx.save();
     ctx.translate(birdX, birdY);
     ctx.rotate(birdRot * Math.PI/180);
-
-    const flapOffset = state === 'playing' ? Math.sin(wingPhase*2.2)*10 : Math.sin(wingPhase)*6;
-
-    // ear tufts - small equilateral triangles, not pointy horns
-    ctx.fillStyle = '#1F3A63';
-    ctx.beginPath();
-    ctx.moveTo(-13, -17);
-    ctx.lineTo(-4, -17);
-    ctx.lineTo(-8.5, -25.8);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(13, -17);
-    ctx.lineTo(4, -17);
-    ctx.lineTo(8.5, -25.8);
-    ctx.closePath();
-    ctx.fill();
-
-    // wings
-    ctx.fillStyle = '#1F3A63';
-    ctx.beginPath();
-    ctx.ellipse(-14, 2+flapOffset*0.3, 11, 16, -0.4, 0, Math.PI*2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(14, 2+flapOffset*0.3, 11, 16, 0.4, 0, Math.PI*2);
-    ctx.fill();
-
-    // body
-    ctx.fillStyle = '#B7DAE8';
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 19, 21, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // belly
-    ctx.fillStyle = '#EEF7F9';
-    ctx.beginPath();
-    ctx.ellipse(0, 5, 11, 13, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // eyes
-    ctx.fillStyle = '#CFE7F0';
-    ctx.beginPath(); ctx.arc(-7, -4, 8.5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(7, -4, 8.5, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#16294A';
-    ctx.beginPath(); ctx.arc(-7, -4, 5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(7, -4, 5, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(-8.5, -6, 1.6, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(5.5, -6, 1.6, 0, Math.PI*2); ctx.fill();
-
-    // beak
-    ctx.fillStyle = '#F0B93D';
-    ctx.beginPath();
-    ctx.moveTo(0, 1);
-    ctx.lineTo(-4, 6);
-    ctx.lineTo(4, 6);
-    ctx.closePath();
-    ctx.fill();
-
+    ctx.drawImage(sprite, -OWL_SPRITE_MID, -OWL_SPRITE_MID);
     ctx.restore();
   }
 
