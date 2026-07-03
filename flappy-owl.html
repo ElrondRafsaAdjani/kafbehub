@@ -241,7 +241,29 @@
   function spawnPipe(){
     const margin = 60;
     const gapCenter = margin + Math.random() * (H - GROUND_H - margin*2 - PIPE_GAP) + PIPE_GAP/2;
-    pipes.push({ x: W + 10, gapCenter, passed:false });
+    const gapTop = gapCenter - PIPE_GAP/2;
+    const gapBottom = gapCenter + PIPE_GAP/2;
+    const topH = gapTop;
+    const bottomH = H - GROUND_H - gapBottom;
+    pipes.push({
+      x: W + 10, gapCenter, passed:false,
+      topImg: renderShelfSegment(topH, true),
+      bottomImg: renderShelfSegment(bottomH, false)
+    });
+  }
+
+  // Gambar satu ruas rak buku SEKALI ke canvas kecil tersembunyi (offscreen),
+  // supaya tiap frame render tinggal "tempel gambar" (drawImage) yang jauh
+  // lebih murah daripada menggambar ulang path + banyak stroke() tiap frame.
+  function renderShelfSegment(h, isTop){
+    if(h <= 0) return null;
+    const w = PIPE_W + 10;
+    const off = document.createElement('canvas');
+    off.width = w;
+    off.height = Math.max(1, Math.round(h));
+    const octx = off.getContext('2d');
+    drawShelfColumn(octx, 5, 0, PIPE_W, h, isTop);
+    return off;
   }
 
   function update(dt){
@@ -318,46 +340,45 @@
   }
 
   function drawPipe(p){
-    const gapTop = p.gapCenter - PIPE_GAP/2;
     const gapBottom = p.gapCenter + PIPE_GAP/2;
-    drawShelfColumn(p.x, 0, PIPE_W, gapTop, true);
-    drawShelfColumn(p.x, gapBottom, PIPE_W, H - GROUND_H - gapBottom, false);
+    if(p.topImg) ctx.drawImage(p.topImg, p.x - 5, 0);
+    if(p.bottomImg) ctx.drawImage(p.bottomImg, p.x - 5, gapBottom);
   }
 
-  function drawShelfColumn(x, y, w, h, isTop){
+  function drawShelfColumn(targetCtx, x, y, w, h, isTop){
     if(h <= 0) return;
-    ctx.fillStyle = '#1F3A63';
-    roundRect(x, y, w, h, 10);
-    ctx.fill();
+    targetCtx.fillStyle = '#1F3A63';
+    roundRect(targetCtx, x, y, w, h, 10);
+    targetCtx.fill();
 
-    ctx.fillStyle = '#F0B93D';
+    targetCtx.fillStyle = '#F0B93D';
     if(isTop){
-      roundRect(x-5, y+h-14, w+10, 14, 7);
+      roundRect(targetCtx, x-5, y+h-14, w+10, 14, 7);
     } else {
-      roundRect(x-5, y, w+10, 14, 7);
+      roundRect(targetCtx, x-5, y, w+10, 14, 7);
     }
-    ctx.fill();
+    targetCtx.fill();
 
-    ctx.strokeStyle = 'rgba(240,185,61,0.55)';
-    ctx.lineWidth = 3;
+    targetCtx.strokeStyle = 'rgba(240,185,61,0.55)';
+    targetCtx.lineWidth = 3;
     const step = 34;
     let start = isTop ? (h % step) : 20;
     for(let ly = y + start; ly < y + h - 4; ly += step){
-      ctx.beginPath();
-      ctx.moveTo(x+6, ly);
-      ctx.lineTo(x+w-6, ly);
-      ctx.stroke();
+      targetCtx.beginPath();
+      targetCtx.moveTo(x+6, ly);
+      targetCtx.lineTo(x+w-6, ly);
+      targetCtx.stroke();
     }
   }
 
-  function roundRect(x,y,w,h,r){
-    ctx.beginPath();
-    ctx.moveTo(x+r,y);
-    ctx.arcTo(x+w,y,x+w,y+h,r);
-    ctx.arcTo(x+w,y+h,x,y+h,r);
-    ctx.arcTo(x,y+h,x,y,r);
-    ctx.arcTo(x,y,x+w,y,r);
-    ctx.closePath();
+  function roundRect(targetCtx, x,y,w,h,r){
+    targetCtx.beginPath();
+    targetCtx.moveTo(x+r,y);
+    targetCtx.arcTo(x+w,y,x+w,y+h,r);
+    targetCtx.arcTo(x+w,y+h,x,y+h,r);
+    targetCtx.arcTo(x,y+h,x,y,r);
+    targetCtx.arcTo(x,y,x+w,y,r);
+    targetCtx.closePath();
   }
 
   function drawGround(){
