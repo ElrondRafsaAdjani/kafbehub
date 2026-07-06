@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Grafik Supply &amp; Demand — Pengantar Mikroekonomi — KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .tool-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:28px; box-shadow:var(--shadow); margin-top:24px;
+  }
+  .tool-card.hidden{display:none;}
+  .tool-card h3{font-size:1.25rem; margin-bottom:4px;}
+  .step-header-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:18px;}
+  .link-btn{
+    background:none; border:none; color:var(--ink-soft); font-weight:600; font-size:0.88rem;
+    cursor:pointer; padding:0; text-decoration:underline;
+  }
+  .link-btn:hover{color:var(--owl-dark2);}
+
+  .mode-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:16px;}
+  @media (max-width:700px){ .mode-grid{grid-template-columns:1fr;} }
+  .mode-option{
+    text-align:left; background:var(--bg-deep); border:2px solid transparent; border-radius:20px;
+    padding:22px; cursor:pointer; font-family:'Plus Jakarta Sans'; transition:border-color .15s, transform .15s;
+  }
+  .mode-option:hover{border-color:var(--owl-mid); transform:translateY(-2px);}
+  .mode-icon{font-size:1.8rem; margin-bottom:8px;}
+  .mode-option h4{font-family:'Baloo 2'; font-size:1.05rem; color:var(--owl-dark2); margin:0 0 6px;}
+  .mode-option p{color:var(--ink-soft); font-size:0.88rem; line-height:1.5; margin:0;}
+
+  .input-columns{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media (max-width:760px){ .input-columns{grid-template-columns:1fr;} }
+  .input-col h4{font-size:1.05rem; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+  .demand-col h4{color:#C24E33;}
+  .supply-col h4{color:var(--owl-dark2);}
+  .rows{display:flex; flex-direction:column; gap:8px; margin-bottom:10px;}
+  .row-item{
+    display:flex; align-items:center; gap:8px; background:var(--bg-deep); border-radius:12px; padding:8px 10px;
+  }
+  .row-item .row-label{font-size:0.72rem; font-weight:700; color:var(--ink-soft); width:16px; flex-shrink:0;}
+  .row-item input[type=number], .row-item input[type=text]{
+    font-family:'Plus Jakarta Sans'; font-size:0.9rem; border:1px solid var(--line); border-radius:8px;
+    padding:8px 10px; width:100%; min-width:0;
+  }
+  .row-item input[type=text]{font-family:'SFMono-Regular', Consolas, monospace;}
+  .row-item .remove-row{
+    background:none; border:none; color:#C24E33; font-size:1.1rem; cursor:pointer; flex-shrink:0;
+    width:26px; height:26px; border-radius:8px; line-height:1;
+  }
+  .row-item .remove-row:hover{background:rgba(194,78,51,0.12);}
+  .btn-sm{padding:8px 16px; font-size:0.85rem;}
+  .btn-lg{padding:15px 28px; font-size:1rem; width:100%; justify-content:center; margin-top:22px;}
+
+  .error-box{
+    background:#FDEDEA; border:1px solid #F3B9AC; color:#9C3B26; padding:12px 16px;
+    border-radius:12px; font-size:0.88rem; margin-top:18px; line-height:1.5;
+  }
+  .error-box.hidden{display:none;}
+
+  .result-layout{display:grid; grid-template-columns:1.3fr 1fr; gap:28px; align-items:start;}
+  @media (max-width:900px){ .result-layout{grid-template-columns:1fr;} }
+  .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:16px;}
+  #chartSvg{width:100%; height:auto; display:block;}
+  .legend{display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:12px; font-size:0.82rem;}
+  .legend-item{display:flex; align-items:center; gap:6px; color:var(--ink-soft);}
+  .legend-swatch{width:18px; height:3px; border-radius:2px; display:inline-block;}
+  .legend-swatch.dashed{background-image:linear-gradient(to right, currentColor 60%, transparent 40%); background-size:8px 3px; height:3px; background-color:transparent;}
+
+  .steps-panel{display:flex; flex-direction:column; gap:14px;}
+  .step-block{background:var(--bg-deep); border-radius:16px; padding:16px 18px;}
+  .step-block .step-num{
+    display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
+    border-radius:50%; background:var(--owl-dark2); color:#fff; font-size:0.75rem; font-weight:800; margin-right:8px;
+  }
+  .step-block h5{font-family:'Baloo 2'; font-size:0.98rem; color:var(--owl-dark2); display:inline;}
+  .step-block .step-body{margin-top:8px; font-size:0.88rem; color:var(--ink-soft); line-height:1.6;}
+  .step-body code{background:rgba(15,37,64,0.06); padding:1px 6px; border-radius:6px; font-size:0.85em;}
+  .step-body .eq-line{font-family:'SFMono-Regular', Consolas, monospace; display:block; margin:3px 0;}
+  .answer-box{
+    background:linear-gradient(135deg, var(--owl-dark2), var(--owl-dark)); color:#fff;
+    border-radius:16px; padding:18px 20px; text-align:center;
+  }
+  .answer-box .lbl{font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; color:#B9CBDA;}
+  .answer-box .val{font-family:'Baloo 2'; font-size:1.6rem; font-weight:700; margin-top:4px;}
+
+  .pair-table-wrap{margin-top:26px;}
+  .pair-table-wrap h4{font-size:1.02rem; margin-bottom:10px;}
+  table.pair-table{width:100%; border-collapse:collapse; font-size:0.88rem;}
+  table.pair-table th, table.pair-table td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--line);}
+  table.pair-table th{color:var(--ink-soft); font-weight:700; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.03em;}
+  table.pair-table tr.primary-row{background:var(--bg-deep);}
+  table.pair-table tr.primary-row td:first-child{font-weight:700;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+      <span class="brand-text"><span class="blue">KA</span><span class="gold">FBE</span><span class="blue"> Hub</span></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Buka menu">☰</button>
+    <nav class="links" id="navLinks">
+      <a href="index.html#beranda">Beranda</a>
+      <a href="index.html#main-santai">Main Santai</a>
+      <a href="pemi.html">Pengantar Mikroekonomi</a>
+    </nav>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/>
+      <path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/>
+      <path d="M142 192 q8 10 16 0"/>
+      <path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/>
+      <path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g>
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/>
+      <circle cx="177" cy="118" r="7" fill="#fff"/>
+      <circle cx="120" cy="136" r="3" fill="#fff" opacity="0.8"/>
+      <circle cx="190" cy="136" r="3" fill="#fff" opacity="0.8"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="pemi.html">← Kembali ke Pengantar Mikroekonomi</a>
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Pengantar Mikroekonomi</span>
+    <h2>Grafik Supply &amp; Demand</h2>
+    <p>Masukkan data permintaan &amp; penawaran kamu sendiri (titik harga-kuantitas, atau persamaan), lalu lihat kurva dan titik ekuilibriumnya terbentuk langkah demi langkah.</p>
+  </div>
+
+  <!-- STEP 0: pilih mode -->
+  <div id="stepMode" class="tool-card">
+    <h3>Langkah 1 — Pilih cara input data</h3>
+    <div class="mode-grid">
+      <button type="button" class="mode-option" id="modeCoord">
+        <div class="mode-icon">📍</div>
+        <h4>Input Koordinat</h4>
+        <p>Masukkan pasangan Harga &amp; Kuantitas — cocok kalau kamu sudah punya tabel jadwal permintaan/penawaran (demand/supply schedule).</p>
+      </button>
+      <button type="button" class="mode-option" id="modeEquation">
+        <div class="mode-icon">✍️</div>
+        <h4>Input Persamaan</h4>
+        <p>Ketik langsung persamaannya, misal <code>P = 100 - 2Q</code> atau <code>Q = 60 - 0.5P</code>.</p>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 1: input data -->
+  <div id="stepInput" class="tool-card hidden">
+    <div class="step-header-row">
+      <h3>Langkah 2 — Masukkan data</h3>
+      <button type="button" class="link-btn" id="btnChangeMode">← Ganti cara input</button>
+    </div>
+    <p style="color:var(--ink-soft); font-size:0.88rem; margin-top:-8px; margin-bottom:18px;">
+      Baris pertama di tiap sisi jadi kurva utama (dipakai untuk hitungan langkah kerja). Baris tambahan (maks. 5) digambar putus-putus sebagai pembanding pergeseran kurva.
+    </p>
+    <div class="input-columns">
+      <div class="input-col demand-col">
+        <h4>📉 Permintaan (Demand)</h4>
+        <div id="demandRows" class="rows"></div>
+        <button type="button" class="btn btn-ghost btn-sm" id="addDemandRow">+ Tambah</button>
+      </div>
+      <div class="input-col supply-col">
+        <h4>📈 Penawaran (Supply)</h4>
+        <div id="supplyRows" class="rows"></div>
+        <button type="button" class="btn btn-ghost btn-sm" id="addSupplyRow">+ Tambah</button>
+      </div>
+    </div>
+    <div id="inputError" class="error-box hidden"></div>
+    <button type="button" class="btn btn-primary btn-lg" id="btnBuild">Gambar Grafik &amp; Cari Ekuilibrium</button>
+  </div>
+
+  <!-- STEP 2: hasil -->
+  <div id="stepResult" class="tool-card hidden">
+    <div class="step-header-row">
+      <h3>Hasil</h3>
+      <button type="button" class="link-btn" id="btnEdit">← Ubah data</button>
+    </div>
+    <div class="result-layout">
+      <div>
+        <div class="chart-wrap">
+          <svg id="chartSvg" viewBox="0 0 640 460" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="steps-panel" id="stepsPanel"></div>
+    </div>
+    <div id="pairTableWrap" class="pair-table-wrap hidden">
+      <h4>🔀 Semua Titik Ekuilibrium (tiap kombinasi kurva)</h4>
+      <table class="pair-table" id="pairTable"></table>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong> — Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ===================================================================
+  // 1. PARSER RUMUS (recursive descent, tanpa eval) 
+  // ===================================================================
+  function tokenize(str){
+    const tokens = [];
+    let i = 0;
+    while(i < str.length){
+      const c = str[i];
+      if(/\s/.test(c)){ i++; continue; }
+      if(/[0-9.]/.test(c)){
+        let j = i;
+        while(j < str.length && /[0-9.]/.test(str[j])) j++;
+        const numStr = str.slice(i,j);
+        if(isNaN(parseFloat(numStr))) throw new Error('Angka tidak valid: "' + numStr + '"');
+        tokens.push({ type:'NUM', value: parseFloat(numStr) });
+        i = j; continue;
+      }
+      if(/[A-Za-z]/.test(c)){
+        let j = i;
+        while(j < str.length && /[A-Za-z]/.test(str[j])) j++;
+        tokens.push({ type:'VAR', value: str.slice(i,j).toUpperCase() });
+        i = j; continue;
+      }
+      if('+-*/^()'.includes(c)){ tokens.push({ type:c }); i++; continue; }
+      throw new Error('Karakter tidak dikenali: "' + c + '"');
+    }
+    tokens.push({ type:'END' });
+    return tokens;
+  }
+
+  function compileExpression(str, varLetter){
+    const tokens = tokenize(str);
+    let pos = 0;
+    const peek = () => tokens[pos];
+    const advance = () => tokens[pos++];
+    const expect = (type) => {
+      if(peek().type !== type) throw new Error('Persamaan tidak valid dekat "' + (peek().value || peek().type) + '"');
+      return advance();
+    };
+
+    function parseExpr(){
+      let node = parseTerm();
+      while(peek().type === '+' || peek().type === '-'){
+        const op = advance().type;
+        const rhs = parseTerm();
+        const left = node;
+        node = (x) => op === '+' ? left(x) + rhs(x) : left(x) - rhs(x);
+      }
+      return node;
+    }
+    function parseTerm(){
+      let node = parseUnary();
+      while(true){
+        if(peek().type === '*' || peek().type === '/'){
+          const op = advance().type;
+          const rhs = parseUnary();
+          const left = node;
+          node = (x) => op === '*' ? left(x) * rhs(x) : left(x) / rhs(x);
+        } else if(peek().type === 'NUM' || peek().type === 'VAR' || peek().type === '('){
+          // perkalian implisit, misal "2Q" atau "2(Q+1)"
+          const rhs = parseUnary();
+          const left = node;
+          node = (x) => left(x) * rhs(x);
+        } else {
+          break;
+        }
+      }
+      return node;
+    }
+    function parseUnary(){
+      if(peek().type === '-'){ advance(); const n = parseUnary(); return (x) => -n(x); }
+      if(peek().type === '+'){ advance(); return parseUnary(); }
+      return parsePower();
+    }
+    function parsePower(){
+      const base = parsePrimary();
+      if(peek().type === '^'){
+        advance();
+        const exp = parseUnary();
+        return (x) => Math.pow(base(x), exp(x));
+      }
+      return base;
+    }
+    function parsePrimary(){
+      const t = peek();
+      if(t.type === 'NUM'){ advance(); const v = t.value; return () => v; }
+      if(t.type === 'VAR'){
+        advance();
+        if(t.value !== varLetter){
+          throw new Error('Variabel "' + t.value + '" tidak sesuai — sisi kanan harus pakai "' + varLetter + '".');
+        }
+        return (x) => x;
+      }
+      if(t.type === '('){ advance(); const inner = parseExpr(); expect(')'); return inner; }
+      throw new Error('Persamaan tidak lengkap di dekat "' + (t.value || t.type) + '"');
+    }
+
+    const fn = parseExpr();
+    if(peek().type !== 'END') throw new Error('Ada bagian yang tidak bisa diproses: "' + (peek().value || peek().type) + '"');
+    const test = fn(1);
+    if(typeof test !== 'number' || !isFinite(test)) throw new Error('Persamaan menghasilkan nilai yang tidak valid.');
+    return fn;
+  }
+
+  function parseEquation(raw){
+    const str = raw.trim();
+    const eqIdx = str.indexOf('=');
+    if(eqIdx === -1) throw new Error('Format harus "P = ..." atau "Q = ...".');
+    const lhs = str.slice(0, eqIdx).trim().toUpperCase();
+    const rhsStr = str.slice(eqIdx + 1).trim();
+    if(lhs !== 'P' && lhs !== 'Q') throw new Error('Sisi kiri harus "P" atau "Q", misal "P = 100 - 2Q".');
+    if(!rhsStr) throw new Error('Sisi kanan persamaan kosong.');
+    const varLetter = lhs === 'P' ? 'Q' : 'P';
+    const evaluate = compileExpression(rhsStr, varLetter);
+    return { lhs, evaluate, raw: str };
+  }
+
+  // ===================================================================
+  // 2. SPLINE (Catmull-Rom) untuk kurva dari titik-titik
+  // ===================================================================
+  function catmullRomSamples(points, samplesPerSegment){
+    samplesPerSegment = samplesPerSegment || 18;
+    if(points.length === 2) return points.slice();
+    const pts = points, n = pts.length, result = [];
+    for(let i = 0; i < n - 1; i++){
+      const p0 = pts[Math.max(0, i-1)];
+      const p1 = pts[i];
+      const p2 = pts[i+1];
+      const p3 = pts[Math.min(n-1, i+2)];
+      for(let s = 0; s < samplesPerSegment; s++){
+        const t = s / samplesPerSegment, t2 = t*t, t3 = t2*t;
+        const q = 0.5*((2*p1.q) + (-p0.q+p2.q)*t + (2*p0.q-5*p1.q+4*p2.q-p3.q)*t2 + (-p0.q+3*p1.q-3*p2.q+p3.q)*t3);
+        const p = 0.5*((2*p1.p) + (-p0.p+p2.p)*t + (2*p0.p-5*p1.p+4*p2.p-p3.p)*t2 + (-p0.p+3*p1.p-3*p2.p+p3.p)*t3);
+        result.push({ q, p });
+      }
+    }
+    result.push(pts[n-1]);
+    result.sort((a,b) => a.q - b.q);
+    return result;
+  }
+
+  // ===================================================================
+  // 3. UTIL: interpolasi & pencarian titik potong
+  // ===================================================================
+  function interpolateAt(samples, q){
+    if(q <= samples[0].q) return samples[0].p;
+    if(q >= samples[samples.length-1].q) return samples[samples.length-1].p;
+    for(let i = 0; i < samples.length - 1; i++){
+      if(q >= samples[i].q && q <= samples[i+1].q){
+        const span = samples[i+1].q - samples[i].q;
+        const t = span === 0 ? 0 : (q - samples[i].q) / span;
+        return samples[i].p + t * (samples[i+1].p - samples[i].p);
+      }
+    }
+    return samples[samples.length-1].p;
+  }
+
+  function findFirstIntersection(samplesA, samplesB, qMax, steps){
+    steps = steps || 600;
+    let prevQ = 0, prevD = interpolateAt(samplesA,0) - interpolateAt(samplesB,0);
+    for(let i = 1; i <= steps; i++){
+      const q = (i/steps) * qMax;
+      const d = interpolateAt(samplesA,q) - interpolateAt(samplesB,q);
+      if(d === 0) return { q, p: interpolateAt(samplesA,q) };
+      if((prevD < 0 && d > 0) || (prevD > 0 && d < 0)){
+        const t = prevD / (prevD - d);
+        const q0 = prevQ + t*(q - prevQ);
+        const p0 = interpolateAt(samplesA,q0);
+        return { q: q0, p: p0 };
+      }
+      prevQ = q; prevD = d;
+    }
+    return null;
+  }
+
+  function findZeroCrossing(evalFn){
+    let q0 = 0, p0 = evalFn(0);
+    let q1 = 1;
+    const maxQ = 200000;
+    while(q1 < maxQ){
+      const p1 = evalFn(q1);
+      if((p0 <= 0 && p1 >= 0) || (p0 >= 0 && p1 <= 0)){
+        let lo = q0, hi = q1, plo = p0;
+        for(let i=0;i<50;i++){
+          const mid = (lo+hi)/2, pm = evalFn(mid);
+          if((plo<=0 && pm>=0) || (plo>=0 && pm<=0)){ hi = mid; } else { lo = mid; plo = pm; }
+        }
+        return (lo+hi)/2;
+      }
+      q0 = q1; p0 = p1; q1 *= 2;
+    }
+    return null;
+  }
+
+  function isLinearFn(fn){
+    const f0 = fn(0), f1 = fn(1), f2 = fn(2);
+    const predicted = f0 + 2*(f1-f0);
+    const tol = Math.max(1e-4, Math.abs(f2)*1e-4);
+    return isFinite(f0) && isFinite(f1) && isFinite(f2) && Math.abs(predicted - f2) < tol;
+  }
+
+  function fmt(n){
+    if(!isFinite(n)) return '—';
+    const r = Math.round(n*100)/100;
+    return r.toString();
+  }
+
+  // ===================================================================
+  // 4. STATE & DOM REFS
+  // ===================================================================
+  let mode = null; // 'coord' | 'equation'
+  const MAX_ROWS = 5;
+
+  const stepMode = document.getElementById('stepMode');
+  const stepInput = document.getElementById('stepInput');
+  const stepResult = document.getElementById('stepResult');
+  const demandRows = document.getElementById('demandRows');
+  const supplyRows = document.getElementById('supplyRows');
+  const addDemandRow = document.getElementById('addDemandRow');
+  const addSupplyRow = document.getElementById('addSupplyRow');
+  const inputError = document.getElementById('inputError');
+  const chartSvg = document.getElementById('chartSvg');
+  const legendEl = document.getElementById('legend');
+  const stepsPanel = document.getElementById('stepsPanel');
+  const pairTableWrap = document.getElementById('pairTableWrap');
+  const pairTable = document.getElementById('pairTable');
+
+  function createRow(){
+    const row = document.createElement('div');
+    row.className = 'row-item';
+    if(mode === 'coord'){
+      row.innerHTML =
+        '<input type="number" step="any" class="in-price" placeholder="Harga (P)">' +
+        '<input type="number" step="any" class="in-qty" placeholder="Kuantitas (Q)">' +
+        '<button type="button" class="remove-row" aria-label="Hapus">✕</button>';
+    } else {
+      row.innerHTML =
+        '<input type="text" class="in-eq" placeholder="misal: P = 100 - 2Q">' +
+        '<button type="button" class="remove-row" aria-label="Hapus">✕</button>';
+    }
+    row.querySelector('.remove-row').addEventListener('click', () => {
+      row.remove();
+      updateAddButtons();
+    });
+    return row;
+  }
+
+  function addRow(container){
+    if(container.children.length >= MAX_ROWS) return;
+    container.appendChild(createRow());
+    updateAddButtons();
+  }
+
+  function updateAddButtons(){
+    addDemandRow.disabled = demandRows.children.length >= MAX_ROWS;
+    addSupplyRow.disabled = supplyRows.children.length >= MAX_ROWS;
+    addDemandRow.style.display = demandRows.children.length >= MAX_ROWS ? 'none' : '';
+    addSupplyRow.style.display = supplyRows.children.length >= MAX_ROWS ? 'none' : '';
+  }
+
+  function resetRows(){
+    demandRows.innerHTML = '';
+    supplyRows.innerHTML = '';
+    const starting = mode === 'coord' ? 2 : 1;
+    for(let i=0;i<starting;i++){ demandRows.appendChild(createRow()); supplyRows.appendChild(createRow()); }
+    updateAddButtons();
+  }
+
+  function selectMode(m){
+    mode = m;
+    stepMode.classList.add('hidden');
+    stepInput.classList.remove('hidden');
+    stepResult.classList.add('hidden');
+    inputError.classList.add('hidden');
+    resetRows();
+    stepInput.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  document.getElementById('modeCoord').addEventListener('click', () => selectMode('coord'));
+  document.getElementById('modeEquation').addEventListener('click', () => selectMode('equation'));
+  document.getElementById('btnChangeMode').addEventListener('click', () => {
+    stepInput.classList.add('hidden');
+    stepResult.classList.add('hidden');
+    stepMode.classList.remove('hidden');
+    stepMode.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  document.getElementById('btnEdit').addEventListener('click', () => {
+    stepResult.classList.add('hidden');
+    stepInput.classList.remove('hidden');
+    stepInput.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  addDemandRow.addEventListener('click', () => addRow(demandRows));
+  addSupplyRow.addEventListener('click', () => addRow(supplyRows));
+
+  // ===================================================================
+  // 5. VALIDASI & PEMBACAAN INPUT -> CURVE DEFINITIONS
+  // ===================================================================
+  function showError(msg){
+    inputError.textContent = msg;
+    inputError.classList.remove('hidden');
+  }
+  function clearError(){ inputError.classList.add('hidden'); }
+
+  // Curve def: { kind:'points', points:[{q,p}...] } atau { kind:'equation', lhs, evaluate, raw }
+  function readSide(container, sideLabel){
+    const curves = [];
+    if(mode === 'coord'){
+      const rowEls = Array.from(container.children);
+      const pointRows = rowEls.map(r => ({
+        priceEl: r.querySelector('.in-price'),
+        qtyEl: r.querySelector('.in-qty')
+      }));
+      const points = [];
+      for(const r of pointRows){
+        const pv = r.priceEl.value.trim(), qv = r.qtyEl.value.trim();
+        if(pv === '' && qv === '') continue;
+        if(pv === '' || qv === '') throw new Error('Ada baris ' + sideLabel + ' yang belum lengkap (harga & kuantitas harus diisi dua-duanya).');
+        const p = parseFloat(pv), q = parseFloat(qv);
+        if(isNaN(p) || isNaN(q)) throw new Error('Ada nilai ' + sideLabel + ' yang bukan angka.');
+        if(q < 0 || p < 0) throw new Error('Harga dan kuantitas ' + sideLabel + ' sebaiknya tidak negatif.');
+        points.push({ q, p });
+      }
+      if(points.length < 2) throw new Error('Isi minimal 2 titik untuk ' + sideLabel + ' (harga & kuantitas) supaya bisa membentuk kurva.');
+      points.sort((a,b) => a.q - b.q);
+      curves.push({ kind:'points', points });
+    } else {
+      const eqEls = Array.from(container.querySelectorAll('.in-eq'));
+      let count = 0;
+      for(const el of eqEls){
+        const val = el.value.trim();
+        if(!val) continue;
+        count++;
+        let parsed;
+        try{
+          parsed = parseEquation(val);
+        }catch(e){
+          throw new Error('Persamaan ' + sideLabel + ' "' + val + '" bermasalah: ' + e.message);
+        }
+        curves.push({ kind:'equation', lhs: parsed.lhs, evaluate: parsed.evaluate, raw: parsed.raw });
+      }
+      if(count === 0) throw new Error('Isi minimal 1 persamaan untuk ' + sideLabel + '.');
+    }
+    return curves;
+  }
+
+  // ===================================================================
+  // 6. MEMBANGUN SAMPLE KURVA & DOMAIN
+  // ===================================================================
+  function estimateDomain(demandCurves, supplyCurves){
+    let maxQ = 0, maxP = 0;
+    const consider = (curves) => {
+      curves.forEach(c => {
+        if(c.kind === 'points'){
+          c.points.forEach(pt => { maxQ = Math.max(maxQ, pt.q); maxP = Math.max(maxP, pt.p); });
+        } else {
+          try{
+            if(c.lhs === 'P'){
+              const p0 = c.evaluate(0);
+              if(isFinite(p0)) maxP = Math.max(maxP, Math.abs(p0));
+              const qZero = findZeroCrossing(c.evaluate);
+              if(qZero !== null) maxQ = Math.max(maxQ, Math.abs(qZero));
+            } else {
+              const q0 = c.evaluate(0);
+              if(isFinite(q0)) maxQ = Math.max(maxQ, Math.abs(q0));
+              const pZero = findZeroCrossing(c.evaluate);
+              if(pZero !== null) maxP = Math.max(maxP, Math.abs(pZero));
+            }
+          }catch(e){ /* abaikan, fallback default dipakai */ }
+        }
+      });
+    };
+    consider(demandCurves);
+    consider(supplyCurves);
+    if(!isFinite(maxQ) || maxQ <= 0) maxQ = 100;
+    if(!isFinite(maxP) || maxP <= 0) maxP = 100;
+    return { qMax: maxQ * 1.2, pMax: maxP * 1.2 };
+  }
+
+  function buildSamples(curve, qMax, pMax){
+    if(curve.kind === 'points'){
+      return catmullRomSamples(curve.points);
+    }
+    const N = 300;
+    if(curve.lhs === 'P'){
+      const samples = [];
+      for(let i=0;i<=N;i++){
+        const q = (i/N) * qMax;
+        samples.push({ q, p: curve.evaluate(q) });
+      }
+      return samples;
+    } else {
+      const raw = [];
+      for(let i=0;i<=N;i++){
+        const p = (i/N) * pMax;
+        raw.push({ q: curve.evaluate(p), p });
+      }
+      raw.sort((a,b) => a.q - b.q);
+      return raw;
+    }
+  }
+
+  function canonicalLinear(curve){
+    // Kembalikan {A,B} sehingga P = A + B*Q, kalau kurva ini memang linear. Selain itu null.
+    if(curve.kind === 'points'){
+      if(curve.points.length !== 2) return null;
+      const [p1, p2] = curve.points;
+      if(p2.q === p1.q) return null;
+      const B = (p2.p - p1.p) / (p2.q - p1.q);
+      const A = p1.p - B * p1.q;
+      return { A, B };
+    }
+    if(!isLinearFn(curve.evaluate)) return null;
+    if(curve.lhs === 'P'){
+      const A = curve.evaluate(0);
+      const B = curve.evaluate(1) - A;
+      return { A, B };
+    } else {
+      const a = curve.evaluate(0); // Q = a + b*P
+      const b = curve.evaluate(1) - a;
+      if(b === 0) return null;
+      return { A: -a/b, B: 1/b };
+    }
+  }
+
+  function describeCurve(curve, labelP, labelQ){
+    if(curve.kind === 'points'){
+      const listStr = curve.points.map(pt => '(Q=' + fmt(pt.q) + ', P=' + fmt(pt.p) + ')').join(', ');
+      if(curve.points.length === 2){
+        const lin = canonicalLinear(curve);
+        return 'Melalui 2 titik ' + listStr + '. Slope = (P₂-P₁)/(Q₂-Q₁) = ' + fmt(lin.B) +
+               ', sehingga persamaan garis: <span class="eq-line">P = ' + fmt(lin.A) + (lin.B>=0?' + ':' - ') + Math.abs(fmt(lin.B)) + 'Q</span>';
+      }
+      return 'Dihubungkan sebagai kurva halus melalui ' + curve.points.length + ' titik: ' + listStr + '.';
+    } else {
+      const lin = canonicalLinear(curve);
+      let txt = 'Persamaan yang dimasukkan: <span class="eq-line">' + curve.raw + '</span>';
+      if(lin){
+        txt += 'Bentuk P = A + B·Q &rarr; A (intersep) = ' + fmt(lin.A) + ', B (slope) = ' + fmt(lin.B) + '.';
+      }
+      return txt;
+    }
+  }
+
+  // ===================================================================
+  // 7. RENDER GRAFIK (SVG)
+  // ===================================================================
+  const DEMAND_COLORS = ['#C24E33', '#D97A5F', '#E6A08A', '#F0C2B0', '#F7DDD2'];
+  const SUPPLY_COLORS = ['#1F3A63', '#3A5A87', '#6C87AA', '#9AB0C8', '#C9D6E3'];
+
+  function svgEl(tag, attrs){
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for(const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  function niceTicks(maxVal, count){
+    count = count || 5;
+    if(maxVal <= 0) return [0];
+    const rough = maxVal / count;
+    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const norm = rough / mag;
+    let step;
+    if(norm < 1.5) step = 1*mag; else if(norm < 3) step = 2*mag; else if(norm < 7) step = 5*mag; else step = 10*mag;
+    const ticks = [];
+    for(let v=0; v <= maxVal + step*0.5; v += step) ticks.push(Math.round(v*10000)/10000);
+    return ticks;
+  }
+
+  function renderChart(demandCurves, supplyCurves, demandSamples, supplySamples, primaryEq, allPairs){
+    chartSvg.innerHTML = '';
+    const W = 640, H = 460;
+    const margin = { left:58, right:20, top:20, bottom:50 };
+    const plotW = W - margin.left - margin.right;
+    const plotH = H - margin.top - margin.bottom;
+
+    let maxP = 0;
+    demandSamples.concat(supplySamples).forEach(arr => arr.forEach(s => { if(isFinite(s.p)) maxP = Math.max(maxP, s.p); }));
+    let maxQ = 0;
+    demandSamples.concat(supplySamples).forEach(arr => arr.forEach(s => { if(isFinite(s.q)) maxQ = Math.max(maxQ, s.q); }));
+    if(maxP <= 0) maxP = 100;
+    if(maxQ <= 0) maxQ = 100;
+    maxP *= 1.15; maxQ *= 1.15;
+
+    const sx = (q) => margin.left + (q/maxQ) * plotW;
+    const sy = (p) => margin.top + plotH - (p/maxP) * plotH;
+
+    // clip path
+    const defs = svgEl('defs', {});
+    const clip = svgEl('clipPath', { id:'plotClip' });
+    clip.appendChild(svgEl('rect', { x:margin.left, y:margin.top, width:plotW, height:plotH }));
+    defs.appendChild(clip);
+    chartSvg.appendChild(defs);
+
+    // gridlines + ticks
+    const qTicks = niceTicks(maxQ);
+    const pTicks = niceTicks(maxP);
+    qTicks.forEach(qv => {
+      if(qv > maxQ) return;
+      const x = sx(qv);
+      chartSvg.appendChild(svgEl('line', { x1:x, y1:margin.top, x2:x, y2:margin.top+plotH, stroke:'#D3E4EC', 'stroke-width':1 }));
+      const t = svgEl('text', { x:x, y:margin.top+plotH+18, 'text-anchor':'middle', 'font-size':'11', fill:'#4C6885', 'font-family':'Plus Jakarta Sans' });
+      t.textContent = fmt(qv);
+      chartSvg.appendChild(t);
+    });
+    pTicks.forEach(pv => {
+      if(pv > maxP) return;
+      const y = sy(pv);
+      chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:y, x2:margin.left+plotW, y2:y, stroke:'#D3E4EC', 'stroke-width':1 }));
+      const t = svgEl('text', { x:margin.left-8, y:y+4, 'text-anchor':'end', 'font-size':'11', fill:'#4C6885', 'font-family':'Plus Jakarta Sans' });
+      t.textContent = fmt(pv);
+      chartSvg.appendChild(t);
+    });
+
+    // axes
+    chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:margin.top, x2:margin.left, y2:margin.top+plotH, stroke:'#16294A', 'stroke-width':2 }));
+    chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:margin.top+plotH, x2:margin.left+plotW, y2:margin.top+plotH, stroke:'#16294A', 'stroke-width':2 }));
+    const xLabel = svgEl('text', { x:margin.left+plotW/2, y:H-8, 'text-anchor':'middle', 'font-size':'12', fill:'#16294A', 'font-weight':'700', 'font-family':'Baloo 2' });
+    xLabel.textContent = 'Kuantitas (Q)';
+    chartSvg.appendChild(xLabel);
+    const yLabel = svgEl('text', { x:14, y:margin.top+plotH/2, 'text-anchor':'middle', 'font-size':'12', fill:'#16294A', 'font-weight':'700', 'font-family':'Baloo 2', transform:'rotate(-90 14 '+(margin.top+plotH/2)+')' });
+    yLabel.textContent = 'Harga (P)';
+    chartSvg.appendChild(yLabel);
+
+    // plot group with clip
+    const plotGroup = svgEl('g', { 'clip-path':'url(#plotClip)' });
+    chartSvg.appendChild(plotGroup);
+
+    function drawCurve(samples, color, dashed){
+      const pts = samples.map(s => sx(s.q) + ',' + sy(s.p)).join(' ');
+      plotGroup.appendChild(svgEl('polyline', {
+        points: pts, fill:'none', stroke:color, 'stroke-width': dashed ? 2.5 : 3.5,
+        'stroke-dasharray': dashed ? '7,6' : 'none', 'stroke-linecap':'round', 'stroke-linejoin':'round'
+      }));
+    }
+    demandSamples.forEach((s,i) => drawCurve(s, DEMAND_COLORS[i] || DEMAND_COLORS[4], i>0));
+    supplySamples.forEach((s,i) => drawCurve(s, SUPPLY_COLORS[i] || SUPPLY_COLORS[4], i>0));
+
+    // pair intersections (kecil, semua kombinasi)
+    allPairs.forEach(pr => {
+      if(!pr.point) return;
+      const isPrimary = pr.di === 0 && pr.si === 0;
+      if(isPrimary) return; // digambar terpisah di bawah, lebih besar
+      const cx = sx(pr.point.q), cy = sy(pr.point.p);
+      const dot = svgEl('circle', { cx, cy, r:4.5, fill:'#fff', stroke:'#16294A', 'stroke-width':2 });
+      const title = svgEl('title', {});
+      title.textContent = 'D' + (pr.di+1) + ' ∩ S' + (pr.si+1) + ':  Q≈' + fmt(pr.point.q) + ', P≈' + fmt(pr.point.p);
+      dot.appendChild(title);
+      plotGroup.appendChild(dot);
+    });
+
+    // primary equilibrium (besar + garis putus2 ke sumbu)
+    if(primaryEq){
+      const ex = sx(primaryEq.q), ey = sy(primaryEq.p);
+      plotGroup.appendChild(svgEl('line', { x1:ex, y1:ey, x2:ex, y2:margin.top+plotH, stroke:'#D69A1F', 'stroke-width':1.5, 'stroke-dasharray':'4,4' }));
+      plotGroup.appendChild(svgEl('line', { x1:margin.left, y1:ey, x2:ex, y2:ey, stroke:'#D69A1F', 'stroke-width':1.5, 'stroke-dasharray':'4,4' }));
+      plotGroup.appendChild(svgEl('circle', { cx:ex, cy:ey, r:7, fill:'#F0B93D', stroke:'#16294A', 'stroke-width':2.5 }));
+      const lbl = svgEl('text', { x:ex+10, y:ey-10, 'font-size':'12', 'font-weight':'800', fill:'#16294A', 'font-family':'Baloo 2' });
+      lbl.textContent = 'E (' + fmt(primaryEq.q) + ', ' + fmt(primaryEq.p) + ')';
+      chartSvg.appendChild(lbl);
+    }
+
+    // legend
+    legendEl.innerHTML = '';
+    demandCurves.forEach((c,i) => {
+      const item = document.createElement('div'); item.className = 'legend-item';
+      const sw = document.createElement('span'); sw.className = 'legend-swatch' + (i>0?' dashed':'');
+      sw.style.color = DEMAND_COLORS[i] || DEMAND_COLORS[4];
+      sw.style.backgroundColor = i>0 ? 'transparent' : (DEMAND_COLORS[i] || DEMAND_COLORS[4]);
+      item.appendChild(sw);
+      const txt = document.createElement('span'); txt.textContent = 'Demand (D' + (i+1) + ')' + (i===0?' — utama':' — pembanding');
+      item.appendChild(txt);
+      legendEl.appendChild(item);
+    });
+    supplyCurves.forEach((c,i) => {
+      const item = document.createElement('div'); item.className = 'legend-item';
+      const sw = document.createElement('span'); sw.className = 'legend-swatch' + (i>0?' dashed':'');
+      sw.style.color = SUPPLY_COLORS[i] || SUPPLY_COLORS[4];
+      sw.style.backgroundColor = i>0 ? 'transparent' : (SUPPLY_COLORS[i] || SUPPLY_COLORS[4]);
+      item.appendChild(sw);
+      const txt = document.createElement('span'); txt.textContent = 'Supply (S' + (i+1) + ')' + (i===0?' — utama':' — pembanding');
+      item.appendChild(txt);
+      legendEl.appendChild(item);
+    });
+  }
+
+  // ===================================================================
+  // 8. LANGKAH KERJA (teks) & TABEL PASANGAN
+  // ===================================================================
+  function renderSteps(demandCurves, supplyCurves, primaryEq){
+    stepsPanel.innerHTML = '';
+    const blocks = [];
+
+    blocks.push({
+      title: '1. Data yang dimasukkan',
+      body: 'Demand: ' + demandCurves.length + ' kurva. Supply: ' + supplyCurves.length + ' kurva. Kurva pertama di tiap sisi (D1 &amp; S1) jadi acuan utama perhitungan ekuilibrium di bawah.'
+    });
+
+    blocks.push({
+      title: '2. Kurva Demand utama (D1)',
+      body: describeCurve(demandCurves[0])
+    });
+
+    blocks.push({
+      title: '3. Kurva Supply utama (S1)',
+      body: describeCurve(supplyCurves[0])
+    });
+
+    const linD = canonicalLinear(demandCurves[0]);
+    const linS = canonicalLinear(supplyCurves[0]);
+    if(linD && linS){
+      const Qstar = (linS.A - linD.A) / (linD.B - linS.B);
+      const Pstar = linD.A + linD.B * Qstar;
+      blocks.push({
+        title: '4. Penyelesaian aljabar (karena D1 &amp; S1 sama-sama garis lurus)',
+        body:
+          'Syarat ekuilibrium: P<sub>demand</sub> = P<sub>supply</sub>' +
+          '<span class="eq-line">' + fmt(linD.A) + (linD.B>=0?' + ':' - ') + Math.abs(fmt(linD.B)) + 'Q  =  ' + fmt(linS.A) + (linS.B>=0?' + ':' - ') + Math.abs(fmt(linS.B)) + 'Q</span>' +
+          'Kumpulkan suku Q:' +
+          '<span class="eq-line">Q·(' + fmt(linD.B) + ' − ' + fmt(linS.B) + ') = ' + fmt(linS.A) + ' − ' + fmt(linD.A) + '</span>' +
+          '<span class="eq-line">Q* = ' + fmt(Qstar) + '</span>' +
+          'Substitusi balik ke persamaan Demand:' +
+          '<span class="eq-line">P* = ' + fmt(linD.A) + (linD.B>=0?' + ':' - ') + Math.abs(fmt(linD.B)) + ' × ' + fmt(Qstar) + ' = ' + fmt(Pstar) + '</span>'
+      });
+    } else {
+      blocks.push({
+        title: '4. Mencari titik ekuilibrium',
+        body: 'Karena minimal salah satu kurva berbentuk lengkung (bukan garis lurus tunggal), titik potong dicari secara numerik — komputer menelusuri nilai Q sedikit demi sedikit sampai ketemu titik di mana harga Demand sama dengan harga Supply.'
+      });
+    }
+
+    blocks.push({
+      title: '5. Hasil',
+      body: primaryEq
+        ? 'Ekuilibrium tercapai pada <strong>Q* = ' + fmt(primaryEq.q) + '</strong> dan <strong>P* = ' + fmt(primaryEq.p) + '</strong>.'
+        : 'Tidak ditemukan titik potong antara D1 dan S1 pada rentang grafik ini — coba periksa lagi data yang dimasukkan (kemungkinan dua kurva tidak pernah berpotongan di kuadran positif).'
+    });
+
+    const extraD = demandCurves.length > 1, extraS = supplyCurves.length > 1;
+    if(extraD || extraS){
+      blocks.push({
+        title: '6. Kurva pembanding',
+        body: 'Kurva tambahan digambar putus-putus di grafik untuk menunjukkan pergeseran (shift). Semua kombinasi titik potongnya tercantum di tabel di bawah grafik.'
+      });
+    }
+
+    blocks.forEach((b, i) => {
+      const div = document.createElement('div');
+      div.className = 'step-block';
+      div.innerHTML = '<div><span class="step-num">' + (i+1) + '</span><h5>' + b.title.replace(/^\d+\.\s*/, '') + '</h5></div>' +
+                       '<div class="step-body">' + b.body + '</div>';
+      stepsPanel.appendChild(div);
+    });
+
+    if(primaryEq){
+      const ans = document.createElement('div');
+      ans.className = 'answer-box';
+      ans.innerHTML = '<div class="lbl">Titik Ekuilibrium</div><div class="val">Q* = ' + fmt(primaryEq.q) + '  |  P* = ' + fmt(primaryEq.p) + '</div>';
+      stepsPanel.appendChild(ans);
+    }
+  }
+
+  function renderPairTable(demandCurves, supplyCurves, allPairs){
+    const needed = demandCurves.length > 1 || supplyCurves.length > 1;
+    if(!needed){ pairTableWrap.classList.add('hidden'); return; }
+    pairTableWrap.classList.remove('hidden');
+    let html = '<thead><tr><th>Kombinasi</th><th>Q*</th><th>P*</th></tr></thead><tbody>';
+    allPairs.forEach(pr => {
+      const primary = pr.di === 0 && pr.si === 0;
+      html += '<tr' + (primary ? ' class="primary-row"' : '') + '>' +
+              '<td>D' + (pr.di+1) + ' ∩ S' + (pr.si+1) + (primary ? ' (utama)' : '') + '</td>' +
+              '<td>' + (pr.point ? fmt(pr.point.q) : '—') + '</td>' +
+              '<td>' + (pr.point ? fmt(pr.point.p) : '—') + '</td>' +
+              '</tr>';
+    });
+    html += '</tbody>';
+    pairTable.innerHTML = html;
+  }
+
+  // ===================================================================
+  // 9. BUILD (tombol utama)
+  // ===================================================================
+  document.getElementById('btnBuild').addEventListener('click', () => {
+    clearError();
+    let demandCurves, supplyCurves;
+    try{
+      demandCurves = readSide(demandRows, 'Demand');
+      supplyCurves = readSide(supplyRows, 'Supply');
+    }catch(e){
+      showError(e.message);
+      return;
+    }
+
+    let domain;
+    try{
+      domain = estimateDomain(demandCurves, supplyCurves);
+    }catch(e){
+      showError('Terjadi kesalahan saat menghitung skala grafik: ' + e.message);
+      return;
+    }
+
+    let demandSamples, supplySamples;
+    try{
+      demandSamples = demandCurves.map(c => buildSamples(c, domain.qMax, domain.pMax));
+      supplySamples = supplyCurves.map(c => buildSamples(c, domain.qMax, domain.pMax));
+    }catch(e){
+      showError('Terjadi kesalahan saat menghitung kurva: ' + e.message);
+      return;
+    }
+
+    const allPairs = [];
+    demandSamples.forEach((ds, di) => {
+      supplySamples.forEach((ss, si) => {
+        const point = findFirstIntersection(ds, ss, domain.qMax * 1.3);
+        allPairs.push({ di, si, point });
+      });
+    });
+    const primary = allPairs.find(p => p.di === 0 && p.si === 0);
+    const primaryEq = primary ? primary.point : null;
+
+    renderChart(demandCurves, supplyCurves, demandSamples, supplySamples, primaryEq, allPairs);
+    renderSteps(demandCurves, supplyCurves, primaryEq);
+    renderPairTable(demandCurves, supplyCurves, allPairs);
+
+    stepInput.classList.add('hidden');
+    stepResult.classList.remove('hidden');
+    stepResult.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+})();
+</script>
+</body>
+</html>
