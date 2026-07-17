@@ -12,92 +12,54 @@
   .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
   .back-link:hover{color:var(--owl-dark2);}
 
-  .tool-card{
+  .story-card{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
     padding:28px; box-shadow:var(--shadow); margin-top:24px;
   }
-  .tool-card.hidden{display:none;}
-  .tool-card h3{font-size:1.25rem; margin-bottom:4px;}
-  .step-header-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:18px;}
-  .link-btn{
-    background:none; border:none; color:var(--ink-soft); font-weight:600; font-size:0.88rem;
-    cursor:pointer; padding:0; text-decoration:underline;
-  }
-  .link-btn:hover{color:var(--owl-dark2);}
 
-  .mode-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:16px;}
-  @media (max-width:700px){ .mode-grid{grid-template-columns:1fr;} }
-  .mode-option{
-    text-align:left; background:var(--bg-deep); border:2px solid transparent; border-radius:20px;
-    padding:22px; cursor:pointer; font-family:'Plus Jakarta Sans'; transition:border-color .15s, transform .15s;
+  .chapter-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .chapter-badge{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
+    background:var(--bg-deep); color:var(--owl-dark2);
   }
-  .mode-option:hover{border-color:var(--owl-mid); transform:translateY(-2px);}
-  .mode-icon{font-size:1.8rem; margin-bottom:8px;}
-  .mode-option h4{font-family:'Baloo 2'; font-size:1.05rem; color:var(--owl-dark2); margin:0 0 6px;}
-  .mode-option p{color:var(--ink-soft); font-size:0.88rem; line-height:1.5; margin:0;}
+  .progress-dots{display:flex; gap:6px;}
+  .progress-dots .dot{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s, transform .2s;}
+  .progress-dots .dot.active{background:var(--gold); transform:scale(1.3);}
+  .progress-dots .dot.done{background:var(--owl-mid);}
 
-  .input-columns{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
-  @media (max-width:760px){ .input-columns{grid-template-columns:1fr;} }
-  .input-col h4{font-size:1.05rem; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
-  .demand-col h4{color:#C24E33;}
-  .supply-col h4{color:var(--owl-dark2);}
-  .rows{display:flex; flex-direction:column; gap:8px; margin-bottom:10px;}
-  .row-item{
-    display:flex; align-items:center; gap:8px; background:var(--bg-deep); border-radius:12px; padding:8px 10px;
-  }
-  .row-item .row-label{font-size:0.72rem; font-weight:700; color:var(--ink-soft); width:16px; flex-shrink:0;}
-  .row-item input[type=number], .row-item input[type=text]{
-    font-family:'Plus Jakarta Sans'; font-size:0.9rem; border:1px solid var(--line); border-radius:8px;
-    padding:8px 10px; width:100%; min-width:0;
-  }
-  .row-item input[type=text]{font-family:'SFMono-Regular', Consolas, monospace;}
-  .row-item .remove-row{
-    background:none; border:none; color:#C24E33; font-size:1.1rem; cursor:pointer; flex-shrink:0;
-    width:26px; height:26px; border-radius:8px; line-height:1;
-  }
-  .row-item .remove-row:hover{background:rgba(194,78,51,0.12);}
-  .btn-sm{padding:8px 16px; font-size:0.85rem;}
-  .btn-lg{padding:15px 28px; font-size:1rem; width:100%; justify-content:center; margin-top:22px;}
+  .story-layout{display:grid; grid-template-columns:300px 1fr; gap:26px; align-items:start;}
+  @media (max-width:820px){ .story-layout{grid-template-columns:1fr;} }
 
-  .error-box{
-    background:#FDEDEA; border:1px solid #F3B9AC; color:#9C3B26; padding:12px 16px;
-    border-radius:12px; font-size:0.88rem; margin-top:18px; line-height:1.5;
-  }
-  .error-box.hidden{display:none;}
+  .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .owl-panel svg{width:150px;}
+  .owl-panel .wing-l{transform-origin:78px 150px; animation:flapL 2.6s ease-in-out infinite;}
+  .owl-panel .wing-r{transform-origin:222px 150px; animation:flapR 2.6s ease-in-out infinite;}
+  .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
 
-  .result-layout{display:grid; grid-template-columns:1.3fr 1fr; gap:28px; align-items:start;}
-  @media (max-width:900px){ .result-layout{grid-template-columns:1fr;} }
+  .bubble{
+    position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
+    font-size:0.94rem; line-height:1.6; color:var(--ink); min-height:96px;
+  }
+  .bubble::before{
+    content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:9px solid var(--bg-deep);
+  }
+  @media (min-width:821px){
+    .bubble::before{ top:26px; left:-9px; transform:none; border-left:none; border-bottom:9px solid transparent; border-top:9px solid transparent; border-right:9px solid var(--bg-deep); }
+  }
+
   .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:16px;}
   #chartSvg{width:100%; height:auto; display:block;}
-  .legend{display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:12px; font-size:0.82rem;}
-  .legend-item{display:flex; align-items:center; gap:6px; color:var(--ink-soft);}
-  .legend-swatch{width:18px; height:3px; border-radius:2px; display:inline-block;}
-  .legend-swatch.dashed{background-image:linear-gradient(to right, currentColor 60%, transparent 40%); background-size:8px 3px; height:3px; background-color:transparent;}
 
-  .steps-panel{display:flex; flex-direction:column; gap:14px;}
-  .step-block{background:var(--bg-deep); border-radius:16px; padding:16px 18px;}
-  .step-block .step-num{
-    display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px;
-    border-radius:50%; background:var(--owl-dark2); color:#fff; font-size:0.75rem; font-weight:800; margin-right:8px;
-  }
-  .step-block h5{font-family:'Baloo 2'; font-size:0.98rem; color:var(--owl-dark2); display:inline;}
-  .step-block .step-body{margin-top:8px; font-size:0.88rem; color:var(--ink-soft); line-height:1.6;}
-  .step-body code{background:rgba(15,37,64,0.06); padding:1px 6px; border-radius:6px; font-size:0.85em;}
-  .step-body .eq-line{font-family:'SFMono-Regular', Consolas, monospace; display:block; margin:3px 0;}
-  .answer-box{
-    background:linear-gradient(135deg, var(--owl-dark2), var(--owl-dark)); color:#fff;
-    border-radius:16px; padding:18px 20px; text-align:center;
-  }
-  .answer-box .lbl{font-size:0.78rem; text-transform:uppercase; letter-spacing:0.05em; color:#B9CBDA;}
-  .answer-box .val{font-family:'Baloo 2'; font-size:1.6rem; font-weight:700; margin-top:4px;}
+  .curve-point{ opacity:0; transform-origin:center; transition:opacity .45s ease, r .45s ease; }
+  .curve-point.revealed{ opacity:1; }
+  .curve-line{ transition:stroke-dashoffset .9s ease; }
+  .curve-fade{ opacity:0; transition:opacity .5s ease; }
+  .curve-fade.revealed{ opacity:1; }
 
-  .pair-table-wrap{margin-top:26px;}
-  .pair-table-wrap h4{font-size:1.02rem; margin-bottom:10px;}
-  table.pair-table{width:100%; border-collapse:collapse; font-size:0.88rem;}
-  table.pair-table th, table.pair-table td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--line);}
-  table.pair-table th{color:var(--ink-soft); font-weight:700; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.03em;}
-  table.pair-table tr.primary-row{background:var(--bg-deep);}
-  table.pair-table tr.primary-row td:first-child{font-weight:700;}
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px;}
+  .nav-row .spacer{flex:1;}
+  #btnRestart{display:none;}
 </style>
 </head>
 <body>
@@ -122,8 +84,8 @@
     <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
     <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
     <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
-    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
-    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <path class="wing-l" d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path class="wing-r" d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
     <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
     <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
       <path d="M122 168 q8 10 16 0"/>
@@ -134,7 +96,7 @@
       <path d="M122 216 q8 10 16 0"/>
       <path d="M162 216 q8 10 16 0"/>
     </g>
-    <g>
+    <g class="eyes-blink">
       <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
       <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
       <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
@@ -155,69 +117,31 @@
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Pengantar Mikroekonomi</span>
     <h2>Grafik Supply &amp; Demand</h2>
-    <p>Masukkan data permintaan &amp; penawaran kamu sendiri (titik harga-kuantitas, atau persamaan), lalu lihat kurva dan titik ekuilibriumnya terbentuk langkah demi langkah.</p>
+    <p>Ikuti cerita si burung hantu KAFBE membangun kurva permintaan dan penawaran, titik demi titik.</p>
   </div>
 
-  <!-- STEP 0: pilih mode -->
-  <div id="stepMode" class="tool-card">
-    <h3>Langkah 1 — Pilih cara input data</h3>
-    <div class="mode-grid">
-      <button type="button" class="mode-option" id="modeCoord">
-        <div class="mode-icon">📍</div>
-        <h4>Input Koordinat</h4>
-        <p>Masukkan pasangan Harga &amp; Kuantitas — cocok kalau kamu sudah punya tabel jadwal permintaan/penawaran (demand/supply schedule).</p>
-      </button>
-      <button type="button" class="mode-option" id="modeEquation">
-        <div class="mode-icon">✍️</div>
-        <h4>Input Persamaan</h4>
-        <p>Ketik langsung persamaannya, misal <code>P = 100 - 2Q</code> atau <code>Q = 60 - 0.5P</code>.</p>
-      </button>
+  <div class="story-card">
+    <div class="chapter-row">
+      <span class="chapter-badge" id="chapterBadge">Bagian: Permintaan</span>
+      <div class="progress-dots" id="progressDots"></div>
     </div>
-  </div>
 
-  <!-- STEP 1: input data -->
-  <div id="stepInput" class="tool-card hidden">
-    <div class="step-header-row">
-      <h3>Langkah 2 — Masukkan data</h3>
-      <button type="button" class="link-btn" id="btnChangeMode">← Ganti cara input</button>
-    </div>
-    <p style="color:var(--ink-soft); font-size:0.88rem; margin-top:-8px; margin-bottom:18px;">
-      Baris pertama di tiap sisi jadi kurva utama (dipakai untuk hitungan langkah kerja). Baris tambahan (maks. 5) digambar putus-putus sebagai pembanding pergeseran kurva.
-    </p>
-    <div class="input-columns">
-      <div class="input-col demand-col">
-        <h4>📉 Permintaan (Demand)</h4>
-        <div id="demandRows" class="rows"></div>
-        <button type="button" class="btn btn-ghost btn-sm" id="addDemandRow">+ Tambah</button>
+    <div class="story-layout">
+      <div class="owl-panel">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <div class="bubble" id="bubbleText"></div>
       </div>
-      <div class="input-col supply-col">
-        <h4>📈 Penawaran (Supply)</h4>
-        <div id="supplyRows" class="rows"></div>
-        <button type="button" class="btn btn-ghost btn-sm" id="addSupplyRow">+ Tambah</button>
-      </div>
-    </div>
-    <div id="inputError" class="error-box hidden"></div>
-    <button type="button" class="btn btn-primary btn-lg" id="btnBuild">Gambar Grafik &amp; Cari Ekuilibrium</button>
-  </div>
 
-  <!-- STEP 2: hasil -->
-  <div id="stepResult" class="tool-card hidden">
-    <div class="step-header-row">
-      <h3>Hasil</h3>
-      <button type="button" class="link-btn" id="btnEdit">← Ubah data</button>
-    </div>
-    <div class="result-layout">
-      <div>
-        <div class="chart-wrap">
-          <svg id="chartSvg" viewBox="0 0 640 460" xmlns="http://www.w3.org/2000/svg"></svg>
-        </div>
-        <div class="legend" id="legend"></div>
+      <div class="chart-wrap">
+        <svg id="chartSvg" viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
-      <div class="steps-panel" id="stepsPanel"></div>
     </div>
-    <div id="pairTableWrap" class="pair-table-wrap hidden">
-      <h4>🔀 Semua Titik Ekuilibrium (tiap kombinasi kurva)</h4>
-      <table class="pair-table" id="pairTable"></table>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
     </div>
   </div>
 </section>
@@ -232,453 +156,51 @@
   "use strict";
 
   // ===================================================================
-  // 1. PARSER RUMUS (recursive descent, tanpa eval) 
+  // Model: Demand P = 50 - 0.5Q ,  Supply P = 10 + 0.5Q
+  // Titik-titik di bawah cuma buat ilustrasi tiap langkah cerita;
+  // garis yang digambar tetap persamaan penuhnya (bukan cuma antar titik).
   // ===================================================================
-  function tokenize(str){
-    const tokens = [];
-    let i = 0;
-    while(i < str.length){
-      const c = str[i];
-      if(/\s/.test(c)){ i++; continue; }
-      if(/[0-9.]/.test(c)){
-        let j = i;
-        while(j < str.length && /[0-9.]/.test(str[j])) j++;
-        const numStr = str.slice(i,j);
-        if(isNaN(parseFloat(numStr))) throw new Error('Angka tidak valid: "' + numStr + '"');
-        tokens.push({ type:'NUM', value: parseFloat(numStr) });
-        i = j; continue;
-      }
-      if(/[A-Za-z]/.test(c)){
-        let j = i;
-        while(j < str.length && /[A-Za-z]/.test(str[j])) j++;
-        tokens.push({ type:'VAR', value: str.slice(i,j).toUpperCase() });
-        i = j; continue;
-      }
-      if('+-*/^()'.includes(c)){ tokens.push({ type:c }); i++; continue; }
-      throw new Error('Karakter tidak dikenali: "' + c + '"');
-    }
-    tokens.push({ type:'END' });
-    return tokens;
-  }
+  const demandP = (Q) => 50 - 0.5*Q;
+  const supplyP = (Q) => 10 + 0.5*Q;
 
-  function compileExpression(str, varLetter){
-    const tokens = tokenize(str);
-    let pos = 0;
-    const peek = () => tokens[pos];
-    const advance = () => tokens[pos++];
-    const expect = (type) => {
-      if(peek().type !== type) throw new Error('Persamaan tidak valid dekat "' + (peek().value || peek().type) + '"');
-      return advance();
-    };
+  const DEMAND_POINTS = [ {p:35,q:30}, {p:40,q:20}, {p:45,q:10} ];
+  const SUPPLY_POINTS = [ {p:15,q:10}, {p:20,q:20}, {p:25,q:30} ];
+  const EQUILIBRIUM = { q:40, p:30 };
 
-    function parseExpr(){
-      let node = parseTerm();
-      while(peek().type === '+' || peek().type === '-'){
-        const op = advance().type;
-        const rhs = parseTerm();
-        const left = node;
-        node = (x) => op === '+' ? left(x) + rhs(x) : left(x) - rhs(x);
-      }
-      return node;
-    }
-    function parseTerm(){
-      let node = parseUnary();
-      while(true){
-        if(peek().type === '*' || peek().type === '/'){
-          const op = advance().type;
-          const rhs = parseUnary();
-          const left = node;
-          node = (x) => op === '*' ? left(x) * rhs(x) : left(x) / rhs(x);
-        } else if(peek().type === 'NUM' || peek().type === 'VAR' || peek().type === '('){
-          // perkalian implisit, misal "2Q" atau "2(Q+1)"
-          const rhs = parseUnary();
-          const left = node;
-          node = (x) => left(x) * rhs(x);
-        } else {
-          break;
-        }
-      }
-      return node;
-    }
-    function parseUnary(){
-      if(peek().type === '-'){ advance(); const n = parseUnary(); return (x) => -n(x); }
-      if(peek().type === '+'){ advance(); return parseUnary(); }
-      return parsePower();
-    }
-    function parsePower(){
-      const base = parsePrimary();
-      if(peek().type === '^'){
-        advance();
-        const exp = parseUnary();
-        return (x) => Math.pow(base(x), exp(x));
-      }
-      return base;
-    }
-    function parsePrimary(){
-      const t = peek();
-      if(t.type === 'NUM'){ advance(); const v = t.value; return () => v; }
-      if(t.type === 'VAR'){
-        advance();
-        if(t.value !== varLetter){
-          throw new Error('Variabel "' + t.value + '" tidak sesuai — sisi kanan harus pakai "' + varLetter + '".');
-        }
-        return (x) => x;
-      }
-      if(t.type === '('){ advance(); const inner = parseExpr(); expect(')'); return inner; }
-      throw new Error('Persamaan tidak lengkap di dekat "' + (t.value || t.type) + '"');
-    }
+  const CHAPTERS = { demand:'Bagian: Permintaan (Demand)', supply:'Bagian: Penawaran (Supply)', eq:'Bagian: Titik Keseimbangan' };
 
-    const fn = parseExpr();
-    if(peek().type !== 'END') throw new Error('Ada bagian yang tidak bisa diproses: "' + (peek().value || peek().type) + '"');
-    const test = fn(1);
-    if(typeof test !== 'number' || !isFinite(test)) throw new Error('Persamaan menghasilkan nilai yang tidak valid.');
-    return fn;
-  }
-
-  function parseEquation(raw){
-    const str = raw.trim();
-    const eqIdx = str.indexOf('=');
-    if(eqIdx === -1) throw new Error('Format harus "P = ..." atau "Q = ...".');
-    const lhs = str.slice(0, eqIdx).trim().toUpperCase();
-    const rhsStr = str.slice(eqIdx + 1).trim();
-    if(lhs !== 'P' && lhs !== 'Q') throw new Error('Sisi kiri harus "P" atau "Q", misal "P = 100 - 2Q".');
-    if(!rhsStr) throw new Error('Sisi kanan persamaan kosong.');
-    const varLetter = lhs === 'P' ? 'Q' : 'P';
-    const evaluate = compileExpression(rhsStr, varLetter);
-    return { lhs, evaluate, raw: str };
-  }
+  const STEPS = [
+    { chapter:'demand', reveal:['d1'],
+      text:'Bayangkan ada barang dijual di pasar dengan harga <strong>Rp35.000</strong>. Pada harga segini, ada <strong>30 orang</strong> yang mau membelinya.' },
+    { chapter:'demand', reveal:['d2'],
+      text:'Sekarang harganya naik jadi <strong>Rp40.000</strong>. Yang mau beli jadi berkurang, tinggal <strong>20 orang</strong>.' },
+    { chapter:'demand', reveal:['d3'],
+      text:'Semakin tinggi harganya, semakin sedikit yang mau beli. Di harga <strong>Rp45.000</strong>, tinggal <strong>10 orang</strong> yang berminat.' },
+    { chapter:'demand', reveal:['dLine','dLabel'],
+      text:'Kalau titik-titik tadi kita hubungkan, jadi garis yang miring ke bawah. Inilah <strong>Kurva Permintaan (Demand)</strong> — makin mahal harganya, makin sedikit yang mau beli.' },
+    { chapter:'supply', reveal:['s1'],
+      text:'Sekarang gantian dari sisi penjual. Waktu harga <strong>Rp15.000</strong>, penjual cuma mau menjual <strong>10 unit</strong> — untungnya masih tipis soalnya.' },
+    { chapter:'supply', reveal:['s2'],
+      text:'Begitu harga naik ke <strong>Rp20.000</strong>, penjual jadi lebih semangat, mereka menawarkan <strong>20 unit</strong>.' },
+    { chapter:'supply', reveal:['s3'],
+      text:'Semakin tinggi harganya, semakin banyak juga yang mau dijual. Di harga <strong>Rp25.000</strong>, mereka menawarkan <strong>30 unit</strong>.' },
+    { chapter:'supply', reveal:['sLine','sLabel'],
+      text:'Titik-titik ini kalau dihubungkan, membentuk garis yang naik ke atas. Inilah <strong>Kurva Penawaran (Supply)</strong> — makin mahal harganya, makin banyak yang mau dijual.' },
+    { chapter:'eq', reveal:['eqDotOuter','eqDotInner','eqGuideV','eqGuideH','eqLabel'],
+      text:'Coba lihat di mana kedua kurva ini bertemu — di situ harga &amp; jumlah barang pas buat pembeli maupun penjual. Ini namanya <strong>Titik Keseimbangan (Equilibrium)</strong>: harga <strong>Rp30.000</strong> dengan <strong>40 unit</strong>.' }
+  ];
 
   // ===================================================================
-  // 2. SPLINE (Catmull-Rom) untuk kurva dari titik-titik
+  // Setup chart (SVG statis, elemen mulai tersembunyi lalu di-reveal)
   // ===================================================================
-  function catmullRomSamples(points, samplesPerSegment){
-    samplesPerSegment = samplesPerSegment || 18;
-    if(points.length === 2) return points.slice();
-    const pts = points, n = pts.length, result = [];
-    for(let i = 0; i < n - 1; i++){
-      const p0 = pts[Math.max(0, i-1)];
-      const p1 = pts[i];
-      const p2 = pts[i+1];
-      const p3 = pts[Math.min(n-1, i+2)];
-      for(let s = 0; s < samplesPerSegment; s++){
-        const t = s / samplesPerSegment, t2 = t*t, t3 = t2*t;
-        const q = 0.5*((2*p1.q) + (-p0.q+p2.q)*t + (2*p0.q-5*p1.q+4*p2.q-p3.q)*t2 + (-p0.q+3*p1.q-3*p2.q+p3.q)*t3);
-        const p = 0.5*((2*p1.p) + (-p0.p+p2.p)*t + (2*p0.p-5*p1.p+4*p2.p-p3.p)*t2 + (-p0.p+3*p1.p-3*p2.p+p3.p)*t3);
-        result.push({ q, p });
-      }
-    }
-    result.push(pts[n-1]);
-    result.sort((a,b) => a.q - b.q);
-    return result;
-  }
+  const W = 560, H = 400;
+  const margin = { left:56, right:20, top:20, bottom:46 };
+  const plotW = W - margin.left - margin.right;
+  const plotH = H - margin.top - margin.bottom;
+  const Q_MAX = 50, P_MAX = 55;
 
-  // ===================================================================
-  // 3. UTIL: interpolasi & pencarian titik potong
-  // ===================================================================
-  function interpolateAt(samples, q){
-    if(q <= samples[0].q) return samples[0].p;
-    if(q >= samples[samples.length-1].q) return samples[samples.length-1].p;
-    for(let i = 0; i < samples.length - 1; i++){
-      if(q >= samples[i].q && q <= samples[i+1].q){
-        const span = samples[i+1].q - samples[i].q;
-        const t = span === 0 ? 0 : (q - samples[i].q) / span;
-        return samples[i].p + t * (samples[i+1].p - samples[i].p);
-      }
-    }
-    return samples[samples.length-1].p;
-  }
-
-  function findFirstIntersection(samplesA, samplesB, qMax, steps){
-    steps = steps || 600;
-    let prevQ = 0, prevD = interpolateAt(samplesA,0) - interpolateAt(samplesB,0);
-    for(let i = 1; i <= steps; i++){
-      const q = (i/steps) * qMax;
-      const d = interpolateAt(samplesA,q) - interpolateAt(samplesB,q);
-      if(d === 0) return { q, p: interpolateAt(samplesA,q) };
-      if((prevD < 0 && d > 0) || (prevD > 0 && d < 0)){
-        const t = prevD / (prevD - d);
-        const q0 = prevQ + t*(q - prevQ);
-        const p0 = interpolateAt(samplesA,q0);
-        return { q: q0, p: p0 };
-      }
-      prevQ = q; prevD = d;
-    }
-    return null;
-  }
-
-  function findZeroCrossing(evalFn){
-    let q0 = 0, p0 = evalFn(0);
-    let q1 = 1;
-    const maxQ = 200000;
-    while(q1 < maxQ){
-      const p1 = evalFn(q1);
-      if((p0 <= 0 && p1 >= 0) || (p0 >= 0 && p1 <= 0)){
-        let lo = q0, hi = q1, plo = p0;
-        for(let i=0;i<50;i++){
-          const mid = (lo+hi)/2, pm = evalFn(mid);
-          if((plo<=0 && pm>=0) || (plo>=0 && pm<=0)){ hi = mid; } else { lo = mid; plo = pm; }
-        }
-        return (lo+hi)/2;
-      }
-      q0 = q1; p0 = p1; q1 *= 2;
-    }
-    return null;
-  }
-
-  function isLinearFn(fn){
-    const f0 = fn(0), f1 = fn(1), f2 = fn(2);
-    const predicted = f0 + 2*(f1-f0);
-    const tol = Math.max(1e-4, Math.abs(f2)*1e-4);
-    return isFinite(f0) && isFinite(f1) && isFinite(f2) && Math.abs(predicted - f2) < tol;
-  }
-
-  function fmt(n){
-    if(!isFinite(n)) return '—';
-    const r = Math.round(n*100)/100;
-    return r.toString();
-  }
-
-  // ===================================================================
-  // 4. STATE & DOM REFS
-  // ===================================================================
-  let mode = null; // 'coord' | 'equation'
-  const MAX_ROWS = 5;
-
-  const stepMode = document.getElementById('stepMode');
-  const stepInput = document.getElementById('stepInput');
-  const stepResult = document.getElementById('stepResult');
-  const demandRows = document.getElementById('demandRows');
-  const supplyRows = document.getElementById('supplyRows');
-  const addDemandRow = document.getElementById('addDemandRow');
-  const addSupplyRow = document.getElementById('addSupplyRow');
-  const inputError = document.getElementById('inputError');
-  const chartSvg = document.getElementById('chartSvg');
-  const legendEl = document.getElementById('legend');
-  const stepsPanel = document.getElementById('stepsPanel');
-  const pairTableWrap = document.getElementById('pairTableWrap');
-  const pairTable = document.getElementById('pairTable');
-
-  function createRow(){
-    const row = document.createElement('div');
-    row.className = 'row-item';
-    if(mode === 'coord'){
-      row.innerHTML =
-        '<input type="number" step="any" class="in-price" placeholder="Harga (P)">' +
-        '<input type="number" step="any" class="in-qty" placeholder="Kuantitas (Q)">' +
-        '<button type="button" class="remove-row" aria-label="Hapus">✕</button>';
-    } else {
-      row.innerHTML =
-        '<input type="text" class="in-eq" placeholder="misal: P = 100 - 2Q">' +
-        '<button type="button" class="remove-row" aria-label="Hapus">✕</button>';
-    }
-    row.querySelector('.remove-row').addEventListener('click', () => {
-      row.remove();
-      updateAddButtons();
-    });
-    return row;
-  }
-
-  function addRow(container){
-    if(container.children.length >= MAX_ROWS) return;
-    container.appendChild(createRow());
-    updateAddButtons();
-  }
-
-  function updateAddButtons(){
-    addDemandRow.disabled = demandRows.children.length >= MAX_ROWS;
-    addSupplyRow.disabled = supplyRows.children.length >= MAX_ROWS;
-    addDemandRow.style.display = demandRows.children.length >= MAX_ROWS ? 'none' : '';
-    addSupplyRow.style.display = supplyRows.children.length >= MAX_ROWS ? 'none' : '';
-  }
-
-  function resetRows(){
-    demandRows.innerHTML = '';
-    supplyRows.innerHTML = '';
-    const starting = mode === 'coord' ? 2 : 1;
-    for(let i=0;i<starting;i++){ demandRows.appendChild(createRow()); supplyRows.appendChild(createRow()); }
-    updateAddButtons();
-  }
-
-  function selectMode(m){
-    mode = m;
-    stepMode.classList.add('hidden');
-    stepInput.classList.remove('hidden');
-    stepResult.classList.add('hidden');
-    inputError.classList.add('hidden');
-    resetRows();
-    stepInput.scrollIntoView({ behavior:'smooth', block:'start' });
-  }
-
-  document.getElementById('modeCoord').addEventListener('click', () => selectMode('coord'));
-  document.getElementById('modeEquation').addEventListener('click', () => selectMode('equation'));
-  document.getElementById('btnChangeMode').addEventListener('click', () => {
-    stepInput.classList.add('hidden');
-    stepResult.classList.add('hidden');
-    stepMode.classList.remove('hidden');
-    stepMode.scrollIntoView({ behavior:'smooth', block:'start' });
-  });
-  document.getElementById('btnEdit').addEventListener('click', () => {
-    stepResult.classList.add('hidden');
-    stepInput.classList.remove('hidden');
-    stepInput.scrollIntoView({ behavior:'smooth', block:'start' });
-  });
-  addDemandRow.addEventListener('click', () => addRow(demandRows));
-  addSupplyRow.addEventListener('click', () => addRow(supplyRows));
-
-  // ===================================================================
-  // 5. VALIDASI & PEMBACAAN INPUT -> CURVE DEFINITIONS
-  // ===================================================================
-  function showError(msg){
-    inputError.textContent = msg;
-    inputError.classList.remove('hidden');
-  }
-  function clearError(){ inputError.classList.add('hidden'); }
-
-  // Curve def: { kind:'points', points:[{q,p}...] } atau { kind:'equation', lhs, evaluate, raw }
-  function readSide(container, sideLabel){
-    const curves = [];
-    if(mode === 'coord'){
-      const rowEls = Array.from(container.children);
-      const pointRows = rowEls.map(r => ({
-        priceEl: r.querySelector('.in-price'),
-        qtyEl: r.querySelector('.in-qty')
-      }));
-      const points = [];
-      for(const r of pointRows){
-        const pv = r.priceEl.value.trim(), qv = r.qtyEl.value.trim();
-        if(pv === '' && qv === '') continue;
-        if(pv === '' || qv === '') throw new Error('Ada baris ' + sideLabel + ' yang belum lengkap (harga & kuantitas harus diisi dua-duanya).');
-        const p = parseFloat(pv), q = parseFloat(qv);
-        if(isNaN(p) || isNaN(q)) throw new Error('Ada nilai ' + sideLabel + ' yang bukan angka.');
-        if(q < 0 || p < 0) throw new Error('Harga dan kuantitas ' + sideLabel + ' sebaiknya tidak negatif.');
-        points.push({ q, p });
-      }
-      if(points.length < 2) throw new Error('Isi minimal 2 titik untuk ' + sideLabel + ' (harga & kuantitas) supaya bisa membentuk kurva.');
-      points.sort((a,b) => a.q - b.q);
-      curves.push({ kind:'points', points });
-    } else {
-      const eqEls = Array.from(container.querySelectorAll('.in-eq'));
-      let count = 0;
-      for(const el of eqEls){
-        const val = el.value.trim();
-        if(!val) continue;
-        count++;
-        let parsed;
-        try{
-          parsed = parseEquation(val);
-        }catch(e){
-          throw new Error('Persamaan ' + sideLabel + ' "' + val + '" bermasalah: ' + e.message);
-        }
-        curves.push({ kind:'equation', lhs: parsed.lhs, evaluate: parsed.evaluate, raw: parsed.raw });
-      }
-      if(count === 0) throw new Error('Isi minimal 1 persamaan untuk ' + sideLabel + '.');
-    }
-    return curves;
-  }
-
-  // ===================================================================
-  // 6. MEMBANGUN SAMPLE KURVA & DOMAIN
-  // ===================================================================
-  function estimateDomain(demandCurves, supplyCurves){
-    let maxQ = 0, maxP = 0;
-    const consider = (curves) => {
-      curves.forEach(c => {
-        if(c.kind === 'points'){
-          c.points.forEach(pt => { maxQ = Math.max(maxQ, pt.q); maxP = Math.max(maxP, pt.p); });
-        } else {
-          try{
-            if(c.lhs === 'P'){
-              const p0 = c.evaluate(0);
-              if(isFinite(p0)) maxP = Math.max(maxP, Math.abs(p0));
-              const qZero = findZeroCrossing(c.evaluate);
-              if(qZero !== null) maxQ = Math.max(maxQ, Math.abs(qZero));
-            } else {
-              const q0 = c.evaluate(0);
-              if(isFinite(q0)) maxQ = Math.max(maxQ, Math.abs(q0));
-              const pZero = findZeroCrossing(c.evaluate);
-              if(pZero !== null) maxP = Math.max(maxP, Math.abs(pZero));
-            }
-          }catch(e){ /* abaikan, fallback default dipakai */ }
-        }
-      });
-    };
-    consider(demandCurves);
-    consider(supplyCurves);
-    if(!isFinite(maxQ) || maxQ <= 0) maxQ = 100;
-    if(!isFinite(maxP) || maxP <= 0) maxP = 100;
-    return { qMax: maxQ * 1.2, pMax: maxP * 1.2 };
-  }
-
-  function buildSamples(curve, qMax, pMax){
-    if(curve.kind === 'points'){
-      return catmullRomSamples(curve.points);
-    }
-    const N = 300;
-    if(curve.lhs === 'P'){
-      const samples = [];
-      for(let i=0;i<=N;i++){
-        const q = (i/N) * qMax;
-        samples.push({ q, p: curve.evaluate(q) });
-      }
-      return samples;
-    } else {
-      const raw = [];
-      for(let i=0;i<=N;i++){
-        const p = (i/N) * pMax;
-        raw.push({ q: curve.evaluate(p), p });
-      }
-      raw.sort((a,b) => a.q - b.q);
-      return raw;
-    }
-  }
-
-  function canonicalLinear(curve){
-    // Kembalikan {A,B} sehingga P = A + B*Q, kalau kurva ini memang linear. Selain itu null.
-    if(curve.kind === 'points'){
-      if(curve.points.length !== 2) return null;
-      const [p1, p2] = curve.points;
-      if(p2.q === p1.q) return null;
-      const B = (p2.p - p1.p) / (p2.q - p1.q);
-      const A = p1.p - B * p1.q;
-      return { A, B };
-    }
-    if(!isLinearFn(curve.evaluate)) return null;
-    if(curve.lhs === 'P'){
-      const A = curve.evaluate(0);
-      const B = curve.evaluate(1) - A;
-      return { A, B };
-    } else {
-      const a = curve.evaluate(0); // Q = a + b*P
-      const b = curve.evaluate(1) - a;
-      if(b === 0) return null;
-      return { A: -a/b, B: 1/b };
-    }
-  }
-
-  function describeCurve(curve, labelP, labelQ){
-    if(curve.kind === 'points'){
-      const listStr = curve.points.map(pt => '(Q=' + fmt(pt.q) + ', P=' + fmt(pt.p) + ')').join(', ');
-      if(curve.points.length === 2){
-        const lin = canonicalLinear(curve);
-        return 'Melalui 2 titik ' + listStr + '. Slope = (P₂-P₁)/(Q₂-Q₁) = ' + fmt(lin.B) +
-               ', sehingga persamaan garis: <span class="eq-line">P = ' + fmt(lin.A) + (lin.B>=0?' + ':' - ') + Math.abs(fmt(lin.B)) + 'Q</span>';
-      }
-      return 'Dihubungkan sebagai kurva halus melalui ' + curve.points.length + ' titik: ' + listStr + '.';
-    } else {
-      const lin = canonicalLinear(curve);
-      let txt = 'Persamaan yang dimasukkan: <span class="eq-line">' + curve.raw + '</span>';
-      if(lin){
-        txt += 'Bentuk P = A + B·Q &rarr; A (intersep) = ' + fmt(lin.A) + ', B (slope) = ' + fmt(lin.B) + '.';
-      }
-      return txt;
-    }
-  }
-
-  // ===================================================================
-  // 7. RENDER GRAFIK (SVG)
-  // ===================================================================
-  const DEMAND_COLORS = ['#C24E33', '#D97A5F', '#E6A08A', '#F0C2B0', '#F7DDD2'];
-  const SUPPLY_COLORS = ['#1F3A63', '#3A5A87', '#6C87AA', '#9AB0C8', '#C9D6E3'];
+  const sx = (q) => margin.left + (q/Q_MAX) * plotW;
+  const sy = (p) => margin.top + plotH - (p/P_MAX) * plotH;
 
   function svgEl(tag, attrs){
     const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -686,279 +208,166 @@
     return el;
   }
 
-  function niceTicks(maxVal, count){
-    count = count || 5;
-    if(maxVal <= 0) return [0];
-    const rough = maxVal / count;
-    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
-    const norm = rough / mag;
-    let step;
-    if(norm < 1.5) step = 1*mag; else if(norm < 3) step = 2*mag; else if(norm < 7) step = 5*mag; else step = 10*mag;
-    const ticks = [];
-    for(let v=0; v <= maxVal + step*0.5; v += step) ticks.push(Math.round(v*10000)/10000);
-    return ticks;
-  }
+  const chartSvg = document.getElementById('chartSvg');
+  const revealMap = {}; // id -> element(s), for step reveal lookup
 
-  function renderChart(demandCurves, supplyCurves, demandSamples, supplySamples, primaryEq, allPairs){
+  function buildChart(){
     chartSvg.innerHTML = '';
-    const W = 640, H = 460;
-    const margin = { left:58, right:20, top:20, bottom:50 };
-    const plotW = W - margin.left - margin.right;
-    const plotH = H - margin.top - margin.bottom;
-
-    let maxP = 0;
-    demandSamples.concat(supplySamples).forEach(arr => arr.forEach(s => { if(isFinite(s.p)) maxP = Math.max(maxP, s.p); }));
-    let maxQ = 0;
-    demandSamples.concat(supplySamples).forEach(arr => arr.forEach(s => { if(isFinite(s.q)) maxQ = Math.max(maxQ, s.q); }));
-    if(maxP <= 0) maxP = 100;
-    if(maxQ <= 0) maxQ = 100;
-    maxP *= 1.15; maxQ *= 1.15;
-
-    const sx = (q) => margin.left + (q/maxQ) * plotW;
-    const sy = (p) => margin.top + plotH - (p/maxP) * plotH;
-
-    // clip path
-    const defs = svgEl('defs', {});
-    const clip = svgEl('clipPath', { id:'plotClip' });
-    clip.appendChild(svgEl('rect', { x:margin.left, y:margin.top, width:plotW, height:plotH }));
-    defs.appendChild(clip);
-    chartSvg.appendChild(defs);
 
     // gridlines + ticks
-    const qTicks = niceTicks(maxQ);
-    const pTicks = niceTicks(maxP);
-    qTicks.forEach(qv => {
-      if(qv > maxQ) return;
-      const x = sx(qv);
+    for(let q=0; q<=Q_MAX; q+=10){
+      const x = sx(q);
       chartSvg.appendChild(svgEl('line', { x1:x, y1:margin.top, x2:x, y2:margin.top+plotH, stroke:'#D3E4EC', 'stroke-width':1 }));
-      const t = svgEl('text', { x:x, y:margin.top+plotH+18, 'text-anchor':'middle', 'font-size':'11', fill:'#4C6885', 'font-family':'Plus Jakarta Sans' });
-      t.textContent = fmt(qv);
+      const t = svgEl('text', { x, y:margin.top+plotH+18, 'text-anchor':'middle', 'font-size':'11', fill:'#4C6885', 'font-family':'Plus Jakarta Sans' });
+      t.textContent = q;
       chartSvg.appendChild(t);
-    });
-    pTicks.forEach(pv => {
-      if(pv > maxP) return;
-      const y = sy(pv);
+    }
+    for(let p=0; p<=P_MAX; p+=5){
+      const y = sy(p);
       chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:y, x2:margin.left+plotW, y2:y, stroke:'#D3E4EC', 'stroke-width':1 }));
       const t = svgEl('text', { x:margin.left-8, y:y+4, 'text-anchor':'end', 'font-size':'11', fill:'#4C6885', 'font-family':'Plus Jakarta Sans' });
-      t.textContent = fmt(pv);
+      t.textContent = p;
       chartSvg.appendChild(t);
-    });
+    }
 
     // axes
     chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:margin.top, x2:margin.left, y2:margin.top+plotH, stroke:'#16294A', 'stroke-width':2 }));
     chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:margin.top+plotH, x2:margin.left+plotW, y2:margin.top+plotH, stroke:'#16294A', 'stroke-width':2 }));
-    const xLabel = svgEl('text', { x:margin.left+plotW/2, y:H-8, 'text-anchor':'middle', 'font-size':'12', fill:'#16294A', 'font-weight':'700', 'font-family':'Baloo 2' });
+    const xLabel = svgEl('text', { x:margin.left+plotW/2, y:H-6, 'text-anchor':'middle', 'font-size':'12', fill:'#16294A', 'font-weight':'700', 'font-family':'Baloo 2' });
     xLabel.textContent = 'Kuantitas (Q)';
     chartSvg.appendChild(xLabel);
     const yLabel = svgEl('text', { x:14, y:margin.top+plotH/2, 'text-anchor':'middle', 'font-size':'12', fill:'#16294A', 'font-weight':'700', 'font-family':'Baloo 2', transform:'rotate(-90 14 '+(margin.top+plotH/2)+')' });
     yLabel.textContent = 'Harga (P)';
     chartSvg.appendChild(yLabel);
 
-    // plot group with clip
-    const plotGroup = svgEl('g', { 'clip-path':'url(#plotClip)' });
-    chartSvg.appendChild(plotGroup);
-
-    function drawCurve(samples, color, dashed){
-      const pts = samples.map(s => sx(s.q) + ',' + sy(s.p)).join(' ');
-      plotGroup.appendChild(svgEl('polyline', {
-        points: pts, fill:'none', stroke:color, 'stroke-width': dashed ? 2.5 : 3.5,
-        'stroke-dasharray': dashed ? '7,6' : 'none', 'stroke-linecap':'round', 'stroke-linejoin':'round'
-      }));
-    }
-    demandSamples.forEach((s,i) => drawCurve(s, DEMAND_COLORS[i] || DEMAND_COLORS[4], i>0));
-    supplySamples.forEach((s,i) => drawCurve(s, SUPPLY_COLORS[i] || SUPPLY_COLORS[4], i>0));
-
-    // pair intersections (kecil, semua kombinasi)
-    allPairs.forEach(pr => {
-      if(!pr.point) return;
-      const isPrimary = pr.di === 0 && pr.si === 0;
-      if(isPrimary) return; // digambar terpisah di bawah, lebih besar
-      const cx = sx(pr.point.q), cy = sy(pr.point.p);
-      const dot = svgEl('circle', { cx, cy, r:4.5, fill:'#fff', stroke:'#16294A', 'stroke-width':2 });
-      const title = svgEl('title', {});
-      title.textContent = 'D' + (pr.di+1) + ' ∩ S' + (pr.si+1) + ':  Q≈' + fmt(pr.point.q) + ', P≈' + fmt(pr.point.p);
-      dot.appendChild(title);
-      plotGroup.appendChild(dot);
+    // ---- Demand points d1,d2,d3 ----
+    const demandColor = '#C24E33';
+    DEMAND_POINTS.forEach((pt, i) => {
+      const c = svgEl('circle', { cx:sx(pt.q), cy:sy(pt.p), r:6, fill:demandColor, stroke:'#fff', 'stroke-width':2, class:'curve-point' });
+      chartSvg.appendChild(c);
+      revealMap['d'+(i+1)] = [c];
     });
 
-    // primary equilibrium (besar + garis putus2 ke sumbu)
-    if(primaryEq){
-      const ex = sx(primaryEq.q), ey = sy(primaryEq.p);
-      plotGroup.appendChild(svgEl('line', { x1:ex, y1:ey, x2:ex, y2:margin.top+plotH, stroke:'#D69A1F', 'stroke-width':1.5, 'stroke-dasharray':'4,4' }));
-      plotGroup.appendChild(svgEl('line', { x1:margin.left, y1:ey, x2:ex, y2:ey, stroke:'#D69A1F', 'stroke-width':1.5, 'stroke-dasharray':'4,4' }));
-      plotGroup.appendChild(svgEl('circle', { cx:ex, cy:ey, r:7, fill:'#F0B93D', stroke:'#16294A', 'stroke-width':2.5 }));
-      const lbl = svgEl('text', { x:ex+10, y:ey-10, 'font-size':'12', 'font-weight':'800', fill:'#16294A', 'font-family':'Baloo 2' });
-      lbl.textContent = 'E (' + fmt(primaryEq.q) + ', ' + fmt(primaryEq.p) + ')';
-      chartSvg.appendChild(lbl);
-    }
+    // demand line: persamaan penuh dari Q=0 sampai Q_MAX (bukan cuma antar titik)
+    const dLine = svgEl('path', { d:'M '+sx(0)+','+sy(demandP(0))+' L '+sx(Q_MAX)+','+sy(demandP(Q_MAX)), fill:'none', stroke:demandColor, 'stroke-width':3.5, 'stroke-linecap':'round', class:'curve-line' });
+    chartSvg.appendChild(dLine);
+    revealMap['dLine'] = [dLine];
+    // label kurva ditaruh di ujung kiri-atas garis, jauh dari klaster titik ekuilibrium di kanan
+    const dLabel = svgEl('text', { x:sx(1), y:sy(demandP(1))-10, 'font-size':'13', 'font-weight':'800', fill:demandColor, 'font-family':'Baloo 2', class:'curve-fade' });
+    dLabel.textContent = 'Demand (D)';
+    chartSvg.appendChild(dLabel);
+    revealMap['dLabel'] = [dLabel];
 
-    // legend
-    legendEl.innerHTML = '';
-    demandCurves.forEach((c,i) => {
-      const item = document.createElement('div'); item.className = 'legend-item';
-      const sw = document.createElement('span'); sw.className = 'legend-swatch' + (i>0?' dashed':'');
-      sw.style.color = DEMAND_COLORS[i] || DEMAND_COLORS[4];
-      sw.style.backgroundColor = i>0 ? 'transparent' : (DEMAND_COLORS[i] || DEMAND_COLORS[4]);
-      item.appendChild(sw);
-      const txt = document.createElement('span'); txt.textContent = 'Demand (D' + (i+1) + ')' + (i===0?' — utama':' — pembanding');
-      item.appendChild(txt);
-      legendEl.appendChild(item);
+    // ---- Supply points s1,s2,s3 ----
+    const supplyColor = '#1F3A63';
+    SUPPLY_POINTS.forEach((pt, i) => {
+      const c = svgEl('circle', { cx:sx(pt.q), cy:sy(pt.p), r:6, fill:supplyColor, stroke:'#fff', 'stroke-width':2, class:'curve-point' });
+      chartSvg.appendChild(c);
+      revealMap['s'+(i+1)] = [c];
     });
-    supplyCurves.forEach((c,i) => {
-      const item = document.createElement('div'); item.className = 'legend-item';
-      const sw = document.createElement('span'); sw.className = 'legend-swatch' + (i>0?' dashed':'');
-      sw.style.color = SUPPLY_COLORS[i] || SUPPLY_COLORS[4];
-      sw.style.backgroundColor = i>0 ? 'transparent' : (SUPPLY_COLORS[i] || SUPPLY_COLORS[4]);
-      item.appendChild(sw);
-      const txt = document.createElement('span'); txt.textContent = 'Supply (S' + (i+1) + ')' + (i===0?' — utama':' — pembanding');
-      item.appendChild(txt);
-      legendEl.appendChild(item);
+
+    const sLine = svgEl('path', { d:'M '+sx(0)+','+sy(supplyP(0))+' L '+sx(Q_MAX)+','+sy(supplyP(Q_MAX)), fill:'none', stroke:supplyColor, 'stroke-width':3.5, 'stroke-linecap':'round', class:'curve-line' });
+    chartSvg.appendChild(sLine);
+    revealMap['sLine'] = [sLine];
+    // label kurva ditaruh di ujung kiri-bawah garis, sisi yang sama dengan label Demand tapi beda ketinggian
+    const sLabel = svgEl('text', { x:sx(16), y:sy(supplyP(16))-10, 'text-anchor':'end', 'font-size':'13', 'font-weight':'800', fill:supplyColor, 'font-family':'Baloo 2', class:'curve-fade' });
+    sLabel.textContent = 'Supply (S)';
+    chartSvg.appendChild(sLabel);
+    revealMap['sLabel'] = [sLabel];
+
+    // ---- Equilibrium ----
+    const ex = sx(EQUILIBRIUM.q), ey = sy(EQUILIBRIUM.p);
+    const guideV = svgEl('line', { x1:ex, y1:ey, x2:ex, y2:margin.top+plotH, stroke:'#D69A1F', 'stroke-width':1.5, 'stroke-dasharray':'4,4', class:'curve-fade' });
+    const guideH = svgEl('line', { x1:margin.left, y1:ey, x2:ex, y2:ey, stroke:'#D69A1F', 'stroke-width':1.5, 'stroke-dasharray':'4,4', class:'curve-fade' });
+    chartSvg.appendChild(guideV); chartSvg.appendChild(guideH);
+    revealMap['eqGuideV'] = [guideV];
+    revealMap['eqGuideH'] = [guideH];
+    const eqOuter = svgEl('circle', { cx:ex, cy:ey, r:9, fill:'none', stroke:'#F0B93D', 'stroke-width':3, class:'curve-point' });
+    const eqInner = svgEl('circle', { cx:ex, cy:ey, r:5, fill:'#F0B93D', stroke:'#16294A', 'stroke-width':2, class:'curve-point' });
+    chartSvg.appendChild(eqOuter); chartSvg.appendChild(eqInner);
+    revealMap['eqDotOuter'] = [eqOuter];
+    revealMap['eqDotInner'] = [eqInner];
+    // label ekuilibrium ditaruh di kanan-atas titik, area yang kosong (jauh dari label kurva di kiri)
+    const eqLabel = svgEl('text', { x:ex+12, y:ey-12, 'font-size':'13', 'font-weight':'800', fill:'#16294A', 'font-family':'Baloo 2', class:'curve-fade' });
+    eqLabel.textContent = 'E';
+    chartSvg.appendChild(eqLabel);
+    revealMap['eqLabel'] = [eqLabel];
+
+    // siapkan garis untuk animasi "menggambar" via stroke-dashoffset
+    [dLine, sLine].forEach(line => {
+      const len = line.getTotalLength();
+      line.style.strokeDasharray = len;
+      line.style.strokeDashoffset = len;
     });
   }
 
   // ===================================================================
-  // 8. LANGKAH KERJA (teks) & TABEL PASANGAN
+  // Navigasi cerita
   // ===================================================================
-  function renderSteps(demandCurves, supplyCurves, primaryEq){
-    stepsPanel.innerHTML = '';
-    const blocks = [];
+  let current = 0;
+  const bubbleText = document.getElementById('bubbleText');
+  const chapterBadge = document.getElementById('chapterBadge');
+  const progressDots = document.getElementById('progressDots');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnRestart = document.getElementById('btnRestart');
 
-    blocks.push({
-      title: '1. Data yang dimasukkan',
-      body: 'Demand: ' + demandCurves.length + ' kurva. Supply: ' + supplyCurves.length + ' kurva. Kurva pertama di tiap sisi (D1 &amp; S1) jadi acuan utama perhitungan ekuilibrium di bawah.'
-    });
-
-    blocks.push({
-      title: '2. Kurva Demand utama (D1)',
-      body: describeCurve(demandCurves[0])
-    });
-
-    blocks.push({
-      title: '3. Kurva Supply utama (S1)',
-      body: describeCurve(supplyCurves[0])
-    });
-
-    const linD = canonicalLinear(demandCurves[0]);
-    const linS = canonicalLinear(supplyCurves[0]);
-    if(linD && linS){
-      const Qstar = (linS.A - linD.A) / (linD.B - linS.B);
-      const Pstar = linD.A + linD.B * Qstar;
-      blocks.push({
-        title: '4. Penyelesaian aljabar (karena D1 &amp; S1 sama-sama garis lurus)',
-        body:
-          'Syarat ekuilibrium: P<sub>demand</sub> = P<sub>supply</sub>' +
-          '<span class="eq-line">' + fmt(linD.A) + (linD.B>=0?' + ':' - ') + Math.abs(fmt(linD.B)) + 'Q  =  ' + fmt(linS.A) + (linS.B>=0?' + ':' - ') + Math.abs(fmt(linS.B)) + 'Q</span>' +
-          'Kumpulkan suku Q:' +
-          '<span class="eq-line">Q·(' + fmt(linD.B) + ' − ' + fmt(linS.B) + ') = ' + fmt(linS.A) + ' − ' + fmt(linD.A) + '</span>' +
-          '<span class="eq-line">Q* = ' + fmt(Qstar) + '</span>' +
-          'Substitusi balik ke persamaan Demand:' +
-          '<span class="eq-line">P* = ' + fmt(linD.A) + (linD.B>=0?' + ':' - ') + Math.abs(fmt(linD.B)) + ' × ' + fmt(Qstar) + ' = ' + fmt(Pstar) + '</span>'
-      });
-    } else {
-      blocks.push({
-        title: '4. Mencari titik ekuilibrium',
-        body: 'Karena minimal salah satu kurva berbentuk lengkung (bukan garis lurus tunggal), titik potong dicari secara numerik — komputer menelusuri nilai Q sedikit demi sedikit sampai ketemu titik di mana harga Demand sama dengan harga Supply.'
-      });
-    }
-
-    blocks.push({
-      title: '5. Hasil',
-      body: primaryEq
-        ? 'Ekuilibrium tercapai pada <strong>Q* = ' + fmt(primaryEq.q) + '</strong> dan <strong>P* = ' + fmt(primaryEq.p) + '</strong>.'
-        : 'Tidak ditemukan titik potong antara D1 dan S1 pada rentang grafik ini — coba periksa lagi data yang dimasukkan (kemungkinan dua kurva tidak pernah berpotongan di kuadran positif).'
-    });
-
-    const extraD = demandCurves.length > 1, extraS = supplyCurves.length > 1;
-    if(extraD || extraS){
-      blocks.push({
-        title: '6. Kurva pembanding',
-        body: 'Kurva tambahan digambar putus-putus di grafik untuk menunjukkan pergeseran (shift). Semua kombinasi titik potongnya tercantum di tabel di bawah grafik.'
-      });
-    }
-
-    blocks.forEach((b, i) => {
-      const div = document.createElement('div');
-      div.className = 'step-block';
-      div.innerHTML = '<div><span class="step-num">' + (i+1) + '</span><h5>' + b.title.replace(/^\d+\.\s*/, '') + '</h5></div>' +
-                       '<div class="step-body">' + b.body + '</div>';
-      stepsPanel.appendChild(div);
-    });
-
-    if(primaryEq){
-      const ans = document.createElement('div');
-      ans.className = 'answer-box';
-      ans.innerHTML = '<div class="lbl">Titik Ekuilibrium</div><div class="val">Q* = ' + fmt(primaryEq.q) + '  |  P* = ' + fmt(primaryEq.p) + '</div>';
-      stepsPanel.appendChild(ans);
-    }
-  }
-
-  function renderPairTable(demandCurves, supplyCurves, allPairs){
-    const needed = demandCurves.length > 1 || supplyCurves.length > 1;
-    if(!needed){ pairTableWrap.classList.add('hidden'); return; }
-    pairTableWrap.classList.remove('hidden');
-    let html = '<thead><tr><th>Kombinasi</th><th>Q*</th><th>P*</th></tr></thead><tbody>';
-    allPairs.forEach(pr => {
-      const primary = pr.di === 0 && pr.si === 0;
-      html += '<tr' + (primary ? ' class="primary-row"' : '') + '>' +
-              '<td>D' + (pr.di+1) + ' ∩ S' + (pr.si+1) + (primary ? ' (utama)' : '') + '</td>' +
-              '<td>' + (pr.point ? fmt(pr.point.q) : '—') + '</td>' +
-              '<td>' + (pr.point ? fmt(pr.point.p) : '—') + '</td>' +
-              '</tr>';
-    });
-    html += '</tbody>';
-    pairTable.innerHTML = html;
-  }
-
-  // ===================================================================
-  // 9. BUILD (tombol utama)
-  // ===================================================================
-  document.getElementById('btnBuild').addEventListener('click', () => {
-    clearError();
-    let demandCurves, supplyCurves;
-    try{
-      demandCurves = readSide(demandRows, 'Demand');
-      supplyCurves = readSide(supplyRows, 'Supply');
-    }catch(e){
-      showError(e.message);
-      return;
-    }
-
-    let domain;
-    try{
-      domain = estimateDomain(demandCurves, supplyCurves);
-    }catch(e){
-      showError('Terjadi kesalahan saat menghitung skala grafik: ' + e.message);
-      return;
-    }
-
-    let demandSamples, supplySamples;
-    try{
-      demandSamples = demandCurves.map(c => buildSamples(c, domain.qMax, domain.pMax));
-      supplySamples = supplyCurves.map(c => buildSamples(c, domain.qMax, domain.pMax));
-    }catch(e){
-      showError('Terjadi kesalahan saat menghitung kurva: ' + e.message);
-      return;
-    }
-
-    const allPairs = [];
-    demandSamples.forEach((ds, di) => {
-      supplySamples.forEach((ss, si) => {
-        const point = findFirstIntersection(ds, ss, domain.qMax * 1.3);
-        allPairs.push({ di, si, point });
-      });
-    });
-    const primary = allPairs.find(p => p.di === 0 && p.si === 0);
-    const primaryEq = primary ? primary.point : null;
-
-    renderChart(demandCurves, supplyCurves, demandSamples, supplySamples, primaryEq, allPairs);
-    renderSteps(demandCurves, supplyCurves, primaryEq);
-    renderPairTable(demandCurves, supplyCurves, allPairs);
-
-    stepInput.classList.add('hidden');
-    stepResult.classList.remove('hidden');
-    stepResult.scrollIntoView({ behavior:'smooth', block:'start' });
+  STEPS.forEach((s, i) => {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.dataset.index = i;
+    progressDots.appendChild(dot);
   });
 
+  function applyReveals(uptoIndex){
+    // sembunyikan semua dulu
+    Object.keys(revealMap).forEach(key => {
+      revealMap[key].forEach(el => {
+        el.classList.remove('revealed');
+        if(el.classList.contains('curve-line')) el.style.strokeDashoffset = el.getTotalLength ? el.getTotalLength() : el.style.strokeDasharray;
+      });
+    });
+    // tampilkan sesuai step yang sudah dilewati
+    for(let i=0; i<=uptoIndex; i++){
+      STEPS[i].reveal.forEach(key => {
+        (revealMap[key] || []).forEach(el => {
+          el.classList.add('revealed');
+          if(el.classList.contains('curve-line')) el.style.strokeDashoffset = '0';
+        });
+      });
+    }
+  }
+
+  function render(){
+    const step = STEPS[current];
+    bubbleText.innerHTML = step.text;
+    chapterBadge.textContent = CHAPTERS[step.chapter];
+    applyReveals(current);
+
+    Array.from(progressDots.children).forEach((dot, i) => {
+      dot.classList.toggle('active', i === current);
+      dot.classList.toggle('done', i < current);
+    });
+
+    btnPrev.disabled = current === 0;
+    const isLast = current === STEPS.length - 1;
+    btnNext.style.display = isLast ? 'none' : '';
+    btnRestart.style.display = isLast ? '' : 'none';
+  }
+
+  btnNext.addEventListener('click', () => {
+    if(current < STEPS.length - 1){ current++; render(); }
+  });
+  btnPrev.addEventListener('click', () => {
+    if(current > 0){ current--; render(); }
+  });
+  btnRestart.addEventListener('click', () => {
+    current = 0; render();
+    document.querySelector('.story-card').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  buildChart();
+  render();
 })();
 </script>
 </body>
