@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Surplus &amp; Deadweight Loss — Pengantar Mikroekonomi — KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .story-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:28px; box-shadow:var(--shadow); margin-top:24px;
+  }
+  .chapter-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .chapter-badge{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
+    background:var(--bg-deep); color:var(--owl-dark2);
+  }
+  .progress-dots{display:flex; gap:6px; flex-wrap:wrap; max-width:220px;}
+  .progress-dots .dot{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s, transform .2s;}
+  .progress-dots .dot.active{background:var(--gold); transform:scale(1.3);}
+  .progress-dots .dot.done{background:var(--owl-mid);}
+
+  .story-layout{display:grid; grid-template-columns:300px 1fr; gap:26px; align-items:start;}
+  @media (max-width:820px){ .story-layout{grid-template-columns:1fr;} }
+
+  .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .owl-panel svg{width:150px;}
+  .owl-panel .wing-l{transform-origin:78px 150px; animation:flapL 2.6s ease-in-out infinite;}
+  .owl-panel .wing-r{transform-origin:222px 150px; animation:flapR 2.6s ease-in-out infinite;}
+  .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
+
+  .bubble{
+    position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
+    font-size:0.94rem; line-height:1.6; color:var(--ink); min-height:96px;
+  }
+  .bubble::before{
+    content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:9px solid var(--bg-deep);
+  }
+  @media (min-width:821px){
+    .bubble::before{ top:26px; left:-9px; transform:none; border-left:none; border-bottom:9px solid transparent; border-top:9px solid transparent; border-right:9px solid var(--bg-deep); }
+  }
+
+  .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:16px; position:relative;}
+  #chartSvg{width:100%; height:auto; display:block;}
+
+  .formula-box{
+    position:absolute; top:14px; right:14px; background:#fff; border:2px solid var(--gold);
+    border-radius:14px; padding:12px 18px; box-shadow:0 10px 26px rgba(0,0,0,0.18);
+    opacity:0; transform:translateY(-6px); transition:opacity .35s ease, transform .35s ease;
+    pointer-events:none; max-width:75%; text-align:center;
+  }
+  .formula-box.show{opacity:1; transform:translateY(0);}
+  .formula-box .katex{font-size:1.05em;}
+
+  .curve-fade{ opacity:0; transition:opacity .55s ease; }
+  .curve-fade.revealed{ opacity:1; }
+  .curve-line{ transition:stroke-dashoffset .8s ease; }
+
+  .legend{display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:14px; font-size:0.82rem;}
+  .legend-item{display:flex; align-items:center; gap:6px; color:var(--ink-soft); opacity:0; transition:opacity .4s ease;}
+  .legend-item.revealed{opacity:1;}
+  .legend-swatch{width:16px; height:16px; border-radius:4px; display:inline-block; flex-shrink:0;}
+
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px;}
+  .nav-row .spacer{flex:1;}
+  #btnRestart{display:none;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+      <span class="brand-text"><span class="blue">KA</span><span class="gold">FBE</span><span class="blue"> Hub</span></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Buka menu">☰</button>
+    <nav class="links" id="navLinks">
+      <a href="index.html#beranda">Beranda</a>
+      <a href="index.html#main-santai">Main Santai</a>
+      <a href="pemi.html">Pengantar Mikroekonomi</a>
+    </nav>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path class="wing-l" d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path class="wing-r" d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/>
+      <path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/>
+      <path d="M142 192 q8 10 16 0"/>
+      <path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/>
+      <path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/>
+      <circle cx="177" cy="118" r="7" fill="#fff"/>
+      <circle cx="120" cy="136" r="3" fill="#fff" opacity="0.8"/>
+      <circle cx="190" cy="136" r="3" fill="#fff" opacity="0.8"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="pemi.html">← Kembali ke Pengantar Mikroekonomi</a>
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Pengantar Mikroekonomi</span>
+    <h2>Surplus Konsumen, Surplus Produsen &amp; Deadweight Loss</h2>
+    <p>Lanjutan dari kurva supply &amp; demand — kali ini kita lihat siapa untung berapa banyak, dan apa yang terjadi kalau ada pajak.</p>
+  </div>
+
+  <div class="story-card">
+    <div class="chapter-row">
+      <span class="chapter-badge" id="chapterBadge">Bagian: Mengingat Kembali</span>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <div class="story-layout">
+      <div class="owl-panel">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <div class="bubble" id="bubbleText"></div>
+      </div>
+
+      <div>
+        <div class="chart-wrap">
+          <svg id="chartSvg" viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg"></svg>
+          <div class="formula-box" id="formulaBox"></div>
+        </div>
+        <div class="legend" id="legend"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong> — Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ===================================================================
+  // Model: kurva sama seperti halaman Supply & Demand sebelumnya.
+  //   Demand:  P = 50 - 0.5Q        (Q = 100 - 2P)
+  //   Supply:  P = 10 + 0.5Q        (Q = 2P - 20)
+  //   Ekuilibrium awal: Q=40, P=30
+  // Lalu pajak Rp10.000/unit dikenakan ke penjual -> kurva supply (dari sisi
+  // harga yang dibayar konsumen) naik: P = 20 + 0.5Q
+  //   Ekuilibrium baru: konsumen bayar P=35, Q=30; produsen terima P=25
+  // ===================================================================
+  const demandP = (Q) => 50 - 0.5*Q;
+  const supplyP = (Q) => 10 + 0.5*Q;
+  const supplyTaxP = (Q) => 20 + 0.5*Q;
+  const TAX = 10;
+
+  const OLD_EQ = { q:40, p:30 };
+  const NEW_EQ_CONSUMER = { q:30, p:35 };
+  const NEW_PRODUCER_NET = { q:30, p:25 };
+
+  // Skenario monopoli: satu penjual sengaja membatasi kuantitas ke 20 unit
+  // supaya bisa jual di harga lebih tinggi (Rp40rb), padahal biaya produksi
+  // unit ke-20 itu cuma Rp20rb (dibaca dari kurva Supply/biaya marjinal).
+  const MONO_Q = 20;
+  const MONO_PRICE = demandP(MONO_Q);   // 40
+  const MONO_COST = supplyP(MONO_Q);    // 20
+
+  const CHAPTERS = {
+    recap:'Bagian: Mengingat Kembali', cs:'Bagian: Surplus Konsumen', ps:'Bagian: Surplus Produsen',
+    tax:'Bagian: Kena Pajak', dwl:'Bagian: DWL akibat Pajak',
+    mono:'Bagian: Monopoli', dwlMono:'Bagian: DWL akibat Monopoli',
+    rumus:'Bagian: Hitung Pakai Rumus Luas'
+  };
+
+  const STEPS = [
+    { chapter:'recap', reveal:['baseCurves','oldEq'],
+      text:'Inget lagi kurva Demand &amp; Supply dari sebelumnya — ketemu di titik ekuilibrium: harga <strong>Rp30.000</strong>, jumlah <strong>40 unit</strong>.' },
+    { chapter:'cs', reveal:['priceLine'],
+      text:'Di harga pasar ini, <strong>semua pembeli bayar Rp30.000</strong> per unit — nggak peduli seberapa besar mereka sebenarnya rela bayar.' },
+    { chapter:'cs', reveal:['csArea','psArea','legCs','legPs'],
+      text:'Ini dua-duanya sekaligus: <strong>Surplus Konsumen</strong> (area coral, di atas garis harga) dan <strong>Surplus Produsen</strong> (area navy, di bawahnya). Sekarang kita hitung luasnya satu-satu, pakai rumus — bukan cuma kira-kira dari gambar.' },
+    { chapter:'cs', reveal:[], hide:['psArea','legPs','baseCurves','oldEq','priceLine'],
+      text:'Mulai dari <strong>Surplus Konsumen</strong> dulu. Kita fokus ke bentuknya aja — semua yang lain disembunyikan sementara.' },
+    { chapter:'cs', reveal:['baseDim40'],
+      text:'Alasnya kita ukur dari sumbu Kuantitas: dari 0 sampai 40. Alas = 40 − 0 = <strong>40</strong>.' },
+    { chapter:'cs', reveal:['csHeightDim'], formula:'L = \\frac{1}{2} \\times a \\times t',
+      text:'Tingginya dari sumbu Harga: dari Rp30.000 sampai Rp50.000. Tinggi = 50 − 30 = <strong>20</strong>. Luas segitiga rumusnya:' },
+    { chapter:'cs', reveal:[], formula:'L = \\frac{1}{2} \\times 40 \\times 20 = 400',
+      text:'Tinggal masukkan angkanya: alas = 40, tinggi = 20. Luas Surplus Konsumen = <strong>Rp400rb²</strong>.' },
+    { chapter:'ps', reveal:['baseCurves','oldEq','priceLine','psArea','legPs'], hide:['baseDim40','csHeightDim'],
+      text:'Oke, itu luas SK. Sekarang balik dulu ke tampilan normal, terus kita hitung <strong>Surplus Produsen</strong> dengan cara yang sama.' },
+    { chapter:'ps', reveal:[], hide:['csArea','legCs','baseCurves','oldEq','priceLine'],
+      text:'Fokus ke Surplus Produsen aja dulu — sisanya disembunyikan sementara.' },
+    { chapter:'ps', reveal:['baseDim40'],
+      text:'Alasnya sama kayak tadi: dari kuantitas 0 sampai 40. Alas = 40 − 0 = <strong>40</strong>.' },
+    { chapter:'ps', reveal:['psHeightDim'], formula:'L = \\frac{1}{2} \\times a \\times t',
+      text:'Tingginya dari Rp10.000 sampai Rp30.000. Tinggi = 30 − 10 = <strong>20</strong>. Rumusnya masih sama:' },
+    { chapter:'ps', reveal:[], formula:'L = \\frac{1}{2} \\times 40 \\times 20 = 400',
+      text:'Luas Surplus Produsen = <strong>Rp400rb²</strong> juga — sama persis dengan SK. Nggak kebetulan, kurva Demand &amp; Supply kita memang dibikin simetris.' },
+    { chapter:'tax', reveal:['baseCurves','oldEq','priceLine','taxSupplyLine'], hide:['baseDim40','psHeightDim','psArea','legPs'], formula:null,
+      text:'Sekarang bayangkan pemerintah kasih <strong>pajak Rp10.000 per unit</strong> ke penjual. Ini bikin kurva Supply — dari sisi harga yang dibayar konsumen — geser ke atas.' },
+    { chapter:'tax', reveal:['newEqConsumer'],
+      text:'Ekuilibrium baru: konsumen sekarang bayar <strong>Rp35.000</strong>, tapi jumlah yang laku turun jadi <strong>30 unit</strong> — lebih sedikit dari 40 unit sebelumnya.' },
+    { chapter:'tax', reveal:['producerNet'],
+      text:'Penjual sendiri cuma nerima <strong>Rp25.000</strong> bersih per unit. Selisih Rp10.000-nya itulah yang masuk ke pemerintah sebagai pajak.' },
+    { chapter:'tax', reveal:['csNew','psNew','taxRect','legCsNew','legPsNew','legTax'], hide:['priceLine'],
+      text:'Surplus Konsumen &amp; Surplus Produsen sekarang mengecil. Tapi ada bagian yang nggak hilang — jadi <strong>pendapatan pajak</strong> buat pemerintah (kotak kuning ini).' },
+    { chapter:'dwl', reveal:['dwlArea','dwlBracket','legDwl'],
+      text:'Tapi ada sepotong "kue" yang beneran hilang — nggak dinikmati konsumen, produsen, ataupun pemerintah. Ini <strong>Deadweight Loss</strong>: kesejahteraan sosial yang hilang karena transaksi antara 30 dan 40 unit yang tadinya saling menguntungkan, sekarang nggak jadi terjadi.' },
+    { chapter:'dwl', reveal:[], hide:['csNew','psNew','taxRect','legCsNew','legPsNew','legTax','taxSupplyLine','newEqConsumer','producerNet','baseCurves','oldEq'],
+      text:'Kita hitung juga luas DWL-nya. Fokus ke segitiga ini aja dulu.' },
+    { chapter:'dwl', reveal:['dwlHDim'],
+      text:'Sisi mendatarnya kita ukur dari kuantitas 30 sampai 40. Sisi mendatar = 40 − 30 = <strong>10</strong>.' },
+    { chapter:'dwl', reveal:['dwlVDim'], formula:'L = \\frac{1}{2} \\times a \\times t',
+      text:'Sisi tegaknya dari harga Rp25.000 sampai Rp35.000. Sisi tegak = 35 − 25 = <strong>10</strong>. Rumusnya tetap sama — cuma alasnya sekarang miring:' },
+    { chapter:'dwl', reveal:[], formula:'L = \\frac{1}{2} \\times 10 \\times 10 = 50',
+      text:'Luas DWL akibat pajak = <strong>Rp50rb²</strong>.' },
+    { chapter:'dwl', reveal:['csNew','psNew','taxRect','legCsNew','legPsNew','legTax','taxSupplyLine','newEqConsumer','producerNet','baseCurves','oldEq'], hide:['dwlHDim','dwlVDim'], formula:null,
+      text:'Itu semua bagian dari kasus pajak. Sekarang lanjut ke skenario yang beda: monopoli.' },
+    { chapter:'mono', reveal:['priceLine'],
+      hide:['taxSupplyLine','newEqConsumer','producerNet','csNew','psNew','taxRect','legCsNew','legPsNew','legTax','dwlArea','dwlBracket','legDwl'],
+      text:'Bayangkan cuma ada <strong>satu penjual</strong> di pasar ini — monopoli. Inget lagi titik ekuilibrium kompetitif kita: Rp30.000, 40 unit.' },
+    { chapter:'mono', reveal:['monoQGuide'],
+      text:'Karena cuma dia sendiri yang jualan, si monopolis sengaja <strong>membatasi jumlah barangnya jadi cuma 20 unit</strong> — biar orang-orang berebut dan rela bayar lebih mahal.' },
+    { chapter:'mono', reveal:['monoPricePoint'], hide:['priceLine'],
+      text:'Dengan jumlah segitu, orang-orang rela bayar sampai <strong>Rp40.000</strong> per unit — jauh lebih mahal dari harga kompetitif Rp30.000.' },
+    { chapter:'mono', reveal:['monoCS','legMonoCS'],
+      text:'Karena harga naik jadi Rp40.000, <strong>Surplus Konsumen</strong> ikut menyusut — sisa area segitiga kecil ini aja, dari yang tadinya sampai ke 40 unit.' },
+    { chapter:'mono', reveal:['monoCostPoint','monoPS','legMonoPS'],
+      text:'Biaya produksi buat unit ke-20 cuma <strong>Rp20.000</strong> (lihat kurva Supply). Tapi karena monopolis jual <em>semua</em> unit di harga Rp40.000 yang sama — termasuk unit-unit yang biaya produksinya lebih murah — <strong>Surplus Produsen</strong>-nya jadi bentuk trapesium ini, dan lumayan besar.' },
+    { chapter:'dwlMono', reveal:['monoDwlArea','monoDwlBracket','legDwlMono'],
+      text:'Sama seperti kasus pajak, ada transaksi antara <strong>20 dan 40 unit</strong> yang jadinya nggak pernah terjadi — padahal dulu saling menguntungkan pembeli &amp; penjual. Ini juga <strong>Deadweight Loss</strong>, kali ini gara-gara monopoli, bukan pajak.' },
+    { chapter:'dwlMono', reveal:[],
+      text:'Polanya selalu sama: baik karena pajak maupun monopoli, begitu ada yang bikin harga naik &amp; kuantitas turun dari titik paling efisien di pasar, sebagian nilai itu selalu ada yang hilang percuma. Itulah <strong>Deadweight Loss</strong>.' },
+    { chapter:'rumus', reveal:['baseCurves','oldEq','csNew','psNew','taxRect','taxSupplyLine','newEqConsumer','producerNet','legCsNew','legPsNew','legTax'],
+      hide:['monoQGuide','monoPricePoint','monoCostPoint','monoCS','monoPS','legMonoCS','legMonoPS','monoDwlArea','monoDwlBracket','legDwlMono'],
+      text:'Terakhir, rekap cepat pakai rumus untuk dua kasus yang tersisa: pajak &amp; monopoli.' },
+    { chapter:'rumus', formula:'L = \\frac{1}{2} \\times 30 \\times 15 = 225',
+      text:'SK &amp; SP yang kena pajak juga segitiga, cuma lebih kecil: alas = 30, tinggi = 15 buat dua-duanya (cuma beda posisi). Luas = <strong>Rp225rb²</strong> masing-masing.' },
+    { chapter:'rumus', reveal:['dwlArea','dwlBracket','legDwl'], formula:'L = p \\times l = 30 \\times 10 = 300',
+      text:'Pendapatan pajak itu <strong>persegi panjang</strong>: panjang × lebar = 30 × 10 = <strong>Rp300rb²</strong>. DWL-nya (sudah kita hitung di atas) = Rp50rb².' },
+    { chapter:'rumus', formula:null,
+      text:'Cek totalnya: sebelum pajak, SK+SP = 400+400 = <strong>800</strong>. Sesudah pajak: SK+SP+Pajak+DWL = 225+225+300+50 = <strong>800</strong> juga. Nggak ada nilai yang hilang ajaib!' },
+    { chapter:'rumus', reveal:['monoQGuide','monoPricePoint','monoCostPoint','monoCS','monoPS','legMonoCS','legMonoPS'],
+      hide:['csNew','psNew','taxRect','taxSupplyLine','newEqConsumer','producerNet','legCsNew','legPsNew','legTax','dwlArea','dwlBracket','legDwl'],
+      formula:'L = \\frac{1}{2} \\times 20 \\times 10 = 100',
+      text:'Sama halnya buat monopoli. SK = ½ × 20 × 10 = <strong>Rp100rb²</strong>.' },
+    { chapter:'rumus', reveal:['monoDwlArea','monoDwlBracket','legDwlMono'], formula:'L = \\frac{1}{2}(a_1+a_2) \\times t = \\frac{1}{2}(30+20)(20) = 500',
+      text:'SP-nya sekarang <strong>trapesium</strong> (dua sisi sejajar beda panjang, bukan segitiga): Luas = ½×(sisi 1 + sisi 2)×tinggi = ½×(30+20)×20 = <strong>Rp500rb²</strong>. DWL = ½×20×20 = <strong>Rp200rb²</strong>.' },
+    { chapter:'rumus', formula:null,
+      text:'Jumlahkan lagi: SK+SP+DWL = 100+500+200 = <strong>800</strong> — sama juga dengan total sebelum monopoli. Rumus luas bangun datar sederhana (segitiga, persegi panjang, trapesium) ternyata cukup buat menghitung semua konsep ini!' }
+  ];
+
+  // ===================================================================
+  // Chart setup
+  // ===================================================================
+  const W = 560, H = 400;
+  const margin = { left:56, right:20, top:20, bottom:64 };
+  const plotW = W - margin.left - margin.right;
+  const plotH = H - margin.top - margin.bottom;
+  const Q_MAX = 50, P_MAX = 55;
+
+  const sx = (q) => margin.left + (q/Q_MAX) * plotW;
+  const sy = (p) => margin.top + plotH - (p/P_MAX) * plotH;
+  const poly = (verts) => verts.map(v => sx(v.q) + ',' + sy(v.p)).join(' ');
+
+  function svgEl(tag, attrs){
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for(const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  const chartSvg = document.getElementById('chartSvg');
+  const legendEl = document.getElementById('legend');
+  const revealMap = {};
+  const legendMap = {};
+
+  function addLegend(key, color, label, hatch){
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    const sw = document.createElement('span');
+    sw.className = 'legend-swatch';
+    sw.style.background = hatch ? 'repeating-linear-gradient(45deg, ' + color + ' 0, ' + color + ' 2px, transparent 2px, transparent 6px)' : color;
+    sw.style.opacity = hatch ? '1' : '0.45';
+    if(hatch){ sw.style.border = '1px solid ' + color; }
+    item.appendChild(sw);
+    const txt = document.createElement('span'); txt.textContent = label;
+    item.appendChild(txt);
+    legendEl.appendChild(item);
+    legendMap[key] = [item];
+  }
+
+  // ---------- Garis ukur (alas & tinggi) buat animasi hitung luas ----------
+  // Garis "alas" selalu ditarik di atas sumbu-X, dari qStart ke qEnd.
+  function makeHDim(qStart, qEnd, labelText){
+    const y = margin.top + plotH;
+    const x1 = sx(qStart), x2 = sx(qEnd);
+    const line = svgEl('line', { x1, y1:y, x2, y2:y, stroke:'#16294A', 'stroke-width':3 });
+    const tick1 = svgEl('line', { x1, y1:y-7, x2:x1, y2:y+7, stroke:'#16294A', 'stroke-width':3 });
+    const tick2 = svgEl('line', { x1:x2, y1:y-7, x2, y2:y+7, stroke:'#16294A', 'stroke-width':3 });
+    const lbl = svgEl('text', { x:(x1+x2)/2, y:y+26, 'text-anchor':'middle', 'font-size':'12', 'font-weight':'700', fill:'#16294A', 'font-family':'Plus Jakarta Sans' });
+    lbl.textContent = labelText;
+    const g = svgEl('g', { class:'curve-fade' });
+    [line, tick1, tick2, lbl].forEach(el => g.appendChild(el));
+    chartSvg.appendChild(g);
+    return g;
+  }
+
+  // Garis "tinggi" ditarik vertikal di posisi qPos (dalam satuan Q), dari pStart ke pEnd.
+  function makeVDim(qPos, pStart, pEnd, labelText){
+    const x = sx(qPos);
+    const y1 = sy(pStart), y2 = sy(pEnd);
+    const line = svgEl('line', { x1:x, y1:y1, x2:x, y2:y2, stroke:'#16294A', 'stroke-width':3 });
+    const tick1 = svgEl('line', { x1:x-7, y1:y1, x2:x+7, y2:y1, stroke:'#16294A', 'stroke-width':3 });
+    const tick2 = svgEl('line', { x1:x-7, y1:y2, x2:x+7, y2:y2, stroke:'#16294A', 'stroke-width':3 });
+    const lbl = svgEl('text', { x:x+11, y:(y1+y2)/2+4, 'font-size':'12', 'font-weight':'700', fill:'#16294A', 'font-family':'Plus Jakarta Sans' });
+    lbl.textContent = labelText;
+    const g = svgEl('g', { class:'curve-fade' });
+    [line, tick1, tick2, lbl].forEach(el => g.appendChild(el));
+    chartSvg.appendChild(g);
+    return g;
+  }
+
+  // ---------- Kotak rumus (dirender pakai KaTeX biar rapi kayak buku teks) ----------
+  const formulaBox = document.getElementById('formulaBox');
+  function showFormula(latex){
+    formulaBox.classList.add('show');
+    if(window.katex){
+      try{ katex.render(latex, formulaBox, { throwOnError:false, displayMode:true }); }
+      catch(e){ formulaBox.textContent = latex; }
+    } else {
+      formulaBox.textContent = latex;
+    }
+  }
+  function hideFormula(){ formulaBox.classList.remove('show'); }
+
+  function buildChart(){
+    chartSvg.innerHTML = '';
+    legendEl.innerHTML = '';
+
+    const defs = svgEl('defs', {});
+    const hatch = svgEl('pattern', { id:'hatchDWL', width:8, height:8, patternUnits:'userSpaceOnUse', patternTransform:'rotate(45)' });
+    hatch.appendChild(svgEl('rect', { width:8, height:8, fill:'rgba(156,59,38,0.10)' }));
+    hatch.appendChild(svgEl('line', { x1:0, y1:0, x2:0, y2:8, stroke:'#9C3B26', 'stroke-width':2.5 }));
+    defs.appendChild(hatch);
+    chartSvg.appendChild(defs);
+
+    // gridlines + ticks
+    for(let q=0; q<=Q_MAX; q+=10){
+      const x = sx(q);
+      chartSvg.appendChild(svgEl('line', { x1:x, y1:margin.top, x2:x, y2:margin.top+plotH, stroke:'#D3E4EC', 'stroke-width':1 }));
+      const t = svgEl('text', { x, y:margin.top+plotH+18, 'text-anchor':'middle', 'font-size':'11', fill:'#4C6885', 'font-family':'Plus Jakarta Sans' });
+      t.textContent = q; chartSvg.appendChild(t);
+    }
+    for(let p=0; p<=P_MAX; p+=5){
+      const y = sy(p);
+      chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:y, x2:margin.left+plotW, y2:y, stroke:'#D3E4EC', 'stroke-width':1 }));
+      const t = svgEl('text', { x:margin.left-8, y:y+4, 'text-anchor':'end', 'font-size':'11', fill:'#4C6885', 'font-family':'Plus Jakarta Sans' });
+      t.textContent = p; chartSvg.appendChild(t);
+    }
+
+    // axes
+    chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:margin.top, x2:margin.left, y2:margin.top+plotH, stroke:'#16294A', 'stroke-width':2 }));
+    chartSvg.appendChild(svgEl('line', { x1:margin.left, y1:margin.top+plotH, x2:margin.left+plotW, y2:margin.top+plotH, stroke:'#16294A', 'stroke-width':2 }));
+    const xLabel = svgEl('text', { x:margin.left+plotW/2, y:H-6, 'text-anchor':'middle', 'font-size':'12', fill:'#16294A', 'font-weight':'700', 'font-family':'Baloo 2' });
+    xLabel.textContent = 'Kuantitas (Q)'; chartSvg.appendChild(xLabel);
+    const yLabel = svgEl('text', { x:14, y:margin.top+plotH/2, 'text-anchor':'middle', 'font-size':'12', fill:'#16294A', 'font-weight':'700', 'font-family':'Baloo 2', transform:'rotate(-90 14 '+(margin.top+plotH/2)+')' });
+    yLabel.textContent = 'Harga (P)'; chartSvg.appendChild(yLabel);
+
+    const areaGroup = svgEl('g', {}); // area/shading di-append duluan supaya di belakang garis kurva
+    chartSvg.appendChild(areaGroup);
+
+    // ---------- SHADED AREAS (digambar dulu, di bawah garis kurva) ----------
+    const DEMAND_C = '#C24E33', SUPPLY_C = '#1F3A63', TAX_C = '#F0B93D';
+
+    const csOldPts = [ {q:0,p:demandP(0)}, {q:0,p:OLD_EQ.p}, {q:OLD_EQ.q,p:OLD_EQ.p} ];
+    const csOld = svgEl('polygon', { points:poly(csOldPts), fill:DEMAND_C, 'fill-opacity':0.28, stroke:DEMAND_C, 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(csOld); revealMap['csArea'] = [csOld];
+
+    const psOldPts = [ {q:0,p:OLD_EQ.p}, {q:0,p:supplyP(0)}, {q:OLD_EQ.q,p:OLD_EQ.p} ];
+    const psOld = svgEl('polygon', { points:poly(psOldPts), fill:SUPPLY_C, 'fill-opacity':0.22, stroke:SUPPLY_C, 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(psOld); revealMap['psArea'] = [psOld];
+
+    // Garis ukur untuk animasi hitung luas SK & SP (alasnya sama-sama 0→40, jadi 1 elemen dipakai berdua)
+    const baseDim40 = makeHDim(0, OLD_EQ.q, 'alas = ' + OLD_EQ.q + ' − 0 = ' + OLD_EQ.q);
+    revealMap['baseDim40'] = [baseDim40];
+    const csHeightDim = makeVDim(2, OLD_EQ.p, demandP(0), 'tinggi = ' + demandP(0) + ' − ' + OLD_EQ.p + ' = ' + (demandP(0)-OLD_EQ.p));
+    revealMap['csHeightDim'] = [csHeightDim];
+    const psHeightDim = makeVDim(2, supplyP(0), OLD_EQ.p, 'tinggi = ' + OLD_EQ.p + ' − ' + supplyP(0) + ' = ' + (OLD_EQ.p-supplyP(0)));
+    revealMap['psHeightDim'] = [psHeightDim];
+
+    const csNewPts = [ {q:0,p:demandP(0)}, {q:0,p:NEW_EQ_CONSUMER.p}, {q:NEW_EQ_CONSUMER.q,p:NEW_EQ_CONSUMER.p} ];
+    const csNew = svgEl('polygon', { points:poly(csNewPts), fill:DEMAND_C, 'fill-opacity':0.28, stroke:DEMAND_C, 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(csNew); revealMap['csNew'] = [csNew];
+
+    const psNewPts = [ {q:0,p:NEW_PRODUCER_NET.p}, {q:0,p:supplyP(0)}, {q:NEW_PRODUCER_NET.q,p:NEW_PRODUCER_NET.p} ];
+    const psNew = svgEl('polygon', { points:poly(psNewPts), fill:SUPPLY_C, 'fill-opacity':0.22, stroke:SUPPLY_C, 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(psNew); revealMap['psNew'] = [psNew];
+
+    const taxRectPts = [ {q:0,p:NEW_PRODUCER_NET.p}, {q:0,p:NEW_EQ_CONSUMER.p}, {q:NEW_EQ_CONSUMER.q,p:NEW_EQ_CONSUMER.p}, {q:NEW_PRODUCER_NET.q,p:NEW_PRODUCER_NET.p} ];
+    const taxRect = svgEl('polygon', { points:poly(taxRectPts), fill:TAX_C, 'fill-opacity':0.38, stroke:TAX_C, 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(taxRect); revealMap['taxRect'] = [taxRect];
+
+    const dwlPts = [ {q:NEW_EQ_CONSUMER.q,p:NEW_EQ_CONSUMER.p}, {q:NEW_PRODUCER_NET.q,p:NEW_PRODUCER_NET.p}, {q:OLD_EQ.q,p:OLD_EQ.p} ];
+    const dwl = svgEl('polygon', { points:poly(dwlPts), fill:'url(#hatchDWL)', stroke:'#9C3B26', 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(dwl); revealMap['dwlArea'] = [dwl];
+
+    // Garis ukur untuk animasi hitung luas DWL (sisi tegak & sisi mendatar)
+    const dwlHDim = makeHDim(NEW_EQ_CONSUMER.q, OLD_EQ.q, 'sisi mendatar = ' + OLD_EQ.q + ' − ' + NEW_EQ_CONSUMER.q + ' = ' + (OLD_EQ.q-NEW_EQ_CONSUMER.q));
+    revealMap['dwlHDim'] = [dwlHDim];
+    const dwlVDim = makeVDim(44, NEW_PRODUCER_NET.p, NEW_EQ_CONSUMER.p, 'sisi tegak = ' + NEW_EQ_CONSUMER.p + ' − ' + NEW_PRODUCER_NET.p + ' = ' + (NEW_EQ_CONSUMER.p-NEW_PRODUCER_NET.p));
+    revealMap['dwlVDim'] = [dwlVDim];
+
+    // penanda batas wilayah DWL secara eksplisit di sumbu Q (menjawab: DWL cuma antara 30-40, bukan di luar itu)
+    const bracketY = margin.top + plotH + 34;
+    const bx1 = sx(NEW_EQ_CONSUMER.q), bx2 = sx(OLD_EQ.q);
+    const bracketLine = svgEl('line', { x1:bx1, y1:bracketY, x2:bx2, y2:bracketY, stroke:'#9C3B26', 'stroke-width':2 });
+    const bracketTick1 = svgEl('line', { x1:bx1, y1:bracketY-5, x2:bx1, y2:bracketY+5, stroke:'#9C3B26', 'stroke-width':2 });
+    const bracketTick2 = svgEl('line', { x1:bx2, y1:bracketY-5, x2:bx2, y2:bracketY+5, stroke:'#9C3B26', 'stroke-width':2 });
+    const bracketLbl = svgEl('text', { x:(bx1+bx2)/2, y:bracketY+16, 'text-anchor':'middle', 'font-size':'10.5', 'font-weight':'700', fill:'#9C3B26', 'font-family':'Plus Jakarta Sans' });
+    bracketLbl.textContent = 'DWL cuma di sini (30–40)';
+    const bracketGroup = svgEl('g', { class:'curve-fade' });
+    [bracketLine, bracketTick1, bracketTick2, bracketLbl].forEach(el => bracketGroup.appendChild(el));
+    chartSvg.appendChild(bracketGroup);
+    revealMap['dwlBracket'] = [bracketGroup];
+
+    // ---------- MONOPOLI ----------
+    const MONO_C = '#7A4FA3'; // ungu, beda dari warna pajak (kuning) supaya jelas ini kasus lain
+
+    const monoCSPts = [ {q:0,p:demandP(0)}, {q:0,p:MONO_PRICE}, {q:MONO_Q,p:MONO_PRICE} ];
+    const monoCS = svgEl('polygon', { points:poly(monoCSPts), fill:DEMAND_C, 'fill-opacity':0.28, stroke:DEMAND_C, 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(monoCS);
+    revealMap['monoCS'] = [monoCS];
+
+    // Surplus Produsen di monopoli berbentuk TRAPESIUM (bukan segitiga), karena
+    // monopolis jual SEMUA unit di harga yang sama (Rp40rb) padahal biaya produksi
+    // tiap unit beda-beda (naik dari Rp10rb sampai Rp20rb, ikut kurva Supply/MC).
+    const monoPSPts = [ {q:0,p:MONO_PRICE}, {q:MONO_Q,p:MONO_PRICE}, {q:MONO_Q,p:MONO_COST}, {q:0,p:supplyP(0)} ];
+    const monoPS = svgEl('polygon', { points:poly(monoPSPts), fill:SUPPLY_C, 'fill-opacity':0.22, stroke:SUPPLY_C, 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(monoPS);
+    revealMap['monoPS'] = [monoPS];
+
+    const monoDwlPts = [ {q:MONO_Q,p:MONO_PRICE}, {q:MONO_Q,p:MONO_COST}, {q:OLD_EQ.q,p:OLD_EQ.p} ];
+    const monoDwl = svgEl('polygon', { points:poly(monoDwlPts), fill:'url(#hatchDWL)', stroke:'#9C3B26', 'stroke-width':1.5, class:'curve-fade' });
+    areaGroup.appendChild(monoDwl);
+    revealMap['monoDwlArea'] = [monoDwl];
+
+    const monoBracketY = margin.top + plotH + 34;
+    const mbx1 = sx(MONO_Q), mbx2 = sx(OLD_EQ.q);
+    const monoBracketLine = svgEl('line', { x1:mbx1, y1:monoBracketY, x2:mbx2, y2:monoBracketY, stroke:'#9C3B26', 'stroke-width':2 });
+    const monoBracketTick1 = svgEl('line', { x1:mbx1, y1:monoBracketY-5, x2:mbx1, y2:monoBracketY+5, stroke:'#9C3B26', 'stroke-width':2 });
+    const monoBracketTick2 = svgEl('line', { x1:mbx2, y1:monoBracketY-5, x2:mbx2, y2:monoBracketY+5, stroke:'#9C3B26', 'stroke-width':2 });
+    const monoBracketLbl = svgEl('text', { x:(mbx1+mbx2)/2, y:monoBracketY+16, 'text-anchor':'middle', 'font-size':'10.5', 'font-weight':'700', fill:'#9C3B26', 'font-family':'Plus Jakarta Sans' });
+    monoBracketLbl.textContent = 'DWL cuma di sini (20–40)';
+    const monoBracketGroup = svgEl('g', { class:'curve-fade' });
+    [monoBracketLine, monoBracketTick1, monoBracketTick2, monoBracketLbl].forEach(el => monoBracketGroup.appendChild(el));
+    chartSvg.appendChild(monoBracketGroup);
+    revealMap['monoDwlBracket'] = [monoBracketGroup];
+
+    // ---------- CURVES ----------
+    const demandLine = svgEl('path', { d:'M '+sx(0)+','+sy(demandP(0))+' L '+sx(Q_MAX)+','+sy(demandP(Q_MAX)), fill:'none', stroke:DEMAND_C, 'stroke-width':3.5, 'stroke-linecap':'round' });
+    const supplyLine = svgEl('path', { d:'M '+sx(0)+','+sy(supplyP(0))+' L '+sx(Q_MAX)+','+sy(supplyP(Q_MAX)), fill:'none', stroke:SUPPLY_C, 'stroke-width':3.5, 'stroke-linecap':'round' });
+    chartSvg.appendChild(demandLine); chartSvg.appendChild(supplyLine);
+    revealMap['baseCurves'] = [demandLine, supplyLine];
+    // label kurva ditaruh di kiri (jauh dari klaster ekuilibrium/pajak di kanan)
+    const dLbl = svgEl('text', { x:sx(1), y:sy(demandP(1))-10, 'font-size':'12', 'font-weight':'800', fill:DEMAND_C, 'font-family':'Baloo 2' });
+    dLbl.textContent = 'Demand'; chartSvg.appendChild(dLbl); revealMap['baseCurves'].push(dLbl);
+    const sLbl = svgEl('text', { x:sx(9), y:sy(supplyP(9))-10, 'text-anchor':'end', 'font-size':'12', 'font-weight':'800', fill:SUPPLY_C, 'font-family':'Baloo 2' });
+    sLbl.textContent = 'Supply'; chartSvg.appendChild(sLbl); revealMap['baseCurves'].push(sLbl);
+
+    // ---------- Titik & garis bantu monopoli (ditaruh SETELAH kurva supaya nggak ketutup garisnya) ----------
+    const monoQGuideLine = svgEl('line', { x1:sx(MONO_Q), y1:sy(MONO_PRICE), x2:sx(MONO_Q), y2:margin.top+plotH, stroke:MONO_C, 'stroke-width':1.5, 'stroke-dasharray':'4,4', class:'curve-fade' });
+    chartSvg.appendChild(monoQGuideLine);
+    revealMap['monoQGuide'] = [monoQGuideLine];
+
+    const monoPriceDot = svgEl('circle', { cx:sx(MONO_Q), cy:sy(MONO_PRICE), r:6, fill:DEMAND_C, stroke:'#fff', 'stroke-width':2, class:'curve-fade' });
+    const monoPriceGuideH = svgEl('line', { x1:margin.left, y1:sy(MONO_PRICE), x2:sx(MONO_Q), y2:sy(MONO_PRICE), stroke:DEMAND_C, 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
+    chartSvg.appendChild(monoPriceGuideH); chartSvg.appendChild(monoPriceDot);
+    revealMap['monoPricePoint'] = [monoPriceDot, monoPriceGuideH];
+
+    const monoCostDot = svgEl('circle', { cx:sx(MONO_Q), cy:sy(MONO_COST), r:6, fill:SUPPLY_C, stroke:'#fff', 'stroke-width':2, class:'curve-fade' });
+    const monoCostGuideH = svgEl('line', { x1:margin.left, y1:sy(MONO_COST), x2:sx(MONO_Q), y2:sy(MONO_COST), stroke:SUPPLY_C, 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
+    chartSvg.appendChild(monoCostGuideH); chartSvg.appendChild(monoCostDot);
+    revealMap['monoCostPoint'] = [monoCostDot, monoCostGuideH];
+
+
+    const taxLine = svgEl('path', { d:'M '+sx(0)+','+sy(supplyTaxP(0))+' L '+sx(Q_MAX)+','+sy(supplyTaxP(Q_MAX)), fill:'none', stroke:SUPPLY_C, 'stroke-width':3, 'stroke-dasharray':'8,6', class:'curve-fade' });
+    chartSvg.appendChild(taxLine);
+    // label pajak ditaruh di ujung kanan-atas garisnya sendiri, jauh dari klaster titik di Q=30-40
+    const taxLbl = svgEl('text', { x:sx(Q_MAX)-4, y:sy(supplyTaxP(Q_MAX))-10, 'text-anchor':'end', 'font-size':'12', 'font-weight':'800', fill:SUPPLY_C, 'font-family':'Baloo 2', class:'curve-fade' });
+    taxLbl.textContent = 'Supply + Pajak'; chartSvg.appendChild(taxLbl);
+    revealMap['taxSupplyLine'] = [taxLine, taxLbl];
+
+    // ---------- OLD equilibrium & price line ----------
+    // Angka persisnya (Q=40, P=30) sudah kebaca dari sumbu lewat garis bantu ini,
+    // jadi label di grafik cukup singkat "E₀" saja - tidak perlu ulang angka di teks.
+    const oldDot = svgEl('circle', { cx:sx(OLD_EQ.q), cy:sy(OLD_EQ.p), r:6, fill:'#F0B93D', stroke:'#16294A', 'stroke-width':2, class:'curve-fade' });
+    const oldGuideV = svgEl('line', { x1:sx(OLD_EQ.q), y1:sy(OLD_EQ.p), x2:sx(OLD_EQ.q), y2:margin.top+plotH, stroke:'#16294A', 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
+    const oldLbl = svgEl('text', { x:sx(OLD_EQ.q)+10, y:sy(OLD_EQ.p)-10, 'font-size':'12', 'font-weight':'800', fill:'#16294A', 'font-family':'Baloo 2', class:'curve-fade' });
+    oldLbl.textContent = 'E₀';
+    chartSvg.appendChild(oldGuideV); chartSvg.appendChild(oldDot); chartSvg.appendChild(oldLbl);
+    revealMap['oldEq'] = [oldDot, oldGuideV, oldLbl];
+
+    const priceLine = svgEl('line', { x1:sx(0), y1:sy(OLD_EQ.p), x2:sx(OLD_EQ.q), y2:sy(OLD_EQ.p), stroke:'#16294A', 'stroke-width':1.5, 'stroke-dasharray':'4,4', class:'curve-fade' });
+    chartSvg.appendChild(priceLine);
+    revealMap['priceLine'] = [priceLine];
+
+    // ---------- NEW equilibrium (consumer) — cuma titik + garis bantu ke angka di sumbu ----------
+    const newDot = svgEl('circle', { cx:sx(NEW_EQ_CONSUMER.q), cy:sy(NEW_EQ_CONSUMER.p), r:6, fill:DEMAND_C, stroke:'#fff', 'stroke-width':2, class:'curve-fade' });
+    const newGuideV = svgEl('line', { x1:sx(NEW_EQ_CONSUMER.q), y1:sy(NEW_EQ_CONSUMER.p), x2:sx(NEW_EQ_CONSUMER.q), y2:margin.top+plotH, stroke:DEMAND_C, 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
+    const newGuideH = svgEl('line', { x1:margin.left, y1:sy(NEW_EQ_CONSUMER.p), x2:sx(NEW_EQ_CONSUMER.q), y2:sy(NEW_EQ_CONSUMER.p), stroke:DEMAND_C, 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
+    const newLbl = svgEl('text', { x:sx(NEW_EQ_CONSUMER.q)-10, y:sy(NEW_EQ_CONSUMER.p)-12, 'text-anchor':'end', 'font-size':'12', 'font-weight':'800', fill:DEMAND_C, 'font-family':'Baloo 2', class:'curve-fade' });
+    newLbl.textContent = 'E₁';
+    chartSvg.appendChild(newGuideV); chartSvg.appendChild(newGuideH); chartSvg.appendChild(newDot); chartSvg.appendChild(newLbl);
+    revealMap['newEqConsumer'] = [newDot, newGuideV, newGuideH, newLbl];
+
+    // ---------- Producer net price — cuma titik + garis bantu horizontal ke angka di sumbu ----------
+    const netDot = svgEl('circle', { cx:sx(NEW_PRODUCER_NET.q), cy:sy(NEW_PRODUCER_NET.p), r:6, fill:SUPPLY_C, stroke:'#fff', 'stroke-width':2, class:'curve-fade' });
+    const netGuideH = svgEl('line', { x1:margin.left, y1:sy(NEW_PRODUCER_NET.p), x2:sx(NEW_PRODUCER_NET.q), y2:sy(NEW_PRODUCER_NET.p), stroke:SUPPLY_C, 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
+    chartSvg.appendChild(netGuideH); chartSvg.appendChild(netDot);
+    revealMap['producerNet'] = [netDot, netGuideH];
+
+    // ---------- Legend ----------
+    addLegend('legCs', DEMAND_C, 'Surplus Konsumen', false);
+    addLegend('legPs', SUPPLY_C, 'Surplus Produsen', false);
+    addLegend('legCsNew', DEMAND_C, 'Surplus Konsumen (baru)', false);
+    addLegend('legPsNew', SUPPLY_C, 'Surplus Produsen (baru)', false);
+    addLegend('legTax', TAX_C, 'Pendapatan Pajak', false);
+    addLegend('legDwl', '#9C3B26', 'Deadweight Loss (Pajak)', true);
+    addLegend('legMonoCS', DEMAND_C, 'Surplus Konsumen (Monopoli)', false);
+    addLegend('legMonoPS', SUPPLY_C, 'Surplus Produsen (Monopoli)', false);
+    addLegend('legDwlMono', '#9C3B26', 'Deadweight Loss (Monopoli)', true);
+  }
+
+  // ===================================================================
+  // Navigasi cerita
+  // ===================================================================
+  let current = 0;
+  const bubbleText = document.getElementById('bubbleText');
+  const chapterBadge = document.getElementById('chapterBadge');
+  const progressDots = document.getElementById('progressDots');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnRestart = document.getElementById('btnRestart');
+
+  STEPS.forEach((s, i) => {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    progressDots.appendChild(dot);
+  });
+
+  function hideAll(){
+    Object.keys(revealMap).forEach(key => revealMap[key].forEach(el => el.classList.remove('revealed')));
+    Object.keys(legendMap).forEach(key => legendMap[key].forEach(el => el.classList.remove('revealed')));
+  }
+
+  function applyUpTo(idx){
+    hideAll();
+    for(let i = 0; i <= idx; i++){
+      const step = STEPS[i];
+      (step.hide || []).forEach(key => {
+        (revealMap[key] || []).forEach(el => el.classList.remove('revealed'));
+        (legendMap[key] || []).forEach(el => el.classList.remove('revealed'));
+      });
+      (step.reveal || []).forEach(key => {
+        (revealMap[key] || []).forEach(el => el.classList.add('revealed'));
+        (legendMap[key] || []).forEach(el => el.classList.add('revealed'));
+      });
+    }
+  }
+
+  function render(){
+    const step = STEPS[current];
+    bubbleText.innerHTML = step.text;
+    chapterBadge.textContent = CHAPTERS[step.chapter];
+    applyUpTo(current);
+
+    if(step.formula){ showFormula(step.formula); } else { hideFormula(); }
+
+    Array.from(progressDots.children).forEach((dot, i) => {
+      dot.classList.toggle('active', i === current);
+      dot.classList.toggle('done', i < current);
+    });
+
+    btnPrev.disabled = current === 0;
+    const isLast = current === STEPS.length - 1;
+    btnNext.style.display = isLast ? 'none' : '';
+    btnRestart.style.display = isLast ? '' : 'none';
+  }
+
+  btnNext.addEventListener('click', () => { if(current < STEPS.length - 1){ current++; render(); } });
+  btnPrev.addEventListener('click', () => { if(current > 0){ current--; render(); } });
+  btnRestart.addEventListener('click', () => {
+    current = 0; render();
+    document.querySelector('.story-card').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  buildChart();
+  render();
+})();
+</script>
+</body>
+</html>
