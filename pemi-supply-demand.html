@@ -359,8 +359,8 @@
     btnPrev.disabled = current === 0;
     const isLast = current === STEPS.length - 1;
     btnNext.style.display = isLast ? 'none' : '';
-    btnRestart.style.display = isLast ? '' : 'none';
-    btnNextMaterial.style.display = isLast ? '' : 'none';
+    btnRestart.style.display = isLast ? 'inline-flex' : 'none';
+    btnNextMaterial.style.display = isLast ? 'inline-flex' : 'none';
   }
 
   btnNext.addEventListener('click', () => {
