@@ -55,9 +55,16 @@
   .intro-list .doc-tag{display:inline-block; background:var(--gold); color:var(--owl-dark2); font-weight:800; font-size:0.72rem; padding:2px 8px; border-radius:100px; margin-right:6px;}
 
   .chart-panel{background:var(--bg-deep); border-radius:18px; padding:0; max-height:660px; overflow:auto; position:relative;}
-  .chart-header-sticky{position:sticky; top:0; z-index:5; background:var(--bg-deep); padding:12px 0 0;}
-  #flowHeaderSvg, #flowSvg{display:block; width:100%; height:auto;}
+  .chart-header-sticky{position:sticky; top:0; z-index:5; background:var(--bg-deep); padding:12px 0 0; display:inline-block;}
+  #flowHeaderSvg, #flowSvg{display:block;}
   #flowSvg{padding-bottom:12px;}
+  .zoom-controls{display:flex; align-items:center; gap:4px;}
+  .zoom-controls button{
+    border:1px solid var(--line); background:var(--surface); width:28px; height:28px; border-radius:8px;
+    font-weight:800; color:var(--owl-dark2); cursor:pointer; font-size:0.95rem; line-height:1;
+  }
+  .zoom-controls button:hover{border-color:var(--owl-mid);}
+  .zoom-controls .zoom-pct{font-size:0.78rem; font-weight:700; color:var(--ink-soft); width:42px; text-align:center;}
   .node-fade{opacity:0; transition:opacity .5s ease;}
   .node-fade.revealed{opacity:1;}
 
@@ -152,11 +159,18 @@
         <p id="narParagraph"></p>
       </div>
 
-      <div class="chart-panel" id="chartPanel">
-        <div class="chart-header-sticky">
-          <svg id="flowHeaderSvg" viewBox="0 0 1100 62"></svg>
+      <div>
+        <div class="zoom-controls" style="margin-bottom:8px;">
+          <button type="button" id="btnZoomOut" title="Perkecil">−</button>
+          <span class="zoom-pct" id="zoomPct">100%</span>
+          <button type="button" id="btnZoomIn" title="Perbesar">+</button>
         </div>
-        <svg id="flowSvg" viewBox="0 0 1100 1940"></svg>
+        <div class="chart-panel" id="chartPanel">
+          <div class="chart-header-sticky">
+            <svg id="flowHeaderSvg" viewBox="0 0 1100 62"></svg>
+          </div>
+          <svg id="flowSvg" viewBox="0 0 1100 1940"></svg>
+        </div>
       </div>
     </div>
 
@@ -354,6 +368,25 @@
     headerSvg.setAttribute('viewBox', `0 0 ${TOTAL_W} 62`);
     svg.setAttribute('viewBox', `0 0 ${TOTAL_W} ${DIAGRAM_H}`);
 
+    // ---------- Kontrol zoom ----------
+    let zoomLevel = 1;
+    const zoomPct = document.getElementById('zoomPct');
+    function applyZoom(){
+      const w = Math.round(TOTAL_W * zoomLevel);
+      headerSvg.style.width = w+'px';
+      headerSvg.style.height = Math.round(62*zoomLevel)+'px';
+      svg.style.width = w+'px';
+      svg.style.height = Math.round(DIAGRAM_H*zoomLevel)+'px';
+      zoomPct.textContent = Math.round(zoomLevel*100)+'%';
+    }
+    document.getElementById('btnZoomIn').addEventListener('click', () => {
+      zoomLevel = Math.min(2, Math.round((zoomLevel+0.15)*100)/100); applyZoom();
+    });
+    document.getElementById('btnZoomOut').addEventListener('click', () => {
+      zoomLevel = Math.max(0.5, Math.round((zoomLevel-0.15)*100)/100); applyZoom();
+    });
+    applyZoom();
+
     // ---------- HEADER (frozen) ----------
     LANES.forEach((name, i) => {
       const x = START_X + i*LANE_W;
@@ -422,22 +455,20 @@
       g.appendChild(makeLabel(cx,cy+ry,label,9));
       svg.appendChild(g); return g;
     }
-    // Manual input / "Key input" symbol — top-left corner slanted, representing keyboard entry
-    function keyInput(cx,cy,w,h,textKey,label){
+    // Gabungan Display (atas) + Manual/Key Input (bawah) — mewakili "input data lewat komputer"
+    function computerInput(cx,cy,w,textKey,label){
+      const dispH=28, keyH=34, gap=3;
+      const totalH = dispH+gap+keyH;
+      const topY = cy - totalH/2;
       const g = svgEl('g', { class:'node-fade' });
-      const x=cx-w/2,y=cy-h/2, slant=14;
-      const d=`M${x},${y+slant} L${x+w},${y} L${x+w},${y+h} L${x},${y+h} Z`;
-      g.appendChild(svgEl('path', { d, fill:'#E3ECFB', stroke:'#1F3A63', 'stroke-width':1.5 }));
-      const t = makeLabel(cx,cy+4,label,10.5); g.appendChild(t); if(textKey) registerText(textKey,t,cx,cy+4,10.5);
-      svg.appendChild(g); return g;
-    }
-    // Display symbol — right edge bulges into a curve, representing a screen
-    function display(cx,cy,w,h,textKey,label){
-      const g = svgEl('g', { class:'node-fade' });
-      const x=cx-w/2,y=cy-h/2;
-      const d=`M${x},${y} L${x+w*0.8},${y} Q${x+w+10},${cy} ${x+w*0.8},${y+h} L${x},${y+h} Z`;
-      g.appendChild(svgEl('path', { d, fill:'#DCEBFB', stroke:'#1F3A63', 'stroke-width':1.5 }));
-      const t = makeLabel(cx-6,cy,label,10.5); g.appendChild(t); if(textKey) registerText(textKey,t,cx-6,cy,10.5);
+      const dx = cx-w/2, dy = topY;
+      const dd = `M${dx},${dy} L${dx+w*0.8},${dy} Q${dx+w+8},${dy+dispH/2} ${dx+w*0.8},${dy+dispH} L${dx},${dy+dispH} Z`;
+      g.appendChild(svgEl('path', { d:dd, fill:'#DCEBFB', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      const ky = dy+dispH+gap, slant=9;
+      const kd = `M${dx},${ky+slant} L${dx+w},${ky} L${dx+w},${ky+keyH} L${dx},${ky+keyH} Z`;
+      g.appendChild(svgEl('path', { d:kd, fill:'#E3ECFB', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      const t = makeLabel(cx, ky+keyH/2+3, label, 10.5); g.appendChild(t);
+      if(textKey) registerText(textKey,t,cx,ky+keyH/2+3,10.5);
       svg.appendChild(g); return g;
     }
     // Inverted triangle + "N" — manual file, sorted by Number
@@ -483,26 +514,7 @@
       }
       svg.appendChild(g); return g;
     }
-    // Panah zigzag (communication link) — untuk dokumen yang dikirim online/email
-    function zigzagArrow(x1,y1,x2,y2,textKey,label){
-      const g = svgEl('g', { class:'node-fade' });
-      const midx=(x1+x2)/2, midy=(y1+y2)/2;
-      const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy)||1;
-      const px=-dy/len, py=dx/len; // tegak lurus arah garis
-      const amp=9;
-      const p1x=x1+dx*0.35+px*amp, p1y=y1+dy*0.35+py*amp;
-      const p2x=x1+dx*0.5-px*amp,  p2y=y1+dy*0.5-py*amp;
-      const p3x=x1+dx*0.65+px*amp, p3y=y1+dy*0.65+py*amp;
-      const d = `M${x1},${y1} L${p1x},${p1y} L${p2x},${p2y} L${p3x},${p3y} L${x2},${y2}`;
-      g.appendChild(svgEl('path', { d, fill:'none', stroke:'#1F3A63', 'stroke-width':1.8, 'stroke-dasharray':'1,0', 'marker-end':'url(#arrowhead)' }));
-      if(label){
-        g.appendChild(svgEl('rect', { x:midx-22, y:midy-9, width:44, height:16, fill:'#EFF6F9', opacity:0.9 }));
-        const t = svgEl('text', { x:midx, y:midy+3, 'text-anchor':'middle', 'font-size':10, 'font-weight':'700', fill:'#1F3A63', 'font-family':"'Plus Jakarta Sans'" });
-        t.textContent = label; g.appendChild(t);
-        if(textKey) registerText(textKey,t,midx,midy+3,10);
-      }
-      svg.appendChild(g); return g;
-    }
+    
 
     // ---------- PHASE DIVIDERS + rotated labels ----------
     function phaseLabel(yTop, yBottom, textKey, label){
@@ -533,12 +545,12 @@
     N.prCopy1    = document_(CX[1],470,110,58,'prCopy1',L.nodes.prCopy1);
     N.prFileN    = fileTriangle(CX[0],575,100,55,L.nodes.prFileN);
 
-    N.inputPO    = keyInput(CX[1],570,150,58,'inputPO',L.nodes.inputPO);
+    N.inputPO    = computerInput(CX[1],575,140,'inputPO',L.nodes.inputPO);
     N.mfPO1      = cylinder(CX[2]-42,545,72,44,'MF Supplier');
     N.mfPO2      = cylinder(CX[2]+42,545,72,44,'MF Product');
     N.mfPO3      = cylinder(CX[2]-42,600,72,44,'MF Employee');
     N.tfPRin     = cylinder(CX[2]+42,600,72,44,'TF PR');
-    N.printPO    = display(CX[2],690,140,58,'printPO',L.nodes.printPO);
+    N.printPO    = process(CX[2],690,140,58,'printPO',L.nodes.printPO);
     N.tfPO       = cylinder(CX[2],780,90,58,'TF PO');
 
     N.poSup      = document_(CX[5],780,110,58,'poSup',L.nodes.poSup);
@@ -548,14 +560,14 @@
     N.poPurN     = fileTriangle(CX[1],790,100,55,L.nodes.poPurN);
 
     N.goodsX     = goodsBox(CX[4],880,60,50,'goodsX',L.nodes.goodsX);
-    N.checkGoods = process(CX[4],980,130,60,'checkGoodsMain',L.nodes.checkGoodsMain);
+    N.checkGoods = manual(CX[4],980,130,60,'checkGoodsMain',L.nodes.checkGoodsMain);
     N.checkGoodsAnn = annotation(CX[4]+70,955,1005,'checkGoodsNote',L.nodes.checkGoodsNote);
-    N.inputRR    = keyInput(CX[4],1080,150,58,'inputRR',L.nodes.inputRR);
+    N.inputRR    = computerInput(CX[4],1085,140,'inputRR',L.nodes.inputRR);
     N.mfRR1      = cylinder(CX[2]-42,1050,72,44,'MF Supplier');
     N.mfRR2      = cylinder(CX[2]+42,1050,72,44,'MF Product');
     N.mfRR3      = cylinder(CX[2]-42,1105,72,44,'MF Employee');
     N.tfPOBlank  = cylinder(CX[2]+42,1105,72,44,'TF PO\n(Blind)');
-    N.printRR    = display(CX[2],1195,140,58,'printRR',L.nodes.printRR);
+    N.printRR    = process(CX[2],1195,140,58,'printRR',L.nodes.printRR);
     N.tfRR       = cylinder(CX[2],1285,90,58,'TF RR');
     N.rrInv      = document_(CX[0],1285,105,58,'rrInv',L.nodes.rrInv);
     N.rrPur      = document_(CX[1],1285,105,58,'rrPur',L.nodes.rrPur);
@@ -563,12 +575,12 @@
     N.invoiceSup = document_(CX[5],1385,110,58,'invoiceSup',L.nodes.invoiceSup);
     N.invoiceFin = document_(CX[3],1385,110,58,'invoiceFin',L.nodes.invoiceFin);
     N.payInv     = process(CX[3],1485,155,58,'payInv',L.nodes.payInv);
-    N.inputCD    = keyInput(CX[3],1585,150,58,'inputCD',L.nodes.inputCD);
+    N.inputCD    = computerInput(CX[3],1590,140,'inputCD',L.nodes.inputCD);
     N.mfCD1      = cylinder(CX[2]-42,1555,72,44,'MF Supplier');
     N.mfCD2      = cylinder(CX[2]+42,1555,72,44,'MF Product');
     N.mfCD3      = cylinder(CX[2]-42,1610,72,44,'MF Employee');
     N.tfRRin     = cylinder(CX[2]+42,1610,72,44,'TF RR');
-    N.printCD    = display(CX[2],1695,140,58,'printCD',L.nodes.printCD);
+    N.printCD    = process(CX[2],1695,140,58,'printCD',L.nodes.printCD);
     N.tfCD       = cylinder(CX[2],1785,90,58,'TF CD');
     N.cdSup      = document_(CX[5],1785,110,58,'cdSup',L.nodes.cdSup);
     N.cdFinN     = fileTriangle(CX[3],1795,100,55,L.nodes.cdFinN);
@@ -591,11 +603,11 @@
     E.e8d = arrow(CX[2]+42,622, CX[2]+30,661);
     E.e9  = arrow(CX[1]+75,570, CX[2]-70,680);
     E.e10 = arrow(CX[2],719, CX[2],751);
-    E.e11 = zigzagArrow(CX[2]+70,700, CX[5]-55,751,'e11',L.edges.online);
-    E.e12 = zigzagArrow(CX[2]-70,700, CX[0]+55,751,'e12',L.edges.online);
-    E.e13 = zigzagArrow(CX[2]+70,690, CX[3]-55,751,'e13',L.edges.online);
-    E.e14 = zigzagArrow(CX[2]+70,710, CX[4]-60,751,'e14',L.edges.online);
-    E.e15 = zigzagArrow(CX[2]-70,710, CX[1]-50,762,'e15',L.edges.online);
+    E.e11 = arrow(CX[2]+70,700, CX[5]-55,751,'e11',L.edges.online);
+    E.e12 = arrow(CX[2]-70,700, CX[0]+55,751,'e12',L.edges.online);
+    E.e13 = arrow(CX[2]+70,690, CX[3]-55,751,'e13',L.edges.online);
+    E.e14 = arrow(CX[2]+70,710, CX[4]-60,751,'e14',L.edges.online);
+    E.e15 = arrow(CX[2]-70,710, CX[1]-50,762,'e15',L.edges.online);
     E.e16 = arrow(CX[4],809, CX[4],855);
     E.e17 = arrow(CX[4],905, CX[4],950);
     E.e18a= arrow(CX[2]-42,1072, CX[2]-42,1083);
@@ -604,8 +616,8 @@
     E.e18d= arrow(CX[2]+42,1127, CX[2]+30,1166);
     E.e19 = arrow(CX[4]-70,1080, CX[2]+65,1195);
     E.e20 = arrow(CX[2],1224, CX[2],1256);
-    E.e21 = zigzagArrow(CX[2]-70,1210, CX[0]+52,1256,'e21',L.edges.email);
-    E.e22 = zigzagArrow(CX[2]-70,1230, CX[1]+52,1256,'e22',L.edges.email);
+    E.e21 = arrow(CX[2]-70,1210, CX[0]+52,1256,'e21',L.edges.email);
+    E.e22 = arrow(CX[2]-70,1230, CX[1]+52,1256,'e22',L.edges.email);
     E.e23 = arrow(CX[5]-55,1385, CX[3]+55,1385,'e23',L.edges.kirim);
     E.e24 = arrow(CX[3],1414, CX[3],1457);
     E.e25 = arrow(CX[3],1514, CX[3],1556);
@@ -615,8 +627,8 @@
     E.e26d= arrow(CX[2]+42,1632, CX[2]+30,1666);
     E.e27 = arrow(CX[3]-75,1585, CX[2]+70,1685);
     E.e28 = arrow(CX[2],1724, CX[2],1756);
-    E.e29 = arrow(CX[2]+70,1770, CX[5]-55,1785,'e29');
-    E.e30 = arrow(CX[2]-70,1770, CX[3]+50,1780,'e30');
+    E.e29 = arrow(CX[2]+70,1705, CX[5]-55,1785,'e29');
+    E.e30 = arrow(CX[2]-70,1705, CX[3]+50,1780,'e30');
     E.e31 = arrow(CX[5],1814, CX[5],1863);
 
     // ---------- FASE ----------
