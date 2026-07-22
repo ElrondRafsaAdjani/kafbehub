@@ -12,7 +12,6 @@
   .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
   .back-link:hover{color:var(--owl-dark2);}
 
-  /* ---------- Device gate ---------- */
   .device-gate{
     display:none; flex-direction:column; align-items:center; text-align:center; gap:16px;
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
@@ -21,51 +20,44 @@
   .device-gate .icon{font-size:2.6rem;}
   .device-gate h3{font-size:1.3rem; color:var(--owl-dark2);}
   .device-gate p{color:var(--ink-soft); max-width:46ch; line-height:1.6;}
-  .device-gate .examples{
-    display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px;
-  }
-  .device-gate .examples span{
-    background:var(--bg-deep); color:var(--owl-dark2); font-weight:700; font-size:0.85rem;
-    padding:7px 14px; border-radius:100px;
-  }
+  .device-gate .examples{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px;}
+  .device-gate .examples span{background:var(--bg-deep); color:var(--owl-dark2); font-weight:700; font-size:0.85rem; padding:7px 14px; border-radius:100px;}
 
-  /* ---------- Main layout ---------- */
   .flow-card{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
     padding:26px; box-shadow:var(--shadow); margin-top:24px;
   }
   .flow-header{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:18px;}
-  .step-badge{
-    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
-    background:var(--bg-deep); color:var(--owl-dark2);
-  }
+  .step-badge{font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px; background:var(--bg-deep); color:var(--owl-dark2);}
   .progress-track{flex:1; min-width:160px; height:6px; background:var(--line); border-radius:100px; margin:0 16px; overflow:hidden;}
   .progress-fill{height:100%; background:var(--gold); border-radius:100px; transition:width .3s ease; width:0%;}
   .step-counter{font-size:0.82rem; color:var(--ink-soft); font-weight:700; white-space:nowrap;}
 
-  .flow-split{display:grid; grid-template-columns:360px 1fr; gap:24px; align-items:start;}
-
-  .text-panel{
-    background:var(--bg-deep); border-radius:18px; padding:20px; max-height:640px; overflow-y:auto;
+  .lang-toggle{display:inline-flex; background:var(--bg-deep); border-radius:100px; padding:3px; gap:2px;}
+  .lang-toggle button{
+    border:none; background:none; padding:6px 14px; border-radius:100px; font-weight:700; font-size:0.82rem;
+    color:var(--ink-soft); cursor:pointer; font-family:'Plus Jakarta Sans';
   }
+  .lang-toggle button.active{background:var(--owl-dark2); color:#fff;}
+
+  .flow-split{display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:start;}
+
+  .text-panel{background:var(--bg-deep); border-radius:18px; padding:20px; max-height:660px; overflow-y:auto;}
   .text-panel h4{font-size:0.95rem; color:var(--owl-dark2); margin-bottom:10px;}
   .text-panel p{font-size:0.92rem; line-height:1.9; color:var(--ink);}
   .text-panel .seg{transition:background .35s ease, box-shadow .35s ease; border-radius:5px; padding:1px 3px;}
   .text-panel .seg.active{background:var(--gold); box-shadow:0 0 0 3px var(--gold); font-weight:700; color:var(--owl-dark2);}
 
-  .intro-list{background:var(--bg-deep); border-radius:18px; padding:24px; max-height:640px; overflow-y:auto;}
+  .intro-list{background:var(--bg-deep); border-radius:18px; padding:24px; max-height:660px; overflow-y:auto;}
   .intro-list h4{font-size:1rem; color:var(--owl-dark2); margin-bottom:12px;}
   .intro-list ul{margin:0 0 18px; padding-left:20px;}
   .intro-list li{font-size:0.9rem; color:var(--ink); line-height:1.7;}
-  .intro-list .doc-tag{
-    display:inline-block; background:var(--gold); color:var(--owl-dark2); font-weight:800;
-    font-size:0.72rem; padding:2px 8px; border-radius:100px; margin-right:6px;
-  }
+  .intro-list .doc-tag{display:inline-block; background:var(--gold); color:var(--owl-dark2); font-weight:800; font-size:0.72rem; padding:2px 8px; border-radius:100px; margin-right:6px;}
 
-  .chart-panel{
-    background:var(--bg-deep); border-radius:18px; padding:16px; max-height:640px; overflow:auto; position:relative;
-  }
-  #flowSvg{display:block;}
+  .chart-panel{background:var(--bg-deep); border-radius:18px; padding:0; max-height:660px; overflow:auto; position:relative;}
+  .chart-header-sticky{position:sticky; top:0; z-index:5; background:var(--bg-deep); padding:12px 0 0;}
+  #flowHeaderSvg, #flowSvg{display:block; width:100%; height:auto;}
+  #flowSvg{padding-bottom:12px;}
   .node-fade{opacity:0; transition:opacity .5s ease;}
   .node-fade.revealed{opacity:1;}
 
@@ -75,9 +67,7 @@
   #btnNextFlow{display:none;}
 
   @media (max-width:999px){
-    .flow-split{display:none;}
-    .nav-row{display:none;}
-    .flow-header{display:none;}
+    .flow-split{display:none;} .nav-row{display:none;} .flow-header{display:none;}
   }
 </style>
 </head>
@@ -128,77 +118,45 @@
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Sistem Informasi</span>
     <h2>Menggambarkan Proses Bisnis dengan Flowchart</h2>
-    <p>Studi kasus: siklus pengeluaran (expenditure cycle) Popuri Inc. — perusahaan pengolahan daging yang membeli bahan baku untuk produksi nugget.</p>
+    <p>Studi kasus: siklus pengeluaran (expenditure cycle) Popuri Inc.</p>
   </div>
 
-  <!-- Ditampilkan kalau layar terlalu sempit -->
   <div class="device-gate" id="deviceGate">
     <div class="icon">🖥️</div>
     <h3>Butuh layar yang lebih lebar</h3>
     <p>Biar animasi flowchart-nya kebaca jelas dan nggak berantakan, fitur ini cuma tersedia di layar yang cukup lebar. Coba buka halaman ini dari:</p>
-    <div class="examples">
-      <span>💻 Laptop</span>
-      <span>🖥️ Komputer / PC</span>
-      <span>📱 Tablet (mode lanskap)</span>
-    </div>
+    <div class="examples"><span>💻 Laptop</span><span>🖥️ Komputer / PC</span><span>📱 Tablet (mode lanskap)</span></div>
   </div>
 
-  <!-- Konten utama -->
   <div class="flow-card" id="flowCard" style="display:none;">
     <div class="flow-header">
       <span class="step-badge" id="stepBadge">Langkah 1</span>
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <span class="step-counter" id="stepCounter">1 / 20</span>
+      <span class="step-counter" id="stepCounter">1 / 22</span>
+      <div class="lang-toggle">
+        <button type="button" id="btnLangID" class="active">ID</button>
+        <button type="button" id="btnLangEN">EN</button>
+      </div>
     </div>
 
     <div class="flow-split">
       <div id="introPanel" class="intro-list">
-        <h4>📋 Entitas yang Terlibat</h4>
-        <ul>
-          <li><strong>Inventory Manager</strong> — mengecek stok &amp; membuat permintaan pembelian</li>
-          <li><strong>Purchasing Department</strong> — memproses pesanan pembelian</li>
-          <li><strong>EDP</strong> (Electronic Data Processing) — sistem komputer yang mencetak dokumen &amp; menyimpan data</li>
-          <li><strong>Financial Department</strong> — mengurus pembayaran</li>
-          <li><strong>Warehouse</strong> — menerima &amp; memeriksa barang</li>
-          <li><strong>Supplier</strong> — pemasok barang</li>
-        </ul>
-        <h4>📄 Dokumen yang Akan Muncul</h4>
-        <ul>
-          <li><span class="doc-tag">PR</span> Purchase Requisition — permintaan pembelian</li>
-          <li><span class="doc-tag">PO</span> Purchase Order — pesanan pembelian</li>
-          <li><span class="doc-tag">RR</span> Receiving Report — laporan penerimaan barang</li>
-          <li><span class="doc-tag">Invoice</span> tagihan dari supplier</li>
-          <li><span class="doc-tag">CD</span> Cash Disbursement — bukti pengeluaran kas</li>
-        </ul>
+        <h4 id="introEntTitle">📋 Entitas yang Terlibat</h4>
+        <ul id="introEntList"></ul>
+        <h4 id="introDocTitle">📄 Dokumen yang Akan Muncul</h4>
+        <ul id="introDocList"></ul>
       </div>
 
       <div class="text-panel" id="textPanel">
-        <h4>📖 Narasi Proses</h4>
-        <p>
-          <span class="seg" data-seg="s1">Popuri Inc. adalah perusahaan pengolahan daging sapi dan babi yang memproduksi nugget. Entitas yang terlibat dalam siklus pengeluaran ini adalah Inventory Manager, Purchasing Department, EDP, Financial Department, Warehouse, dan Supplier — dengan dokumen utama PR, PO, RR, Invoice, dan CD.</span>
-          <span class="seg" data-seg="s2">Proses dimulai dari Inventory Manager.</span>
-          <span class="seg" data-seg="s3">Inventory Manager mengecek ketersediaan stok barang.</span>
-          <span class="seg" data-seg="s4">Ia memeriksa apakah stok sudah mencapai reorder point.</span>
-          <span class="seg" data-seg="s5">Jika belum mencapai reorder point, proses selesai.</span>
-          <span class="seg" data-seg="s6">Jika sudah mencapai reorder point, Inventory Manager membuat Purchase Requisition (PR) secara manual, sebanyak dua rangkap.</span>
-          <span class="seg" data-seg="s7">Rangkap pertama diberikan ke Purchasing Department, rangkap kedua disimpan sendiri oleh Inventory Manager berdasarkan nomor.</span>
-          <span class="seg" data-seg="s8">Setelah menerima PR, Purchasing Department menginput datanya untuk membuat Purchase Order (PO) secara online.</span>
-          <span class="seg" data-seg="s9">Sistem EDP mencetak PO menggunakan data dari master file, lalu menyimpan Transfer File PO.</span>
-          <span class="seg" data-seg="s10">PO yang tercetak didistribusikan lima rangkap: ke Supplier, Inventory Manager, Financial Department, Warehouse (sebagai rangkap buta/blind), dan disimpan sendiri oleh Purchasing Department.</span>
-          <span class="seg" data-seg="s11">Setelah barang diterima, Warehouse memeriksa barang secara manual berdasarkan PO Blind tersebut, tanpa mengetahui jumlah pesanan sebelumnya.</span>
-          <span class="seg" data-seg="s12">Warehouse menginput hasil pemeriksaan untuk membuat Receiving Report (RR) secara terkomputerisasi.</span>
-          <span class="seg" data-seg="s13">Sistem EDP mencetak RR menggunakan master file, lalu menyimpan Transfer File RR.</span>
-          <span class="seg" data-seg="s14">RR dikirim melalui email ke Inventory Manager dan Purchasing Department.</span>
-          <span class="seg" data-seg="s15">Supplier mengirimkan Invoice, yang diterima oleh Financial Department.</span>
-          <span class="seg" data-seg="s16">Staf keuangan membayar invoice tersebut ketika sudah jatuh tempo, lalu menginput data untuk membuat Cash Disbursement (CD).</span>
-          <span class="seg" data-seg="s17">Sistem EDP mencetak CD menggunakan master file, lalu menyimpan Transfer File CD.</span>
-          <span class="seg" data-seg="s18">CD didistribusikan dua rangkap: rangkap pertama diberikan ke Supplier, rangkap kedua disimpan Financial Department berdasarkan nomor dokumen.</span>
-          <span class="seg" data-seg="s19">Setelah Supplier menerima pembayaran, proses pengeluaran ini pun selesai.</span>
-        </p>
+        <h4 id="narTitle">📖 Narasi Proses</h4>
+        <p id="narParagraph"></p>
       </div>
 
       <div class="chart-panel" id="chartPanel">
-        <svg id="flowSvg" viewBox="0 0 1070 1820" width="1070" height="1820"></svg>
+        <div class="chart-header-sticky">
+          <svg id="flowHeaderSvg" viewBox="0 0 1100 62"></svg>
+        </div>
+        <svg id="flowSvg" viewBox="0 0 1100 1940"></svg>
       </div>
     </div>
 
@@ -222,31 +180,139 @@
   "use strict";
 
   // ===================================================================
-  // 1. GERBANG PERANGKAT — fitur ini cuma untuk layar lebar
+  // GERBANG PERANGKAT
   // ===================================================================
   const MIN_W = 1000, MIN_H = 560;
   const deviceGate = document.getElementById('deviceGate');
   const flowCard = document.getElementById('flowCard');
   let initialized = false;
-
   function checkDevice(){
     const ok = window.innerWidth >= MIN_W && window.innerHeight >= MIN_H;
     deviceGate.style.display = ok ? 'none' : 'flex';
     flowCard.style.display = ok ? 'block' : 'none';
-    if(ok && !initialized){
-      initialized = true;
-      initFlowchart();
-    }
+    if(ok && !initialized){ initialized = true; initFlowchart(); }
   }
   window.addEventListener('resize', checkDevice);
 
   // ===================================================================
-  // 2. GRID SWIMLANE
+  // KAMUS DUA BAHASA
   // ===================================================================
-  const LANE_W = 170, START_X = 25;
+  const DICT = {
+    id: {
+      ui: { prev:'← Sebelumnya', next:'Lanjut →', restart:'🔁 Ulangi dari Awal', backHub:'Kembali ke Sistem Informasi →',
+            introEntTitle:'📋 Entitas yang Terlibat', introDocTitle:'📄 Dokumen yang Akan Muncul', narTitle:'📖 Narasi Proses' },
+      entities: [
+        ['Inventory Manager','mengecek stok & membuat permintaan pembelian'],
+        ['Purchasing Department','memproses pesanan pembelian'],
+        ['EDP','(Electronic Data Processing) — sistem komputer yang mencetak dokumen & menyimpan data'],
+        ['Financial Department','mengurus pembayaran'],
+        ['Warehouse','menerima & memeriksa barang'],
+        ['Supplier','pemasok barang']
+      ],
+      docs: [
+        ['PR','Purchase Requisition — permintaan pembelian'],
+        ['PO','Purchase Order — pesanan pembelian'],
+        ['RR','Receiving Report — laporan penerimaan barang'],
+        ['Invoice','tagihan dari supplier'],
+        ['CD','Cash Disbursement — bukti pengeluaran kas']
+      ],
+      segs: {
+        s1:'Popuri Inc. adalah perusahaan yang mengolah daging, khususnya daging sapi dan babi. Siklus pengeluaran (expenditure cycle) Popuri melibatkan pemesanan dan penerimaan barang. Barang-barang ini digunakan sebagai persediaan bahan baku untuk memproduksi nugget demi menjalankan bisnisnya.',
+        s2:'Pertama, Inventory Manager akan mengecek ketersediaan stok, apakah sudah mencapai reorder point atau belum,',
+        s3:'jika sudah mencapai reorder point, Inventory Manager akan membuat dua rangkap Purchase Requisition (PR) secara manual.',
+        s4:'(Jika belum mencapai reorder point, proses selesai.)',
+        s5:'Rangkap pertama diberikan ke Purchasing Department, rangkap kedua disimpan oleh Inventory Manager berdasarkan nomor.',
+        s6:'Setelah Purchasing Department menerima purchase requisition, mereka akan membuat Purchase Order (PO) secara online,',
+        s7:'di mana rangkap pertama file diberikan ke supplier, rangkap kedua ke Inventory Manager, rangkap ketiga untuk Financial Department, rangkap keempat adalah rangkap buta (blind) untuk Warehouse, dan rangkap terakhir diberikan ke Purchasing Department.',
+        s8:'Setelah barang diterima, Warehouse akan memeriksa barang secara manual berdasarkan PO Blind,',
+        s9:'dan menyiapkan Receiving Report (RR) secara terkomputerisasi, lalu mengirimnya lewat email ke Inventory Manager dan Purchasing Department.',
+        s10:'Supplier kemudian akan mengirimkan invoice, yang diterima oleh Financial Department,',
+        s11:'lalu staf keuangan akan membayar invoice tersebut ketika sudah jatuh tempo pembayaran.',
+        s12:'Financial Department kemudian akan membuat dua rangkap Cash Disbursement (CD),',
+        s13:'di mana rangkap pertama diberikan ke supplier dan rangkap kedua disimpan oleh Financial Department berdasarkan nomor dokumen.'
+      },
+      badges: {
+        intro:'Langkah 1: Kenali Entitas & Dokumen', pools:'Langkah 2: Membuat Pool', start:'Langkah 3: Titik Mulai (Start)',
+        checkStock:'Langkah 4', reorderQ:'Langkah 5', finish1:'Langkah 6', createPR:'Langkah 7',
+        prDist:'Langkah 8', inputPO:'Langkah 9', printPO:'Langkah 10', poDist:'Langkah 11',
+        goodsX:'Langkah 12: Barang Diterima', checkGoods:'Langkah 13', inputRR:'Langkah 14', printRR:'Langkah 15', rrDist:'Langkah 16',
+        invoice:'Langkah 17', payInv:'Langkah 18', inputCD:'Langkah 19', printCD:'Langkah 20', cdDist:'Langkah 21', finish2:'Langkah 22: Selesai'
+      },
+      phases: { placing:'PLACING AN ORDER', receiving:'RECEIVING GOODS', payment:'PAYMENT' },
+      nodes: {
+        checkStock:'Cek ketersediaan\nstok barang', reorderQ:'Sudah capai\nreorder point?',
+        createPR:'Buat PR manual\n(2 rangkap)', prCopy1:'PR (1)', prFileN:'PR (2)',
+        inputPO:'Input data PO', printPO:'Print PO', poInv:'PO (2)', poFin:'PO (3)', poWh:'PO (4)\nBlind', poPurN:'PO (5)', poSup:'PO (1)',
+        goodsX:'Barang\nditerima', checkGoodsMain:'Cek barang\nmanual', checkGoodsNote:'berdasarkan\nPO Blind',
+        inputRR:'Input data RR', printRR:'Print RR', rrInv:'RR', rrPur:'RR',
+        invoiceSup:'Invoice', invoiceFin:'Invoice', payInv:'Bayar invoice\n(jatuh tempo)',
+        inputCD:'Input data CD', printCD:'Print CD', cdSup:'CD (1)', cdFinN:'CD (2)'
+      },
+      edges: { ya:'Ya', tidak:'Tidak', online:'online', email:'email', kirim:'kirim' }
+    },
+    en: {
+      ui: { prev:'← Previous', next:'Next →', restart:'🔁 Restart', backHub:'Back to Information Systems →',
+            introEntTitle:'📋 Entities Involved', introDocTitle:'📄 Documents That Will Appear', narTitle:'📖 Process Narrative' },
+      entities: [
+        ['Inventory Manager','checks stock & creates purchase requisitions'],
+        ['Purchasing Department','processes purchase orders'],
+        ['EDP','(Electronic Data Processing) — the computer system that prints documents & stores data'],
+        ['Financial Department','handles payment'],
+        ['Warehouse','receives & inspects goods'],
+        ['Supplier','supplies the goods']
+      ],
+      docs: [
+        ['PR','Purchase Requisition'],
+        ['PO','Purchase Order'],
+        ['RR','Receiving Report'],
+        ['Invoice','bill from the supplier'],
+        ['CD','Cash Disbursement']
+      ],
+      segs: {
+        s1:'Popuri Inc. is a company that processes meat, especially cow and pig meat. Popuri\u2019s expenditure cycle involves ordering and receiving goods. These goods are used as an inventory of raw materials to produce nuggets for the purpose of running the business.',
+        s2:'First the inventory manager will check the availability of the stock, whether it has reached the reorder point or not,',
+        s3:'if it reaches the reorder point, then the inventory manager will make two copies of purchase requisition (PR) manually.',
+        s4:'(If it has not reached the reorder point, the process is finished.)',
+        s5:'The first copy is given to the purchasing department, the second copy will be kept by the inventory manager based on number.',
+        s6:'After the purchasing department receives a purchase requisition, they will make an online purchase order (PO),',
+        s7:'where the first copy of the file will be given to the supplier, the second copy given to the inventory manager, the third copy for the financial department, the fourth copy is a blind copy for the warehouse, and the last copy given to the purchasing department.',
+        s8:'After the goods received, the warehouse will check the goods manually based on the PO Blind,',
+        s9:'and prepare a receiving report (RR) computerized, then send it by email to the inventory manager and purchasing department.',
+        s10:'The supplier will then send the invoice, which is received by the finance department,',
+        s11:'then the finance staff will pay the invoice when its payment due date arrives.',
+        s12:'The financial department will then make two copies of a cash disbursement (CD),',
+        s13:'where the first copy is given to the supplier and the secondary copy is saved by the finance department based on document number.'
+      },
+      badges: {
+        intro:'Step 1: Entities & Documents', pools:'Step 2: Creating Pools', start:'Step 3: Start Point',
+        checkStock:'Step 4', reorderQ:'Step 5', finish1:'Step 6', createPR:'Step 7',
+        prDist:'Step 8', inputPO:'Step 9', printPO:'Step 10', poDist:'Step 11',
+        goodsX:'Step 12: Goods Received', checkGoods:'Step 13', inputRR:'Step 14', printRR:'Step 15', rrDist:'Step 16',
+        invoice:'Step 17', payInv:'Step 18', inputCD:'Step 19', printCD:'Step 20', cdDist:'Step 21', finish2:'Step 22: Finish'
+      },
+      phases: { placing:'PLACING AN ORDER', receiving:'RECEIVING GOODS', payment:'PAYMENT' },
+      nodes: {
+        checkStock:'Check stock\navailability', reorderQ:'Reached\nreorder point?',
+        createPR:'Create PR manually\n(2 copies)', prCopy1:'PR (1)', prFileN:'PR (2)',
+        inputPO:'Input PO data', printPO:'Print PO', poInv:'PO (2)', poFin:'PO (3)', poWh:'PO (4)\nBlind', poPurN:'PO (5)', poSup:'PO (1)',
+        goodsX:'Goods\nreceived', checkGoodsMain:'Check goods\nmanually', checkGoodsNote:'based on\nPO Blind',
+        inputRR:'Input RR data', printRR:'Print RR', rrInv:'RR', rrPur:'RR',
+        invoiceSup:'Invoice', invoiceFin:'Invoice', payInv:'Pay invoice\n(when due)',
+        inputCD:'Input CD data', printCD:'Print CD', cdSup:'CD (1)', cdFinN:'CD (2)'
+      },
+      edges: { ya:'Yes', tidak:'No', online:'online', email:'email', kirim:'send' }
+    }
+  };
+  let LANG = 'id';
+
+  // ===================================================================
+  // GRID SWIMLANE (kolom label fase + 6 pool)
+  // ===================================================================
+  const PHASE_COL_W = 55, START_X = 55, LANE_W = 170;
   const LANES = ['Inventory Manager','Purchasing Department','EDP','Financial Department','Warehouse','Supplier'];
   const CX = LANES.map((_, i) => START_X + i*LANE_W + LANE_W/2);
-  const DIAGRAM_H = 1790;
+  const TOTAL_W = START_X + 6*LANE_W + 25;
+  const DIAGRAM_H = 1940;
 
   function svgEl(tag, attrs){
     const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -254,207 +320,342 @@
     return el;
   }
 
-  function initFlowchart(){
-    const svg = document.getElementById('flowSvg');
+  // referensi teks yang perlu di-update saat ganti bahasa
+  const textRefs = {}; // key -> {el, cx, cy, size}
 
-    // arrowhead marker
+  function makeLabel(cx,cy,label,size,weight){
+    const t = svgEl('text', { x:cx, y:cy, 'text-anchor':'middle', 'font-size':size||11, 'font-weight':weight||'700', fill:'#16294A', 'font-family':"'Plus Jakarta Sans'" });
+    setLabelContent(t,cx,cy,label,size);
+    return t;
+  }
+  function setLabelContent(t,cx,cy,label,size){
+    while(t.firstChild) t.removeChild(t.firstChild);
+    const lines = String(label).split('\n');
+    const lh = (size||11)+2;
+    const startY = cy - ((lines.length-1)*lh)/2 + 4;
+    t.setAttribute('y', startY);
+    lines.forEach((ln,i) => {
+      const tspan = svgEl('tspan', { x:cx, dy: i===0?0:lh });
+      tspan.textContent = ln;
+      t.appendChild(tspan);
+    });
+  }
+  function registerText(key, textEl, cx, cy, size){
+    textRefs[key] = { el:textEl, cx, cy, size };
+  }
+  function updateText(key, newLabel){
+    const r = textRefs[key];
+    if(r) setLabelContent(r.el, r.cx, r.cy, newLabel, r.size);
+  }
+
+  function initFlowchart(){
+    const headerSvg = document.getElementById('flowHeaderSvg');
+    const svg = document.getElementById('flowSvg');
+    headerSvg.setAttribute('viewBox', `0 0 ${TOTAL_W} 62`);
+    svg.setAttribute('viewBox', `0 0 ${TOTAL_W} ${DIAGRAM_H}`);
+
+    // ---------- HEADER (frozen) ----------
+    LANES.forEach((name, i) => {
+      const x = START_X + i*LANE_W;
+      headerSvg.appendChild(svgEl('rect', { x, y:8, width:LANE_W-6, height:44, rx:9, fill:'#16294A' }));
+      const t = svgEl('text', { x:CX[i], y:35, 'text-anchor':'middle', 'font-size':'11.5', 'font-weight':'700', fill:'#fff', 'font-family':"'Plus Jakarta Sans'" });
+      t.textContent = name;
+      headerSvg.appendChild(t);
+      headerSvg.appendChild(svgEl('line', { x1:x, y1:52, x2:x, y2:62, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+    });
+    headerSvg.appendChild(svgEl('line', { x1:START_X+6*LANE_W, y1:52, x2:START_X+6*LANE_W, y2:62, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+
+    // ---------- BODY: dividers lajur ----------
+    for(let i=0;i<=6;i++){
+      const x = START_X + i*LANE_W;
+      svg.appendChild(svgEl('line', { x1:x, y1:0, x2:x, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+    }
+    svg.appendChild(svgEl('line', { x1:0, y1:0, x2:0, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+
     const defs = svgEl('defs', {});
     const marker = svgEl('marker', { id:'arrowhead', markerWidth:9, markerHeight:9, refX:7, refY:4.5, orient:'auto' });
     marker.appendChild(svgEl('path', { d:'M0,0 L9,4.5 L0,9 Z', fill:'#16294A' }));
     defs.appendChild(marker);
     svg.appendChild(defs);
 
-    // lane headers + dividers
-    LANES.forEach((name, i) => {
-      const x = START_X + i*LANE_W;
-      svg.appendChild(svgEl('rect', { x, y:14, width:LANE_W-6, height:40, rx:8, fill:'#16294A' }));
-      const t = svgEl('text', { x:CX[i], y:38, 'text-anchor':'middle', 'font-size':'11.5', 'font-weight':'700', fill:'#fff', 'font-family':'Plus Jakarta Sans' });
-      t.textContent = name;
-      svg.appendChild(t);
-      svg.appendChild(svgEl('line', { x1:x, y1:60, x2:x, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
-    });
-    svg.appendChild(svgEl('line', { x1:START_X+6*LANE_W, y1:60, x2:START_X+6*LANE_W, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
-
-    // header + divider garis pool digambar langsung; panel chart-nya sendiri
-    // baru ditampilkan mulai langkah 2 (lihat render()), jadi otomatis
-    // "muncul" bertepatan dengan narasi "membuat pool".
-
-    // ---------- shape drawers ----------
-    function labelText(cx, cy, label, size){
-      const lines = label.split('\n');
-      const lh = (size||12) + 2;
-      const startY = cy - ((lines.length-1)*lh)/2 + 4;
-      const t = svgEl('text', { x:cx, y:startY, 'text-anchor':'middle', 'font-size':size||12, 'font-weight':'700', fill:'#16294A', 'font-family':"'Plus Jakarta Sans'" });
-      lines.forEach((ln,i) => {
-        const tspan = svgEl('tspan', { x:cx, dy: i===0?0:lh });
-        tspan.textContent = ln;
-        t.appendChild(tspan);
-      });
-      return t;
-    }
-
-    function drawTerminator(cx,cy,w,h,label,fill){
+    // ---------- SHAPE DRAWERS ----------
+    function terminator(cx,cy,w,h,textKey,label,fill){
       const g = svgEl('g', { class:'node-fade' });
       g.appendChild(svgEl('rect', { x:cx-w/2, y:cy-h/2, width:w, height:h, rx:h/2, ry:h/2, fill:fill||'#F0B93D', stroke:'#16294A', 'stroke-width':1.5 }));
-      g.appendChild(labelText(cx,cy,label,12));
-      svg.appendChild(g);
-      return g;
+      const t = makeLabel(cx,cy,label,12); g.appendChild(t); if(textKey) registerText(textKey,t,cx,cy,12);
+      svg.appendChild(g); return g;
     }
-    function drawProcess(cx,cy,w,h,label){
+    function process(cx,cy,w,h,textKey,label){
       const g = svgEl('g', { class:'node-fade' });
       g.appendChild(svgEl('rect', { x:cx-w/2, y:cy-h/2, width:w, height:h, fill:'#EEF7F9', stroke:'#1F3A63', 'stroke-width':1.5 }));
-      g.appendChild(labelText(cx,cy,label,11.5));
-      svg.appendChild(g);
-      return g;
+      const t = makeLabel(cx,cy,label,11.5); g.appendChild(t); if(textKey) registerText(textKey,t,cx,cy,11.5);
+      svg.appendChild(g); return g;
     }
-    function drawDecision(cx,cy,w,h,label){
+    function decision(cx,cy,w,h,textKey,label){
       const g = svgEl('g', { class:'node-fade' });
-      const pts = [[cx,cy-h/2],[cx+w/2,cy],[cx,cy+h/2],[cx-w/2,cy]].map(p=>p.join(',')).join(' ');
+      const pts=[[cx,cy-h/2],[cx+w/2,cy],[cx,cy+h/2],[cx-w/2,cy]].map(p=>p.join(',')).join(' ');
       g.appendChild(svgEl('polygon', { points:pts, fill:'#FDEEDB', stroke:'#D69A1F', 'stroke-width':1.5 }));
-      g.appendChild(labelText(cx,cy,label,11));
-      svg.appendChild(g);
-      return g;
+      const t = makeLabel(cx,cy,label,11); g.appendChild(t); if(textKey) registerText(textKey,t,cx,cy,11);
+      svg.appendChild(g); return g;
     }
-    function drawDocument(cx,cy,w,h,label){
+    function document_(cx,cy,w,h,textKey,label){
       const g = svgEl('g', { class:'node-fade' });
-      const x=cx-w/2, y=cy-h/2, wave=8;
-      const d = `M${x},${y} L${x+w},${y} L${x+w},${y+h-wave} `+
-                `Q${x+w*0.75},${y+h+wave} ${x+w/2},${y+h-wave} `+
-                `Q${x+w*0.25},${y+h-wave*3} ${x},${y+h-wave} Z`;
+      const x=cx-w/2,y=cy-h/2,wave=8;
+      const d=`M${x},${y} L${x+w},${y} L${x+w},${y+h-wave} Q${x+w*0.75},${y+h+wave} ${x+w/2},${y+h-wave} Q${x+w*0.25},${y+h-wave*3} ${x},${y+h-wave} Z`;
       g.appendChild(svgEl('path', { d, fill:'#FBEFEA', stroke:'#C24E33', 'stroke-width':1.5 }));
-      g.appendChild(labelText(cx,cy-3,label,10.5));
-      svg.appendChild(g);
-      return g;
+      const t = makeLabel(cx,cy-3,label,10.5); g.appendChild(t); if(textKey) registerText(textKey,t,cx,cy-3,10.5);
+      svg.appendChild(g); return g;
     }
-    function drawManual(cx,cy,w,h,label){
+    function manual(cx,cy,w,h,textKey,label){
       const g = svgEl('g', { class:'node-fade' });
-      const x=cx-w/2, y=cy-h/2, indent=w*0.16;
-      const d = `M${x},${y} L${x+w},${y} L${x+w-indent},${y+h} L${x+indent},${y+h} Z`;
+      const x=cx-w/2,y=cy-h/2,indent=w*0.16;
+      const d=`M${x},${y} L${x+w},${y} L${x+w-indent},${y+h} L${x+indent},${y+h} Z`;
       g.appendChild(svgEl('path', { d, fill:'#E9F0FA', stroke:'#1F3A63', 'stroke-width':1.5 }));
-      g.appendChild(labelText(cx,cy,label,11));
-      svg.appendChild(g);
-      return g;
+      const t = makeLabel(cx,cy,label,11); g.appendChild(t); if(textKey) registerText(textKey,t,cx,cy,11);
+      svg.appendChild(g); return g;
     }
-    function drawCylinder(cx,cy,w,h,label){
+    function cylinder(cx,cy,w,h,label){
       const g = svgEl('g', { class:'node-fade' });
-      const rx=w/2, ry=h*0.16, top=cy-h/2, bottom=cy+h/2;
+      const rx=w/2, ry=h*0.18, top=cy-h/2, bottom=cy+h/2;
       g.appendChild(svgEl('path', { d:`M${cx-rx},${top+ry} A${rx},${ry} 0 0 0 ${cx+rx},${top+ry} L${cx+rx},${bottom-ry} A${rx},${ry} 0 0 1 ${cx-rx},${bottom-ry} Z`, fill:'#E9F0FA', stroke:'#1F3A63', 'stroke-width':1.5 }));
       g.appendChild(svgEl('ellipse', { cx, cy:top+ry, rx, ry, fill:'#F5FAFC', stroke:'#1F3A63', 'stroke-width':1.5 }));
-      g.appendChild(labelText(cx,cy+ry,label,10));
-      svg.appendChild(g);
-      return g;
+      g.appendChild(makeLabel(cx,cy+ry,label,9));
+      svg.appendChild(g); return g;
+    }
+    // Manual input / "Key input" symbol — top-left corner slanted, representing keyboard entry
+    function keyInput(cx,cy,w,h,textKey,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const x=cx-w/2,y=cy-h/2, slant=14;
+      const d=`M${x},${y+slant} L${x+w},${y} L${x+w},${y+h} L${x},${y+h} Z`;
+      g.appendChild(svgEl('path', { d, fill:'#E3ECFB', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      const t = makeLabel(cx,cy+4,label,10.5); g.appendChild(t); if(textKey) registerText(textKey,t,cx,cy+4,10.5);
+      svg.appendChild(g); return g;
+    }
+    // Display symbol — right edge bulges into a curve, representing a screen
+    function display(cx,cy,w,h,textKey,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const x=cx-w/2,y=cy-h/2;
+      const d=`M${x},${y} L${x+w*0.8},${y} Q${x+w+10},${cy} ${x+w*0.8},${y+h} L${x},${y+h} Z`;
+      g.appendChild(svgEl('path', { d, fill:'#DCEBFB', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      const t = makeLabel(cx-6,cy,label,10.5); g.appendChild(t); if(textKey) registerText(textKey,t,cx-6,cy,10.5);
+      svg.appendChild(g); return g;
+    }
+    // Inverted triangle + "N" — manual file, sorted by Number
+    function fileTriangle(cx,cy,w,h,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const x=cx-w/2,y=cy-h/2;
+      const d=`M${x},${y} L${x+w},${y} L${cx},${y+h} Z`;
+      g.appendChild(svgEl('path', { d, fill:'#FDEEDB', stroke:'#D69A1F', 'stroke-width':1.5 }));
+      g.appendChild(makeLabel(cx,y+h*0.42,'N',12,'800'));
+      if(label){ g.appendChild(makeLabel(cx,y-10,label,10)); }
+      svg.appendChild(g); return g;
+    }
+    // Goods box — square with X, representing physical goods received
+    function goodsBox(cx,cy,w,h,textKey,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const x=cx-w/2,y=cy-h/2;
+      g.appendChild(svgEl('rect', { x,y,width:w,height:h, fill:'#F5F7F2', stroke:'#16294A', 'stroke-width':1.5 }));
+      g.appendChild(svgEl('line', { x1:x+8,y1:y+8, x2:x+w-8,y2:y+h-8, stroke:'#16294A', 'stroke-width':2 }));
+      g.appendChild(svgEl('line', { x1:x+w-8,y1:y+8, x2:x+8,y2:y+h-8, stroke:'#16294A', 'stroke-width':2 }));
+      const t = makeLabel(cx,y+h+16,label,10.5); g.appendChild(t); if(textKey) registerText(textKey,t,cx,y+h+16,10.5);
+      svg.appendChild(g); return g;
+    }
+    // Annotation bracket — a note attached beside a shape
+    function annotation(x,yTop,yBottom,textKey,label){
+      const g = svgEl('g', { class:'node-fade' });
+      g.appendChild(svgEl('path', { d:`M${x+10},${yTop} L${x},${yTop} L${x},${yBottom} L${x+10},${yBottom}`, fill:'none', stroke:'#4C6885', 'stroke-width':1.5 }));
+      const t = svgEl('text', { x:x+16, y:(yTop+yBottom)/2+3, 'font-size':10, fill:'#4C6885', 'font-family':"'Plus Jakarta Sans'" });
+      setLabelContent(t, x+16, (yTop+yBottom)/2+3, label, 10);
+      t.setAttribute('text-anchor','start');
+      g.appendChild(t); if(textKey) registerText(textKey,t,x+16,(yTop+yBottom)/2+3,10);
+      svg.appendChild(g); return g;
     }
 
-    function drawArrow(x1,y1,x2,y2,label){
+    function arrow(x1,y1,x2,y2,textKey,label){
       const g = svgEl('g', { class:'node-fade' });
       g.appendChild(svgEl('line', { x1,y1,x2,y2, stroke:'#16294A', 'stroke-width':1.6, 'marker-end':'url(#arrowhead)' }));
       if(label){
         const mx=(x1+x2)/2, my=(y1+y2)/2;
         g.appendChild(svgEl('rect', { x:mx-20, y:my-9, width:40, height:16, fill:'#EFF6F9', opacity:0.9 }));
         const t = svgEl('text', { x:mx, y:my+3, 'text-anchor':'middle', 'font-size':10, 'font-weight':'700', fill:'#9C3B26', 'font-family':"'Plus Jakarta Sans'" });
-        t.textContent = label;
-        g.appendChild(t);
+        t.textContent = label; g.appendChild(t);
+        if(textKey) registerText(textKey,t,mx,my+3,10);
       }
-      svg.appendChild(g);
-      return g;
+      svg.appendChild(g); return g;
+    }
+    // Panah zigzag (communication link) — untuk dokumen yang dikirim online/email
+    function zigzagArrow(x1,y1,x2,y2,textKey,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const midx=(x1+x2)/2, midy=(y1+y2)/2;
+      const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy)||1;
+      const px=-dy/len, py=dx/len; // tegak lurus arah garis
+      const amp=9;
+      const p1x=x1+dx*0.35+px*amp, p1y=y1+dy*0.35+py*amp;
+      const p2x=x1+dx*0.5-px*amp,  p2y=y1+dy*0.5-py*amp;
+      const p3x=x1+dx*0.65+px*amp, p3y=y1+dy*0.65+py*amp;
+      const d = `M${x1},${y1} L${p1x},${p1y} L${p2x},${p2y} L${p3x},${p3y} L${x2},${y2}`;
+      g.appendChild(svgEl('path', { d, fill:'none', stroke:'#1F3A63', 'stroke-width':1.8, 'stroke-dasharray':'1,0', 'marker-end':'url(#arrowhead)' }));
+      if(label){
+        g.appendChild(svgEl('rect', { x:midx-22, y:midy-9, width:44, height:16, fill:'#EFF6F9', opacity:0.9 }));
+        const t = svgEl('text', { x:midx, y:midy+3, 'text-anchor':'middle', 'font-size':10, 'font-weight':'700', fill:'#1F3A63', 'font-family':"'Plus Jakarta Sans'" });
+        t.textContent = label; g.appendChild(t);
+        if(textKey) registerText(textKey,t,midx,midy+3,10);
+      }
+      svg.appendChild(g); return g;
     }
 
-    // ---------- NODES ----------
+    // ---------- PHASE DIVIDERS + rotated labels ----------
+    function phaseLabel(yTop, yBottom, textKey, label){
+      const g = svgEl('g', {});
+      const midY = (yTop+yBottom)/2;
+      const t = svgEl('text', { x:22, y:midY, 'text-anchor':'middle', 'font-size':11, 'font-weight':'800', fill:'#4C6885',
+                                 'font-family':"'Plus Jakarta Sans'", transform:`rotate(-90 22 ${midY})` });
+      t.textContent = label;
+      g.appendChild(t);
+      svg.appendChild(g);
+      registerText(textKey, t, 22, midY, 11);
+    }
+    function dividerLine(y){
+      svg.appendChild(svgEl('line', { x1:0, y1:y, x2:TOTAL_W, y2:y, stroke:'#9AB0C8', 'stroke-width':1.5, 'stroke-dasharray':'6,5' }));
+    }
+
+    const L = DICT[LANG];
+
+    // ===================================================================
+    // NODES
+    // ===================================================================
     const N = {};
-    N.start      = drawTerminator(CX[0],90,120,44,'Start');
-    N.checkStock = drawProcess(CX[0],200,155,60,'Cek ketersediaan\nstok barang');
-    N.reorderQ   = drawDecision(CX[0],330,145,100,'Sudah capai\nreorder point?');
-    N.finish1    = drawTerminator(CX[0]-55,410,110,40,'Finish','#E4EBEF');
-    N.createPR   = drawManual(CX[0],470,150,58,'Buat PR manual\n(2 rangkap)');
-    N.prCopy1    = drawDocument(CX[1],470,135,58,'PR rangkap 1');
-    N.prCopy2    = drawDocument(CX[0],580,145,58,'PR rangkap 2\n(disimpan – No.)');
-    N.inputPO    = drawProcess(CX[1],580,150,58,'Input data PO\n(online)');
-    N.mfPO       = drawCylinder(CX[2],580,95,60,'Master File');
-    N.printPO    = drawProcess(CX[2],690,150,58,'Print PO');
-    N.tfPO       = drawCylinder(CX[2],800,95,60,'TF PO');
-    N.poSup      = drawDocument(CX[5],800,135,58,'PO rangkap 1');
-    N.poInv      = drawDocument(CX[0],800,135,58,'PO rangkap 2');
-    N.poFin      = drawDocument(CX[3],800,135,58,'PO rangkap 3');
-    N.poWh       = drawDocument(CX[4],800,145,58,'PO rangkap 4\n(Blind)');
-    N.poPur      = drawDocument(CX[1],800,145,58,'PO rangkap 5\n(disimpan)');
-    N.checkGoods = drawProcess(CX[4],910,155,60,'Cek barang manual\n(PO Blind)');
-    N.inputRR    = drawProcess(CX[4],1020,150,58,'Input RR');
-    N.mfRR       = drawCylinder(CX[2],1020,95,60,'Master File');
-    N.printRR    = drawProcess(CX[2],1130,150,58,'Print RR');
-    N.tfRR       = drawCylinder(CX[2],1240,95,60,'TF RR');
-    N.rrInv      = drawDocument(CX[0],1240,130,58,'RR (email)');
-    N.rrPur      = drawDocument(CX[1],1240,130,58,'RR (email)');
-    N.invoiceSup = drawDocument(CX[5],1350,130,58,'Invoice');
-    N.invoiceFin = drawDocument(CX[3],1350,145,58,'Invoice diterima');
-    N.payInv     = drawProcess(CX[3],1460,155,58,'Bayar invoice\n(jatuh tempo)');
-    N.inputCD    = drawProcess(CX[3],1570,150,58,'Input CD');
-    N.mfCD       = drawCylinder(CX[2],1570,95,60,'Master File');
-    N.printCD    = drawProcess(CX[2],1680,150,58,'Print CD');
-    N.tfCD       = drawCylinder(CX[2],1790,95,60,'TF CD');
-    N.cdSup      = drawDocument(CX[5],1690,135,58,'CD rangkap 1');
-    N.cdFin      = drawDocument(CX[3],1690,145,58,'CD rangkap 2\n(disimpan)');
-    N.finish2    = drawTerminator(CX[5],1780,120,44,'Finish');
+    N.start      = terminator(CX[0],70,120,44,null,'Start');
+    N.checkStock = process(CX[0],170,155,60,'checkStock',L.nodes.checkStock);
+    N.reorderQ   = decision(CX[0],290,145,100,'reorderQ',L.nodes.reorderQ);
+    N.finish1    = terminator(CX[0]-55,400,110,40,null,'Finish','#E4EBEF');
+    N.createPR   = manual(CX[0],470,150,58,'createPR',L.nodes.createPR);
+    N.prCopy1    = document_(CX[1],470,110,58,'prCopy1',L.nodes.prCopy1);
+    N.prFileN    = fileTriangle(CX[0],575,100,55,L.nodes.prFileN);
 
-    // ---------- EDGES ----------
+    N.inputPO    = keyInput(CX[1],570,150,58,'inputPO',L.nodes.inputPO);
+    N.mfPO1      = cylinder(CX[2]-42,545,72,44,'MF Supplier');
+    N.mfPO2      = cylinder(CX[2]+42,545,72,44,'MF Product');
+    N.mfPO3      = cylinder(CX[2]-42,600,72,44,'MF Employee');
+    N.tfPRin     = cylinder(CX[2]+42,600,72,44,'TF PR');
+    N.printPO    = display(CX[2],690,140,58,'printPO',L.nodes.printPO);
+    N.tfPO       = cylinder(CX[2],780,90,58,'TF PO');
+
+    N.poSup      = document_(CX[5],780,110,58,'poSup',L.nodes.poSup);
+    N.poInv      = document_(CX[0],780,110,58,'poInv',L.nodes.poInv);
+    N.poFin      = document_(CX[3],780,110,58,'poFin',L.nodes.poFin);
+    N.poWh       = document_(CX[4],780,120,58,'poWh',L.nodes.poWh);
+    N.poPurN     = fileTriangle(CX[1],790,100,55,L.nodes.poPurN);
+
+    N.goodsX     = goodsBox(CX[4],880,60,50,'goodsX',L.nodes.goodsX);
+    N.checkGoods = process(CX[4],980,130,60,'checkGoodsMain',L.nodes.checkGoodsMain);
+    N.checkGoodsAnn = annotation(CX[4]+70,955,1005,'checkGoodsNote',L.nodes.checkGoodsNote);
+    N.inputRR    = keyInput(CX[4],1080,150,58,'inputRR',L.nodes.inputRR);
+    N.mfRR1      = cylinder(CX[2]-42,1050,72,44,'MF Supplier');
+    N.mfRR2      = cylinder(CX[2]+42,1050,72,44,'MF Product');
+    N.mfRR3      = cylinder(CX[2]-42,1105,72,44,'MF Employee');
+    N.tfPOBlank  = cylinder(CX[2]+42,1105,72,44,'TF PO\n(Blind)');
+    N.printRR    = display(CX[2],1195,140,58,'printRR',L.nodes.printRR);
+    N.tfRR       = cylinder(CX[2],1285,90,58,'TF RR');
+    N.rrInv      = document_(CX[0],1285,105,58,'rrInv',L.nodes.rrInv);
+    N.rrPur      = document_(CX[1],1285,105,58,'rrPur',L.nodes.rrPur);
+
+    N.invoiceSup = document_(CX[5],1385,110,58,'invoiceSup',L.nodes.invoiceSup);
+    N.invoiceFin = document_(CX[3],1385,110,58,'invoiceFin',L.nodes.invoiceFin);
+    N.payInv     = process(CX[3],1485,155,58,'payInv',L.nodes.payInv);
+    N.inputCD    = keyInput(CX[3],1585,150,58,'inputCD',L.nodes.inputCD);
+    N.mfCD1      = cylinder(CX[2]-42,1555,72,44,'MF Supplier');
+    N.mfCD2      = cylinder(CX[2]+42,1555,72,44,'MF Product');
+    N.mfCD3      = cylinder(CX[2]-42,1610,72,44,'MF Employee');
+    N.tfRRin     = cylinder(CX[2]+42,1610,72,44,'TF RR');
+    N.printCD    = display(CX[2],1695,140,58,'printCD',L.nodes.printCD);
+    N.tfCD       = cylinder(CX[2],1785,90,58,'TF CD');
+    N.cdSup      = document_(CX[5],1785,110,58,'cdSup',L.nodes.cdSup);
+    N.cdFinN     = fileTriangle(CX[3],1795,100,55,L.nodes.cdFinN);
+    N.finish2    = terminator(CX[5],1885,120,44,null,'Finish');
+
+    // ===================================================================
+    // EDGES
+    // ===================================================================
     const E = {};
-    E.e1  = drawArrow(CX[0],112, CX[0],170);
-    E.e2  = drawArrow(CX[0],230, CX[0],280);
-    E.e3  = drawArrow(CX[0]-72,330, CX[0]-55,390,'Tidak');
-    E.e4  = drawArrow(CX[0],380, CX[0],441,'Ya');
-    E.e5  = drawArrow(CX[0]+75,470, CX[1]-67,470);
-    E.e6  = drawArrow(CX[0],499, CX[0],551);
-    E.e7  = drawArrow(CX[1],499, CX[1],551);
-    E.e8  = drawArrow(CX[2],610, CX[2],661);
-    E.e9  = drawArrow(CX[1]+75,580, CX[2]-75,660);
-    E.e10 = drawArrow(CX[2],720, CX[2],770);
-    E.e11 = drawArrow(CX[2]+75,700, CX[5]-67,771,'ke Supplier');
-    E.e12 = drawArrow(CX[2]-75,700, CX[0]+67,771,'ke Inv.Mgr');
-    E.e13 = drawArrow(CX[2]+75,690, CX[3]-67,771,'ke Finance');
-    E.e14 = drawArrow(CX[2]+75,710, CX[4]-72,771,'blind');
-    E.e15 = drawArrow(CX[2]-75,710, CX[1]-72,771,'simpan');
-    E.e16 = drawArrow(CX[4],829, CX[4],880);
-    E.e17 = drawArrow(CX[4],940, CX[4],990);
-    E.e18 = drawArrow(CX[2],1050, CX[2],1101);
-    E.e19 = drawArrow(CX[4]-75,1020, CX[2]+75,1130);
-    E.e20 = drawArrow(CX[2],1160, CX[2],1210);
-    E.e21 = drawArrow(CX[2]-75,1120, CX[0]+65,1211,'email');
-    E.e22 = drawArrow(CX[2]-75,1140, CX[1]+65,1211,'email');
-    E.e23 = drawArrow(CX[5]-65,1350, CX[3]+72,1350,'kirim');
-    E.e24 = drawArrow(CX[3],1379, CX[3],1432);
-    E.e25 = drawArrow(CX[3],1489, CX[3],1541);
-    E.e26 = drawArrow(CX[2],1600, CX[2],1651);
-    E.e27 = drawArrow(CX[3]-75,1570, CX[2]+75,1680);
-    E.e28 = drawArrow(CX[2],1710, CX[2],1760);
-    E.e29 = drawArrow(CX[2]+75,1700, CX[5]-67,1690,'ke Supplier');
-    E.e30 = drawArrow(CX[2]-75,1700, CX[3]-72,1690,'simpan');
-    E.e31 = drawArrow(CX[5],1719, CX[5],1758);
+    E.e1  = arrow(CX[0],92, CX[0],140);
+    E.e2  = arrow(CX[0],200, CX[0],240);
+    E.e3  = arrow(CX[0]-72,290, CX[0]-55,380,'tidak',L.edges.tidak);
+    E.e4  = arrow(CX[0],340, CX[0],441,'ya',L.edges.ya);
+    E.e5  = arrow(CX[0]+75,470, CX[1]-55,470);
+    E.e6  = arrow(CX[0],499, CX[0],547);
+    E.e7  = arrow(CX[1],499, CX[1],541);
+    E.e8a = arrow(CX[2]-42,567, CX[2]-42,578);
+    E.e8b = arrow(CX[2]+42,567, CX[2]+42,578);
+    E.e8c = arrow(CX[2]-42,622, CX[2]-30,661);
+    E.e8d = arrow(CX[2]+42,622, CX[2]+30,661);
+    E.e9  = arrow(CX[1]+75,570, CX[2]-70,680);
+    E.e10 = arrow(CX[2],719, CX[2],751);
+    E.e11 = zigzagArrow(CX[2]+70,700, CX[5]-55,751,'e11',L.edges.online);
+    E.e12 = zigzagArrow(CX[2]-70,700, CX[0]+55,751,'e12',L.edges.online);
+    E.e13 = zigzagArrow(CX[2]+70,690, CX[3]-55,751,'e13',L.edges.online);
+    E.e14 = zigzagArrow(CX[2]+70,710, CX[4]-60,751,'e14',L.edges.online);
+    E.e15 = zigzagArrow(CX[2]-70,710, CX[1]-50,762,'e15',L.edges.online);
+    E.e16 = arrow(CX[4],809, CX[4],855);
+    E.e17 = arrow(CX[4],905, CX[4],950);
+    E.e18a= arrow(CX[2]-42,1072, CX[2]-42,1083);
+    E.e18b= arrow(CX[2]+42,1072, CX[2]+42,1083);
+    E.e18c= arrow(CX[2]-42,1127, CX[2]-30,1166);
+    E.e18d= arrow(CX[2]+42,1127, CX[2]+30,1166);
+    E.e19 = arrow(CX[4]-70,1080, CX[2]+65,1195);
+    E.e20 = arrow(CX[2],1224, CX[2],1256);
+    E.e21 = zigzagArrow(CX[2]-70,1210, CX[0]+52,1256,'e21',L.edges.email);
+    E.e22 = zigzagArrow(CX[2]-70,1230, CX[1]+52,1256,'e22',L.edges.email);
+    E.e23 = arrow(CX[5]-55,1385, CX[3]+55,1385,'e23',L.edges.kirim);
+    E.e24 = arrow(CX[3],1414, CX[3],1457);
+    E.e25 = arrow(CX[3],1514, CX[3],1556);
+    E.e26a= arrow(CX[2]-42,1577, CX[2]-42,1588);
+    E.e26b= arrow(CX[2]+42,1577, CX[2]+42,1588);
+    E.e26c= arrow(CX[2]-42,1632, CX[2]-30,1666);
+    E.e26d= arrow(CX[2]+42,1632, CX[2]+30,1666);
+    E.e27 = arrow(CX[3]-75,1585, CX[2]+70,1685);
+    E.e28 = arrow(CX[2],1724, CX[2],1756);
+    E.e29 = arrow(CX[2]+70,1770, CX[5]-55,1785,'e29');
+    E.e30 = arrow(CX[2]-70,1770, CX[3]+50,1780,'e30');
+    E.e31 = arrow(CX[5],1814, CX[5],1863);
 
-    // ---------- STEPS ----------
+    // ---------- FASE ----------
+    dividerLine(830);
+    dividerLine(1330);
+    phaseLabel(0,830,'phasePlacing',L.phases.placing);
+    phaseLabel(830,1330,'phaseReceiving',L.phases.receiving);
+    phaseLabel(1330,DIAGRAM_H,'phasePayment',L.phases.payment);
+
+    // ===================================================================
+    // STEPS
+    // ===================================================================
     const STEPS = [
-      { mode:'intro', seg:'s1', badge:'Langkah 1: Kenali Entitas & Dokumen' },
-      { mode:'pools', seg:'s1', badge:'Langkah 2: Membuat Pool' },
-      { mode:'diagram', seg:'s2', badge:'Langkah 3: Titik Mulai (Start)', nodes:[N.start] },
-      { mode:'diagram', seg:'s3', badge:'Langkah 4', nodes:[N.checkStock], edges:[E.e1] },
-      { mode:'diagram', seg:'s4', badge:'Langkah 5', nodes:[N.reorderQ], edges:[E.e2] },
-      { mode:'diagram', seg:'s5', badge:'Langkah 6', nodes:[N.finish1], edges:[E.e3] },
-      { mode:'diagram', seg:'s6', badge:'Langkah 7', nodes:[N.createPR], edges:[E.e4] },
-      { mode:'diagram', seg:'s7', badge:'Langkah 8', nodes:[N.prCopy1,N.prCopy2], edges:[E.e5,E.e6] },
-      { mode:'diagram', seg:'s8', badge:'Langkah 9', nodes:[N.inputPO], edges:[E.e7] },
-      { mode:'diagram', seg:'s9', badge:'Langkah 10', nodes:[N.mfPO,N.printPO,N.tfPO], edges:[E.e8,E.e9,E.e10] },
-      { mode:'diagram', seg:'s10', badge:'Langkah 11', nodes:[N.poSup,N.poInv,N.poFin,N.poWh,N.poPur], edges:[E.e11,E.e12,E.e13,E.e14,E.e15] },
-      { mode:'diagram', seg:'s11', badge:'Langkah 12', nodes:[N.checkGoods], edges:[E.e16] },
-      { mode:'diagram', seg:'s12', badge:'Langkah 13', nodes:[N.inputRR], edges:[E.e17] },
-      { mode:'diagram', seg:'s13', badge:'Langkah 14', nodes:[N.mfRR,N.printRR,N.tfRR], edges:[E.e18,E.e19,E.e20] },
-      { mode:'diagram', seg:'s14', badge:'Langkah 15', nodes:[N.rrInv,N.rrPur], edges:[E.e21,E.e22] },
-      { mode:'diagram', seg:'s15', badge:'Langkah 16', nodes:[N.invoiceSup,N.invoiceFin], edges:[E.e23] },
-      { mode:'diagram', seg:'s16', badge:'Langkah 17', nodes:[N.payInv,N.inputCD], edges:[E.e24,E.e25] },
-      { mode:'diagram', seg:'s17', badge:'Langkah 18', nodes:[N.mfCD,N.printCD,N.tfCD], edges:[E.e26,E.e27,E.e28] },
-      { mode:'diagram', seg:'s18', badge:'Langkah 19', nodes:[N.cdSup,N.cdFin], edges:[E.e29,E.e30] },
-      { mode:'diagram', seg:'s19', badge:'Langkah 20: Selesai', nodes:[N.finish2], edges:[E.e31] }
+      { mode:'intro', seg:'s1', badgeKey:'intro' },
+      { mode:'pools', seg:'s1', badgeKey:'pools' },
+      { mode:'diagram', seg:'s2', badgeKey:'start', nodes:[N.start] },
+      { mode:'diagram', seg:'s2', badgeKey:'checkStock', nodes:[N.checkStock], edges:[E.e1] },
+      { mode:'diagram', seg:'s2', badgeKey:'reorderQ', nodes:[N.reorderQ], edges:[E.e2] },
+      { mode:'diagram', seg:'s4', badgeKey:'finish1', nodes:[N.finish1], edges:[E.e3] },
+      { mode:'diagram', seg:'s3', badgeKey:'createPR', nodes:[N.createPR], edges:[E.e4] },
+      { mode:'diagram', seg:'s5', badgeKey:'prDist', nodes:[N.prCopy1,N.prFileN], edges:[E.e5,E.e6] },
+      { mode:'diagram', seg:'s6', badgeKey:'inputPO', nodes:[N.inputPO], edges:[E.e7] },
+      { mode:'diagram', seg:'s6', badgeKey:'printPO', nodes:[N.mfPO1,N.mfPO2,N.mfPO3,N.tfPRin,N.printPO,N.tfPO], edges:[E.e8a,E.e8b,E.e8c,E.e8d,E.e9,E.e10] },
+      { mode:'diagram', seg:'s7', badgeKey:'poDist', nodes:[N.poSup,N.poInv,N.poFin,N.poWh,N.poPurN], edges:[E.e11,E.e12,E.e13,E.e14,E.e15] },
+      { mode:'diagram', seg:'s8', badgeKey:'goodsX', nodes:[N.goodsX], edges:[E.e16] },
+      { mode:'diagram', seg:'s8', badgeKey:'checkGoods', nodes:[N.checkGoods,N.checkGoodsAnn], edges:[E.e17] },
+      { mode:'diagram', seg:'s9', badgeKey:'inputRR', nodes:[N.inputRR], edges:[] },
+      { mode:'diagram', seg:'s9', badgeKey:'printRR', nodes:[N.mfRR1,N.mfRR2,N.mfRR3,N.tfPOBlank,N.printRR,N.tfRR], edges:[E.e18a,E.e18b,E.e18c,E.e18d,E.e19,E.e20] },
+      { mode:'diagram', seg:'s9', badgeKey:'rrDist', nodes:[N.rrInv,N.rrPur], edges:[E.e21,E.e22] },
+      { mode:'diagram', seg:'s10', badgeKey:'invoice', nodes:[N.invoiceSup,N.invoiceFin], edges:[E.e23] },
+      { mode:'diagram', seg:'s11', badgeKey:'payInv', nodes:[N.payInv], edges:[E.e24] },
+      { mode:'diagram', seg:'s12', badgeKey:'inputCD', nodes:[N.inputCD], edges:[E.e25] },
+      { mode:'diagram', seg:'s12', badgeKey:'printCD', nodes:[N.mfCD1,N.mfCD2,N.mfCD3,N.tfRRin,N.printCD,N.tfCD], edges:[E.e26a,E.e26b,E.e26c,E.e26d,E.e27,E.e28] },
+      { mode:'diagram', seg:'s13', badgeKey:'cdDist', nodes:[N.cdSup,N.cdFinN], edges:[E.e29,E.e30] },
+      { mode:'diagram', seg:'s13', badgeKey:'finish2', nodes:[N.finish2], edges:[E.e31] }
     ];
 
     // ===================================================================
-    // Navigasi
+    // NAVIGASI
     // ===================================================================
     let current = 0;
     const introPanel = document.getElementById('introPanel');
@@ -467,7 +668,42 @@
     const btnNextStep = document.getElementById('btnNextStep');
     const btnRestartFlow = document.getElementById('btnRestartFlow');
     const btnNextFlow = document.getElementById('btnNextFlow');
-    const segs = Array.from(document.querySelectorAll('.seg'));
+    const narParagraph = document.getElementById('narParagraph');
+
+    function buildNarrative(){
+      narParagraph.innerHTML = '';
+      Object.keys(DICT[LANG].segs).forEach(key => {
+        const span = document.createElement('span');
+        span.className = 'seg';
+        span.dataset.seg = key;
+        span.textContent = DICT[LANG].segs[key] + ' ';
+        narParagraph.appendChild(span);
+      });
+    }
+    function buildIntroLists(){
+      const entList = document.getElementById('introEntList');
+      const docList = document.getElementById('introDocList');
+      entList.innerHTML = DICT[LANG].entities.map(e => `<li><strong>${e[0]}</strong> — ${e[1]}</li>`).join('');
+      docList.innerHTML = DICT[LANG].docs.map(d => `<li><span class="doc-tag">${d[0]}</span> ${d[1]}</li>`).join('');
+    }
+    function applyStaticText(){
+      document.getElementById('introEntTitle').textContent = DICT[LANG].ui.introEntTitle;
+      document.getElementById('introDocTitle').textContent = DICT[LANG].ui.introDocTitle;
+      document.getElementById('narTitle').textContent = DICT[LANG].ui.narTitle;
+      btnPrevFlow.textContent = DICT[LANG].ui.prev;
+      btnNextStep.textContent = DICT[LANG].ui.next;
+      btnRestartFlow.textContent = DICT[LANG].ui.restart;
+      btnNextFlow.textContent = DICT[LANG].ui.backHub;
+    }
+    function applyNodeLanguage(){
+      const L2 = DICT[LANG];
+      Object.keys(L2.nodes).forEach(k => updateText(k, L2.nodes[k]));
+      updateText('e11', L2.edges.online); updateText('e12', L2.edges.online); updateText('e13', L2.edges.online);
+      updateText('e14', L2.edges.online); updateText('e15', L2.edges.online);
+      updateText('e21', L2.edges.email); updateText('e22', L2.edges.email);
+      updateText('e23', L2.edges.kirim); updateText('ya', L2.edges.ya); updateText('tidak', L2.edges.tidak);
+      updateText('phasePlacing', L2.phases.placing); updateText('phaseReceiving', L2.phases.receiving); updateText('phasePayment', L2.phases.payment);
+    }
 
     function applyUpTo(idx){
       for(let i=0;i<=idx;i++){
@@ -482,7 +718,7 @@
 
     function render(){
       const step = STEPS[current];
-      stepBadge.textContent = step.badge;
+      stepBadge.textContent = DICT[LANG].badges[step.badgeKey];
       progressFill.style.width = (((current+1)/STEPS.length)*100) + '%';
       stepCounter.textContent = (current+1) + ' / ' + STEPS.length;
 
@@ -490,16 +726,17 @@
       textPanel.style.display = step.mode === 'intro' ? 'none' : 'block';
       chartPanel.style.display = step.mode === 'intro' ? 'none' : 'block';
 
-      segs.forEach(s => s.classList.toggle('active', step.seg && s.dataset.seg === step.seg));
+      Array.from(document.querySelectorAll('.seg')).forEach(s => s.classList.toggle('active', step.seg && s.dataset.seg === step.seg));
       if(step.seg){
-        const activeEl = segs.find(s => s.dataset.seg === step.seg);
+        const activeEl = document.querySelector('.seg[data-seg="'+step.seg+'"]');
         if(activeEl) activeEl.scrollIntoView({ behavior:'smooth', block:'center' });
       }
 
       applyUpTo(current);
 
-      if(step.mode === 'diagram' && step.nodes && step.nodes.length){
-        step.nodes[0].scrollIntoView && chartPanel.scrollTo({ top: Math.max(0, step.nodes[0].getBBox ? step.nodes[0].getBBox().y - 200 : 0), behavior:'smooth' });
+      if(step.mode === 'diagram' && step.nodes && step.nodes.length && step.nodes[0].getBBox){
+        const bb = step.nodes[0].getBBox();
+        chartPanel.scrollTo({ top: Math.max(0, bb.y - 220), behavior:'smooth' });
       }
 
       btnPrevFlow.disabled = current === 0;
@@ -516,6 +753,25 @@
       document.getElementById('flowCard').scrollIntoView({ behavior:'smooth', block:'start' });
     });
 
+    // ---------- Toggle bahasa ----------
+    const btnLangID = document.getElementById('btnLangID');
+    const btnLangEN = document.getElementById('btnLangEN');
+    function setLang(lang){
+      LANG = lang;
+      btnLangID.classList.toggle('active', lang==='id');
+      btnLangEN.classList.toggle('active', lang==='en');
+      applyStaticText();
+      buildIntroLists();
+      buildNarrative();
+      applyNodeLanguage();
+      render();
+    }
+    btnLangID.addEventListener('click', () => setLang('id'));
+    btnLangEN.addEventListener('click', () => setLang('en'));
+
+    applyStaticText();
+    buildIntroLists();
+    buildNarrative();
     render();
   }
 
