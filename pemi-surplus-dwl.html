@@ -59,10 +59,18 @@
     position:absolute; top:14px; right:14px; background:#fff; border:2px solid var(--gold);
     border-radius:14px; padding:12px 18px; box-shadow:0 10px 26px rgba(0,0,0,0.18);
     opacity:0; transform:translateY(-6px); transition:opacity .35s ease, transform .35s ease;
-    pointer-events:none; max-width:75%; text-align:center;
+    pointer-events:none; max-width:75%; text-align:center; overflow-x:auto;
   }
   .formula-box.show{opacity:1; transform:translateY(0);}
   .formula-box .katex{font-size:1.05em;}
+  @media (max-width:820px){
+    .formula-box{
+      position:static; display:none; margin-top:12px; max-width:100%; width:100%;
+      box-sizing:border-box; transform:none; opacity:1;
+    }
+    .formula-box.show{display:block;}
+    .formula-box .katex{font-size:0.85em;}
+  }
 
   .curve-fade{ opacity:0; transition:opacity .55s ease; }
   .curve-fade.revealed{ opacity:1; }
@@ -283,7 +291,7 @@
       hide:['csNew','psNew','taxRect','taxSupplyLine','newEqConsumer','producerNet','legCsNew','legPsNew','legTax','dwlArea','dwlBracket','legDwl'],
       formula:'L = \\frac{1}{2} \\times 20 \\times 10 = 100',
       text:'Sama halnya buat monopoli. SK = ½ × 20 × 10 = <strong>Rp100rb²</strong>.' },
-    { chapter:'rumus', reveal:['monoDwlArea','monoDwlBracket','legDwlMono'], formula:'L = \\frac{1}{2}(a_1+a_2) \\times t = \\frac{1}{2}(30+20)(20) = 500',
+    { chapter:'rumus', reveal:['monoDwlArea','monoDwlBracket','legDwlMono'], formula:'\\begin{aligned} L &= \\frac{1}{2}(a_1+a_2) \\times t \\\\ &= \\frac{1}{2}(30+20)(20) = 500 \\end{aligned}',
       text:'SP-nya sekarang <strong>trapesium</strong> (dua sisi sejajar beda panjang, bukan segitiga): Luas = ½×(sisi 1 + sisi 2)×tinggi = ½×(30+20)×20 = <strong>Rp500rb²</strong>. DWL = ½×20×20 = <strong>Rp200rb²</strong>.' },
     { chapter:'rumus', formula:null,
       text:'Jumlahkan lagi: SK+SP+DWL = 100+500+200 = <strong>800</strong> — sama juga dengan total sebelum monopoli. Rumus luas bangun datar sederhana (segitiga, persegi panjang, trapesium) ternyata cukup buat menghitung semua konsep ini!' }
@@ -624,8 +632,8 @@
     btnPrev.disabled = current === 0;
     const isLast = current === STEPS.length - 1;
     btnNext.style.display = isLast ? 'none' : '';
-    btnRestart.style.display = isLast ? '' : 'none';
-    btnBackToHub.style.display = isLast ? '' : 'none';
+    btnRestart.style.display = isLast ? 'inline-flex' : 'none';
+    btnBackToHub.style.display = isLast ? 'inline-flex' : 'none';
   }
 
   btnNext.addEventListener('click', () => { if(current < STEPS.length - 1){ current++; render(); } });
