@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sistem Informasi — KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+  .course-hero{
+    background:linear-gradient(135deg, var(--owl-dark2), var(--owl-dark));
+    border-radius:32px; padding:36px 32px; color:#fff; margin-top:18px;
+    display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+  }
+  .course-hero .icon{
+    width:72px; height:72px; border-radius:20px; background:rgba(255,255,255,0.12);
+    display:flex; align-items:center; justify-content:center; font-size:2.1rem; flex-shrink:0;
+  }
+  .course-hero h1{color:#fff; font-size:1.8rem;}
+  .course-hero p{color:#CFE0EC; margin-top:6px; max-width:60ch; line-height:1.55;}
+  .desktop-note{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,0.12); color:#FCE7BB;
+    font-size:0.78rem; font-weight:700; padding:5px 12px; border-radius:100px; margin-top:12px;
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+      <span class="brand-text"><span class="blue">KA</span><span class="gold">FBE</span><span class="blue"> Hub</span></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Buka menu">☰</button>
+    <nav class="links" id="navLinks">
+      <a href="index.html#beranda">Beranda</a>
+      <a href="index.html#main-santai">Main Santai</a>
+      <a href="index.html#visualisasi">Visualisasi Materi</a>
+    </nav>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/><path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/><path d="M142 192 q8 10 16 0"/><path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/><path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g><circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/><circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+      <circle cx="120" cy="136" r="3" fill="#fff" opacity="0.8"/><circle cx="190" cy="136" r="3" fill="#fff" opacity="0.8"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:64px;">
+  <a class="back-link" href="index.html#visualisasi">← Kembali ke Hub</a>
+
+  <div class="course-hero">
+    <div class="icon">🗂️</div>
+    <div>
+      <h1>Sistem Informasi</h1>
+      <p>Visualisasi langkah kerja untuk konsep-konsep Sistem Informasi. Dimulai dari menggambarkan proses bisnis dengan flowchart — dibangun langkah demi langkah, disinkronkan dengan narasi kasusnya.</p>
+      <span class="desktop-note">🖥️ Sebagian fitur di sini butuh layar lebar (laptop/PC/tablet)</span>
+    </div>
+  </div>
+
+  <div class="section-head" style="margin-top:40px;">
+    <span class="kicker">Daftar Visualisasi</span>
+    <h2>Pilih topik</h2>
+  </div>
+  <div class="card-grid">
+    <div class="feature-card">
+      <span class="badge badge-live">Aktif</span>
+      <div class="feature-icon">🔀</div>
+      <h3>Flowchart Proses Bisnis</h3>
+      <p>Studi kasus siklus pengeluaran (expenditure cycle) Popuri Inc. — flowchart swimlane-nya dibangun bertahap: entitas &amp; dokumen, pool tiap entitas, sampai alur lengkapnya, disinkronkan dengan narasi di sampingnya.</p>
+      <a href="si-flowchart-popuri.html" class="btn btn-gold">Buka Visualisasi</a>
+    </div>
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">🗺️</div>
+      <h3>Data Flow Diagram (DFD)</h3>
+      <p>Menggambarkan aliran data antar proses, entitas eksternal, dan penyimpanan data dalam sebuah sistem informasi.</p>
+    </div>
+    <div class="feature-card">
+      <span class="badge badge-soon">Segera Hadir</span>
+      <div class="feature-icon">🗄️</div>
+      <h3>Entity Relationship Diagram (ERD)</h3>
+      <p>Merancang struktur basis data: entitas, atribut, dan relasi antar tabel.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong> — Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

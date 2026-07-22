@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flowchart Proses Bisnis: Popuri Inc. — Sistem Informasi — KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  /* ---------- Device gate ---------- */
+  .device-gate{
+    display:none; flex-direction:column; align-items:center; text-align:center; gap:16px;
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:56px 28px; margin-top:24px; box-shadow:var(--shadow);
+  }
+  .device-gate .icon{font-size:2.6rem;}
+  .device-gate h3{font-size:1.3rem; color:var(--owl-dark2);}
+  .device-gate p{color:var(--ink-soft); max-width:46ch; line-height:1.6;}
+  .device-gate .examples{
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px;
+  }
+  .device-gate .examples span{
+    background:var(--bg-deep); color:var(--owl-dark2); font-weight:700; font-size:0.85rem;
+    padding:7px 14px; border-radius:100px;
+  }
+
+  /* ---------- Main layout ---------- */
+  .flow-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:26px; box-shadow:var(--shadow); margin-top:24px;
+  }
+  .flow-header{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:18px;}
+  .step-badge{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
+    background:var(--bg-deep); color:var(--owl-dark2);
+  }
+  .progress-track{flex:1; min-width:160px; height:6px; background:var(--line); border-radius:100px; margin:0 16px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--gold); border-radius:100px; transition:width .3s ease; width:0%;}
+  .step-counter{font-size:0.82rem; color:var(--ink-soft); font-weight:700; white-space:nowrap;}
+
+  .flow-split{display:grid; grid-template-columns:360px 1fr; gap:24px; align-items:start;}
+
+  .text-panel{
+    background:var(--bg-deep); border-radius:18px; padding:20px; max-height:640px; overflow-y:auto;
+  }
+  .text-panel h4{font-size:0.95rem; color:var(--owl-dark2); margin-bottom:10px;}
+  .text-panel p{font-size:0.92rem; line-height:1.9; color:var(--ink);}
+  .text-panel .seg{transition:background .35s ease, box-shadow .35s ease; border-radius:5px; padding:1px 3px;}
+  .text-panel .seg.active{background:var(--gold); box-shadow:0 0 0 3px var(--gold); font-weight:700; color:var(--owl-dark2);}
+
+  .intro-list{background:var(--bg-deep); border-radius:18px; padding:24px; max-height:640px; overflow-y:auto;}
+  .intro-list h4{font-size:1rem; color:var(--owl-dark2); margin-bottom:12px;}
+  .intro-list ul{margin:0 0 18px; padding-left:20px;}
+  .intro-list li{font-size:0.9rem; color:var(--ink); line-height:1.7;}
+  .intro-list .doc-tag{
+    display:inline-block; background:var(--gold); color:var(--owl-dark2); font-weight:800;
+    font-size:0.72rem; padding:2px 8px; border-radius:100px; margin-right:6px;
+  }
+
+  .chart-panel{
+    background:var(--bg-deep); border-radius:18px; padding:16px; max-height:640px; overflow:auto; position:relative;
+  }
+  #flowSvg{display:block;}
+  .node-fade{opacity:0; transition:opacity .5s ease;}
+  .node-fade.revealed{opacity:1;}
+
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:22px; gap:12px; flex-wrap:wrap;}
+  .nav-row .spacer{flex:1;}
+  #btnRestartFlow{display:none;}
+  #btnNextFlow{display:none;}
+
+  @media (max-width:999px){
+    .flow-split{display:none;}
+    .nav-row{display:none;}
+    .flow-header{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+      <span class="brand-text"><span class="blue">KA</span><span class="gold">FBE</span><span class="blue"> Hub</span></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Buka menu">☰</button>
+    <nav class="links" id="navLinks">
+      <a href="index.html#beranda">Beranda</a>
+      <a href="index.html#main-santai">Main Santai</a>
+      <a href="si.html">Sistem Informasi</a>
+    </nav>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/><path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/><path d="M142 192 q8 10 16 0"/><path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/><path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g><circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/><circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+      <circle cx="120" cy="136" r="3" fill="#fff" opacity="0.8"/><circle cx="190" cy="136" r="3" fill="#fff" opacity="0.8"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="si.html">← Kembali ke Sistem Informasi</a>
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Sistem Informasi</span>
+    <h2>Menggambarkan Proses Bisnis dengan Flowchart</h2>
+    <p>Studi kasus: siklus pengeluaran (expenditure cycle) Popuri Inc. — perusahaan pengolahan daging yang membeli bahan baku untuk produksi nugget.</p>
+  </div>
+
+  <!-- Ditampilkan kalau layar terlalu sempit -->
+  <div class="device-gate" id="deviceGate">
+    <div class="icon">🖥️</div>
+    <h3>Butuh layar yang lebih lebar</h3>
+    <p>Biar animasi flowchart-nya kebaca jelas dan nggak berantakan, fitur ini cuma tersedia di layar yang cukup lebar. Coba buka halaman ini dari:</p>
+    <div class="examples">
+      <span>💻 Laptop</span>
+      <span>🖥️ Komputer / PC</span>
+      <span>📱 Tablet (mode lanskap)</span>
+    </div>
+  </div>
+
+  <!-- Konten utama -->
+  <div class="flow-card" id="flowCard" style="display:none;">
+    <div class="flow-header">
+      <span class="step-badge" id="stepBadge">Langkah 1</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="step-counter" id="stepCounter">1 / 20</span>
+    </div>
+
+    <div class="flow-split">
+      <div id="introPanel" class="intro-list">
+        <h4>📋 Entitas yang Terlibat</h4>
+        <ul>
+          <li><strong>Inventory Manager</strong> — mengecek stok &amp; membuat permintaan pembelian</li>
+          <li><strong>Purchasing Department</strong> — memproses pesanan pembelian</li>
+          <li><strong>EDP</strong> (Electronic Data Processing) — sistem komputer yang mencetak dokumen &amp; menyimpan data</li>
+          <li><strong>Financial Department</strong> — mengurus pembayaran</li>
+          <li><strong>Warehouse</strong> — menerima &amp; memeriksa barang</li>
+          <li><strong>Supplier</strong> — pemasok barang</li>
+        </ul>
+        <h4>📄 Dokumen yang Akan Muncul</h4>
+        <ul>
+          <li><span class="doc-tag">PR</span> Purchase Requisition — permintaan pembelian</li>
+          <li><span class="doc-tag">PO</span> Purchase Order — pesanan pembelian</li>
+          <li><span class="doc-tag">RR</span> Receiving Report — laporan penerimaan barang</li>
+          <li><span class="doc-tag">Invoice</span> tagihan dari supplier</li>
+          <li><span class="doc-tag">CD</span> Cash Disbursement — bukti pengeluaran kas</li>
+        </ul>
+      </div>
+
+      <div class="text-panel" id="textPanel">
+        <h4>📖 Narasi Proses</h4>
+        <p>
+          <span class="seg" data-seg="s1">Popuri Inc. adalah perusahaan pengolahan daging sapi dan babi yang memproduksi nugget. Entitas yang terlibat dalam siklus pengeluaran ini adalah Inventory Manager, Purchasing Department, EDP, Financial Department, Warehouse, dan Supplier — dengan dokumen utama PR, PO, RR, Invoice, dan CD.</span>
+          <span class="seg" data-seg="s2">Proses dimulai dari Inventory Manager.</span>
+          <span class="seg" data-seg="s3">Inventory Manager mengecek ketersediaan stok barang.</span>
+          <span class="seg" data-seg="s4">Ia memeriksa apakah stok sudah mencapai reorder point.</span>
+          <span class="seg" data-seg="s5">Jika belum mencapai reorder point, proses selesai.</span>
+          <span class="seg" data-seg="s6">Jika sudah mencapai reorder point, Inventory Manager membuat Purchase Requisition (PR) secara manual, sebanyak dua rangkap.</span>
+          <span class="seg" data-seg="s7">Rangkap pertama diberikan ke Purchasing Department, rangkap kedua disimpan sendiri oleh Inventory Manager berdasarkan nomor.</span>
+          <span class="seg" data-seg="s8">Setelah menerima PR, Purchasing Department menginput datanya untuk membuat Purchase Order (PO) secara online.</span>
+          <span class="seg" data-seg="s9">Sistem EDP mencetak PO menggunakan data dari master file, lalu menyimpan Transfer File PO.</span>
+          <span class="seg" data-seg="s10">PO yang tercetak didistribusikan lima rangkap: ke Supplier, Inventory Manager, Financial Department, Warehouse (sebagai rangkap buta/blind), dan disimpan sendiri oleh Purchasing Department.</span>
+          <span class="seg" data-seg="s11">Setelah barang diterima, Warehouse memeriksa barang secara manual berdasarkan PO Blind tersebut, tanpa mengetahui jumlah pesanan sebelumnya.</span>
+          <span class="seg" data-seg="s12">Warehouse menginput hasil pemeriksaan untuk membuat Receiving Report (RR) secara terkomputerisasi.</span>
+          <span class="seg" data-seg="s13">Sistem EDP mencetak RR menggunakan master file, lalu menyimpan Transfer File RR.</span>
+          <span class="seg" data-seg="s14">RR dikirim melalui email ke Inventory Manager dan Purchasing Department.</span>
+          <span class="seg" data-seg="s15">Supplier mengirimkan Invoice, yang diterima oleh Financial Department.</span>
+          <span class="seg" data-seg="s16">Staf keuangan membayar invoice tersebut ketika sudah jatuh tempo, lalu menginput data untuk membuat Cash Disbursement (CD).</span>
+          <span class="seg" data-seg="s17">Sistem EDP mencetak CD menggunakan master file, lalu menyimpan Transfer File CD.</span>
+          <span class="seg" data-seg="s18">CD didistribusikan dua rangkap: rangkap pertama diberikan ke Supplier, rangkap kedua disimpan Financial Department berdasarkan nomor dokumen.</span>
+          <span class="seg" data-seg="s19">Setelah Supplier menerima pembayaran, proses pengeluaran ini pun selesai.</span>
+        </p>
+      </div>
+
+      <div class="chart-panel" id="chartPanel">
+        <svg id="flowSvg" viewBox="0 0 1070 1820" width="1070" height="1820"></svg>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrevFlow">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestartFlow">🔁 Ulangi dari Awal</button>
+      <a href="si.html" class="btn btn-gold" id="btnNextFlow">Kembali ke Sistem Informasi →</a>
+      <button type="button" class="btn btn-primary" id="btnNextStep">Lanjut →</button>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong> — Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ===================================================================
+  // 1. GERBANG PERANGKAT — fitur ini cuma untuk layar lebar
+  // ===================================================================
+  const MIN_W = 1000, MIN_H = 560;
+  const deviceGate = document.getElementById('deviceGate');
+  const flowCard = document.getElementById('flowCard');
+  let initialized = false;
+
+  function checkDevice(){
+    const ok = window.innerWidth >= MIN_W && window.innerHeight >= MIN_H;
+    deviceGate.style.display = ok ? 'none' : 'flex';
+    flowCard.style.display = ok ? 'block' : 'none';
+    if(ok && !initialized){
+      initialized = true;
+      initFlowchart();
+    }
+  }
+  window.addEventListener('resize', checkDevice);
+
+  // ===================================================================
+  // 2. GRID SWIMLANE
+  // ===================================================================
+  const LANE_W = 170, START_X = 25;
+  const LANES = ['Inventory Manager','Purchasing Department','EDP','Financial Department','Warehouse','Supplier'];
+  const CX = LANES.map((_, i) => START_X + i*LANE_W + LANE_W/2);
+  const DIAGRAM_H = 1790;
+
+  function svgEl(tag, attrs){
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for(const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  function initFlowchart(){
+    const svg = document.getElementById('flowSvg');
+
+    // arrowhead marker
+    const defs = svgEl('defs', {});
+    const marker = svgEl('marker', { id:'arrowhead', markerWidth:9, markerHeight:9, refX:7, refY:4.5, orient:'auto' });
+    marker.appendChild(svgEl('path', { d:'M0,0 L9,4.5 L0,9 Z', fill:'#16294A' }));
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    // lane headers + dividers
+    LANES.forEach((name, i) => {
+      const x = START_X + i*LANE_W;
+      svg.appendChild(svgEl('rect', { x, y:14, width:LANE_W-6, height:40, rx:8, fill:'#16294A' }));
+      const t = svgEl('text', { x:CX[i], y:38, 'text-anchor':'middle', 'font-size':'11.5', 'font-weight':'700', fill:'#fff', 'font-family':'Plus Jakarta Sans' });
+      t.textContent = name;
+      svg.appendChild(t);
+      svg.appendChild(svgEl('line', { x1:x, y1:60, x2:x, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+    });
+    svg.appendChild(svgEl('line', { x1:START_X+6*LANE_W, y1:60, x2:START_X+6*LANE_W, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+
+    // header + divider garis pool digambar langsung; panel chart-nya sendiri
+    // baru ditampilkan mulai langkah 2 (lihat render()), jadi otomatis
+    // "muncul" bertepatan dengan narasi "membuat pool".
+
+    // ---------- shape drawers ----------
+    function labelText(cx, cy, label, size){
+      const lines = label.split('\n');
+      const lh = (size||12) + 2;
+      const startY = cy - ((lines.length-1)*lh)/2 + 4;
+      const t = svgEl('text', { x:cx, y:startY, 'text-anchor':'middle', 'font-size':size||12, 'font-weight':'700', fill:'#16294A', 'font-family':"'Plus Jakarta Sans'" });
+      lines.forEach((ln,i) => {
+        const tspan = svgEl('tspan', { x:cx, dy: i===0?0:lh });
+        tspan.textContent = ln;
+        t.appendChild(tspan);
+      });
+      return t;
+    }
+
+    function drawTerminator(cx,cy,w,h,label,fill){
+      const g = svgEl('g', { class:'node-fade' });
+      g.appendChild(svgEl('rect', { x:cx-w/2, y:cy-h/2, width:w, height:h, rx:h/2, ry:h/2, fill:fill||'#F0B93D', stroke:'#16294A', 'stroke-width':1.5 }));
+      g.appendChild(labelText(cx,cy,label,12));
+      svg.appendChild(g);
+      return g;
+    }
+    function drawProcess(cx,cy,w,h,label){
+      const g = svgEl('g', { class:'node-fade' });
+      g.appendChild(svgEl('rect', { x:cx-w/2, y:cy-h/2, width:w, height:h, fill:'#EEF7F9', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      g.appendChild(labelText(cx,cy,label,11.5));
+      svg.appendChild(g);
+      return g;
+    }
+    function drawDecision(cx,cy,w,h,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const pts = [[cx,cy-h/2],[cx+w/2,cy],[cx,cy+h/2],[cx-w/2,cy]].map(p=>p.join(',')).join(' ');
+      g.appendChild(svgEl('polygon', { points:pts, fill:'#FDEEDB', stroke:'#D69A1F', 'stroke-width':1.5 }));
+      g.appendChild(labelText(cx,cy,label,11));
+      svg.appendChild(g);
+      return g;
+    }
+    function drawDocument(cx,cy,w,h,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const x=cx-w/2, y=cy-h/2, wave=8;
+      const d = `M${x},${y} L${x+w},${y} L${x+w},${y+h-wave} `+
+                `Q${x+w*0.75},${y+h+wave} ${x+w/2},${y+h-wave} `+
+                `Q${x+w*0.25},${y+h-wave*3} ${x},${y+h-wave} Z`;
+      g.appendChild(svgEl('path', { d, fill:'#FBEFEA', stroke:'#C24E33', 'stroke-width':1.5 }));
+      g.appendChild(labelText(cx,cy-3,label,10.5));
+      svg.appendChild(g);
+      return g;
+    }
+    function drawManual(cx,cy,w,h,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const x=cx-w/2, y=cy-h/2, indent=w*0.16;
+      const d = `M${x},${y} L${x+w},${y} L${x+w-indent},${y+h} L${x+indent},${y+h} Z`;
+      g.appendChild(svgEl('path', { d, fill:'#E9F0FA', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      g.appendChild(labelText(cx,cy,label,11));
+      svg.appendChild(g);
+      return g;
+    }
+    function drawCylinder(cx,cy,w,h,label){
+      const g = svgEl('g', { class:'node-fade' });
+      const rx=w/2, ry=h*0.16, top=cy-h/2, bottom=cy+h/2;
+      g.appendChild(svgEl('path', { d:`M${cx-rx},${top+ry} A${rx},${ry} 0 0 0 ${cx+rx},${top+ry} L${cx+rx},${bottom-ry} A${rx},${ry} 0 0 1 ${cx-rx},${bottom-ry} Z`, fill:'#E9F0FA', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      g.appendChild(svgEl('ellipse', { cx, cy:top+ry, rx, ry, fill:'#F5FAFC', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      g.appendChild(labelText(cx,cy+ry,label,10));
+      svg.appendChild(g);
+      return g;
+    }
+
+    function drawArrow(x1,y1,x2,y2,label){
+      const g = svgEl('g', { class:'node-fade' });
+      g.appendChild(svgEl('line', { x1,y1,x2,y2, stroke:'#16294A', 'stroke-width':1.6, 'marker-end':'url(#arrowhead)' }));
+      if(label){
+        const mx=(x1+x2)/2, my=(y1+y2)/2;
+        g.appendChild(svgEl('rect', { x:mx-20, y:my-9, width:40, height:16, fill:'#EFF6F9', opacity:0.9 }));
+        const t = svgEl('text', { x:mx, y:my+3, 'text-anchor':'middle', 'font-size':10, 'font-weight':'700', fill:'#9C3B26', 'font-family':"'Plus Jakarta Sans'" });
+        t.textContent = label;
+        g.appendChild(t);
+      }
+      svg.appendChild(g);
+      return g;
+    }
+
+    // ---------- NODES ----------
+    const N = {};
+    N.start      = drawTerminator(CX[0],90,120,44,'Start');
+    N.checkStock = drawProcess(CX[0],200,155,60,'Cek ketersediaan\nstok barang');
+    N.reorderQ   = drawDecision(CX[0],330,145,100,'Sudah capai\nreorder point?');
+    N.finish1    = drawTerminator(CX[0]-55,410,110,40,'Finish','#E4EBEF');
+    N.createPR   = drawManual(CX[0],470,150,58,'Buat PR manual\n(2 rangkap)');
+    N.prCopy1    = drawDocument(CX[1],470,135,58,'PR rangkap 1');
+    N.prCopy2    = drawDocument(CX[0],580,145,58,'PR rangkap 2\n(disimpan – No.)');
+    N.inputPO    = drawProcess(CX[1],580,150,58,'Input data PO\n(online)');
+    N.mfPO       = drawCylinder(CX[2],580,95,60,'Master File');
+    N.printPO    = drawProcess(CX[2],690,150,58,'Print PO');
+    N.tfPO       = drawCylinder(CX[2],800,95,60,'TF PO');
+    N.poSup      = drawDocument(CX[5],800,135,58,'PO rangkap 1');
+    N.poInv      = drawDocument(CX[0],800,135,58,'PO rangkap 2');
+    N.poFin      = drawDocument(CX[3],800,135,58,'PO rangkap 3');
+    N.poWh       = drawDocument(CX[4],800,145,58,'PO rangkap 4\n(Blind)');
+    N.poPur      = drawDocument(CX[1],800,145,58,'PO rangkap 5\n(disimpan)');
+    N.checkGoods = drawProcess(CX[4],910,155,60,'Cek barang manual\n(PO Blind)');
+    N.inputRR    = drawProcess(CX[4],1020,150,58,'Input RR');
+    N.mfRR       = drawCylinder(CX[2],1020,95,60,'Master File');
+    N.printRR    = drawProcess(CX[2],1130,150,58,'Print RR');
+    N.tfRR       = drawCylinder(CX[2],1240,95,60,'TF RR');
+    N.rrInv      = drawDocument(CX[0],1240,130,58,'RR (email)');
+    N.rrPur      = drawDocument(CX[1],1240,130,58,'RR (email)');
+    N.invoiceSup = drawDocument(CX[5],1350,130,58,'Invoice');
+    N.invoiceFin = drawDocument(CX[3],1350,145,58,'Invoice diterima');
+    N.payInv     = drawProcess(CX[3],1460,155,58,'Bayar invoice\n(jatuh tempo)');
+    N.inputCD    = drawProcess(CX[3],1570,150,58,'Input CD');
+    N.mfCD       = drawCylinder(CX[2],1570,95,60,'Master File');
+    N.printCD    = drawProcess(CX[2],1680,150,58,'Print CD');
+    N.tfCD       = drawCylinder(CX[2],1790,95,60,'TF CD');
+    N.cdSup      = drawDocument(CX[5],1690,135,58,'CD rangkap 1');
+    N.cdFin      = drawDocument(CX[3],1690,145,58,'CD rangkap 2\n(disimpan)');
+    N.finish2    = drawTerminator(CX[5],1780,120,44,'Finish');
+
+    // ---------- EDGES ----------
+    const E = {};
+    E.e1  = drawArrow(CX[0],112, CX[0],170);
+    E.e2  = drawArrow(CX[0],230, CX[0],280);
+    E.e3  = drawArrow(CX[0]-72,330, CX[0]-55,390,'Tidak');
+    E.e4  = drawArrow(CX[0],380, CX[0],441,'Ya');
+    E.e5  = drawArrow(CX[0]+75,470, CX[1]-67,470);
+    E.e6  = drawArrow(CX[0],499, CX[0],551);
+    E.e7  = drawArrow(CX[1],499, CX[1],551);
+    E.e8  = drawArrow(CX[2],610, CX[2],661);
+    E.e9  = drawArrow(CX[1]+75,580, CX[2]-75,660);
+    E.e10 = drawArrow(CX[2],720, CX[2],770);
+    E.e11 = drawArrow(CX[2]+75,700, CX[5]-67,771,'ke Supplier');
+    E.e12 = drawArrow(CX[2]-75,700, CX[0]+67,771,'ke Inv.Mgr');
+    E.e13 = drawArrow(CX[2]+75,690, CX[3]-67,771,'ke Finance');
+    E.e14 = drawArrow(CX[2]+75,710, CX[4]-72,771,'blind');
+    E.e15 = drawArrow(CX[2]-75,710, CX[1]-72,771,'simpan');
+    E.e16 = drawArrow(CX[4],829, CX[4],880);
+    E.e17 = drawArrow(CX[4],940, CX[4],990);
+    E.e18 = drawArrow(CX[2],1050, CX[2],1101);
+    E.e19 = drawArrow(CX[4]-75,1020, CX[2]+75,1130);
+    E.e20 = drawArrow(CX[2],1160, CX[2],1210);
+    E.e21 = drawArrow(CX[2]-75,1120, CX[0]+65,1211,'email');
+    E.e22 = drawArrow(CX[2]-75,1140, CX[1]+65,1211,'email');
+    E.e23 = drawArrow(CX[5]-65,1350, CX[3]+72,1350,'kirim');
+    E.e24 = drawArrow(CX[3],1379, CX[3],1432);
+    E.e25 = drawArrow(CX[3],1489, CX[3],1541);
+    E.e26 = drawArrow(CX[2],1600, CX[2],1651);
+    E.e27 = drawArrow(CX[3]-75,1570, CX[2]+75,1680);
+    E.e28 = drawArrow(CX[2],1710, CX[2],1760);
+    E.e29 = drawArrow(CX[2]+75,1700, CX[5]-67,1690,'ke Supplier');
+    E.e30 = drawArrow(CX[2]-75,1700, CX[3]-72,1690,'simpan');
+    E.e31 = drawArrow(CX[5],1719, CX[5],1758);
+
+    // ---------- STEPS ----------
+    const STEPS = [
+      { mode:'intro', seg:'s1', badge:'Langkah 1: Kenali Entitas & Dokumen' },
+      { mode:'pools', seg:'s1', badge:'Langkah 2: Membuat Pool' },
+      { mode:'diagram', seg:'s2', badge:'Langkah 3: Titik Mulai (Start)', nodes:[N.start] },
+      { mode:'diagram', seg:'s3', badge:'Langkah 4', nodes:[N.checkStock], edges:[E.e1] },
+      { mode:'diagram', seg:'s4', badge:'Langkah 5', nodes:[N.reorderQ], edges:[E.e2] },
+      { mode:'diagram', seg:'s5', badge:'Langkah 6', nodes:[N.finish1], edges:[E.e3] },
+      { mode:'diagram', seg:'s6', badge:'Langkah 7', nodes:[N.createPR], edges:[E.e4] },
+      { mode:'diagram', seg:'s7', badge:'Langkah 8', nodes:[N.prCopy1,N.prCopy2], edges:[E.e5,E.e6] },
+      { mode:'diagram', seg:'s8', badge:'Langkah 9', nodes:[N.inputPO], edges:[E.e7] },
+      { mode:'diagram', seg:'s9', badge:'Langkah 10', nodes:[N.mfPO,N.printPO,N.tfPO], edges:[E.e8,E.e9,E.e10] },
+      { mode:'diagram', seg:'s10', badge:'Langkah 11', nodes:[N.poSup,N.poInv,N.poFin,N.poWh,N.poPur], edges:[E.e11,E.e12,E.e13,E.e14,E.e15] },
+      { mode:'diagram', seg:'s11', badge:'Langkah 12', nodes:[N.checkGoods], edges:[E.e16] },
+      { mode:'diagram', seg:'s12', badge:'Langkah 13', nodes:[N.inputRR], edges:[E.e17] },
+      { mode:'diagram', seg:'s13', badge:'Langkah 14', nodes:[N.mfRR,N.printRR,N.tfRR], edges:[E.e18,E.e19,E.e20] },
+      { mode:'diagram', seg:'s14', badge:'Langkah 15', nodes:[N.rrInv,N.rrPur], edges:[E.e21,E.e22] },
+      { mode:'diagram', seg:'s15', badge:'Langkah 16', nodes:[N.invoiceSup,N.invoiceFin], edges:[E.e23] },
+      { mode:'diagram', seg:'s16', badge:'Langkah 17', nodes:[N.payInv,N.inputCD], edges:[E.e24,E.e25] },
+      { mode:'diagram', seg:'s17', badge:'Langkah 18', nodes:[N.mfCD,N.printCD,N.tfCD], edges:[E.e26,E.e27,E.e28] },
+      { mode:'diagram', seg:'s18', badge:'Langkah 19', nodes:[N.cdSup,N.cdFin], edges:[E.e29,E.e30] },
+      { mode:'diagram', seg:'s19', badge:'Langkah 20: Selesai', nodes:[N.finish2], edges:[E.e31] }
+    ];
+
+    // ===================================================================
+    // Navigasi
+    // ===================================================================
+    let current = 0;
+    const introPanel = document.getElementById('introPanel');
+    const textPanel = document.getElementById('textPanel');
+    const chartPanel = document.getElementById('chartPanel');
+    const stepBadge = document.getElementById('stepBadge');
+    const progressFill = document.getElementById('progressFill');
+    const stepCounter = document.getElementById('stepCounter');
+    const btnPrevFlow = document.getElementById('btnPrevFlow');
+    const btnNextStep = document.getElementById('btnNextStep');
+    const btnRestartFlow = document.getElementById('btnRestartFlow');
+    const btnNextFlow = document.getElementById('btnNextFlow');
+    const segs = Array.from(document.querySelectorAll('.seg'));
+
+    function applyUpTo(idx){
+      for(let i=0;i<=idx;i++){
+        (STEPS[i].nodes||[]).forEach(n => n.classList.add('revealed'));
+        (STEPS[i].edges||[]).forEach(e => e.classList.add('revealed'));
+      }
+      for(let i=idx+1;i<STEPS.length;i++){
+        (STEPS[i].nodes||[]).forEach(n => n.classList.remove('revealed'));
+        (STEPS[i].edges||[]).forEach(e => e.classList.remove('revealed'));
+      }
+    }
+
+    function render(){
+      const step = STEPS[current];
+      stepBadge.textContent = step.badge;
+      progressFill.style.width = (((current+1)/STEPS.length)*100) + '%';
+      stepCounter.textContent = (current+1) + ' / ' + STEPS.length;
+
+      introPanel.style.display = step.mode === 'intro' ? 'block' : 'none';
+      textPanel.style.display = step.mode === 'intro' ? 'none' : 'block';
+      chartPanel.style.display = step.mode === 'intro' ? 'none' : 'block';
+
+      segs.forEach(s => s.classList.toggle('active', step.seg && s.dataset.seg === step.seg));
+      if(step.seg){
+        const activeEl = segs.find(s => s.dataset.seg === step.seg);
+        if(activeEl) activeEl.scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+
+      applyUpTo(current);
+
+      if(step.mode === 'diagram' && step.nodes && step.nodes.length){
+        step.nodes[0].scrollIntoView && chartPanel.scrollTo({ top: Math.max(0, step.nodes[0].getBBox ? step.nodes[0].getBBox().y - 200 : 0), behavior:'smooth' });
+      }
+
+      btnPrevFlow.disabled = current === 0;
+      const isLast = current === STEPS.length - 1;
+      btnNextStep.style.display = isLast ? 'none' : '';
+      btnRestartFlow.style.display = isLast ? 'inline-flex' : 'none';
+      btnNextFlow.style.display = isLast ? 'inline-flex' : 'none';
+    }
+
+    btnNextStep.addEventListener('click', () => { if(current < STEPS.length-1){ current++; render(); } });
+    btnPrevFlow.addEventListener('click', () => { if(current > 0){ current--; render(); } });
+    btnRestartFlow.addEventListener('click', () => {
+      current = 0; render();
+      document.getElementById('flowCard').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+
+    render();
+  }
+
+  checkDevice();
+})();
+</script>
+</body>
+</html>
