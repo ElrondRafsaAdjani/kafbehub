@@ -77,8 +77,8 @@
   .curve-line{ transition:stroke-dashoffset .8s ease; }
 
   .legend{display:flex; flex-wrap:wrap; gap:10px 16px; margin-top:14px; font-size:0.82rem;}
-  .legend-item{display:flex; align-items:center; gap:6px; color:var(--ink-soft); opacity:0; transition:opacity .4s ease;}
-  .legend-item.revealed{opacity:1;}
+  .legend-item{display:none; align-items:center; gap:6px; color:var(--ink-soft);}
+  .legend-item.revealed{display:flex;}
   .legend-swatch{width:16px; height:16px; border-radius:4px; display:inline-block; flex-shrink:0;}
 
   .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
