@@ -55,8 +55,7 @@
   .intro-list .doc-tag{display:inline-block; background:var(--gold); color:var(--owl-dark2); font-weight:800; font-size:0.72rem; padding:2px 8px; border-radius:100px; margin-right:6px;}
 
   .chart-panel{background:var(--bg-deep); border-radius:18px; padding:0; max-height:660px; overflow:auto; position:relative;}
-  .chart-header-sticky{position:sticky; top:0; z-index:5; background:var(--bg-deep); padding:12px 0 0; display:inline-block;}
-  #flowHeaderSvg, #flowSvg{display:block;}
+  #flowSvg{display:block;}
   #flowSvg{padding-bottom:12px;}
   .zoom-controls{display:flex; align-items:center; gap:4px;}
   .zoom-controls button{
@@ -166,10 +165,7 @@
           <button type="button" id="btnZoomIn" title="Perbesar">+</button>
         </div>
         <div class="chart-panel" id="chartPanel">
-          <div class="chart-header-sticky">
-            <svg id="flowHeaderSvg" viewBox="0 0 1100 62"></svg>
-          </div>
-          <svg id="flowSvg" viewBox="0 0 1100 1940"></svg>
+          <svg id="flowSvg" viewBox="0 0 1100 2000"></svg>
         </div>
       </div>
     </div>
@@ -363,20 +359,17 @@
   }
 
   function initFlowchart(){
-    const headerSvg = document.getElementById('flowHeaderSvg');
     const svg = document.getElementById('flowSvg');
-    headerSvg.setAttribute('viewBox', `0 0 ${TOTAL_W} 62`);
-    svg.setAttribute('viewBox', `0 0 ${TOTAL_W} ${DIAGRAM_H}`);
+    const HEADER_H = 70;
+    svg.setAttribute('viewBox', `0 ${-HEADER_H} ${TOTAL_W} ${DIAGRAM_H + HEADER_H}`);
 
     // ---------- Kontrol zoom ----------
     let zoomLevel = 1;
     const zoomPct = document.getElementById('zoomPct');
     function applyZoom(){
       const w = Math.round(TOTAL_W * zoomLevel);
-      headerSvg.style.width = w+'px';
-      headerSvg.style.height = Math.round(62*zoomLevel)+'px';
       svg.style.width = w+'px';
-      svg.style.height = Math.round(DIAGRAM_H*zoomLevel)+'px';
+      svg.style.height = Math.round((DIAGRAM_H+HEADER_H)*zoomLevel)+'px';
       zoomPct.textContent = Math.round(zoomLevel*100)+'%';
     }
     document.getElementById('btnZoomIn').addEventListener('click', () => {
@@ -387,23 +380,21 @@
     });
     applyZoom();
 
-    // ---------- HEADER (frozen) ----------
+    // ---------- HEADER (di area negatif, di atas titik y=0 tempat diagram mulai) ----------
     LANES.forEach((name, i) => {
       const x = START_X + i*LANE_W;
-      headerSvg.appendChild(svgEl('rect', { x, y:8, width:LANE_W-6, height:44, rx:9, fill:'#16294A' }));
-      const t = svgEl('text', { x:CX[i], y:35, 'text-anchor':'middle', 'font-size':'11.5', 'font-weight':'700', fill:'#fff', 'font-family':"'Plus Jakarta Sans'" });
+      svg.appendChild(svgEl('rect', { x, y:-HEADER_H+8, width:LANE_W-6, height:44, rx:9, fill:'#16294A' }));
+      const t = svgEl('text', { x:CX[i], y:-HEADER_H+35, 'text-anchor':'middle', 'font-size':'11.5', 'font-weight':'700', fill:'#fff', 'font-family':"'Plus Jakarta Sans'" });
       t.textContent = name;
-      headerSvg.appendChild(t);
-      headerSvg.appendChild(svgEl('line', { x1:x, y1:52, x2:x, y2:62, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+      svg.appendChild(t);
     });
-    headerSvg.appendChild(svgEl('line', { x1:START_X+6*LANE_W, y1:52, x2:START_X+6*LANE_W, y2:62, stroke:'#D3E4EC', 'stroke-width':1.5 }));
 
-    // ---------- BODY: dividers lajur ----------
+    // ---------- BODY: dividers lajur (dari atas header sampai bawah diagram) ----------
     for(let i=0;i<=6;i++){
       const x = START_X + i*LANE_W;
-      svg.appendChild(svgEl('line', { x1:x, y1:0, x2:x, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+      svg.appendChild(svgEl('line', { x1:x, y1:-HEADER_H+52, x2:x, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
     }
-    svg.appendChild(svgEl('line', { x1:0, y1:0, x2:0, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+    svg.appendChild(svgEl('line', { x1:0, y1:-HEADER_H+52, x2:0, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
 
     const defs = svgEl('defs', {});
     const marker = svgEl('marker', { id:'arrowhead', markerWidth:9, markerHeight:9, refX:7, refY:4.5, orient:'auto' });
@@ -455,15 +446,19 @@
       g.appendChild(makeLabel(cx,cy+ry,label,9));
       svg.appendChild(g); return g;
     }
-    // Gabungan Display (atas) + Manual/Key Input (bawah) — mewakili "input data lewat komputer"
-    function computerInput(cx,cy,w,textKey,label){
-      const dispH=28, keyH=34, gap=3;
+    // Gabungan Display (atas, menampilkan nama dokumen) + Manual/Key Input (bawah, aksi input)
+    function computerInput(cx,cy,w,textKey,label,docName){
+      const dispH=30, keyH=34, gap=3;
       const totalH = dispH+gap+keyH;
       const topY = cy - totalH/2;
       const g = svgEl('g', { class:'node-fade' });
       const dx = cx-w/2, dy = topY;
       const dd = `M${dx},${dy} L${dx+w*0.8},${dy} Q${dx+w+8},${dy+dispH/2} ${dx+w*0.8},${dy+dispH} L${dx},${dy+dispH} Z`;
       g.appendChild(svgEl('path', { d:dd, fill:'#DCEBFB', stroke:'#1F3A63', 'stroke-width':1.5 }));
+      if(docName){
+        const dt = makeLabel(cx-6, dy+dispH/2+4, docName, 11, '800');
+        g.appendChild(dt);
+      }
       const ky = dy+dispH+gap, slant=9;
       const kd = `M${dx},${ky+slant} L${dx+w},${ky} L${dx+w},${ky+keyH} L${dx},${ky+keyH} Z`;
       g.appendChild(svgEl('path', { d:kd, fill:'#E3ECFB', stroke:'#1F3A63', 'stroke-width':1.5 }));
@@ -545,7 +540,7 @@
     N.prCopy1    = document_(CX[1],470,110,58,'prCopy1',L.nodes.prCopy1);
     N.prFileN    = fileTriangle(CX[0],575,100,55,L.nodes.prFileN);
 
-    N.inputPO    = computerInput(CX[1],575,140,'inputPO',L.nodes.inputPO);
+    N.inputPO    = computerInput(CX[1],575,140,'inputPO',L.nodes.inputPO,'PO');
     N.mfPO1      = cylinder(CX[2]-42,545,72,44,'MF Supplier');
     N.mfPO2      = cylinder(CX[2]+42,545,72,44,'MF Product');
     N.mfPO3      = cylinder(CX[2]-42,600,72,44,'MF Employee');
@@ -562,7 +557,7 @@
     N.goodsX     = goodsBox(CX[4],880,60,50,'goodsX',L.nodes.goodsX);
     N.checkGoods = manual(CX[4],980,130,60,'checkGoodsMain',L.nodes.checkGoodsMain);
     N.checkGoodsAnn = annotation(CX[4]+70,955,1005,'checkGoodsNote',L.nodes.checkGoodsNote);
-    N.inputRR    = computerInput(CX[4],1085,140,'inputRR',L.nodes.inputRR);
+    N.inputRR    = computerInput(CX[4],1085,140,'inputRR',L.nodes.inputRR,'RR');
     N.mfRR1      = cylinder(CX[2]-42,1050,72,44,'MF Supplier');
     N.mfRR2      = cylinder(CX[2]+42,1050,72,44,'MF Product');
     N.mfRR3      = cylinder(CX[2]-42,1105,72,44,'MF Employee');
@@ -575,7 +570,7 @@
     N.invoiceSup = document_(CX[5],1385,110,58,'invoiceSup',L.nodes.invoiceSup);
     N.invoiceFin = document_(CX[3],1385,110,58,'invoiceFin',L.nodes.invoiceFin);
     N.payInv     = process(CX[3],1485,155,58,'payInv',L.nodes.payInv);
-    N.inputCD    = computerInput(CX[3],1590,140,'inputCD',L.nodes.inputCD);
+    N.inputCD    = computerInput(CX[3],1590,140,'inputCD',L.nodes.inputCD,'CD');
     N.mfCD1      = cylinder(CX[2]-42,1555,72,44,'MF Supplier');
     N.mfCD2      = cylinder(CX[2]+42,1555,72,44,'MF Product');
     N.mfCD3      = cylinder(CX[2]-42,1610,72,44,'MF Employee');
@@ -748,7 +743,7 @@
 
       if(step.mode === 'diagram' && step.nodes && step.nodes.length && step.nodes[0].getBBox){
         const bb = step.nodes[0].getBBox();
-        chartPanel.scrollTo({ top: Math.max(0, bb.y - 220), behavior:'smooth' });
+        chartPanel.scrollTo({ top: Math.max(0, (bb.y + HEADER_H) * zoomLevel - 220), behavior:'smooth' });
       }
 
       btnPrevFlow.disabled = current === 0;
