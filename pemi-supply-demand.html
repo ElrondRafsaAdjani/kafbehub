@@ -28,13 +28,14 @@
   .progress-dots .dot.done{background:var(--owl-mid);}
 
   .story-layout{display:grid; grid-template-columns:300px 1fr; gap:26px; align-items:start;}
-  @media (max-width:820px){ .story-layout{grid-template-columns:1fr;} }
+  @media (max-width:820px){ .story-layout{display:flex; flex-direction:column; gap:18px;} }
 
   .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
   .owl-panel svg{width:150px;}
   .owl-panel .wing-l{transform-origin:78px 150px; animation:flapL 2.6s ease-in-out infinite;}
   .owl-panel .wing-r{transform-origin:222px 150px; animation:flapR 2.6s ease-in-out infinite;}
   .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
+  @media (max-width:820px){ .owl-panel svg{width:84px;} .owl-panel{gap:8px;} }
 
   .bubble{
     position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
@@ -49,7 +50,7 @@
   }
 
   .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:16px;}
-  #chartSvg{width:100%; height:auto; display:block;}
+  #chartSvg{width:100%; height:auto; aspect-ratio:560/400; display:block;}
 
   .curve-point{ opacity:0; transform-origin:center; transition:opacity .45s ease, r .45s ease; }
   .curve-point.revealed{ opacity:1; }
@@ -57,9 +58,10 @@
   .curve-fade{ opacity:0; transition:opacity .5s ease; }
   .curve-fade.revealed{ opacity:1; }
 
-  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px;}
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
   .nav-row .spacer{flex:1;}
   #btnRestart{display:none;}
+  #btnNextMaterial{display:none;}
 </style>
 </head>
 <body>
@@ -133,7 +135,7 @@
       </div>
 
       <div class="chart-wrap">
-        <svg id="chartSvg" viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="chartSvg" viewBox="0 0 560 400" width="560" height="400" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
     </div>
 
@@ -141,6 +143,7 @@
       <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
       <div class="spacer"></div>
       <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <a href="pemi-surplus-dwl.html" class="btn btn-gold" id="btnNextMaterial">Materi Berikutnya: Surplus &amp; DWL →</a>
       <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
     </div>
   </div>
@@ -311,6 +314,7 @@
   const btnPrev = document.getElementById('btnPrev');
   const btnNext = document.getElementById('btnNext');
   const btnRestart = document.getElementById('btnRestart');
+  const btnNextMaterial = document.getElementById('btnNextMaterial');
 
   STEPS.forEach((s, i) => {
     const dot = document.createElement('span');
@@ -353,6 +357,7 @@
     const isLast = current === STEPS.length - 1;
     btnNext.style.display = isLast ? 'none' : '';
     btnRestart.style.display = isLast ? '' : 'none';
+    btnNextMaterial.style.display = isLast ? '' : 'none';
   }
 
   btnNext.addEventListener('click', () => {
