@@ -40,7 +40,8 @@
   }
   .lang-toggle button.active{background:var(--owl-dark2); color:#fff;}
 
-  .flow-split{display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:start;}
+  .flow-split{display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:start; min-width:0;}
+  .flow-split > *{min-width:0;}
 
   .text-panel{background:var(--bg-deep); border-radius:18px; padding:20px; max-height:660px; overflow-y:auto;}
   .text-panel h4{font-size:0.95rem; color:var(--owl-dark2); margin-bottom:10px;}
@@ -54,8 +55,9 @@
   .intro-list li{font-size:0.9rem; color:var(--ink); line-height:1.7;}
   .intro-list .doc-tag{display:inline-block; background:var(--gold); color:var(--owl-dark2); font-weight:800; font-size:0.72rem; padding:2px 8px; border-radius:100px; margin-right:6px;}
 
-  .chart-panel{background:var(--bg-deep); border-radius:18px; padding:0; max-height:660px; overflow:auto; position:relative;}
-  #flowSvg{display:block;}
+  .chart-panel{background:var(--bg-deep); border-radius:18px; padding:0; max-height:660px; overflow:auto; position:relative; overflow-anchor:none;}
+  .chart-header-sticky{position:sticky; top:0; z-index:5; background:var(--bg-deep); padding:12px 0 0;}
+  #flowHeaderSvg, #flowSvg{display:block;}
   #flowSvg{padding-bottom:12px;}
   .zoom-controls{display:flex; align-items:center; gap:4px;}
   .zoom-controls button{
@@ -165,7 +167,10 @@
           <button type="button" id="btnZoomIn" title="Perbesar">+</button>
         </div>
         <div class="chart-panel" id="chartPanel">
-          <svg id="flowSvg" viewBox="0 0 1100 2000"></svg>
+          <div class="chart-header-sticky">
+            <svg id="flowHeaderSvg" viewBox="0 0 1100 62"></svg>
+          </div>
+          <svg id="flowSvg" viewBox="0 0 1100 1940"></svg>
         </div>
       </div>
     </div>
@@ -359,17 +364,20 @@
   }
 
   function initFlowchart(){
+    const headerSvg = document.getElementById('flowHeaderSvg');
     const svg = document.getElementById('flowSvg');
-    const HEADER_H = 70;
-    svg.setAttribute('viewBox', `0 ${-HEADER_H} ${TOTAL_W} ${DIAGRAM_H + HEADER_H}`);
+    headerSvg.setAttribute('viewBox', `0 0 ${TOTAL_W} 62`);
+    svg.setAttribute('viewBox', `0 0 ${TOTAL_W} ${DIAGRAM_H}`);
 
     // ---------- Kontrol zoom ----------
     let zoomLevel = 1;
     const zoomPct = document.getElementById('zoomPct');
     function applyZoom(){
       const w = Math.round(TOTAL_W * zoomLevel);
+      headerSvg.style.width = w+'px';
+      headerSvg.style.height = Math.round(62*zoomLevel)+'px';
       svg.style.width = w+'px';
-      svg.style.height = Math.round((DIAGRAM_H+HEADER_H)*zoomLevel)+'px';
+      svg.style.height = Math.round(DIAGRAM_H*zoomLevel)+'px';
       zoomPct.textContent = Math.round(zoomLevel*100)+'%';
     }
     document.getElementById('btnZoomIn').addEventListener('click', () => {
@@ -380,21 +388,23 @@
     });
     applyZoom();
 
-    // ---------- HEADER (di area negatif, di atas titik y=0 tempat diagram mulai) ----------
+    // ---------- HEADER (freeze, SVG terpisah dari body) ----------
     LANES.forEach((name, i) => {
       const x = START_X + i*LANE_W;
-      svg.appendChild(svgEl('rect', { x, y:-HEADER_H+8, width:LANE_W-6, height:44, rx:9, fill:'#16294A' }));
-      const t = svgEl('text', { x:CX[i], y:-HEADER_H+35, 'text-anchor':'middle', 'font-size':'11.5', 'font-weight':'700', fill:'#fff', 'font-family':"'Plus Jakarta Sans'" });
+      headerSvg.appendChild(svgEl('rect', { x, y:8, width:LANE_W-6, height:44, rx:9, fill:'#16294A' }));
+      const t = svgEl('text', { x:CX[i], y:35, 'text-anchor':'middle', 'font-size':'11.5', 'font-weight':'700', fill:'#fff', 'font-family':"'Plus Jakarta Sans'" });
       t.textContent = name;
-      svg.appendChild(t);
+      headerSvg.appendChild(t);
+      headerSvg.appendChild(svgEl('line', { x1:x, y1:52, x2:x, y2:62, stroke:'#D3E4EC', 'stroke-width':1.5 }));
     });
+    headerSvg.appendChild(svgEl('line', { x1:START_X+6*LANE_W, y1:52, x2:START_X+6*LANE_W, y2:62, stroke:'#D3E4EC', 'stroke-width':1.5 }));
 
-    // ---------- BODY: dividers lajur (dari atas header sampai bawah diagram) ----------
+    // ---------- BODY: dividers lajur ----------
     for(let i=0;i<=6;i++){
       const x = START_X + i*LANE_W;
-      svg.appendChild(svgEl('line', { x1:x, y1:-HEADER_H+52, x2:x, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+      svg.appendChild(svgEl('line', { x1:x, y1:0, x2:x, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
     }
-    svg.appendChild(svgEl('line', { x1:0, y1:-HEADER_H+52, x2:0, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
+    svg.appendChild(svgEl('line', { x1:0, y1:0, x2:0, y2:DIAGRAM_H, stroke:'#D3E4EC', 'stroke-width':1.5 }));
 
     const defs = svgEl('defs', {});
     const marker = svgEl('marker', { id:'arrowhead', markerWidth:9, markerHeight:9, refX:7, refY:4.5, orient:'auto' });
@@ -732,6 +742,7 @@
       introPanel.style.display = step.mode === 'intro' ? 'block' : 'none';
       textPanel.style.display = step.mode === 'intro' ? 'none' : 'block';
       chartPanel.style.display = step.mode === 'intro' ? 'none' : 'block';
+      if(step.mode === 'pools'){ chartPanel.scrollTop = 0; chartPanel.scrollLeft = 0; }
 
       Array.from(document.querySelectorAll('.seg')).forEach(s => s.classList.toggle('active', step.seg && s.dataset.seg === step.seg));
       if(step.seg){
@@ -743,7 +754,7 @@
 
       if(step.mode === 'diagram' && step.nodes && step.nodes.length && step.nodes[0].getBBox){
         const bb = step.nodes[0].getBBox();
-        chartPanel.scrollTo({ top: Math.max(0, (bb.y + HEADER_H) * zoomLevel - 220), behavior:'smooth' });
+        chartPanel.scrollTo({ top: Math.max(0, bb.y * zoomLevel + 74 - 220), behavior:'smooth' });
       }
 
       btnPrevFlow.disabled = current === 0;
@@ -780,6 +791,8 @@
     buildIntroLists();
     buildNarrative();
     render();
+    chartPanel.scrollTop = 0;
+    chartPanel.scrollLeft = 0;
   }
 
   checkDevice();
