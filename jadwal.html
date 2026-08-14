@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jadwal Kelas — KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+      <span class="brand-text"><span class="blue">KA</span><span class="gold">FBE</span><span class="blue"> Hub</span></span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Buka menu">☰</button>
+    <nav class="links" id="navLinks">
+      <a href="index.html#beranda">Beranda</a>
+      <a href="jadwal.html">Jadwal Kelas</a>
+      <a href="index.html#visualisasi">Visualisasi Materi</a>
+      <a href="index.html#belajar-main">Belajar Sambil Main</a>
+      <a href="index.html#main-santai">Main Santai</a>
+    </nav>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path class="wing-l" d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path class="wing-r" d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/><path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/><path d="M142 192 q8 10 16 0"/><path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/><path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+      <circle cx="120" cy="136" r="3" fill="#fff" opacity="0.8"/><circle cx="190" cy="136" r="3" fill="#fff" opacity="0.8"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<!-- ============ ISI ============ -->
+<section class="wrap" style="padding-top:44px;">
+  <div class="section-head">
+    <span class="kicker">Jadwal Kelas</span>
+    <h2>Jadwal mata kuliah per minggu</h2>
+    <p>Diambil otomatis dari spreadsheet jadwal KAFBE dan diperbarui berkala. Klik nama hari untuk berpindah, atau cari mata kuliah/ruangan lewat kotak pencarian.</p>
+  </div>
+
+  <div class="jadwal-toolbar">
+    <div class="day-tabs" id="dayTabs" role="tablist" aria-label="Pilih hari"></div>
+    <input
+      type="search"
+      id="cari"
+      class="jadwal-search"
+      placeholder="Cari matkul, kode, KP, atau ruangan…"
+      aria-label="Cari jadwal"
+    />
+  </div>
+
+  <div id="jadwalIsi" aria-live="polite">
+    <p class="jadwal-status">Memuat jadwal…</p>
+  </div>
+
+  <p class="jadwal-meta" id="jadwalMeta"></p>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat oleh Elrond, untuk <strong>KAFBE</strong> — Kelompok Asisten FBE. Info jadwal dan kegiatan resmi tetap lewat Instagram KAFBE.</p>
+  <p> version 1.0 </p>
+</footer>
+
+<script src="main.js"></script>
+<script>
+(function(){
+  const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+  const elTabs  = document.getElementById('dayTabs');
+  const elIsi   = document.getElementById('jadwalIsi');
+  const elMeta  = document.getElementById('jadwalMeta');
+  const elCari  = document.getElementById('cari');
+
+  let data = null;
+  let hariAktif = null;
+
+  // Escape teks sebelum masuk innerHTML — isinya berasal dari spreadsheet
+  // yang diedit banyak orang, jadi jangan pernah dipercaya mentah-mentah.
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, c => (
+      { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+    ));
+  }
+
+  function cocok(kelas, q){
+    if(!q) return true;
+    const hay = [kelas.kode, kelas.nama, kelas.kp, kelas.jam, kelas.ruang]
+      .join(' ').toLowerCase();
+    return hay.includes(q);
+  }
+
+  function render(){
+    const q = elCari.value.trim().toLowerCase();
+    const hari = data.days.find(d => d.day === hariAktif);
+    if(!hari){ elIsi.innerHTML = '<p class="jadwal-status">Hari tidak ditemukan.</p>'; return; }
+
+    const kelas = hari.classes.filter(k => cocok(k, q));
+
+    if(kelas.length === 0){
+      elIsi.innerHTML = q
+        ? `<p class="jadwal-status">Tidak ada kelas di hari ${esc(hariAktif)} yang cocok dengan “${esc(elCari.value.trim())}”.</p>`
+        : `<p class="jadwal-status">Tidak ada kelas terjadwal di hari ${esc(hariAktif)}.</p>`;
+      return;
+    }
+
+    const baris = kelas.map(k => `
+      <tr>
+        <td class="col-jam"><span class="jam-pill">${esc(k.jam)}</span></td>
+        <td class="col-matkul">
+          <span class="matkul-nama">${esc(k.nama)}</span>
+          <span class="matkul-kode">${esc(k.kode)}</span>
+        </td>
+        <td class="col-kp"><span class="kp-pill">${esc(k.kp)}</span></td>
+        <td class="col-ruang">${esc(k.ruang)}</td>
+      </tr>
+    `).join('');
+
+    elIsi.innerHTML = `
+      <div class="jadwal-card">
+        <div class="jadwal-scroll">
+          <table class="jadwal-table">
+            <caption class="sr-only">Jadwal kelas hari ${esc(hariAktif)}</caption>
+            <thead>
+              <tr><th scope="col">Jam</th><th scope="col">Mata Kuliah</th><th scope="col">KP</th><th scope="col">Ruang</th></tr>
+            </thead>
+            <tbody>${baris}</tbody>
+          </table>
+        </div>
+        <p class="jadwal-count">${kelas.length} kelas${q ? ' cocok' : ''} pada hari ${esc(hariAktif)}</p>
+      </div>
+    `;
+  }
+
+  function renderTabs(){
+    const hariIni = HARI[new Date().getDay()];
+    elTabs.innerHTML = data.days.map(d => {
+      const aktif = d.day === hariAktif;
+      const badge = d.day === hariIni ? '<span class="dot-today" aria-hidden="true"></span>' : '';
+      return `<button role="tab" aria-selected="${aktif}" class="day-tab${aktif ? ' active' : ''}" data-hari="${esc(d.day)}">${badge}${esc(d.day)}</button>`;
+    }).join('');
+
+    elTabs.querySelectorAll('.day-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        hariAktif = btn.dataset.hari;
+        renderTabs();
+        render();
+      });
+    });
+  }
+
+  function tampilkanMeta(){
+    if(!data.updatedAt){ elMeta.textContent = ''; return; }
+    const t = new Date(data.updatedAt);
+    if(isNaN(t)){ elMeta.textContent = ''; return; }
+    const fmt = t.toLocaleString('id-ID', {
+      dateStyle: 'long', timeStyle: 'short'
+    });
+    elMeta.textContent = `Terakhir diperbarui: ${fmt} WIB · disinkronkan otomatis tiap 3 jam dari spreadsheet KAFBE.`;
+  }
+
+  async function muat(){
+    try{
+      // cache: 'no-cache' → browser tetap pakai cache, tapi selalu
+      // memvalidasi ke server, jadi update jadwal langsung kelihatan.
+      const res = await fetch('data/jadwal.json', { cache: 'no-cache' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      data = await res.json();
+
+      if(!data.days || data.days.length === 0){
+        throw new Error('data jadwal kosong');
+      }
+
+      // Default ke hari ini kalau ada kelasnya; kalau tidak (mis. akhir
+      // pekan), jatuh ke hari pertama yang tersedia.
+      const hariIni = HARI[new Date().getDay()];
+      hariAktif = data.days.some(d => d.day === hariIni) ? hariIni : data.days[0].day;
+
+      renderTabs();
+      render();
+      tampilkanMeta();
+      elCari.addEventListener('input', render);
+    }catch(err){
+      console.error('Gagal memuat jadwal:', err);
+      elIsi.innerHTML = `
+        <div class="jadwal-card">
+          <p class="jadwal-status">
+            Jadwal belum bisa dimuat. Coba muat ulang halaman ini beberapa saat lagi.
+            Untuk info pasti, cek Instagram KAFBE.
+          </p>
+        </div>`;
+      elTabs.innerHTML = '';
+      elCari.style.display = 'none';
+    }
+  }
+
+  muat();
+})();
+</script>
+</body>
+</html>

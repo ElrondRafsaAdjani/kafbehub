@@ -1,0 +1,54 @@
+name: Sinkronisasi jadwal kelas
+
+# Mengambil jadwal dari Google Sheets tiap 3 jam dan commit hasilnya ke
+# data/jadwal.json bila ada perubahan.
+#
+# SETUP SEKALI SAJA:
+#   Settings → Secrets and variables → Actions → tab "Variables" → New variable
+#     Name : SHEET_ID
+#     Value: id Google Sheet (bagian di URL antara /d/ dan /edit)
+#
+#   Sheet-nya juga harus di-Share → "Anyone with the link" → Viewer,
+#   karena workflow ini membacanya tanpa login.
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'   # tiap 3 jam, waktu UTC
+  workflow_dispatch:         # tombol "Run workflow" untuk update manual
+
+# Diperlukan agar workflow boleh push commit balik ke repo.
+permissions:
+  contents: write
+
+# Kalau ada run yang masih jalan, biarkan selesai — jangan sampai dua run
+# saling menimpa commit.
+concurrency:
+  group: sync-jadwal
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Ambil jadwal dari Google Sheets
+        env:
+          SHEET_ID: ${{ vars.SHEET_ID }}
+        run: node scripts/sync-jadwal.mjs
+
+      - name: Commit bila jadwal berubah
+        run: |
+          if [ -z "$(git status --porcelain data/jadwal.json)" ]; then
+            echo "Tidak ada perubahan jadwal — tidak ada yang di-commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/jadwal.json
+          git commit -m "Perbarui jadwal kelas dari Google Sheets"
+          git push

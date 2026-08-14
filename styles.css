@@ -147,5 +147,101 @@ section{padding:64px 0;}
 .badge-live{background:#E1F5E9; color:#1E7A44;}
 .badge-soon{background:#FDEEDB; color:var(--gold-deep);}
 
+/* ---------- JADWAL KELAS ---------- */
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+.jadwal-toolbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; margin-bottom:22px;
+}
+.day-tabs{display:flex; gap:8px; flex-wrap:wrap;}
+.day-tab{
+  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.92rem;
+  padding:10px 18px; border-radius:100px; cursor:pointer;
+  background:var(--surface); color:var(--ink-soft);
+  border:1px solid var(--line);
+  display:inline-flex; align-items:center; gap:7px;
+  transition:background .15s, color .15s, border-color .15s, transform .15s;
+}
+.day-tab:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+.day-tab:active{transform:scale(0.97);}
+.day-tab.active{
+  background:var(--owl-dark2); color:#fff; border-color:var(--owl-dark2);
+  box-shadow:0 10px 22px -10px rgba(22,41,74,0.55);
+}
+/* Titik emas = hari ini */
+.dot-today{
+  width:7px; height:7px; border-radius:100px;
+  background:var(--gold); flex:none;
+}
+
+.jadwal-search{
+  font-family:'Plus Jakarta Sans'; font-size:0.92rem; color:var(--ink);
+  padding:11px 18px; border-radius:100px; min-width:270px; flex:1; max-width:340px;
+  background:var(--surface); border:1px solid var(--line); outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.jadwal-search::placeholder{color:#9AAAB8;}
+.jadwal-search:focus{border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba(111,168,201,0.18);}
+
+.jadwal-card{
+  background:var(--surface); border-radius:var(--radius-lg);
+  border:1px solid var(--line); box-shadow:var(--shadow);
+  padding:10px 10px 4px;
+}
+/* Tabel bisa lebih lebar dari layar HP — biarkan ia yang menggeser,
+   jangan sampai seluruh halaman ikut bisa digeser ke samping. */
+.jadwal-scroll{overflow-x:auto;}
+
+.jadwal-table{width:100%; border-collapse:collapse; min-width:560px;}
+.jadwal-table th{
+  text-align:left; font-size:0.74rem; font-weight:800;
+  letter-spacing:0.08em; text-transform:uppercase; color:var(--gold-deep);
+  padding:14px 16px; border-bottom:1px solid var(--line); white-space:nowrap;
+}
+.jadwal-table td{
+  padding:14px 16px; border-bottom:1px solid var(--line);
+  font-size:0.94rem; vertical-align:middle;
+}
+.jadwal-table tbody tr:last-child td{border-bottom:none;}
+.jadwal-table tbody tr:hover{background:var(--bg);}
+
+.col-jam{white-space:nowrap;}
+.jam-pill{
+  display:inline-block; padding:5px 12px; border-radius:100px;
+  background:var(--bg-deep); color:var(--owl-dark);
+  font-weight:700; font-size:0.85rem; white-space:nowrap;
+}
+.col-matkul{min-width:240px;}
+.matkul-nama{display:block; font-weight:600; color:var(--owl-dark2); line-height:1.35;}
+.matkul-kode{display:block; font-size:0.78rem; color:var(--ink-soft); margin-top:3px; letter-spacing:0.02em;}
+.col-kp{white-space:nowrap;}
+.kp-pill{
+  display:inline-block; min-width:32px; text-align:center;
+  padding:4px 10px; border-radius:8px;
+  background:#FDEEDB; color:var(--gold-deep); font-weight:800; font-size:0.82rem;
+}
+.col-ruang{font-weight:600; color:var(--ink-soft); white-space:nowrap;}
+
+.jadwal-count{
+  padding:12px 16px 14px; margin:0;
+  font-size:0.82rem; color:var(--ink-soft);
+}
+.jadwal-status{
+  padding:22px 16px; margin:0;
+  color:var(--ink-soft); font-size:0.94rem; line-height:1.6;
+}
+.jadwal-meta{
+  margin-top:18px; font-size:0.82rem; color:var(--ink-soft); line-height:1.6;
+}
+
+@media (max-width:620px){
+  .jadwal-search{max-width:none; min-width:0; width:100%;}
+  .day-tab{padding:9px 15px; font-size:0.88rem;}
+}
+
 footer{padding:36px 0 60px; text-align:center; color:var(--ink-soft); font-size:0.85rem;}
 footer strong{color:var(--owl-dark2);}
