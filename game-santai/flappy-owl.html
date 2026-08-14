@@ -2,12 +2,14 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://*.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Flappy Owl — KAFBE Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../styles.css">
 <style>
   .game-panel{
     background:linear-gradient(180deg, var(--owl-dark2), var(--owl-dark));
@@ -69,15 +71,15 @@
 
 <header class="nav">
   <div class="nav-inner">
-    <a class="brand" href="index.html">
+    <a class="brand" href="../index.html">
       <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
       <span class="brand-text"><span class="blue">KA</span><span class="gold">FBE</span><span class="blue"> Hub</span></span>
     </a>
     <button class="nav-toggle" id="navToggle" aria-label="Buka menu">☰</button>
     <nav class="links" id="navLinks">
-      <a href="index.html#beranda">Beranda</a>
-      <a href="index.html#belajar-main">Belajar Sambil Main</a>
-      <a href="index.html#visualisasi">Visualisasi Materi</a>
+      <a href="../index.html#beranda">Beranda</a>
+      <a href="../index.html#belajar-main">Belajar Sambil Main</a>
+      <a href="../index.html#visualisasi">Visualisasi Materi</a>
     </nav>
   </div>
 </header>
@@ -116,7 +118,7 @@
 </svg>
 
 <section class="wrap" style="padding-top:32px;">
-  <a class="back-link" href="index.html">← Kembali ke Hub</a>
+  <a class="back-link" href="../index.html">← Kembali ke Hub</a>
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Main Santai</span>
     <h2>Flappy Owl 🦉</h2>
@@ -176,9 +178,9 @@
   <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong> — Kelompok Asisten FBE.</p>
 </footer>
 
-<script src="main.js"></script>
-<script src="firebase-config.js?v=2"></script>
-<script src="storage.js?v=2"></script>
+<script src="../main.js"></script>
+<script src="../firebase-config.js?v=2"></script>
+<script src="../storage.js?v=2"></script>
 <script>
 (function(){
   const GAME_ID = 'flappy-owl';
