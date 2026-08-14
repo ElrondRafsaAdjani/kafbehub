@@ -63,7 +63,20 @@
   <div class="section-head">
     <span class="kicker">Jadwal Kelas</span>
     <h2>Jadwal mata kuliah per minggu</h2>
-    <p>Diambil otomatis dari spreadsheet jadwal KAFBE dan diperbarui berkala. Klik nama hari untuk berpindah, atau cari mata kuliah/ruangan lewat kotak pencarian.</p>
+    <p>Diambil otomatis dari spreadsheet jadwal KAFBE. Kelas yang ditiadakan dan kelas pengganti ikut ditampilkan sesuai tanggalnya.</p>
+  </div>
+
+  <div id="kotakSemester"></div>
+  <div id="kotakPerubahan"></div>
+  <div id="kotakPeringatan"></div>
+
+  <div class="week-nav" id="weekNav" hidden>
+    <button class="week-btn" id="prevWeek" aria-label="Minggu sebelumnya">‹</button>
+    <div class="week-label">
+      <strong id="weekRange"></strong>
+      <button class="week-reset" id="thisWeek" hidden>Kembali ke minggu ini</button>
+    </div>
+    <button class="week-btn" id="nextWeek" aria-label="Minggu berikutnya">›</button>
   </div>
 
   <div class="jadwal-toolbar">
@@ -92,98 +105,315 @@
 <script src="main.js"></script>
 <script>
 (function(){
-  const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const HARI  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli',
+                 'Agustus','September','Oktober','November','Desember'];
+  const BULAN_SINGKAT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
-  const elTabs  = document.getElementById('dayTabs');
-  const elIsi   = document.getElementById('jadwalIsi');
-  const elMeta  = document.getElementById('jadwalMeta');
-  const elCari  = document.getElementById('cari');
+  const elTabs   = document.getElementById('dayTabs');
+  const elIsi    = document.getElementById('jadwalIsi');
+  const elMeta   = document.getElementById('jadwalMeta');
+  const elCari   = document.getElementById('cari');
+  const elNav    = document.getElementById('weekNav');
+  const elRange  = document.getElementById('weekRange');
+  const elSemester = document.getElementById('kotakSemester');
+  const elPerub  = document.getElementById('kotakPerubahan');
+  const elPering = document.getElementById('kotakPeringatan');
+  const btnPrev  = document.getElementById('prevWeek');
+  const btnNext  = document.getElementById('nextWeek');
+  const btnThis  = document.getElementById('thisWeek');
 
   let data = null;
+  let offsetMinggu = 0;      // 0 = minggu ini, -1 = minggu lalu, dst.
   let hariAktif = null;
 
-  // Escape teks sebelum masuk innerHTML — isinya berasal dari spreadsheet
-  // yang diedit banyak orang, jadi jangan pernah dipercaya mentah-mentah.
+  /* ---------- util ---------- */
+
   function esc(s){
     return String(s).replace(/[&<>"']/g, c => (
       { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
     ));
   }
 
-  function cocok(kelas, q){
+  const p2 = n => String(n).padStart(2,'0');
+
+  // Tanggal lokal (WIB di sisi pengunjung), BUKAN UTC — kalau pakai
+  // toISOString(), pengunjung sebelum jam 07.00 WIB akan melihat tanggal kemarin.
+  function iso(d){ return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
+
+  function tambahHari(d, n){
+    const x = new Date(d);
+    x.setDate(x.getDate() + n);
+    return x;
+  }
+
+  // Senin pada minggu yang memuat tanggal d.
+  function seninMinggu(d){
+    const hari = d.getDay();                    // 0 = Minggu
+    return tambahHari(d, hari === 0 ? -6 : 1 - hari);
+  }
+
+  function dariIso(s){
+    const [y,m,d] = s.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+
+  function tglPanjang(s){
+    const d = dariIso(s);
+    return `${HARI[d.getDay()]}, ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function tglPendek(d){ return `${d.getDate()} ${BULAN_SINGKAT[d.getMonth()]}`; }
+
+  function menitMulai(jam){
+    const m = String(jam).match(/(\d{1,2})[.:](\d{2})/);
+    return m ? (+m[1]*60 + +m[2]) : 0;
+  }
+
+  function cocok(k, q){
     if(!q) return true;
-    const hay = [kelas.kode, kelas.nama, kelas.kp, kelas.jam, kelas.ruang]
-      .join(' ').toLowerCase();
-    return hay.includes(q);
+    return [k.kode,k.nama,k.kp,k.jam,k.ruang].join(' ').toLowerCase().includes(q);
+  }
+
+  /* ---------- susun jadwal satu hari, sudah termasuk perubahan ---------- */
+
+  // Tanggal mulai perkuliahan untuk satu mata kuliah (lihat data/mulai.json).
+  function mulaiUntuk(kode){
+    const m = data.mulai;
+    if(!m) return null;
+    return (m.perMatkul && m.perMatkul[kode]) || m.default || null;
+  }
+
+  function kelasHari(namaHari, tanggalIso){
+    const dasar = (data.days.find(d => d.day === namaHari)?.classes || []);
+    const perub = (data.changes || []).filter(c => c.tanggal === tanggalIso);
+
+    const libur = new Map();
+    for(const c of perub.filter(c => c.tipe === 'libur')){
+      libur.set(`${c.kode}|${c.kp}`.toUpperCase(), c);
+    }
+
+    const hasil = dasar.map(k => {
+      // Kelas yang perkuliahannya belum dimulai tidak bisa "ditiadakan" —
+      // status ini diperiksa lebih dulu.
+      const mulai = mulaiUntuk(k.kode);
+      if(mulai && tanggalIso < mulai){
+        return { ...k, status:'belum', catatan:`Perkuliahan dimulai ${tglPanjang(mulai)}` };
+      }
+      const c = libur.get(`${k.kode}|${k.kp}`.toUpperCase());
+      return c
+        ? { ...k, status:'libur', catatan:c.catatan }
+        : { ...k, status:'normal', catatan:'' };
+    });
+
+    for(const c of perub.filter(c => c.tipe === 'pengganti')){
+      hasil.push({
+        kode:c.kode, nama:c.nama, kp:c.kp, jam:c.jam, ruang:c.ruang,
+        status:'pengganti', catatan:c.catatan
+      });
+    }
+
+    hasil.sort((a,b) => menitMulai(a.jam) - menitMulai(b.jam));
+    return hasil;
+  }
+
+  /* ---------- render ---------- */
+
+  // Hari yang ditampilkan = hari di jadwal tetap, ditambah hari mana pun yang
+  // kebetulan punya kelas pengganti pada minggu ini (mis. Sabtu).
+  function daftarHari(senin){
+    const nama = data.days.map(d => d.day);
+    const extra = new Set();
+    for(let i=0;i<7;i++){
+      const t = iso(tambahHari(senin,i));
+      if((data.changes||[]).some(c => c.tanggal === t && c.tipe === 'pengganti')){
+        extra.add(HARI[tambahHari(senin,i).getDay()]);
+      }
+    }
+    const urut = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+    return urut.filter(h => nama.includes(h) || extra.has(h));
+  }
+
+  function tanggalHari(senin, namaHari){
+    for(let i=0;i<7;i++){
+      const d = tambahHari(senin,i);
+      if(HARI[d.getDay()] === namaHari) return d;
+    }
+    return senin;
   }
 
   function render(){
-    const q = elCari.value.trim().toLowerCase();
-    const hari = data.days.find(d => d.day === hariAktif);
-    if(!hari){ elIsi.innerHTML = '<p class="jadwal-status">Hari tidak ditemukan.</p>'; return; }
+    const senin = tambahHari(seninMinggu(new Date()), offsetMinggu*7);
+    const hariList = daftarHari(senin);
 
-    const kelas = hari.classes.filter(k => cocok(k, q));
+    if(!hariList.includes(hariAktif)) hariAktif = hariList[0];
+
+    const jumat = tanggalHari(senin, hariList[hariList.length-1]);
+    elRange.textContent = `${tglPendek(senin)} – ${tglPendek(jumat)} ${jumat.getFullYear()}`;
+    btnThis.hidden = offsetMinggu === 0;
+    elNav.hidden = false;
+
+    // Tab hari
+    const hariIniIso = iso(new Date());
+    elTabs.innerHTML = hariList.map(h => {
+      const d = tanggalHari(senin, h);
+      const aktif = h === hariAktif;
+      const isToday = iso(d) === hariIniIso;
+      const adaPerubahan = (data.changes||[]).some(c => c.tanggal === iso(d));
+      return `<button role="tab" aria-selected="${aktif}" class="day-tab${aktif?' active':''}" data-hari="${esc(h)}">
+        ${isToday ? '<span class="dot-today" aria-hidden="true"></span>' : ''}
+        <span>${esc(h)}<span class="tab-date">${esc(tglPendek(d))}</span></span>
+        ${adaPerubahan ? '<span class="dot-change" aria-hidden="true" title="ada perubahan"></span>' : ''}
+      </button>`;
+    }).join('');
+
+    elTabs.querySelectorAll('.day-tab').forEach(btn => {
+      btn.addEventListener('click', () => { hariAktif = btn.dataset.hari; render(); });
+    });
+
+    // Tabel
+    const tgl = tanggalHari(senin, hariAktif);
+    const q = elCari.value.trim().toLowerCase();
+    const semua = kelasHari(hariAktif, iso(tgl));
+    const kelas = semua.filter(k => cocok(k, q));
 
     if(kelas.length === 0){
-      elIsi.innerHTML = q
-        ? `<p class="jadwal-status">Tidak ada kelas di hari ${esc(hariAktif)} yang cocok dengan “${esc(elCari.value.trim())}”.</p>`
-        : `<p class="jadwal-status">Tidak ada kelas terjadwal di hari ${esc(hariAktif)}.</p>`;
+      elIsi.innerHTML = `<div class="jadwal-card"><p class="jadwal-status">${
+        q ? `Tidak ada kelas pada ${esc(tglPanjang(iso(tgl)))} yang cocok dengan “${esc(elCari.value.trim())}”.`
+          : `Tidak ada kelas terjadwal pada ${esc(tglPanjang(iso(tgl)))}.`
+      }</p></div>`;
       return;
     }
 
-    const baris = kelas.map(k => `
-      <tr>
+    const KELAS_BARIS = { libur:'row-libur', pengganti:'row-pengganti', belum:'row-belum' };
+    const LABEL = {
+      libur: '<span class="tag tag-libur">Ditiadakan</span>',
+      pengganti: '<span class="tag tag-pengganti">Kelas pengganti</span>',
+      belum: '<span class="tag tag-belum">Belum dimulai</span>',
+    };
+
+    const baris = kelas.map(k => {
+      const cls = KELAS_BARIS[k.status] || '';
+      const badge = LABEL[k.status] || '';
+      return `
+      <tr class="${cls}">
         <td class="col-jam"><span class="jam-pill">${esc(k.jam)}</span></td>
         <td class="col-matkul">
           <span class="matkul-nama">${esc(k.nama)}</span>
           <span class="matkul-kode">${esc(k.kode)}</span>
+          ${badge}
+          ${k.catatan ? `<span class="matkul-catatan">${esc(k.catatan)}</span>` : ''}
         </td>
         <td class="col-kp"><span class="kp-pill">${esc(k.kp)}</span></td>
-        <td class="col-ruang">${esc(k.ruang)}</td>
-      </tr>
-    `).join('');
+        <td class="col-ruang">${esc(k.ruang || '—')}</td>
+      </tr>`;
+    }).join('');
+
+    const hitung = s => semua.filter(k => k.status === s).length;
+    const ringkas = [
+      `${kelas.length} kelas${q ? ' cocok' : ''}`,
+      hitung('belum')     ? `${hitung('belum')} belum dimulai` : '',
+      hitung('libur')     ? `${hitung('libur')} ditiadakan` : '',
+      hitung('pengganti') ? `${hitung('pengganti')} kelas pengganti` : '',
+    ].filter(Boolean).join(' · ');
 
     elIsi.innerHTML = `
       <div class="jadwal-card">
         <div class="jadwal-scroll">
           <table class="jadwal-table">
-            <caption class="sr-only">Jadwal kelas hari ${esc(hariAktif)}</caption>
+            <caption class="sr-only">Jadwal kelas ${esc(tglPanjang(iso(tgl)))}</caption>
             <thead>
               <tr><th scope="col">Jam</th><th scope="col">Mata Kuliah</th><th scope="col">KP</th><th scope="col">Ruang</th></tr>
             </thead>
             <tbody>${baris}</tbody>
           </table>
         </div>
-        <p class="jadwal-count">${kelas.length} kelas${q ? ' cocok' : ''} pada hari ${esc(hariAktif)}</p>
-      </div>
-    `;
+        <p class="jadwal-count">${esc(tglPanjang(iso(tgl)))} — ${ringkas}</p>
+      </div>`;
   }
 
-  function renderTabs(){
-    const hariIni = HARI[new Date().getDay()];
-    elTabs.innerHTML = data.days.map(d => {
-      const aktif = d.day === hariAktif;
-      const badge = d.day === hariIni ? '<span class="dot-today" aria-hidden="true"></span>' : '';
-      return `<button role="tab" aria-selected="${aktif}" class="day-tab${aktif ? ' active' : ''}" data-hari="${esc(d.day)}">${badge}${esc(d.day)}</button>`;
+  /* ---------- kotak "perkuliahan belum dimulai" ---------- */
+  function renderSemester(){
+    if(!data.mulai || !data.mulai.default) return;
+
+    const hariIni = iso(new Date());
+
+    // Kumpulkan tanggal mulai yang belum terlewati, beserta matkul yang terkait.
+    const kelompok = new Map();
+    const semuaKode = new Set();
+    for(const d of data.days) for(const k of d.classes) semuaKode.add(k.kode);
+
+    for(const kode of semuaKode){
+      const m = mulaiUntuk(kode);
+      if(!m || m <= hariIni) continue;
+      if(!kelompok.has(m)) kelompok.set(m, new Set());
+      const nama = data.days.flatMap(d => d.classes).find(k => k.kode === kode)?.nama;
+      if(nama) kelompok.get(m).add(nama);
+    }
+    if(kelompok.size === 0) return;
+
+    const urut = [...kelompok.entries()].sort((a,b) => a[0].localeCompare(b[0]));
+    const item = urut.map(([tgl, nama]) => {
+      const daftar = [...nama].sort();
+      // Kalau hampir semua matkul mulai di tanggal ini, tidak usah dirinci.
+      const rinci = daftar.length <= 6
+        ? `<span class="mulai-matkul">${daftar.map(esc).join(' · ')}</span>` : '';
+      return `<li class="perub-item">
+        <span class="perub-tanggal">${esc(tglPanjang(tgl))}</span>
+        <span class="perub-teks">${daftar.length} mata kuliah mulai berjalan${rinci}</span>
+      </li>`;
     }).join('');
 
-    elTabs.querySelectorAll('.day-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        hariAktif = btn.dataset.hari;
-        renderTabs();
-        render();
-      });
-    });
+    elSemester.innerHTML = `
+      <div class="kotak kotak-info">
+        <h3>🗓️ Sebagian perkuliahan belum dimulai</h3>
+        <p>Kelas yang belum berjalan tetap ditampilkan agar rencananya terlihat, tapi diredupkan dan diberi label <strong>Belum dimulai</strong>.</p>
+        <ul class="perub-list" style="margin-top:14px;">${item}</ul>
+      </div>`;
+  }
+
+  /* ---------- kotak perubahan terdekat ---------- */
+  function renderPerubahan(){
+    const changes = data.changes || [];
+    if(changes.length === 0) return;
+
+    const hariIni = iso(new Date());
+    const mendatang = changes.filter(c => c.tanggal >= hariIni).slice(0, 12);
+    if(mendatang.length === 0) return;
+
+    const item = mendatang.map(c => `
+      <li class="perub-item">
+        <span class="perub-tanggal">${esc(tglPanjang(c.tanggal))}</span>
+        <span class="perub-teks">
+          <span class="tag ${c.tipe === 'libur' ? 'tag-libur' : 'tag-pengganti'}">${c.tipe === 'libur' ? 'Ditiadakan' : 'Pengganti'}</span>
+          <strong>${esc(c.nama)}</strong> KP ${esc(c.kp)} · ${esc(c.jam)}${c.ruang ? ' · ' + esc(c.ruang) : ''}
+        </span>
+      </li>`).join('');
+
+    elPerub.innerHTML = `
+      <div class="kotak kotak-info">
+        <h3>📌 Perubahan jadwal terdekat</h3>
+        <ul class="perub-list">${item}</ul>
+      </div>`;
+  }
+
+  /* ---------- kotak peringatan data ---------- */
+  function renderPeringatan(){
+    const w = data.warnings || [];
+    if(w.length === 0) return;
+    elPering.innerHTML = `
+      <div class="kotak kotak-warn">
+        <h3>⚠️ Sebagian perubahan mungkin belum tampil</h3>
+        <p>Ada ${w.length} baris di spreadsheet perubahan yang belum bisa dibaca otomatis atau perlu dicek ulang.
+        Untuk kepastian, konfirmasi ke asisten atau cek Instagram KAFBE.</p>
+      </div>`;
   }
 
   function tampilkanMeta(){
     if(!data.updatedAt){ elMeta.textContent = ''; return; }
     const t = new Date(data.updatedAt);
     if(isNaN(t)){ elMeta.textContent = ''; return; }
-    const fmt = t.toLocaleString('id-ID', {
-      dateStyle: 'long', timeStyle: 'short'
-    });
-    elMeta.textContent = `Terakhir diperbarui: ${fmt} WIB · disinkronkan otomatis tiap 3 jam dari spreadsheet KAFBE.`;
+    elMeta.textContent = `Terakhir diperbarui: ${t.toLocaleString('id-ID',{dateStyle:'long',timeStyle:'short'})} · disinkronkan otomatis dari spreadsheet KAFBE.`;
   }
 
   async function muat(){
@@ -193,20 +423,19 @@
       const res = await fetch('data/jadwal.json', { cache: 'no-cache' });
       if(!res.ok) throw new Error('HTTP ' + res.status);
       data = await res.json();
+      if(!data.days || data.days.length === 0) throw new Error('data jadwal kosong');
 
-      if(!data.days || data.days.length === 0){
-        throw new Error('data jadwal kosong');
-      }
-
-      // Default ke hari ini kalau ada kelasnya; kalau tidak (mis. akhir
-      // pekan), jatuh ke hari pertama yang tersedia.
-      const hariIni = HARI[new Date().getDay()];
-      hariAktif = data.days.some(d => d.day === hariIni) ? hariIni : data.days[0].day;
-
-      renderTabs();
+      hariAktif = HARI[new Date().getDay()];
+      renderSemester();
+      renderPerubahan();
+      renderPeringatan();
       render();
       tampilkanMeta();
+
       elCari.addEventListener('input', render);
+      btnPrev.addEventListener('click', () => { offsetMinggu--; render(); });
+      btnNext.addEventListener('click', () => { offsetMinggu++; render(); });
+      btnThis.addEventListener('click', () => { offsetMinggu = 0; render(); });
     }catch(err){
       console.error('Gagal memuat jadwal:', err);
       elIsi.innerHTML = `

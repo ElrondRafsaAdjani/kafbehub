@@ -1,0 +1,30 @@
+{
+  "_baca_ini": [
+    "Tanggal mulai perkuliahan. File ini DIEDIT MANUAL (tidak ikut tersinkron",
+    "dari spreadsheet), biasanya sekali tiap awal semester.",
+    "",
+    "  default    : tanggal mulai untuk semua mata kuliah.",
+    "  perMatkul  : pengecualian per kode mata kuliah.",
+    "",
+    "Kelas yang tanggal mulainya belum tiba akan tampil diredupkan dengan label",
+    "'Belum dimulai' di halaman jadwal, bukan disembunyikan, supaya mahasiswa",
+    "tetap bisa melihat rencana jadwalnya.",
+    "",
+    "Format tanggal: YYYY-MM-DD.",
+    "Cara mengubah: buka file ini di GitHub, klik ikon pensil, edit, Commit."
+  ],
+
+  "default": "2026-08-17",
+
+  "perMatkul": {
+    "1303D114": "2026-09-07",
+    "1301D002": "2026-09-07",
+    "1370E01B": "2026-09-07",
+    "1303D113": "2026-09-07"
+  },
+
+  "_catatan": {
+    "2026-08-17": "Mulai kuliah mahasiswa lama (Senin).",
+    "2026-09-07": "Mulai kuliah mahasiswa baru (Senin, minggu kedua September): Pengantar Akuntansi 1, Pengantar Ekonomika Mikro, Introduction of Microeconomics, Ekonomi Mikro Untuk Akuntansi."
+  }
+}

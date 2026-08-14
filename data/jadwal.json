@@ -1,94 +1,483 @@
 {
-  "updatedAt": "2026-08-14T14:21:28.933Z",
+  "updatedAt": "2026-08-14T16:38:07.936Z",
   "note": "Digenerate otomatis oleh scripts/sync-jadwal.mjs. Jangan diedit manual — perubahan akan tertimpa saat sinkronisasi berikutnya.",
+  "mulai": {
+    "default": "2026-08-17",
+    "perMatkul": {
+      "1303D114": "2026-09-07",
+      "1301D002": "2026-09-07",
+      "1370E01B": "2026-09-07",
+      "1303D113": "2026-09-07"
+    }
+  },
   "days": [
     {
       "day": "Senin",
       "classes": [
-        { "kode": "1303FW33", "nama": "Akuntansi Keuangan Menengah I", "kp": "A", "jam": "13.00 - 14.40", "ruang": "FG 06.02" },
-        { "kode": "1303D113", "nama": "Ekonomi Mikro Untuk Akuntansi", "kp": "A", "jam": "13.00 - 14.40", "ruang": "SGFBE" },
-        { "kode": "1300M02B", "nama": "Manajemen Keuangan dan Investasi", "kp": "A", "jam": "15.45 - 17.20", "ruang": "EA 03.07" },
-        { "kode": "1303AW31", "nama": "Analitik dan Visualisasi Data Bisnis", "kp": "B1", "jam": "18.30 - 20.10", "ruang": "EA 02.04" },
-        { "kode": "1303FW21", "nama": "Manajemen Keuangan", "kp": "A", "jam": "18.30 - 20.20", "ruang": "EC 03.03" },
-        { "kode": "1300M03B", "nama": "Statistika II", "kp": "A", "jam": "18.30 - 20.20", "ruang": "EC 04.04" }
+        {
+          "kode": "1303FW33",
+          "nama": "Akuntansi Keuangan Menengah I",
+          "kp": "A",
+          "jam": "13.00 - 14.40",
+          "ruang": "FG 06.02"
+        },
+        {
+          "kode": "1303D113",
+          "nama": "Ekonomi Mikro Untuk Akuntansi",
+          "kp": "A",
+          "jam": "13.00 - 14.40",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1300M02B",
+          "nama": "Manajemen Keuangan dan Investasi",
+          "kp": "A",
+          "jam": "15.45 - 17.20",
+          "ruang": "EA 03.07"
+        },
+        {
+          "kode": "1303AW31",
+          "nama": "Analitik dan Visualisasi Data Bisnis",
+          "kp": "B1",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 02.04"
+        },
+        {
+          "kode": "1303FW21",
+          "nama": "Manajemen Keuangan",
+          "kp": "A",
+          "jam": "18.30 - 20.20",
+          "ruang": "EC 03.03"
+        },
+        {
+          "kode": "1300M03B",
+          "nama": "Statistika II",
+          "kp": "A",
+          "jam": "18.30 - 20.20",
+          "ruang": "EC 04.04"
+        }
       ]
     },
     {
       "day": "Selasa",
       "classes": [
-        { "kode": "1303A15A", "nama": "Akuntansi Keuangan Lanjutan II", "kp": "WA", "jam": "07.50 - 09.30", "ruang": "UW 09.21" },
-        { "kode": "1302M13B", "nama": "Sistem Informasi Manajemen (Jur. Manajemen)", "kp": "A1", "jam": "07.55 - 09.30", "ruang": "EA 02.04" },
-        { "kode": "1301D002", "nama": "Pengantar Ekonomika Mikro", "kp": "G", "jam": "13.00 - 14.40", "ruang": "SGFBE" },
-        { "kode": "1303MW35", "nama": "Sistem Informasi Manajemen - AK", "kp": "A1", "jam": "13.00 - 14.40", "ruang": "EA 02.05" },
-        { "kode": "1302M19B", "nama": "Pengantar Akuntansi Biaya", "kp": "A", "jam": "15.45 - 17.20", "ruang": "SGFBE" },
-        { "kode": "1303FW54", "nama": "Akuntansi Keuangan Lanjutan II", "kp": "B", "jam": "18.30 - 20.10", "ruang": "EA 04.05" },
-        { "kode": "1303FW52", "nama": "Audit Keuangan dan Asurans II", "kp": "A2", "jam": "18.30 - 20.10", "ruang": "EC 02.03" },
-        { "kode": "1302M07B", "nama": "Manajemen Operasi", "kp": "A", "jam": "18.30 - 20.10", "ruang": "EC 03.04" },
-        { "kode": "1303MW24", "nama": "Sistem Informasi Akuntansi", "kp": "A", "jam": "18.30 - 20.10", "ruang": "EA 02.05" },
-        { "kode": "1303MW35", "nama": "Sistem Informasi Manajemen - AK", "kp": "A2", "jam": "18.30 - 20.10", "ruang": "EA 02.04" },
-        { "kode": "1300M03B", "nama": "Statistika II", "kp": "C", "jam": "18.30 - 20.10", "ruang": "EC 03.03" }
+        {
+          "kode": "1303A15A",
+          "nama": "Akuntansi Keuangan Lanjutan II",
+          "kp": "WA",
+          "jam": "07.50 - 09.30",
+          "ruang": "UW 09.21"
+        },
+        {
+          "kode": "1302M13B",
+          "nama": "Sistem Informasi Manajemen (Jur. Manajemen)",
+          "kp": "A1",
+          "jam": "07.55 - 09.30",
+          "ruang": "EA 02.04"
+        },
+        {
+          "kode": "1301D002",
+          "nama": "Pengantar Ekonomika Mikro",
+          "kp": "G",
+          "jam": "13.00 - 14.40",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1303MW35",
+          "nama": "Sistem Informasi Manajemen - AK",
+          "kp": "A1",
+          "jam": "13.00 - 14.40",
+          "ruang": "EA 02.05"
+        },
+        {
+          "kode": "1302M19B",
+          "nama": "Pengantar Akuntansi Biaya",
+          "kp": "A",
+          "jam": "15.45 - 17.20",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1303FW54",
+          "nama": "Akuntansi Keuangan Lanjutan II",
+          "kp": "B",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 04.05"
+        },
+        {
+          "kode": "1303FW52",
+          "nama": "Audit Keuangan dan Asurans II",
+          "kp": "A2",
+          "jam": "18.30 - 20.10",
+          "ruang": "EC 02.03"
+        },
+        {
+          "kode": "1302M07B",
+          "nama": "Manajemen Operasi",
+          "kp": "A",
+          "jam": "18.30 - 20.10",
+          "ruang": "EC 03.04"
+        },
+        {
+          "kode": "1303MW24",
+          "nama": "Sistem Informasi Akuntansi",
+          "kp": "A",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 02.05"
+        },
+        {
+          "kode": "1303MW35",
+          "nama": "Sistem Informasi Manajemen - AK",
+          "kp": "A2",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 02.04"
+        },
+        {
+          "kode": "1300M03B",
+          "nama": "Statistika II",
+          "kp": "C",
+          "jam": "18.30 - 20.10",
+          "ruang": "EC 03.03"
+        }
       ]
     },
     {
       "day": "Rabu",
       "classes": [
-        { "kode": "1301D002", "nama": "Pengantar Ekonomika Mikro", "kp": "D", "jam": "07.00 - 08.40", "ruang": "EA 04.04" },
-        { "kode": "1303A17A", "nama": "Pemeriksaan Akuntan II", "kp": "WA", "jam": "07.50 - 09.30", "ruang": "UW 09.11" },
-        { "kode": "1303D114", "nama": "Pengantar Akuntansi 1", "kp": "C", "jam": "07.50 - 09.30", "ruang": "SGFBE" },
-        { "kode": "1303D113", "nama": "Ekonomi Mikro Untuk Akuntansi", "kp": "B", "jam": "13.00 - 14.40", "ruang": "EC 04.04" },
-        { "kode": "1303D114", "nama": "Pengantar Akuntansi 1", "kp": "A", "jam": "13.00 - 14.40", "ruang": "SGFBE" },
-        { "kode": "1303FW54", "nama": "Akuntansi Keuangan Lanjutan II", "kp": "C", "jam": "15.45 - 17.20", "ruang": "SGFBE" },
-        { "kode": "1302M13B", "nama": "Sistem Informasi Manajemen (Jur. Manajemen)", "kp": "A2", "jam": "15.45 - 17.20", "ruang": "EA 02.05" },
-        { "kode": "1303FW54", "nama": "Akuntansi Keuangan Lanjutan II", "kp": "A", "jam": "18.30 - 20.10", "ruang": "EA 04.05" },
-        { "kode": "1303AW31", "nama": "Analitik dan Visualisasi Data Bisnis", "kp": "A1", "jam": "18.30 - 20.10", "ruang": "EA 02.04" },
-        { "kode": "1303FW52", "nama": "Audit Keuangan dan Asurans II", "kp": "A1", "jam": "18.30 - 20.10", "ruang": "EA 02.05" }
+        {
+          "kode": "1301D002",
+          "nama": "Pengantar Ekonomika Mikro",
+          "kp": "D",
+          "jam": "07.00 - 08.40",
+          "ruang": "EA 04.04"
+        },
+        {
+          "kode": "1303A17A",
+          "nama": "Pemeriksaan Akuntan II",
+          "kp": "WA",
+          "jam": "07.50 - 09.30",
+          "ruang": "UW 09.11"
+        },
+        {
+          "kode": "1303D114",
+          "nama": "Pengantar Akuntansi 1",
+          "kp": "C",
+          "jam": "07.50 - 09.30",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1303D113",
+          "nama": "Ekonomi Mikro Untuk Akuntansi",
+          "kp": "B",
+          "jam": "13.00 - 14.40",
+          "ruang": "EC 04.04"
+        },
+        {
+          "kode": "1303D114",
+          "nama": "Pengantar Akuntansi 1",
+          "kp": "A",
+          "jam": "13.00 - 14.40",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1303FW54",
+          "nama": "Akuntansi Keuangan Lanjutan II",
+          "kp": "C",
+          "jam": "15.45 - 17.20",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1302M13B",
+          "nama": "Sistem Informasi Manajemen (Jur. Manajemen)",
+          "kp": "A2",
+          "jam": "15.45 - 17.20",
+          "ruang": "EA 02.05"
+        },
+        {
+          "kode": "1303FW54",
+          "nama": "Akuntansi Keuangan Lanjutan II",
+          "kp": "A",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 04.05"
+        },
+        {
+          "kode": "1303AW31",
+          "nama": "Analitik dan Visualisasi Data Bisnis",
+          "kp": "A1",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 02.04"
+        },
+        {
+          "kode": "1303FW52",
+          "nama": "Audit Keuangan dan Asurans II",
+          "kp": "A1",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 02.05"
+        }
       ]
     },
     {
       "day": "Kamis",
       "classes": [
-        { "kode": "1301D002", "nama": "Pengantar Ekonomika Mikro", "kp": "B", "jam": "07.50 - 09.30", "ruang": "SGFBE" },
-        { "kode": "1301D002", "nama": "Pengantar Ekonomika Mikro", "kp": "F", "jam": "09.45 - 11.25", "ruang": "SGFBE" },
-        { "kode": "1303D114", "nama": "Pengantar Akuntansi 1", "kp": "D", "jam": "13.00 - 14.40", "ruang": "SGFBE" },
-        { "kode": "1301D002", "nama": "Pengantar Ekonomika Mikro", "kp": "C", "jam": "13.00 - 14.40", "ruang": "EC 04.04" },
-        { "kode": "1303MW35", "nama": "Sistem Informasi Manajemen - AK", "kp": "B1", "jam": "13.00 - 14.40", "ruang": "FG 06.02" },
-        { "kode": "1300M03B", "nama": "Statistika II", "kp": "WA", "jam": "13.00 - 14.40", "ruang": "UW 09.24" },
-        { "kode": "1303FW33", "nama": "Akuntansi Keuangan Menengah I", "kp": "B", "jam": "15.45 - 17.20", "ruang": "SGFBE" },
-        { "kode": "1302M13B", "nama": "Sistem Informasi Manajemen (Jur. Manajemen)", "kp": "B1", "jam": "15.45 - 17.20", "ruang": "EA 02.05" },
-        { "kode": "1302M13B", "nama": "Sistem Informasi Manajemen (Jur. Manajemen)", "kp": "WA", "jam": "15.45 - 17.20", "ruang": "UW 09.08" },
-        { "kode": "1370M03B", "nama": "Statistics II", "kp": "WZ", "jam": "15.45 - 17.20", "ruang": "UW 09.24" },
-        { "kode": "1303FW33", "nama": "Akuntansi Keuangan Menengah I", "kp": "C", "jam": "18.30 - 20.10", "ruang": "EC 04.03" },
-        { "kode": "1303FW42", "nama": "Akuntansi Keuangan Menengah II", "kp": "A", "jam": "18.30 - 20.10", "ruang": "EA 04.04" },
-        { "kode": "1303AW31", "nama": "Analitik dan Visualisasi Data Bisnis", "kp": "A2", "jam": "18.30 - 20.10", "ruang": "EA 02.04" },
-        { "kode": "1303TW37", "nama": "Perpajakan", "kp": "A", "jam": "18.30 - 20.10", "ruang": "EA 04.03" },
-        { "kode": "1302M13B", "nama": "Sistem Informasi Manajemen (Jur. Manajemen)", "kp": "B2", "jam": "18.30 - 20.10", "ruang": "EC 02.03" },
-        { "kode": "1303MW35", "nama": "Sistem Informasi Manajemen - AK", "kp": "C1", "jam": "18.30 - 20.10", "ruang": "EA 02.05" }
+        {
+          "kode": "1301D002",
+          "nama": "Pengantar Ekonomika Mikro",
+          "kp": "B",
+          "jam": "07.50 - 09.30",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1301D002",
+          "nama": "Pengantar Ekonomika Mikro",
+          "kp": "F",
+          "jam": "09.45 - 11.25",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1303D114",
+          "nama": "Pengantar Akuntansi 1",
+          "kp": "D",
+          "jam": "13.00 - 14.40",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1301D002",
+          "nama": "Pengantar Ekonomika Mikro",
+          "kp": "C",
+          "jam": "13.00 - 14.40",
+          "ruang": "EC 04.04"
+        },
+        {
+          "kode": "1303MW35",
+          "nama": "Sistem Informasi Manajemen - AK",
+          "kp": "B1",
+          "jam": "13.00 - 14.40",
+          "ruang": "FG 06.02"
+        },
+        {
+          "kode": "1300M03B",
+          "nama": "Statistika II",
+          "kp": "WA",
+          "jam": "13.00 - 14.40",
+          "ruang": "UW 09.24"
+        },
+        {
+          "kode": "1303FW33",
+          "nama": "Akuntansi Keuangan Menengah I",
+          "kp": "B",
+          "jam": "15.45 - 17.20",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1302M13B",
+          "nama": "Sistem Informasi Manajemen (Jur. Manajemen)",
+          "kp": "B1",
+          "jam": "15.45 - 17.20",
+          "ruang": "EA 02.05"
+        },
+        {
+          "kode": "1302M13B",
+          "nama": "Sistem Informasi Manajemen (Jur. Manajemen)",
+          "kp": "WA",
+          "jam": "15.45 - 17.20",
+          "ruang": "UW 09.08"
+        },
+        {
+          "kode": "1370M03B",
+          "nama": "Statistics II",
+          "kp": "WZ",
+          "jam": "15.45 - 17.20",
+          "ruang": "UW 09.24"
+        },
+        {
+          "kode": "1303FW33",
+          "nama": "Akuntansi Keuangan Menengah I",
+          "kp": "C",
+          "jam": "18.30 - 20.10",
+          "ruang": "EC 04.03"
+        },
+        {
+          "kode": "1303FW42",
+          "nama": "Akuntansi Keuangan Menengah II",
+          "kp": "A",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 04.04"
+        },
+        {
+          "kode": "1303AW31",
+          "nama": "Analitik dan Visualisasi Data Bisnis",
+          "kp": "A2",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 02.04"
+        },
+        {
+          "kode": "1303TW37",
+          "nama": "Perpajakan",
+          "kp": "A",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 04.03"
+        },
+        {
+          "kode": "1302M13B",
+          "nama": "Sistem Informasi Manajemen (Jur. Manajemen)",
+          "kp": "B2",
+          "jam": "18.30 - 20.10",
+          "ruang": "EC 02.03"
+        },
+        {
+          "kode": "1303MW35",
+          "nama": "Sistem Informasi Manajemen - AK",
+          "kp": "C1",
+          "jam": "18.30 - 20.10",
+          "ruang": "EA 02.05"
+        }
       ]
     },
     {
       "day": "Jumat",
       "classes": [
-        { "kode": "1301D002", "nama": "Pengantar Ekonomika Mikro", "kp": "WA", "jam": "07.50 - 09.30", "ruang": "UW 09.07" },
-        { "kode": "1303MW34", "nama": "Akuntansi Manajemen", "kp": "C", "jam": "09.45 - 11.25", "ruang": "EC 04.03" },
-        { "kode": "1301E15A", "nama": "Ekonometrika Terapan", "kp": "A", "jam": "09.45 - 11.25", "ruang": "EA 03.07" },
-        { "kode": "1370E01B", "nama": "Introduction of Microeconomics", "kp": "WZ", "jam": "09.45 - 11.25", "ruang": "UW 09.07" },
-        { "kode": "1303D114", "nama": "Pengantar Akuntansi 1", "kp": "E", "jam": "09.45 - 11.25", "ruang": "SGFBE" },
-        { "kode": "1302M19B", "nama": "Pengantar Akuntansi Biaya", "kp": "B", "jam": "09.45 - 11.25", "ruang": "EC 04.04" },
-        { "kode": "1303MW24", "nama": "Sistem Informasi Akuntansi", "kp": "B", "jam": "09.45 - 11.25", "ruang": "EA 02.05" },
-        { "kode": "1300M03B", "nama": "Statistika II", "kp": "D", "jam": "09.45 - 11.25", "ruang": "FF 04.05" },
-        { "kode": "1303TW37", "nama": "Perpajakan", "kp": "B", "jam": "10.40 - 12.30", "ruang": "FG 04.02" },
-        { "kode": "1303MW34", "nama": "Akuntansi Manajemen", "kp": "B", "jam": "13.00 - 14.40", "ruang": "FG 06.02" },
-        { "kode": "1303AW31", "nama": "Analitik dan Visualisasi Data Bisnis", "kp": "B2", "jam": "13.00 - 14.40", "ruang": "EA 02.05" },
-        { "kode": "1303D114", "nama": "Pengantar Akuntansi 1", "kp": "B", "jam": "13.00 - 14.40", "ruang": "SGFBE" },
-        { "kode": "1303FW22", "nama": "Pengantar Akuntansi II", "kp": "A", "jam": "13.00 - 14.40", "ruang": "FF 04.01" },
-        { "kode": "1301D002", "nama": "Pengantar Ekonomika Mikro", "kp": "A", "jam": "13.00 - 14.40", "ruang": "EC 04.04" },
-        { "kode": "1300M03B", "nama": "Statistika II", "kp": "B", "jam": "13.00 - 14.40", "ruang": "FF 04.05" },
-        { "kode": "1300E07B", "nama": "Statistika I", "kp": "A", "jam": "15.40 - 17.20", "ruang": "EA 03.07" },
-        { "kode": "1303MW23", "nama": "Akuntansi Biaya", "kp": "A", "jam": "15.45 - 17.20", "ruang": "EA 02.05" },
-        { "kode": "1303MW34", "nama": "Akuntansi Manajemen", "kp": "A", "jam": "15.45 - 17.20", "ruang": "EC 04.03" },
-        { "kode": "1302M19B", "nama": "Pengantar Akuntansi Biaya", "kp": "WA", "jam": "15.45 - 17.20", "ruang": "UW 09.04" },
-        { "kode": "1301D002", "nama": "Pengantar Ekonomika Mikro", "kp": "E", "jam": "15.45 - 17.20", "ruang": "EC 04.04" }
+        {
+          "kode": "1301D002",
+          "nama": "Pengantar Ekonomika Mikro",
+          "kp": "WA",
+          "jam": "07.50 - 09.30",
+          "ruang": "UW 09.07"
+        },
+        {
+          "kode": "1303MW34",
+          "nama": "Akuntansi Manajemen",
+          "kp": "C",
+          "jam": "09.45 - 11.25",
+          "ruang": "EC 04.03"
+        },
+        {
+          "kode": "1301E15A",
+          "nama": "Ekonometrika Terapan",
+          "kp": "A",
+          "jam": "09.45 - 11.25",
+          "ruang": "EA 03.07"
+        },
+        {
+          "kode": "1370E01B",
+          "nama": "Introduction of Microeconomics",
+          "kp": "WZ",
+          "jam": "09.45 - 11.25",
+          "ruang": "UW 09.07"
+        },
+        {
+          "kode": "1303D114",
+          "nama": "Pengantar Akuntansi 1",
+          "kp": "E",
+          "jam": "09.45 - 11.25",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1302M19B",
+          "nama": "Pengantar Akuntansi Biaya",
+          "kp": "B",
+          "jam": "09.45 - 11.25",
+          "ruang": "EC 04.04"
+        },
+        {
+          "kode": "1303MW24",
+          "nama": "Sistem Informasi Akuntansi",
+          "kp": "B",
+          "jam": "09.45 - 11.25",
+          "ruang": "EA 02.05"
+        },
+        {
+          "kode": "1300M03B",
+          "nama": "Statistika II",
+          "kp": "D",
+          "jam": "09.45 - 11.25",
+          "ruang": "FF 04.05"
+        },
+        {
+          "kode": "1303TW37",
+          "nama": "Perpajakan",
+          "kp": "B",
+          "jam": "10.40 - 12.30",
+          "ruang": "FG 04.02"
+        },
+        {
+          "kode": "1303MW34",
+          "nama": "Akuntansi Manajemen",
+          "kp": "B",
+          "jam": "13.00 - 14.40",
+          "ruang": "FG 06.02"
+        },
+        {
+          "kode": "1303AW31",
+          "nama": "Analitik dan Visualisasi Data Bisnis",
+          "kp": "B2",
+          "jam": "13.00 - 14.40",
+          "ruang": "EA 02.05"
+        },
+        {
+          "kode": "1303D114",
+          "nama": "Pengantar Akuntansi 1",
+          "kp": "B",
+          "jam": "13.00 - 14.40",
+          "ruang": "SGFBE"
+        },
+        {
+          "kode": "1303FW22",
+          "nama": "Pengantar Akuntansi II",
+          "kp": "A",
+          "jam": "13.00 - 14.40",
+          "ruang": "FF 04.01"
+        },
+        {
+          "kode": "1301D002",
+          "nama": "Pengantar Ekonomika Mikro",
+          "kp": "A",
+          "jam": "13.00 - 14.40",
+          "ruang": "EC 04.04"
+        },
+        {
+          "kode": "1300M03B",
+          "nama": "Statistika II",
+          "kp": "B",
+          "jam": "13.00 - 14.40",
+          "ruang": "FF 04.05"
+        },
+        {
+          "kode": "1300E07B",
+          "nama": "Statistika I",
+          "kp": "A",
+          "jam": "15.40 - 17.20",
+          "ruang": "EA 03.07"
+        },
+        {
+          "kode": "1303MW23",
+          "nama": "Akuntansi Biaya",
+          "kp": "A",
+          "jam": "15.45 - 17.20",
+          "ruang": "EA 02.05"
+        },
+        {
+          "kode": "1303MW34",
+          "nama": "Akuntansi Manajemen",
+          "kp": "A",
+          "jam": "15.45 - 17.20",
+          "ruang": "EC 04.03"
+        },
+        {
+          "kode": "1302M19B",
+          "nama": "Pengantar Akuntansi Biaya",
+          "kp": "WA",
+          "jam": "15.45 - 17.20",
+          "ruang": "UW 09.04"
+        },
+        {
+          "kode": "1301D002",
+          "nama": "Pengantar Ekonomika Mikro",
+          "kp": "E",
+          "jam": "15.45 - 17.20",
+          "ruang": "EC 04.04"
+        }
       ]
     }
-  ]
+  ],
+  "changes": [],
+  "warnings": []
 }
