@@ -60,10 +60,31 @@ const BULAN = {
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_FILE = join(ROOT, 'data', 'jadwal.json');
 
+/* Dua tingkat peringatan, dan bedanya penting:
+
+   warn()     — catatan kualitas data untuk pengurus (mis. jam di dua sheet
+                tidak sama). Barisnya TETAP tampil, jadi mahasiswa tidak perlu
+                diberi tahu apa-apa; cukup muncul di log GitHub Actions.
+
+   warnSkip() — baris benar-benar TIDAK bisa ditampilkan. Ini yang membuat
+                halaman jadwal memasang catatan "ada perubahan yang belum
+                tampil", supaya mahasiswa tahu ada info yang terlewat.
+
+   Kalau keduanya dicampur, halaman akan memberi alarm palsu setiap kali ada
+   selisih kecil di spreadsheet — dan peringatan yang terlalu sering muncul
+   justru berhenti dibaca. */
 const warnings = [];
+const skipped = [];
+
 function warn(msg) {
   warnings.push(msg);
   console.warn('  ! ' + msg);
+}
+
+function warnSkip(msg) {
+  skipped.push(msg);
+  warnings.push(msg);
+  console.warn('  !! ' + msg);
 }
 
 /* ---------- CSV parser ----------
@@ -179,7 +200,7 @@ function rowsToDays(rows) {
     if (!current) continue;
     const [kode, nama, kp, jam, ruang] = cells;
     if (!nama || !jam) {
-      warn(`Baris jadwal dilewati (data tidak lengkap): ${cells.join(' | ')}`);
+      warnSkip(`Baris jadwal dilewati (data tidak lengkap): ${cells.join(' | ')}`);
       continue;
     }
 
@@ -274,7 +295,7 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
         blok = { ...t, label: teksBaris };
         console.log(`  blok: ${formatTanggalPanjang(t.iso)}`);
       } else {
-        warn(`Baris judul tanpa tanggal yang bisa dibaca, blok dilewati: "${teksBaris}"`);
+        warnSkip(`Baris judul tanpa tanggal yang bisa dibaca, blok dilewati: "${teksBaris}"`);
         blok = null;
       }
       continue;
@@ -284,21 +305,21 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
     const [kode, nama, kp, jadwalAsal, jadwalPengganti, ruangPengganti] = cells;
 
     if (!blok) {
-      warn(`Baris perubahan tanpa baris judul bertanggal di atasnya, dilewati: ${kode} ${kp}`);
+      warnSkip(`Baris perubahan tanpa baris judul bertanggal di atasnya, dilewati: ${kode} ${kp}`);
       continue;
     }
 
     const key = `${kode}|${kp}`.toUpperCase();
     const kandidat = indeks.get(key) || [];
     if (kandidat.length === 0) {
-      warn(`Kelas ${kode} KP ${kp} tidak ada di jadwal tetap — baris dilewati.`);
+      warnSkip(`Kelas ${kode} KP ${kp} tidak ada di jadwal tetap — baris dilewati.`);
       continue;
     }
 
     // Kelas yang ditiadakan harus jatuh pada hari yang sama dengan tanggal libur.
     const asal = kandidat.find(k => k.day === blok.hari);
     if (!asal) {
-      warn(
+      warnSkip(
         `Kelas ${kode} KP ${kp} terjadwal hari ${kandidat.map(k => k.day).join('/')}, `
         + `bukan ${blok.hari} (${blok.iso}) — baris dilewati.`
       );
@@ -319,7 +340,7 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
     const jamPengganti = parseJam(jadwalPengganti);
 
     if (!tglPengganti || !jamPengganti) {
-      warn(
+      warnSkip(
         `${kode} KP ${kp}: kolom "Jadwal Pengganti" tidak terbaca `
         + `("${jadwalPengganti}") — baris dilewati.`
       );
@@ -330,7 +351,7 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
     // tidak menebak mana yang benar — lebih baik dilewati daripada salah info.
     const hariDitulis = cariNamaHari(jadwalPengganti);
     if (hariDitulis && hariDitulis !== tglPengganti.hari) {
-      warn(
+      warnSkip(
         `${kode} KP ${kp}: tertulis "${hariDitulis}" tapi ${tglPengganti.iso} `
         + `jatuh pada ${tglPengganti.hari} — baris dilewati.`
       );
@@ -520,11 +541,12 @@ async function main() {
     days,
     changes,
     warnings,
+    skipped,
   };
 
   // Bandingkan tanpa updatedAt, supaya workflow tidak membuat commit kosong
   // tiap siklus kalau isinya sebenarnya tidak berubah.
-  const next = JSON.stringify({ mulai, days, changes, warnings });
+  const next = JSON.stringify({ mulai, days, changes, warnings, skipped });
   let prev = null;
   try {
     const lama = JSON.parse(await readFile(OUT_FILE, 'utf8'));
@@ -533,6 +555,7 @@ async function main() {
       days: lama.days,
       changes: lama.changes || [],
       warnings: lama.warnings || [],
+      skipped: lama.skipped || [],
     });
   } catch { /* file belum ada — anggap berubah */ }
 
@@ -543,8 +566,20 @@ async function main() {
 
   await writeFile(OUT_FILE, JSON.stringify(payload, null, 2) + '\n', 'utf8');
   console.log(`Data berubah — ${OUT_FILE} diperbarui.`);
-  if (warnings.length) {
-    console.log(`\n${warnings.length} peringatan di atas akan ditampilkan sebagai catatan di halaman jadwal.`);
+
+  if (skipped.length) {
+    console.log(
+      `\n${skipped.length} baris TIDAK bisa ditampilkan (tanda !!). `
+      + 'Halaman jadwal akan memberi tahu mahasiswa ada info yang terlewat — '
+      + 'perbaiki barisnya di spreadsheet.'
+    );
+  }
+  const infoSaja = warnings.length - skipped.length;
+  if (infoSaja > 0) {
+    console.log(
+      `${infoSaja} catatan kualitas data (tanda !) — barisnya tetap tampil, `
+      + 'tapi ada yang perlu diseragamkan di spreadsheet.'
+    );
   }
 }
 

@@ -397,14 +397,19 @@
       </div>`;
   }
 
-  /* ---------- kotak peringatan data ---------- */
+  /* ---------- kotak peringatan data ----------
+     Hanya dipasang kalau ada baris yang benar-benar GAGAL ditampilkan.
+     Catatan kualitas data (data.warnings) sengaja tidak dimunculkan di sini:
+     barisnya tetap tampil, jadi buat mahasiswa tidak ada yang perlu
+     dikhawatirkan — itu urusan pengurus lewat log GitHub Actions. */
   function renderPeringatan(){
-    const w = data.warnings || [];
-    if(w.length === 0) return;
+    const s = data.skipped || [];
+    if(s.length === 0) return;
     elPering.innerHTML = `
       <div class="kotak kotak-warn">
-        <h3>⚠️ Sebagian perubahan mungkin belum tampil</h3>
-        <p>Ada ${w.length} baris di spreadsheet perubahan yang belum bisa dibaca otomatis atau perlu dicek ulang.
+        <h3>⚠️ Ada perubahan jadwal yang belum bisa ditampilkan</h3>
+        <p>${s.length} baris di spreadsheet perubahan formatnya belum bisa dibaca otomatis,
+        jadi ada kemungkinan info yang terlewat di halaman ini.
         Untuk kepastian, konfirmasi ke asisten atau cek Instagram KAFBE.</p>
       </div>`;
   }
