@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self';" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Jadwal Kelas — KAFBE Hub</title>
+<title>Jadwal Kelas - KAFBE Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -63,7 +63,6 @@
   <div class="section-head">
     <span class="kicker">Jadwal Kelas</span>
     <h2>Jadwal mata kuliah per minggu</h2>
-    <p>Diambil otomatis dari spreadsheet jadwal KAFBE. Kelas yang ditiadakan dan kelas pengganti ikut ditampilkan sesuai tanggalnya.</p>
   </div>
 
   <div id="kotakSemester"></div>
@@ -93,12 +92,10 @@
   <div id="jadwalIsi" aria-live="polite">
     <p class="jadwal-status">Memuat jadwal…</p>
   </div>
-
-  <p class="jadwal-meta" id="jadwalMeta"></p>
 </section>
 
 <footer class="wrap">
-  <p>Dibuat oleh Elrond, untuk <strong>KAFBE</strong> — Kelompok Asisten FBE. Info jadwal dan kegiatan resmi tetap lewat Instagram KAFBE.</p>
+  <p>Dibuat oleh Elrond, untuk <strong>KAFBE</strong>, Kelompok Asisten FBE. Info jadwal dan kegiatan resmi tetap lewat Instagram KAFBE.</p>
   <p> version 1.0 </p>
 </footer>
 
@@ -112,7 +109,6 @@
 
   const elTabs   = document.getElementById('dayTabs');
   const elIsi    = document.getElementById('jadwalIsi');
-  const elMeta   = document.getElementById('jadwalMeta');
   const elCari   = document.getElementById('cari');
   const elNav    = document.getElementById('weekNav');
   const elRange  = document.getElementById('weekRange');
@@ -137,7 +133,7 @@
 
   const p2 = n => String(n).padStart(2,'0');
 
-  // Tanggal lokal (WIB di sisi pengunjung), BUKAN UTC — kalau pakai
+  // Tanggal lokal (WIB di sisi pengunjung), BUKAN UTC. Kalau pakai
   // toISOString(), pengunjung sebelum jam 07.00 WIB akan melihat tanggal kemarin.
   function iso(d){ return `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`; }
 
@@ -194,7 +190,7 @@
     }
 
     const hasil = dasar.map(k => {
-      // Kelas yang perkuliahannya belum dimulai tidak bisa "ditiadakan" —
+      // Kelas yang perkuliahannya belum dimulai tidak bisa "ditiadakan".
       // status ini diperiksa lebih dulu.
       const mulai = mulaiUntuk(k.kode);
       if(mulai && tanggalIso < mulai){
@@ -249,7 +245,7 @@
     if(!hariList.includes(hariAktif)) hariAktif = hariList[0];
 
     const jumat = tanggalHari(senin, hariList[hariList.length-1]);
-    elRange.textContent = `${tglPendek(senin)} – ${tglPendek(jumat)} ${jumat.getFullYear()}`;
+    elRange.textContent = `${tglPendek(senin)} - ${tglPendek(jumat)} ${jumat.getFullYear()}`;
     btnThis.hidden = offsetMinggu === 0;
     elNav.hidden = false;
 
@@ -305,7 +301,7 @@
           ${k.catatan ? `<span class="matkul-catatan">${esc(k.catatan)}</span>` : ''}
         </td>
         <td class="col-kp"><span class="kp-pill">${esc(k.kp)}</span></td>
-        <td class="col-ruang">${esc(k.ruang || '—')}</td>
+        <td class="col-ruang">${esc(k.ruang || '-')}</td>
       </tr>`;
     }).join('');
 
@@ -328,7 +324,7 @@
             <tbody>${baris}</tbody>
           </table>
         </div>
-        <p class="jadwal-count">${esc(tglPanjang(iso(tgl)))} — ${ringkas}</p>
+        <p class="jadwal-count">${esc(tglPanjang(iso(tgl)))} · ${ringkas}</p>
       </div>`;
   }
 
@@ -401,7 +397,7 @@
      Hanya dipasang kalau ada baris yang benar-benar GAGAL ditampilkan.
      Catatan kualitas data (data.warnings) sengaja tidak dimunculkan di sini:
      barisnya tetap tampil, jadi buat mahasiswa tidak ada yang perlu
-     dikhawatirkan — itu urusan pengurus lewat log GitHub Actions. */
+     dikhawatirkan. Itu urusan pengurus lewat log GitHub Actions. */
   function renderPeringatan(){
     const s = data.skipped || [];
     if(s.length === 0) return;
@@ -412,13 +408,6 @@
         jadi ada kemungkinan info yang terlewat di halaman ini.
         Untuk kepastian, konfirmasi ke asisten atau cek Instagram KAFBE.</p>
       </div>`;
-  }
-
-  function tampilkanMeta(){
-    if(!data.updatedAt){ elMeta.textContent = ''; return; }
-    const t = new Date(data.updatedAt);
-    if(isNaN(t)){ elMeta.textContent = ''; return; }
-    elMeta.textContent = `Terakhir diperbarui: ${t.toLocaleString('id-ID',{dateStyle:'long',timeStyle:'short'})} · disinkronkan otomatis dari spreadsheet KAFBE.`;
   }
 
   async function muat(){
@@ -435,7 +424,6 @@
       renderPerubahan();
       renderPeringatan();
       render();
-      tampilkanMeta();
 
       elCari.addEventListener('input', render);
       btnPrev.addEventListener('click', () => { offsetMinggu--; render(); });

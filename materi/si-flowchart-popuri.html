@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://*.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Flowchart Proses Bisnis: Popuri Inc. — Sistem Informasi — KAFBE Hub</title>
+<title>Flowchart Proses Bisnis: Popuri Inc. - Sistem Informasi - KAFBE Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -188,7 +188,7 @@
 </section>
 
 <footer class="wrap">
-  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong> — Kelompok Asisten FBE.</p>
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong>, Kelompok Asisten FBE.</p>
 </footer>
 
 <script src="../main.js"></script>
@@ -221,17 +221,17 @@
       entities: [
         ['Inventory Manager','mengecek stok & membuat permintaan pembelian'],
         ['Purchasing Department','memproses pesanan pembelian'],
-        ['EDP','(Electronic Data Processing) — sistem komputer yang mencetak dokumen & menyimpan data'],
+        ['EDP','(Electronic Data Processing), sistem komputer yang mencetak dokumen & menyimpan data'],
         ['Financial Department','mengurus pembayaran'],
         ['Warehouse','menerima & memeriksa barang'],
         ['Supplier','pemasok barang']
       ],
       docs: [
-        ['PR','Purchase Requisition — permintaan pembelian'],
-        ['PO','Purchase Order — pesanan pembelian'],
-        ['RR','Receiving Report — laporan penerimaan barang'],
+        ['PR','Purchase Requisition, permintaan pembelian'],
+        ['PO','Purchase Order, pesanan pembelian'],
+        ['RR','Receiving Report, laporan penerimaan barang'],
         ['Invoice','tagihan dari supplier'],
-        ['CD','Cash Disbursement — bukti pengeluaran kas']
+        ['CD','Cash Disbursement, bukti pengeluaran kas']
       ],
       segs: {
         s1:'Popuri Inc. adalah perusahaan yang mengolah daging, khususnya daging sapi dan babi. Siklus pengeluaran (expenditure cycle) Popuri melibatkan pemesanan dan penerimaan barang. Barang-barang ini digunakan sebagai persediaan bahan baku untuk memproduksi nugget demi menjalankan bisnisnya.',
@@ -273,7 +273,7 @@
       entities: [
         ['Inventory Manager','checks stock & creates purchase requisitions'],
         ['Purchasing Department','processes purchase orders'],
-        ['EDP','(Electronic Data Processing) — the computer system that prints documents & stores data'],
+        ['EDP','(Electronic Data Processing), the computer system that prints documents & stores data'],
         ['Financial Department','handles payment'],
         ['Warehouse','receives & inspects goods'],
         ['Supplier','supplies the goods']
@@ -478,7 +478,7 @@
       if(textKey) registerText(textKey,t,cx,ky+keyH/2+3,10.5);
       svg.appendChild(g); return g;
     }
-    // Inverted triangle + "N" — manual file, sorted by Number
+    // Inverted triangle + "N", manual file, sorted by Number
     function fileTriangle(cx,cy,w,h,label){
       const g = svgEl('g', { class:'node-fade' });
       const x=cx-w/2,y=cy-h/2;
@@ -488,7 +488,7 @@
       if(label){ g.appendChild(makeLabel(cx,y-10,label,10)); }
       svg.appendChild(g); return g;
     }
-    // Goods box — square with X, representing physical goods received
+    // Goods box, square with X, representing physical goods received
     function goodsBox(cx,cy,w,h,textKey,label){
       const g = svgEl('g', { class:'node-fade' });
       const x=cx-w/2,y=cy-h/2;
@@ -498,7 +498,7 @@
       const t = makeLabel(cx,y+h+16,label,10.5); g.appendChild(t); if(textKey) registerText(textKey,t,cx,y+h+16,10.5);
       svg.appendChild(g); return g;
     }
-    // Annotation bracket — a note attached beside a shape
+    // Annotation bracket, a note attached beside a shape
     function annotation(x,yTop,yBottom,textKey,label){
       const g = svgEl('g', { class:'node-fade' });
       g.appendChild(svgEl('path', { d:`M${x+10},${yTop} L${x},${yTop} L${x},${yBottom} L${x+10},${yBottom}`, fill:'none', stroke:'#4C6885', 'stroke-width':1.5 }));
@@ -702,7 +702,7 @@
     function buildIntroLists(){
       const entList = document.getElementById('introEntList');
       const docList = document.getElementById('introDocList');
-      entList.innerHTML = DICT[LANG].entities.map(e => `<li><strong>${e[0]}</strong> — ${e[1]}</li>`).join('');
+      entList.innerHTML = DICT[LANG].entities.map(e => `<li><strong>${e[0]}</strong>: ${e[1]}</li>`).join('');
       docList.innerHTML = DICT[LANG].docs.map(d => `<li><span class="doc-tag">${d[0]}</span> ${d[1]}</li>`).join('');
     }
     function applyStaticText(){

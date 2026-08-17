@@ -20,7 +20,7 @@ on:
 permissions:
   contents: write
 
-# Kalau ada run yang masih jalan, biarkan selesai — jangan sampai dua run
+# Kalau ada run yang masih jalan, biarkan selesai, jangan sampai dua run
 # saling menimpa commit.
 concurrency:
   group: sync-jadwal
@@ -44,7 +44,7 @@ jobs:
       - name: Commit bila jadwal berubah
         run: |
           if [ -z "$(git status --porcelain data/jadwal.json)" ]; then
-            echo "Tidak ada perubahan jadwal — tidak ada yang di-commit."
+            echo "Tidak ada perubahan jadwal, tidak ada yang di-commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"

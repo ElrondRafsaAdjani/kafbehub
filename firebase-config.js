@@ -8,10 +8,10 @@
      catatan rules di bawah).
   3. Buka "Project settings" (ikon gerigi) → scroll ke "Your apps" → klik ikon
      web "</>" → daftarkan app (nama bebas, tidak perlu centang Hosting).
-  4. Firebase akan menampilkan object `firebaseConfig` — copy semua isinya
+  4. Firebase akan menampilkan object `firebaseConfig`, copy semua isinya
      ke bawah ini, menggantikan nilai placeholder.
 
-  Field-field ini AMAN untuk ditaruh di kode publik/GitHub — ini bukan
+  Field-field ini AMAN untuk ditaruh di kode publik/GitHub, ini bukan
   password, hanya alamat project. Yang benar-benar menjaga keamanan data
   adalah Firestore Security Rules (lihat catatan di storage.js).
 */

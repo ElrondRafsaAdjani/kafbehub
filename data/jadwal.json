@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-08-14T16:53:12.328Z",
-  "note": "Digenerate otomatis oleh scripts/sync-jadwal.mjs. Jangan diedit manual — perubahan akan tertimpa saat sinkronisasi berikutnya.",
+  "updatedAt": "2026-08-17T23:56:55.495Z",
+  "note": "Digenerate otomatis oleh scripts/sync-jadwal.mjs. Jangan diedit manual, perubahan akan tertimpa saat sinkronisasi berikutnya.",
   "mulai": {
     "default": "2026-08-17",
     "perMatkul": {
@@ -487,7 +487,7 @@
       "nama": "Akuntansi Keuangan Menengah I",
       "jam": "13.00 - 14.40",
       "ruang": "FG 06.02",
-      "catatan": "Ditiadakan — diganti Rabu, 19 Agustus 2026, 13.00 - 14.00 di EA 04.05"
+      "catatan": "Diganti ke Rabu, 19 Agustus 2026 pukul 13.00 - 14.00 di EA 04.05"
     },
     {
       "tanggal": "2026-08-17",
@@ -497,7 +497,7 @@
       "nama": "Manajemen Keuangan dan Investasi",
       "jam": "15.45 - 17.20",
       "ruang": "EA 03.07",
-      "catatan": "Ditiadakan — diganti Rabu, 19 Agustus 2026, 13.00 - 14.40 di EA 02.04"
+      "catatan": "Diganti ke Rabu, 19 Agustus 2026 pukul 13.00 - 14.40 di EA 02.04"
     },
     {
       "tanggal": "2026-08-17",
@@ -507,7 +507,7 @@
       "nama": "Analitik dan Visualisasi Data Bisnis",
       "jam": "18.30 - 20.10",
       "ruang": "EA 02.04",
-      "catatan": "Ditiadakan — diganti Jumat, 21 Agustus 2026, 09.45 - 11.25 di EC 03.03"
+      "catatan": "Diganti ke Jumat, 21 Agustus 2026 pukul 09.45 - 11.25 di EC 03.03"
     },
     {
       "tanggal": "2026-08-17",
@@ -517,7 +517,7 @@
       "nama": "Statistika II",
       "jam": "18.30 - 20.20",
       "ruang": "EC 04.04",
-      "catatan": "Ditiadakan — diganti Rabu, 19 Agustus 2026, 18.30 - 20.10 di EA 04.03"
+      "catatan": "Diganti ke Rabu, 19 Agustus 2026 pukul 18.30 - 20.10 di EA 04.03"
     },
     {
       "tanggal": "2026-08-17",
@@ -527,7 +527,7 @@
       "nama": "Manajemen Keuangan",
       "jam": "18.30 - 20.20",
       "ruang": "EC 03.03",
-      "catatan": "Ditiadakan — diganti Rabu, 19 Agustus 2026, 18.30 - 20.10 di EA 04.04"
+      "catatan": "Diganti ke Rabu, 19 Agustus 2026 pukul 18.30 - 20.10 di EA 04.04"
     },
     {
       "tanggal": "2026-08-19",
@@ -582,7 +582,7 @@
   ],
   "warnings": [
     "1300M03B KP A: \"Jadwal Asal\" tertulis 18.30 - 20.10, jadwal tetap 18.30 - 20.20. Yang dipakai: 18.30 - 20.20.",
-    "1303FW33 KP A: durasi pengganti 60 menit, aslinya 100 menit (13.00 - 14.00 vs 13.00 - 14.40) — cek kemungkinan salah ketik.",
+    "1303FW33 KP A: durasi pengganti 60 menit, aslinya 100 menit (13.00 - 14.00 vs 13.00 - 14.40), cek kemungkinan salah ketik.",
     "1303FW21 KP A: \"Jadwal Asal\" tertulis 18.30 - 20.10, jadwal tetap 18.30 - 20.20. Yang dipakai: 18.30 - 20.20."
   ],
   "skipped": []

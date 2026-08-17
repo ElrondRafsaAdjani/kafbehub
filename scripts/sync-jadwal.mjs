@@ -1,5 +1,5 @@
 /*
-  sync-jadwal.mjs — ambil jadwal kelas dari Google Sheets, tulis ke data/jadwal.json.
+  sync-jadwal.mjs: ambil jadwal kelas dari Google Sheets, tulis ke data/jadwal.json.
 
   Dijalankan otomatis oleh .github/workflows/sync-jadwal.yml, dan bisa
   dijalankan manual:
@@ -8,11 +8,11 @@
 
   Membaca DUA tab:
 
-  1. "per hari"  — jadwal tetap mingguan. Satu baris = satu kelas, sudah
+  1. "per hari"  : jadwal tetap mingguan. Satu baris = satu kelas, sudah
      terurut per jam, nama matkul terisi penuh (tidak ada merged cell
      seperti di tab master "Jadwal + Ruang Kelas").
 
-  2. "perubahan" — perubahan sementara (tanggal merah, acara kampus, dll).
+  2. "perubahan" : perubahan sementara (tanggal merah, acara kampus, dll).
      Formatnya sengaja mengikuti file "Jadwal Kelas Pengganti" yang biasa
      dibuat pengurus, supaya isinya bisa langsung di-copy-paste. Boleh berisi
      beberapa blok sekaligus; tiap blok diawali baris judul yang memuat
@@ -25,9 +25,9 @@
      Satu baris menghasilkan DUA kejadian: kelas asal ditiadakan pada tanggal
      libur, dan kelas pengganti muncul pada tanggal penggantinya.
 
-  Tab "perubahan" boleh belum ada — jadwal tetap akan tetap tersinkron.
+  Tab "perubahan" boleh belum ada, jadwal tetap akan tetap tersinkron.
 
-  SYARAT: sheet harus bisa dibaca tanpa login — Share → "Anyone with the
+  SYARAT: sheet harus bisa dibaca tanpa login, Share → "Anyone with the
   link" → Viewer. Script ini sengaja tidak memakai kredensial apa pun.
 */
 
@@ -62,16 +62,16 @@ const OUT_FILE = join(ROOT, 'data', 'jadwal.json');
 
 /* Dua tingkat peringatan, dan bedanya penting:
 
-   warn()     — catatan kualitas data untuk pengurus (mis. jam di dua sheet
+   warn()     : catatan kualitas data untuk pengurus (mis. jam di dua sheet
                 tidak sama). Barisnya TETAP tampil, jadi mahasiswa tidak perlu
                 diberi tahu apa-apa; cukup muncul di log GitHub Actions.
 
-   warnSkip() — baris benar-benar TIDAK bisa ditampilkan. Ini yang membuat
+   warnSkip() : baris benar-benar TIDAK bisa ditampilkan. Ini yang membuat
                 halaman jadwal memasang catatan "ada perubahan yang belum
                 tampil", supaya mahasiswa tahu ada info yang terlewat.
 
    Kalau keduanya dicampur, halaman akan memberi alarm palsu setiap kali ada
-   selisih kecil di spreadsheet — dan peringatan yang terlalu sering muncul
+   selisih kecil di spreadsheet, dan peringatan yang terlalu sering muncul
    justru berhenti dibaca. */
 const warnings = [];
 const skipped = [];
@@ -218,7 +218,7 @@ function rowsToDays(rows) {
 
 /* Apakah isi tab ini benar-benar berbentuk tabel perubahan?
 
-   PENTING: kalau nama tab tidak ditemukan, gviz TIDAK memberi error — ia diam-
+   PENTING: kalau nama tab tidak ditemukan, gviz TIDAK memberi error, ia diam-
    diam mengembalikan tab PERTAMA (master jadwal). Tanpa pemeriksaan ini, isi
    tab yang sama sekali lain akan dibaca sebagai data perubahan dan menghasilkan
    puluhan peringatan palsu di halaman jadwal. */
@@ -241,7 +241,7 @@ async function bacaKonfigMulai() {
       perMatkul: cfg.perMatkul || {},
     };
   } catch (e) {
-    console.log(`  data/mulai.json tidak terbaca (${e.message}) — semua kelas dianggap sudah berjalan.`);
+    console.log(`  data/mulai.json tidak terbaca (${e.message}), semua kelas dianggap sudah berjalan.`);
     return { default: null, perMatkul: {} };
   }
 }
@@ -312,7 +312,7 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
     const key = `${kode}|${kp}`.toUpperCase();
     const kandidat = indeks.get(key) || [];
     if (kandidat.length === 0) {
-      warnSkip(`Kelas ${kode} KP ${kp} tidak ada di jadwal tetap — baris dilewati.`);
+      warnSkip(`Kelas ${kode} KP ${kp} tidak ada di jadwal tetap, baris dilewati.`);
       continue;
     }
 
@@ -321,7 +321,7 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
     if (!asal) {
       warnSkip(
         `Kelas ${kode} KP ${kp} terjadwal hari ${kandidat.map(k => k.day).join('/')}, `
-        + `bukan ${blok.hari} (${blok.iso}) — baris dilewati.`
+        + `bukan ${blok.hari} (${blok.iso}), baris dilewati.`
       );
       continue;
     }
@@ -342,18 +342,18 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
     if (!tglPengganti || !jamPengganti) {
       warnSkip(
         `${kode} KP ${kp}: kolom "Jadwal Pengganti" tidak terbaca `
-        + `("${jadwalPengganti}") — baris dilewati.`
+        + `("${jadwalPengganti}"), baris dilewati.`
       );
       continue;
     }
 
     // Nama hari yang diketik harus cocok dengan tanggalnya. Kalau bentrok kita
-    // tidak menebak mana yang benar — lebih baik dilewati daripada salah info.
+    // tidak menebak mana yang benar, lebih baik dilewati daripada salah info.
     const hariDitulis = cariNamaHari(jadwalPengganti);
     if (hariDitulis && hariDitulis !== tglPengganti.hari) {
       warnSkip(
         `${kode} KP ${kp}: tertulis "${hariDitulis}" tapi ${tglPengganti.iso} `
-        + `jatuh pada ${tglPengganti.hari} — baris dilewati.`
+        + `jatuh pada ${tglPengganti.hari}, baris dilewati.`
       );
       continue;
     }
@@ -365,7 +365,7 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
     if (dAsal && dGanti && Math.abs(dAsal - dGanti) > 10) {
       warn(
         `${kode} KP ${kp}: durasi pengganti ${dGanti} menit, aslinya ${dAsal} menit `
-        + `(${jamPengganti} vs ${asal.jam}) — cek kemungkinan salah ketik.`
+        + `(${jamPengganti} vs ${asal.jam}), cek kemungkinan salah ketik.`
       );
     }
 
@@ -380,7 +380,7 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
       nama: namaKelas,
       jam: asal.jam,
       ruang: asal.ruang,
-      catatan: `Ditiadakan — diganti ${tglGantiTeks}, ${jamPengganti} di ${ruangPengganti || '(ruang belum ditentukan)'}`,
+      catatan: `Diganti ke ${tglGantiTeks} pukul ${jamPengganti} di ${ruangPengganti || '(ruang belum ditentukan)'}`,
     });
 
     changes.push({
@@ -398,7 +398,7 @@ function rowsToChanges(rows, days, mulaiCfg = { default: null, perMatkul: {} }) 
 
   // Kalau sebuah tanggal meniadakan sebagian besar (tapi tidak semua) kelas di
   // hari itu, biasanya itu tanggal merah dan ada kelas yang lupa didaftarkan.
-  // Hanya dicatat di log — memindahkan satu-dua kelas saja juga hal biasa.
+  // Hanya dicatat di log, memindahkan satu-dua kelas saja juga hal biasa.
   const perTanggal = new Map();
   for (const c of changes.filter(c => c.tipe === 'libur')) {
     if (!perTanggal.has(c.tanggal)) perTanggal.set(c.tanggal, []);
@@ -475,15 +475,15 @@ async function ambilTab(tab, { wajib }) {
         + 'sheet sudah di-share "Anyone with the link → Viewer", dan SHEET_ID-nya tepat.'
       );
     }
-    console.log(`  tab "${tab}" tidak ada / belum bisa dibaca — dilewati.`);
+    console.log(`  tab "${tab}" tidak ada / belum bisa dibaca, dilewati.`);
     return null;
   }
 
   // Kalau sheet tidak publik, Google membalas halaman login berformat HTML
-  // dengan status 200 — jadi status OK saja tidak cukup untuk dipercaya.
+  // dengan status 200, jadi status OK saja tidak cukup untuk dipercaya.
   if (body.trimStart().startsWith('<')) {
     throw new Error(
-      'Google membalas HTML, bukan CSV — sheet kemungkinan belum publik. '
+      'Google membalas HTML, bukan CSV, sheet kemungkinan belum publik. '
       + 'Buka sheet → Share → "Anyone with the link" → Viewer.'
     );
   }
@@ -499,7 +499,7 @@ async function main() {
   if (total === 0) {
     throw new Error(
       `Tidak ada satu pun baris kelas yang terbaca dari tab "${TAB_JADWAL}". `
-      + 'Struktur sheet mungkin berubah — data lama sengaja tidak ditimpa.'
+      + 'Struktur sheet mungkin berubah, data lama sengaja tidak ditimpa.'
     );
   }
 
@@ -522,11 +522,11 @@ async function main() {
     if (bentuknyaTabPerubahan(rows)) {
       changes = rowsToChanges(rows, days, mulai);
     } else {
-      // gviz mengembalikan tab pertama saat nama tab tidak ketemu — jangan
+      // gviz mengembalikan tab pertama saat nama tab tidak ketemu, jangan
       // dibaca sebagai perubahan, dan jangan bikin peringatan palsu.
       console.log(
         `  isi tab "${TAB_PERUBAHAN}" tidak berbentuk tabel perubahan `
-        + '(kemungkinan tabnya belum dibuat) — dilewati.'
+        + '(kemungkinan tabnya belum dibuat), dilewati.'
       );
     }
   }
@@ -536,7 +536,7 @@ async function main() {
 
   const payload = {
     updatedAt: new Date().toISOString(),
-    note: 'Digenerate otomatis oleh scripts/sync-jadwal.mjs. Jangan diedit manual — perubahan akan tertimpa saat sinkronisasi berikutnya.',
+    note: 'Digenerate otomatis oleh scripts/sync-jadwal.mjs. Jangan diedit manual, perubahan akan tertimpa saat sinkronisasi berikutnya.',
     mulai,
     days,
     changes,
@@ -557,27 +557,27 @@ async function main() {
       warnings: lama.warnings || [],
       skipped: lama.skipped || [],
     });
-  } catch { /* file belum ada — anggap berubah */ }
+  } catch { /* file belum ada, anggap berubah */ }
 
   if (prev === next) {
-    console.log('Tidak ada perubahan — file tidak ditulis ulang.');
+    console.log('Tidak ada perubahan, file tidak ditulis ulang.');
     return;
   }
 
   await writeFile(OUT_FILE, JSON.stringify(payload, null, 2) + '\n', 'utf8');
-  console.log(`Data berubah — ${OUT_FILE} diperbarui.`);
+  console.log(`Data berubah, ${OUT_FILE} diperbarui.`);
 
   if (skipped.length) {
     console.log(
       `\n${skipped.length} baris TIDAK bisa ditampilkan (tanda !!). `
-      + 'Halaman jadwal akan memberi tahu mahasiswa ada info yang terlewat — '
+      + 'Halaman jadwal akan memberi tahu mahasiswa ada info yang terlewat, '
       + 'perbaiki barisnya di spreadsheet.'
     );
   }
   const infoSaja = warnings.length - skipped.length;
   if (infoSaja > 0) {
     console.log(
-      `${infoSaja} catatan kualitas data (tanda !) — barisnya tetap tampil, `
+      `${infoSaja} catatan kualitas data (tanda !), barisnya tetap tampil, `
       + 'tapi ada yang perlu diseragamkan di spreadsheet.'
     );
   }

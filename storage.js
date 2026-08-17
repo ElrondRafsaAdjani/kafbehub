@@ -1,8 +1,8 @@
 /*
-  KafbeStorage — abstraksi penyimpanan skor untuk SEMUA game di hub ini.
+  KafbeStorage: abstraksi penyimpanan skor untuk SEMUA game di hub ini.
 
   - "Skor terbaik" (getBest/setBest) tetap disimpan per perangkat lewat
-    localStorage — cukup untuk statistik pribadi "skor terbaikmu di HP/laptop ini".
+    localStorage, cukup untuk statistik pribadi "skor terbaikmu di HP/laptop ini".
   - "Papan peringkat" (getLeaderboard/addScore) sekarang memakai Firebase
     Firestore, jadi BENERAN dibagikan ke semua pengunjung situs, bukan cuma
     lokal di satu browser.
