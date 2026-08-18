@@ -92,6 +92,8 @@
   <div id="jadwalIsi" aria-live="polite">
     <p class="jadwal-status">Memuat jadwal…</p>
   </div>
+
+  <p class="jadwal-meta" id="jadwalMeta"></p>
 </section>
 
 <footer class="wrap">
@@ -110,6 +112,7 @@
   const elTabs   = document.getElementById('dayTabs');
   const elIsi    = document.getElementById('jadwalIsi');
   const elCari   = document.getElementById('cari');
+  const elMeta   = document.getElementById('jadwalMeta');
   const elNav    = document.getElementById('weekNav');
   const elRange  = document.getElementById('weekRange');
   const elSemester = document.getElementById('kotakSemester');
@@ -410,6 +413,16 @@
       </div>`;
   }
 
+  function tampilkanMeta(){
+    if(!elMeta) return;
+    const t = data.updatedAt ? new Date(data.updatedAt) : null;
+    if(!t || isNaN(t)){ elMeta.textContent = ''; return; }
+    // Ditampilkan dalam zona waktu perangkat pembaca, bukan zona waktu server.
+    const tgl = t.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+    const jam = t.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+    elMeta.textContent = `Terakhir diperbarui: ${tgl} pukul ${jam}`;
+  }
+
   async function muat(){
     try{
       // cache: 'no-cache' → browser tetap pakai cache, tapi selalu
@@ -424,6 +437,7 @@
       renderPerubahan();
       renderPeringatan();
       render();
+      tampilkanMeta();
 
       elCari.addEventListener('input', render);
       btnPrev.addEventListener('click', () => { offsetMinggu--; render(); });
