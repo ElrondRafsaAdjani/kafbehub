@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-17T23:56:55.495Z",
+  "updatedAt": "2026-08-18T09:31:45.748Z",
   "note": "Digenerate otomatis oleh scripts/sync-jadwal.mjs. Jangan diedit manual, perubahan akan tertimpa saat sinkronisasi berikutnya.",
   "mulai": {
     "default": "2026-08-17",
@@ -129,7 +129,7 @@
           "nama": "Sistem Informasi Manajemen - AK",
           "kp": "A2",
           "jam": "18.30 - 20.10",
-          "ruang": "EA 02.04"
+          "ruang": "EA 04.04"
         },
         {
           "kode": "1300M03B",
