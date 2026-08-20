@@ -33,6 +33,15 @@
     </form>
 
     <p class="op-pesan" id="pesanMasuk" role="alert"></p>
+
+    <!-- Catatan langkah demi langkah saat mencoba masuk. Tersembunyi sampai
+         ada percobaan, dan berguna untuk menunjukkan langkah mana yang gagal
+         tanpa perlu membuka developer tools. -->
+    <details class="op-diagnosa" id="diagnosaBungkus" hidden>
+      <summary>Rincian teknis percobaan masuk</summary>
+      <pre id="diagnosa"></pre>
+    </details>
+
     <p class="op-catatan">Lupa kata sandi atau butuh akun baru? Hubungi pengurus yang memegang akses Firebase Console.</p>
   </div>
 </section>

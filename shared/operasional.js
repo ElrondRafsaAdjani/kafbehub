@@ -97,6 +97,24 @@ function daftarKesalahan(judul, list){
   return `${esc(judul)}<ul>${list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
 }
 
+/*
+  Catatan langkah saat mencoba masuk.
+
+  Kegagalan pada tahap ini sulit dilacak karena tersebar di beberapa proses
+  asinkron, dan kalau salah satunya gagal diam-diam pemakai cuma melihat
+  halaman yang tidak bereaksi. Setiap langkah dicatat ke panel yang bisa dibuka
+  di layar masuk, sehingga tidak perlu membuka developer tools untuk tahu
+  langkah mana yang berhenti.
+*/
+function diag(teks){
+  const el = $('diagnosa');
+  if(!el) return;
+  $('diagnosaBungkus').hidden = false;
+  const jam = new Date().toLocaleTimeString('id-ID', { hour12: false });
+  el.textContent += `[${jam}] ${teks}\n`;
+  console.log('[operasional] ' + teks);
+}
+
 let waktuStatus = null;
 function status(teks, jenis){
   const el = $('statusSimpan');
@@ -143,9 +161,12 @@ $('formMasuk').addEventListener('submit', async (e) => {
   tombol.disabled = true;
   tombol.textContent = 'Memeriksa…';
   try{
+    diag('Mengirim email dan kata sandi ke Firebase…');
     await signInWithEmailAndPassword(auth, $('email').value.trim(), $('sandi').value);
+    diag('Kredensial diterima Firebase.');
     $('sandi').value = '';
   }catch(err){
+    diag('DITOLAK saat masuk: ' + (err.code || err.message));
     pesan($('pesanMasuk'), esc(pesanAuth(err.code || '')), 'salah');
   }finally{
     tombol.disabled = false;
@@ -162,15 +183,21 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  diag('Sesi aktif sebagai ' + user.email);
+  diag('UID akun ini: ' + user.uid);
+  diag('Membaca dokumen admins/' + user.uid + ' …');
+
   // Punya akun saja tidak cukup. Wewenang ditentukan oleh dokumen di koleksi
   // "admins", dan aturan Firestore memeriksa hal yang sama di sisi server.
   let profil = null;
   let galat = null;
   try{
     const snap = await getDoc(doc(db, 'admins', user.uid));
+    diag('Dokumen admins terbaca. Ada isinya? ' + (snap.exists() ? 'YA' : 'TIDAK'));
     if(snap.exists()) profil = snap.data();
   }catch(err){
     console.error('Gagal memeriksa status admin', err);
+    diag('GAGAL membaca admins: ' + (err.code || err.message));
     galat = err;
   }
 
@@ -201,6 +228,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+  diag('Terverifikasi sebagai admin. Membuka halaman…');
   $('siapa').textContent = (profil.nama ? profil.nama + ' · ' : '') + user.email;
   $('layarMasuk').hidden = true;
   $('aplikasi').hidden = false;

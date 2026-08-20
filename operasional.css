@@ -19,6 +19,18 @@
 .op-penuh{ width:100%; justify-content:center; margin-top:18px; }
 .op-catatan{ font-size:0.78rem; color:var(--ink-soft); line-height:1.55; margin-top:16px; }
 
+.op-diagnosa{ margin-top:16px; text-align:left; }
+.op-diagnosa summary{
+  cursor:pointer; font-size:0.78rem; font-weight:700; color:var(--ink-soft);
+}
+.op-diagnosa pre{
+  margin:10px 0 0; padding:11px; max-height:220px; overflow:auto;
+  background:var(--bg-deep); border:1px solid var(--line); border-radius:8px;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:0.72rem; line-height:1.5; white-space:pre-wrap; word-break:break-all;
+  user-select:all;
+}
+
 /* ---------- Kolom isian ---------- */
 input[type=text], input[type=email], input[type=password], input[type=date],
 input[type=time], input[type=search], select, textarea{
