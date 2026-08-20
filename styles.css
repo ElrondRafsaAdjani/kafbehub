@@ -18,6 +18,14 @@
   --radius-md: 18px;
 }
 *{box-sizing:border-box;}
+
+/* Atribut hidden bawaan HTML memasang display:none lewat stylesheet peramban,
+   dan itu KALAH dari aturan kita sendiri seperti .op-masuk{display:flex} atau
+   .btn{display:inline-flex}. Akibatnya elemen yang sudah diberi hidden lewat
+   JavaScript tetap terlihat. Baris ini yang membuat hidden benar-benar
+   menyembunyikan, berapa pun spesifisitas aturan lain.
+   !important memang disengaja di sini, bukan jalan pintas. */
+[hidden]{display:none !important;}
 html{scroll-behavior:smooth;}
 body{
   margin:0;
