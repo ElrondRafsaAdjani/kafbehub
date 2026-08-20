@@ -85,6 +85,91 @@ window.KafbeStorage = (function(){
     try{ localStorage.setItem(localKey(gameId), JSON.stringify(arr)); }catch(e){}
   }
 
+  // ---------- Cache papan peringkat ----------
+  /*
+    Firestore menagih per DOKUMEN yang dibaca, bukan per permintaan. Game
+    memanggil getLeaderboard setiap kali pemain mati (untuk mengecek apakah
+    skornya masuk 10 besar), jadi tanpa cache satu sesi 20 ronde memicu 20
+    pembacaan penuh seluruh koleksi.
+
+    Papan peringkat tidak perlu real-time sampai ke detik, jadi hasilnya
+    disimpan sebentar di memori. Cache ini hanya ada selama tab terbuka dan
+    tidak menyentuh data di server sama sekali.
+  */
+  const CACHE_TTL_MS = 60 * 1000;
+  const cache = new Map();   // gameId -> { waktu, data, limitN }
+
+  function dariCache(gameId, limitN){
+    const c = cache.get(gameId);
+    if(!c) return null;
+    if(Date.now() - c.waktu > CACHE_TTL_MS){ cache.delete(gameId); return null; }
+    // Cache yang isinya lebih pendek dari yang diminta tidak bisa dipakai.
+    if(c.limitN < limitN) return null;
+    return c.data;
+  }
+
+  function simpanCache(gameId, data, limitN){
+    cache.set(gameId, { waktu: Date.now(), data, limitN });
+  }
+
+  /*
+    Cara hemat: minta Firestore yang mengurutkan dan memotong, sehingga yang
+    terbaca hanya 10 dokumen berapa pun banyaknya skor tersimpan.
+
+    Ini butuh "composite index" (game menaik, score menurun) yang dibuat sekali
+    di console Firebase. Selama index itu belum ada, Firestore menolak query-nya
+    dan kita turun otomatis ke cara lama: ambil semua lalu urutkan di peramban.
+    Jadi situs tetap jalan tanpa setup apa pun, dan langsung lebih hemat begitu
+    index-nya dibuat, tanpa perlu ubah kode lagi.
+  */
+  let indexTersedia = null;   // null = belum dicoba, false = index belum ada
+
+  function bacaSnapshot(snap){
+    const out = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      out.push({ name: d.name, score: d.score });
+    });
+    return out;
+  }
+
+  async function ambilDariFirestore(conn, gameId, limitN){
+    const { db, firestore } = conn;
+    const koleksi = firestore.collection(db, 'scores');
+
+    if(indexTersedia !== false && typeof firestore.orderBy === 'function'){
+      try{
+        const q = firestore.query(
+          koleksi,
+          firestore.where('game', '==', gameId),
+          firestore.orderBy('score', 'desc'),
+          firestore.limit(limitN)
+        );
+        const snap = await firestore.getDocs(q);
+        indexTersedia = true;
+        return bacaSnapshot(snap);
+      }catch(e){
+        indexTersedia = false;
+        console.info(
+          'KafbeStorage: composite index belum ada, sementara memakai cara lama '
+          + '(membaca semua skor). Buat index lewat tautan pada pesan error di '
+          + 'bawah ini supaya pembacaan turun jadi ' + limitN + ' dokumen saja.',
+          e && e.message
+        );
+      }
+    }
+
+    const q = firestore.query(
+      koleksi,
+      firestore.where('game', '==', gameId),
+      firestore.limit(200)
+    );
+    const snap = await firestore.getDocs(q);
+    const out = bacaSnapshot(snap);
+    out.sort((a,b) => b.score - a.score);
+    return out.slice(0, limitN);
+  }
+
   // ---------- Public: leaderboard global ----------
   async function getLeaderboard(gameId, limitN){
     limitN = limitN || 10;
@@ -92,24 +177,13 @@ window.KafbeStorage = (function(){
     if(!conn){
       return getLocalLeaderboard(gameId).slice(0, limitN);
     }
+
+    const tersimpan = dariCache(gameId, limitN);
+    if(tersimpan) return tersimpan.slice(0, limitN);
+
     try{
-      const { db, firestore } = conn;
-      // Sengaja TIDAK pakai orderBy di query Firestore-nya, karena where + orderBy
-      // pada field berbeda butuh "composite index" yang harus dibuat manual di
-      // console Firebase. Supaya zero-setup, ambil semua entri game ini lalu
-      // urutkan di browser saja (aman untuk skala leaderboard kelas/organisasi).
-      const q = firestore.query(
-        firestore.collection(db, 'scores'),
-        firestore.where('game', '==', gameId),
-        firestore.limit(200)
-      );
-      const snap = await firestore.getDocs(q);
-      const out = [];
-      snap.forEach(doc => {
-        const d = doc.data();
-        out.push({ name: d.name, score: d.score });
-      });
-      out.sort((a,b) => b.score - a.score);
+      const out = await ambilDariFirestore(conn, gameId, limitN);
+      simpanCache(gameId, out, limitN);
       return out.slice(0, limitN);
     }catch(e){
       console.error('KafbeStorage: gagal ambil leaderboard dari Firebase, pakai fallback lokal.', e);
@@ -134,6 +208,9 @@ window.KafbeStorage = (function(){
         score,
         ts: firestore.serverTimestamp()
       });
+      // Papan peringkat berubah, jadi cache lama harus dibuang supaya skor
+      // yang baru saja dikirim langsung kelihatan.
+      cache.delete(gameId);
     }catch(e){
       console.error('KafbeStorage: gagal simpan skor ke Firebase, simpan ke lokal saja.', e);
       const board = getLocalLeaderboard(gameId);
