@@ -97,6 +97,17 @@ textarea{ resize:vertical; }
 .op-pesan.benar{ color:#1E7A44; }
 .op-pesan.hati{ color:var(--gold-deep); }
 .op-pesan ul{ margin:6px 0 0; padding-left:20px; }
+.op-pesan code{
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:0.82em; background:var(--bg-deep); padding:1px 5px; border-radius:5px;
+}
+/* UID sengaja dibuat mudah diblok dan disalin, karena harus ditempel
+   persis ke Firebase Console. */
+.op-uid{
+  display:block; margin:8px 0 10px; padding:9px 11px;
+  word-break:break-all; user-select:all; font-size:0.82rem;
+  background:var(--bg-deep); border:1px solid var(--line); border-radius:8px;
+}
 .op-pesan li{ margin-bottom:3px; }
 
 .op-status{

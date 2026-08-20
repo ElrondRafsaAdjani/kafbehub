@@ -165,19 +165,39 @@ onAuthStateChanged(auth, async (user) => {
   // Punya akun saja tidak cukup. Wewenang ditentukan oleh dokumen di koleksi
   // "admins", dan aturan Firestore memeriksa hal yang sama di sisi server.
   let profil = null;
+  let galat = null;
   try{
     const snap = await getDoc(doc(db, 'admins', user.uid));
     if(snap.exists()) profil = snap.data();
   }catch(err){
     console.error('Gagal memeriksa status admin', err);
+    galat = err;
   }
 
   if(!profil){
-    await signOut(auth);
-    pesan($('pesanMasuk'),
-      'Akun ini berhasil masuk, tapi belum terdaftar sebagai admin. '
-      + 'Minta pengurus mendaftarkan UID akun Anda di koleksi <code>admins</code>.',
-      'salah');
+    // Pesan dipasang LEBIH DULU, baru keluar. Kalau urutannya dibalik dan
+    // signOut gagal, pemakai hanya melihat halaman masuk kosong tanpa
+    // penjelasan apa pun, dan itu justru yang paling membingungkan.
+    if(galat){
+      pesan($('pesanMasuk'),
+        'Masuk berhasil, tapi status admin tidak bisa diperiksa.<br>'
+        + `Pesan aslinya: <code>${esc(galat.message || galat.code || 'tidak diketahui')}</code><br><br>`
+        + 'Biasanya ini berarti aturan keamanan Firestore belum terpasang. '
+        + 'Lihat langkah 1.4 di PANDUAN-PENGURUS.md.',
+        'salah');
+    }else{
+      pesan($('pesanMasuk'),
+        'Masuk berhasil, tapi akun ini belum terdaftar sebagai admin.<br><br>'
+        + 'Di Firestore, koleksi <code>admins</code> harus punya dokumen yang '
+        + '<strong>Document ID-nya persis sama</strong> dengan baris di bawah ini:'
+        + `<br><code class="op-uid">${esc(user.uid)}</code>`
+        + 'Pastikan memakai ID itu, <strong>bukan</strong> tombol Auto-ID, dan '
+        + 'UID-nya ditaruh sebagai Document ID, bukan sebagai isi field.',
+        'salah');
+    }
+
+    try{ await signOut(auth); }
+    catch(err){ console.warn('Gagal keluar setelah penolakan admin', err); }
     return;
   }
 
