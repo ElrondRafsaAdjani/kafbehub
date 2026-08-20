@@ -11,10 +11,26 @@ name: Sinkronisasi jadwal kelas
 #   Sheet-nya juga harus di-Share → "Anyone with the link" → Viewer,
 #   karena workflow ini membacanya tanpa login.
 
+# ============================================================
+# TIDAK LAGI BERJALAN OTOMATIS. Sengaja.
+#
+# Sejak halaman /operasional ada, jadwal disunting langsung lewat halaman itu
+# dan tersimpan di Firestore. Google Sheets tidak lagi menjadi sumber jadwal.
+#
+# Kalau sinkronisasi ini tetap dibiarkan berjalan, ia akan menimpa
+# data/jadwal.json dengan isi sheet yang sudah tidak diurus, sehingga salinan
+# cadangan di situs justru menampilkan jadwal usang. Itu sebabnya jadwal cron
+# di bawah dinonaktifkan.
+#
+# Berkas ini tidak dihapus supaya cara kerja lamanya tetap terekam, dan supaya
+# gampang dihidupkan lagi kalau suatu saat pengurus memutuskan kembali memakai
+# spreadsheet: cukup hapus tanda pagar pada dua baris "schedule" di bawah.
+# ============================================================
+
 on:
-  schedule:
-    - cron: '0 */3 * * *'   # tiap 3 jam, waktu UTC
-  workflow_dispatch:         # tombol "Run workflow" untuk update manual
+  # schedule:
+  #   - cron: '0 */3 * * *'   # tiap 3 jam, waktu UTC
+  workflow_dispatch:           # hanya jalan kalau ditekan manual di tab Actions
 
 # Diperlukan agar workflow boleh push commit balik ke repo.
 permissions:

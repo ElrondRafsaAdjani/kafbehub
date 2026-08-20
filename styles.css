@@ -147,6 +147,23 @@ section{padding:64px 0;}
 .badge-live{background:#E1F5E9; color:#1E7A44;}
 .badge-soon{background:#FDEEDB; color:var(--gold-deep);}
 
+/* ---------- PENGUMUMAN (halaman utama) ---------- */
+.pengumuman-wrap{ padding:26px 24px 0; }
+.pengumuman{
+  background:var(--surface); border:1px solid var(--line);
+  border-left:4px solid var(--owl-mid);
+  border-radius:var(--radius-md); padding:18px 22px; margin-bottom:12px;
+  box-shadow:var(--shadow);
+}
+.pengumuman-pin{ border-left-color:var(--gold); }
+.pengumuman-label{
+  display:inline-block; margin-bottom:8px; padding:3px 10px; border-radius:100px;
+  background:#FDEEDB; color:var(--gold-deep);
+  font-size:0.7rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
+}
+.pengumuman h3{ font-size:1.05rem; }
+.pengumuman p{ margin:6px 0 0; color:var(--ink-soft); font-size:0.92rem; line-height:1.6; }
+
 /* ---------- JADWAL KELAS ---------- */
 .sr-only{
   position:absolute; width:1px; height:1px; padding:0; margin:-1px;
@@ -192,6 +209,8 @@ section{padding:64px 0;}
 .tag-libur{background:#FBE3E2; color:#B03B37;}
 .tag-pengganti{background:#E1F5E9; color:#1E7A44;}
 .tag-belum{background:#E7EDF1; color:#5C7285;}
+.tag-ruang{background:#E3EEF8; color:#2C5A85;}
+.row-ruang{background:#F6FAFD;}
 
 .row-belum{background:#FAFCFD;}
 .row-belum .matkul-nama, .row-belum .jam-pill,

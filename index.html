@@ -65,6 +65,13 @@
   </symbol>
 </svg>
 
+<!-- ============ PENGUMUMAN ============ -->
+<!-- Diisi dari Firestore lewat skrip di bawah halaman. Dibiarkan kosong dan
+     tersembunyi kalau tidak ada pengumuman yang sedang tayang. -->
+<section class="wrap pengumuman-wrap" id="pengumumanWrap" hidden aria-live="polite">
+  <div id="pengumumanIsi"></div>
+</section>
+
 <!-- ============ HERO ============ -->
 <section id="beranda" class="hero">
   <div class="wrap hero-inner">
@@ -216,6 +223,52 @@
 </footer>
 
 <script src="main.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+/*
+  Pengumuman dari halaman /operasional. Sengaja dimuat setelah halaman tampil
+  dan gagal secara diam-diam: kalau Firestore tidak terjangkau, blok ini tetap
+  tersembunyi dan sisa halaman sama sekali tidak terganggu.
+*/
+(function(){
+  const wrap = document.getElementById('pengumumanWrap');
+  const isi  = document.getElementById('pengumumanIsi');
+  if(!wrap || !isi) return;
+
+  function esc(s){
+    return String(s ?? '').replace(/[&<>"']/g, c => (
+      { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+    ));
+  }
+
+  (async function(){
+    try{
+      const c = window.KAFBE_FIREBASE_CONFIG;
+      if(!c || !c.apiKey) return;
+
+      const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
+      const { initializeApp } = await import(`${SDK}/firebase-app.js`);
+      const { getFirestore, doc, getDoc } = await import(`${SDK}/firebase-firestore.js`);
+
+      const snap = await getDoc(doc(getFirestore(initializeApp(c)), 'publik', 'terkini'));
+      if(!snap.exists()) return;
+
+      const daftar = (snap.data().pengumuman || []);
+      if(daftar.length === 0) return;
+
+      isi.innerHTML = daftar.map(p => `
+        <article class="pengumuman${p.pin ? ' pengumuman-pin' : ''}">
+          ${p.pin ? '<span class="pengumuman-label">📌 Disematkan</span>' : ''}
+          <h3>${esc(p.judul)}</h3>
+          ${p.isi ? `<p>${esc(p.isi)}</p>` : ''}
+        </article>`).join('');
+      wrap.hidden = false;
+    }catch(err){
+      console.warn('Pengumuman tidak bisa dimuat.', err);
+    }
+  })();
+})();
+</script>
 
 <script defer src="/_vercel/insights/script.js"></script>
 </body>

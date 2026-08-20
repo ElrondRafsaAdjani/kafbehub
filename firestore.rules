@@ -1,0 +1,115 @@
+/*
+  ATURAN AKSES FIRESTORE (Firestore Security Rules)
+
+  INI SATU-SATUNYA PENGAMAN DATA KAFBE HUB.
+
+  Halaman /operasional hanyalah antarmuka. Siapa pun bisa membuka Console
+  peramban dan memanggil Firestore langsung tanpa melewati halaman itu sama
+  sekali. Yang menolak mereka adalah berkas ini, bukan halaman loginnya.
+
+  CARA MEMASANG:
+  1. Buka https://console.firebase.google.com -> pilih proyek "kafbe-hub"
+  2. Build -> Firestore Database -> tab "Rules"
+  3. Hapus seluruh isinya, tempel seluruh isi berkas ini, klik "Publish"
+
+  Berkas ini disimpan di repo hanya sebagai salinan acuan supaya tidak hilang
+  dan bisa ditinjau. Firestore TIDAK membacanya dari sini, jadi setiap kali
+  berkas ini diubah, isinya harus ditempel ulang lewat langkah di atas.
+
+  CARA MENAMBAH ADMIN BARU (misalnya adik tingkat yang meneruskan):
+  1. Authentication -> Users -> Add user -> isi email dan password
+  2. Salin nilai "User UID" yang muncul di daftar
+  3. Firestore Database -> Data -> koleksi "admins" -> Add document
+     - Document ID : tempel User UID tadi
+     - Field       : nama (string), isi nama orangnya
+  Tanpa langkah nomor 3, akun itu bisa login tapi tidak bisa mengubah apa pun.
+
+  CARA MENCABUT AKSES ADMIN:
+  Hapus dokumennya dari koleksi "admins". Efeknya langsung. Menghapus akunnya
+  di Authentication juga boleh, tapi menghapus dokumen admin sudah cukup.
+*/
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Benar hanya jika: sudah login DAN terdaftar di koleksi "admins".
+    // Sekadar punya akun tidak cukup, sehingga akun yang bocor pun tidak
+    // otomatis bisa mengubah data selama tidak didaftarkan di sini.
+    function adminTerdaftar() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function tulisanAdmin() {
+      return adminTerdaftar();
+    }
+
+    // ---------- Daftar admin ----------
+    // Sengaja tidak bisa ditulis dari web sama sekali, bahkan oleh admin.
+    // Penambahan admin hanya lewat Firebase Console, supaya seorang admin yang
+    // akunnya diambil alih tidak bisa mengangkat admin baru diam-diam.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // ---------- Dokumen ringkasan untuk halaman publik ----------
+    // Dibaca semua pengunjung, ditulis ulang oleh halaman admin tiap menyimpan.
+    match /publik/{doc} {
+      allow read: if true;
+      allow write: if tulisanAdmin();
+    }
+
+    // ---------- Data kerja admin ----------
+    // Boleh dibaca publik supaya halaman jadwal tetap bisa jalan seandainya
+    // dokumen ringkasan bermasalah, tapi hanya admin yang boleh mengubah.
+    match /matakuliah/{id} {
+      allow read: if true;
+      allow write: if tulisanAdmin();
+    }
+
+    match /jadwal/{id} {
+      allow read: if true;
+      allow write: if tulisanAdmin();
+    }
+
+    match /perubahan/{id} {
+      allow read: if true;
+      allow write: if tulisanAdmin();
+    }
+
+    match /pengumuman/{id} {
+      allow read: if true;
+      allow write: if tulisanAdmin();
+    }
+
+    match /pengaturan/{id} {
+      allow read: if true;
+      allow write: if tulisanAdmin();
+    }
+
+    // ---------- Papan skor game ----------
+    // Dibiarkan seperti sebelumnya: siapa pun boleh menambah skor tanpa login,
+    // tapi bentuk datanya dibatasi, dan skor yang sudah masuk tidak bisa
+    // diubah atau dihapus oleh siapa pun lewat web.
+    match /scores/{scoreId} {
+      allow read: if true;
+      allow create: if request.resource.data.game is string
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() <= 14
+                    && request.resource.data.score is int
+                    && request.resource.data.score >= 0
+                    && request.resource.data.score <= 100000;
+      allow update, delete: if false;
+    }
+
+    // Koleksi yang tidak disebut di atas otomatis tertutup, karena Firestore
+    // menolak apa pun yang tidak diizinkan secara eksplisit. Baris di bawah
+    // hanya penegasan untuk pembaca; menghapusnya tidak mengubah apa pun.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

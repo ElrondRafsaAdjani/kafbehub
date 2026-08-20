@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'none';" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Operasional - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="operasional.css">
+</head>
+<body class="op-body">
+
+<!-- ============ LAYAR MASUK ============ -->
+<section id="layarMasuk" class="op-masuk">
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1>Operasional KAFBE</h1>
+    <p class="op-sub">Halaman pengurus. Masuk untuk mengelola jadwal dan pengumuman.</p>
+
+    <form id="formMasuk" autocomplete="on">
+      <label for="email">Email admin</label>
+      <input type="email" id="email" name="email" required autocomplete="username" placeholder="nama@contoh.com" />
+
+      <label for="sandi">Kata sandi</label>
+      <input type="password" id="sandi" name="sandi" required autocomplete="current-password" />
+
+      <button type="submit" class="btn btn-primary op-penuh" id="tombolMasuk">Masuk</button>
+    </form>
+
+    <p class="op-pesan" id="pesanMasuk" role="alert"></p>
+    <p class="op-catatan">Lupa kata sandi atau butuh akun baru? Hubungi pengurus yang memegang akses Firebase Console.</p>
+  </div>
+</section>
+
+<!-- ============ APLIKASI ADMIN ============ -->
+<div id="aplikasi" hidden>
+  <header class="op-nav">
+    <div class="op-nav-dalam">
+      <div class="op-merek">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <span>Operasional <strong>KAFBE</strong></span>
+      </div>
+      <div class="op-nav-kanan">
+        <span class="op-siapa" id="siapa"></span>
+        <a href="jadwal.html" class="op-tautan-luar" target="_blank" rel="noopener">Lihat halaman jadwal</a>
+        <button class="btn btn-ghost op-kecil" id="tombolKeluar">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="op-wrap">
+    <div class="op-status" id="statusSimpan" role="status" aria-live="polite" hidden></div>
+
+    <nav class="op-tab" role="tablist">
+      <button class="op-tab-btn active" data-tab="matakuliah" role="tab">Mata Kuliah</button>
+      <button class="op-tab-btn" data-tab="jadwal" role="tab">Jadwal Permanen</button>
+      <button class="op-tab-btn" data-tab="perubahan" role="tab">Perubahan Sementara</button>
+      <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
+      <button class="op-tab-btn" data-tab="pengaturan" role="tab">Pengaturan</button>
+    </nav>
+
+    <!-- ---------- MATA KULIAH ---------- -->
+    <section class="op-panel" id="panel-matakuliah">
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Mata Kuliah</h2>
+          <p>Daftar acuan kode dan nama. Jadwal hanya boleh memakai kode yang terdaftar di sini, supaya penamaan tidak berbeda-beda.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formMatkul">
+        <input type="hidden" id="mkId" />
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="mkKode">Kode mata kuliah</label>
+            <input type="text" id="mkKode" required maxlength="20" placeholder="1300M03B" />
+          </div>
+          <div class="op-field op-lebar">
+            <label for="mkNama">Nama mata kuliah</label>
+            <input type="text" id="mkNama" required maxlength="120" placeholder="Statistika II" />
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
+          <button type="button" class="btn btn-ghost op-kecil" data-batal="formMatkul" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanMatkul" role="alert"></p>
+      </form>
+
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelMatkul"></table>
+      </div>
+    </section>
+
+    <!-- ---------- JADWAL PERMANEN ---------- -->
+    <section class="op-panel" id="panel-jadwal" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Jadwal Permanen</h2>
+          <p>Jadwal mingguan yang berulang. Perubahan di sini langsung tampil di halaman jadwal setelah disimpan.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formJadwal">
+        <input type="hidden" id="jdId" />
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="jdKode">Mata kuliah</label>
+            <select id="jdKode" required></select>
+          </div>
+          <div class="op-field op-sempit">
+            <label for="jdKp">KP</label>
+            <input type="text" id="jdKp" required maxlength="6" placeholder="A" />
+          </div>
+          <div class="op-field">
+            <label for="jdHari">Hari</label>
+            <select id="jdHari" required>
+              <option value="Senin">Senin</option>
+              <option value="Selasa">Selasa</option>
+              <option value="Rabu">Rabu</option>
+              <option value="Kamis">Kamis</option>
+              <option value="Jumat">Jumat</option>
+              <option value="Sabtu">Sabtu</option>
+            </select>
+          </div>
+          <div class="op-field op-sempit">
+            <label for="jdMulai">Jam mulai</label>
+            <input type="time" id="jdMulai" required />
+          </div>
+          <div class="op-field op-sempit">
+            <label for="jdSelesai">Jam selesai</label>
+            <input type="time" id="jdSelesai" required />
+          </div>
+          <div class="op-field">
+            <label for="jdRuang">Ruang</label>
+            <input type="text" id="jdRuang" maxlength="40" placeholder="EC 04.04" />
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
+          <button type="button" class="btn btn-ghost op-kecil" data-batal="formJadwal" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanJadwal" role="alert"></p>
+      </form>
+
+      <div class="op-saring">
+        <input type="search" id="cariJadwal" placeholder="Cari kode, nama, KP, atau ruang…" aria-label="Cari jadwal" />
+      </div>
+
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelJadwal"></table>
+      </div>
+    </section>
+
+    <!-- ---------- PERUBAHAN SEMENTARA ---------- -->
+    <section class="op-panel" id="panel-perubahan" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Perubahan Sementara</h2>
+          <p>Berlaku hanya pada satu tanggal tertentu: kelas ditiadakan, dipindah ke tanggal lain, atau sekadar pindah ruangan.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formPerubahan">
+        <input type="hidden" id="pbId" />
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="pbTipe">Jenis perubahan</label>
+            <select id="pbTipe" required>
+              <option value="libur">Kelas ditiadakan</option>
+              <option value="pindah">Dipindah ke tanggal lain</option>
+              <option value="ruang">Pindah ruangan saja</option>
+            </select>
+          </div>
+          <div class="op-field op-lebar">
+            <label for="pbKelas">Kelas yang terdampak</label>
+            <select id="pbKelas" required></select>
+          </div>
+          <div class="op-field">
+            <label for="pbTanggal">Tanggal terdampak</label>
+            <input type="date" id="pbTanggal" required />
+          </div>
+        </div>
+
+        <div class="op-baris" id="barisPindah" hidden>
+          <div class="op-field">
+            <label for="pbTanggalBaru">Tanggal pengganti</label>
+            <input type="date" id="pbTanggalBaru" />
+          </div>
+          <div class="op-field op-sempit">
+            <label for="pbMulai">Jam mulai</label>
+            <input type="time" id="pbMulai" />
+          </div>
+          <div class="op-field op-sempit">
+            <label for="pbSelesai">Jam selesai</label>
+            <input type="time" id="pbSelesai" />
+          </div>
+        </div>
+
+        <div class="op-baris" id="barisRuang" hidden>
+          <div class="op-field">
+            <label for="pbRuang">Ruang baru</label>
+            <input type="text" id="pbRuang" maxlength="40" placeholder="EA 02.05" />
+          </div>
+        </div>
+
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="pbCatatan">Catatan (opsional, tampil ke mahasiswa)</label>
+            <input type="text" id="pbCatatan" maxlength="160" placeholder="Libur Hari Kemerdekaan" />
+          </div>
+        </div>
+
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
+          <button type="button" class="btn btn-ghost op-kecil" data-batal="formPerubahan" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanPerubahan" role="alert"></p>
+      </form>
+
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelPerubahan"></table>
+      </div>
+    </section>
+
+    <!-- ---------- PENGUMUMAN ---------- -->
+    <section class="op-panel" id="panel-pengumuman" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Pengumuman</h2>
+          <p>Tampil di halaman utama. Yang disematkan muncul paling atas.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formPengumuman">
+        <input type="hidden" id="pmId" />
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="pmJudul">Judul</label>
+            <input type="text" id="pmJudul" required maxlength="120" placeholder="Asistensi Statistika II diundur" />
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="pmIsi">Isi</label>
+            <textarea id="pmIsi" rows="3" maxlength="600" placeholder="Tulis keterangan singkat di sini."></textarea>
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="pmMulai">Mulai tampil</label>
+            <input type="date" id="pmMulai" />
+          </div>
+          <div class="op-field">
+            <label for="pmSelesai">Berhenti tampil</label>
+            <input type="date" id="pmSelesai" />
+          </div>
+          <div class="op-field op-centang">
+            <label><input type="checkbox" id="pmPin" /> Sematkan di paling atas</label>
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
+          <button type="button" class="btn btn-ghost op-kecil" data-batal="formPengumuman" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanPengumuman" role="alert"></p>
+      </form>
+
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelPengumuman"></table>
+      </div>
+    </section>
+
+    <!-- ---------- PENGATURAN ---------- -->
+    <section class="op-panel" id="panel-pengaturan" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Pengaturan</h2>
+          <p>Tanggal mulai perkuliahan. Kelas yang belum mulai tetap tampil di halaman jadwal, tapi diredupkan dan diberi label.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formPengaturan">
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="stMulai">Mulai kuliah (umum)</label>
+            <input type="date" id="stMulai" />
+          </div>
+        </div>
+        <p class="op-catatan">Pengecualian per mata kuliah, misalnya angkatan baru yang mulai belakangan:</p>
+        <div id="daftarPengecualian"></div>
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="stKode">Mata kuliah</label>
+            <select id="stKode"></select>
+          </div>
+          <div class="op-field">
+            <label for="stTanggal">Mulai tanggal</label>
+            <input type="date" id="stTanggal" />
+          </div>
+          <div class="op-field op-centang">
+            <button type="button" class="btn btn-ghost op-kecil" id="tambahPengecualian">Tambah pengecualian</button>
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan pengaturan</button>
+        </div>
+        <p class="op-pesan" id="pesanPengaturan" role="alert"></p>
+      </form>
+
+      <hr class="op-garis" />
+
+      <h3>Impor data awal</h3>
+      <p class="op-catatan">
+        Dijalankan sekali saja saat pertama kali memakai halaman ini. Isi berkas jadwal lama
+        akan disalin ke basis data. Tombol ini menolak berjalan kalau datanya sudah ada,
+        supaya tidak menimpa pekerjaan yang sudah tersimpan.
+      </p>
+      <button type="button" class="btn btn-ghost op-kecil" id="tombolImpor">Impor dari data lama</button>
+      <p class="op-pesan" id="pesanImpor" role="alert"></p>
+    </section>
+  </div>
+</div>
+
+<!-- Lambang burung hantu, dipakai ulang di beberapa tempat -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<script src="firebase-config.js"></script>
+<script type="module" src="shared/operasional.js"></script>
+</body>
+</html>

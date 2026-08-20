@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self';" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Jadwal Kelas - KAFBE Hub</title>
@@ -102,6 +102,7 @@
 </footer>
 
 <script src="main.js"></script>
+<script src="firebase-config.js"></script>
 <script>
 (function(){
   const HARI  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -187,10 +188,15 @@
     const dasar = (data.days.find(d => d.day === namaHari)?.classes || []);
     const perub = (data.changes || []).filter(c => c.tanggal === tanggalIso);
 
+    const kunci = c => `${c.kode}|${c.kp}`.toUpperCase();
+
     const libur = new Map();
-    for(const c of perub.filter(c => c.tipe === 'libur')){
-      libur.set(`${c.kode}|${c.kp}`.toUpperCase(), c);
-    }
+    for(const c of perub.filter(c => c.tipe === 'libur')) libur.set(kunci(c), c);
+
+    // Pindah ruang: kelasnya tetap berjalan pada jam yang sama, hanya ruangnya
+    // yang berbeda khusus di tanggal ini.
+    const gantiRuang = new Map();
+    for(const c of perub.filter(c => c.tipe === 'ruang')) gantiRuang.set(kunci(c), c);
 
     const hasil = dasar.map(k => {
       // Kelas yang perkuliahannya belum dimulai tidak bisa "ditiadakan".
@@ -199,10 +205,13 @@
       if(mulai && tanggalIso < mulai){
         return { ...k, status:'belum', catatan:`Perkuliahan dimulai ${tglPanjang(mulai)}` };
       }
-      const c = libur.get(`${k.kode}|${k.kp}`.toUpperCase());
-      return c
-        ? { ...k, status:'libur', catatan:c.catatan }
-        : { ...k, status:'normal', catatan:'' };
+      const c = libur.get(kunci(k));
+      if(c) return { ...k, status:'libur', catatan:c.catatan };
+
+      const g = gantiRuang.get(kunci(k));
+      if(g) return { ...k, ruang: g.ruang || k.ruang, status:'ruang', catatan: g.catatan };
+
+      return { ...k, status:'normal', catatan:'' };
     });
 
     for(const c of perub.filter(c => c.tipe === 'pengganti')){
@@ -284,11 +293,15 @@
       return;
     }
 
-    const KELAS_BARIS = { libur:'row-libur', pengganti:'row-pengganti', belum:'row-belum' };
+    const KELAS_BARIS = {
+      libur:'row-libur', pengganti:'row-pengganti',
+      belum:'row-belum', ruang:'row-ruang',
+    };
     const LABEL = {
       libur: '<span class="tag tag-libur">Ditiadakan</span>',
       pengganti: '<span class="tag tag-pengganti">Kelas pengganti</span>',
       belum: '<span class="tag tag-belum">Belum dimulai</span>',
+      ruang: '<span class="tag tag-ruang">Pindah ruang</span>',
     };
 
     const baris = kelas.map(k => {
@@ -313,6 +326,7 @@
       `${kelas.length} kelas${q ? ' cocok' : ''}`,
       hitung('belum')     ? `${hitung('belum')} belum dimulai` : '',
       hitung('libur')     ? `${hitung('libur')} ditiadakan` : '',
+      hitung('ruang')     ? `${hitung('ruang')} pindah ruang` : '',
       hitung('pengganti') ? `${hitung('pengganti')} kelas pengganti` : '',
     ].filter(Boolean).join(' · ');
 
@@ -384,7 +398,7 @@
       <li class="perub-item">
         <span class="perub-tanggal">${esc(tglPanjang(c.tanggal))}</span>
         <span class="perub-teks">
-          <span class="tag ${c.tipe === 'libur' ? 'tag-libur' : 'tag-pengganti'}">${c.tipe === 'libur' ? 'Ditiadakan' : 'Pengganti'}</span>
+          <span class="tag tag-${esc(c.tipe)}">${esc({ libur:'Ditiadakan', pengganti:'Pengganti', ruang:'Pindah ruang' }[c.tipe] || c.tipe)}</span>
           <strong>${esc(c.nama)}</strong> KP ${esc(c.kp)} · ${esc(c.jam)}${c.ruang ? ' · ' + esc(c.ruang) : ''}
         </span>
       </li>`).join('');
@@ -402,6 +416,18 @@
      barisnya tetap tampil, jadi buat mahasiswa tidak ada yang perlu
      dikhawatirkan. Itu urusan pengurus lewat log GitHub Actions. */
   function renderPeringatan(){
+    // Gagal mengambil data terkini lebih penting diberitahukan daripada
+    // sekadar baris yang terlewat, jadi diperiksa lebih dulu.
+    if(data._cadangan){
+      elPering.innerHTML = `
+        <div class="kotak kotak-warn">
+          <h3>⚠️ Jadwal terkini sedang tidak bisa diambil</h3>
+          <p>Yang ditampilkan di bawah adalah salinan cadangan dan mungkin sudah tertinggal.
+          Untuk kepastian, konfirmasi ke asisten atau cek Instagram KAFBE.</p>
+        </div>`;
+      return;
+    }
+
     const s = data.skipped || [];
     if(s.length === 0) return;
     elPering.innerHTML = `
@@ -415,6 +441,7 @@
 
   function tampilkanMeta(){
     if(!elMeta) return;
+
     const t = data.updatedAt ? new Date(data.updatedAt) : null;
     if(!t || isNaN(t)){ elMeta.textContent = ''; return; }
     // Ditampilkan dalam zona waktu perangkat pembaca, bukan zona waktu server.
@@ -423,13 +450,55 @@
     elMeta.textContent = `Terakhir diperbarui: ${tgl} pukul ${jam}`;
   }
 
+  /*
+    Sumber utamanya satu dokumen Firestore yang ditulis ulang oleh halaman
+    /operasional setiap kali pengurus menyimpan, jadi perubahan langsung
+    tayang. Sengaja satu dokumen, bukan satu dokumen per kelas, supaya tiap
+    pengunjung hanya menimbulkan satu pembacaan.
+
+    Kalau karena satu dan lain hal dokumen itu tidak terbaca, halaman jatuh ke
+    berkas statis di repo. Berkas itu bisa saja tertinggal zaman, tapi jauh
+    lebih baik daripada halaman jadwal yang kosong sama sekali.
+  */
+  async function ambilDariFirestore(){
+    const c = window.KAFBE_FIREBASE_CONFIG;
+    if(!c || !c.apiKey) return null;
+    const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
+    const { initializeApp } = await import(`${SDK}/firebase-app.js`);
+    const { getFirestore, doc, getDoc } = await import(`${SDK}/firebase-firestore.js`);
+    const snap = await getDoc(doc(getFirestore(initializeApp(c)), 'publik', 'terkini'));
+    if(!snap.exists()) return null;
+    const d = snap.data();
+    return (d.days && d.days.length) ? d : null;
+  }
+
   async function muat(){
     try{
-      // cache: 'no-cache' → browser tetap pakai cache, tapi selalu
-      // memvalidasi ke server, jadi update jadwal langsung kelihatan.
-      const res = await fetch('data/jadwal.json', { cache: 'no-cache' });
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      data = await res.json();
+      let firestoreBermasalah = false;
+      try{
+        data = await ambilDariFirestore();
+      }catch(err){
+        console.warn('Gagal membaca jadwal dari Firestore, memakai berkas cadangan.', err);
+        data = null;
+        firestoreBermasalah = true;
+      }
+
+      if(!data){
+        // cache: 'no-cache' → browser tetap pakai cache, tapi selalu
+        // memvalidasi ke server, jadi update jadwal langsung kelihatan.
+        const res = await fetch('data/jadwal.json', { cache: 'no-cache' });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+        data = await res.json();
+        // Berkas ini tidak lagi ikut diperbarui pengurus, jadi isinya bisa
+        // tertinggal. Pembaca berhak tahu bahwa yang dilihatnya bukan versi
+        // terkini, bukan dibiarkan mengira jadwal lama masih berlaku.
+        //
+        // Tapi peringatan hanya dipasang kalau Firestore benar-benar
+        // bermasalah. Dokumen yang memang belum pernah dibuat, misalnya saat
+        // sistem baru dipasang, bukan keadaan darurat dan tidak perlu
+        // menakuti mahasiswa.
+        if(firestoreBermasalah) data._cadangan = true;
+      }
       if(!data.days || data.days.length === 0) throw new Error('data jadwal kosong');
 
       hariAktif = HARI[new Date().getDay()];

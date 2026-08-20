@@ -1,0 +1,1049 @@
+/*
+  Halaman operasional KAFBE Hub.
+
+  PENTING UNTUK YANG MERAWAT BERKAS INI:
+
+  Berkas ini berjalan di peramban pengurus, jadi isinya bisa dibaca siapa pun.
+  Jangan pernah menaruh kata sandi, kunci rahasia, atau pemeriksaan keamanan di
+  sini. Semua pemeriksaan di bawah hanya untuk KENYAMANAN pemakai, misalnya
+  memberi tahu jadwal bentrok sebelum tersimpan.
+
+  Yang benar-benar menjaga data adalah firestore.rules, karena aturan itu
+  dijalankan di server Google dan tidak bisa dilewati lewat Console peramban.
+*/
+
+const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
+
+const { initializeApp } = await import(`${SDK}/firebase-app.js`);
+const {
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+} = await import(`${SDK}/firebase-auth.js`);
+const {
+  getFirestore, collection, doc, getDoc, getDocs,
+  addDoc, setDoc, updateDoc, deleteDoc,
+} = await import(`${SDK}/firebase-firestore.js`);
+
+const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+/* ============================================================
+   1. Alat bantu umum
+   ============================================================ */
+
+const HARI = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli',
+               'Agustus','September','Oktober','November','Desember'];
+
+const $ = id => document.getElementById(id);
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+}
+
+// "07:50" -> 470. Menerima "07.50" juga supaya data lama tetap terbaca.
+function keMenit(jam){
+  const m = String(jam || '').match(/^(\d{1,2})[:.](\d{2})$/);
+  if(!m) return null;
+  const j = +m[1], n = +m[2];
+  if(j > 23 || n > 59) return null;
+  return j * 60 + n;
+}
+
+// 470 -> "07.50", bentuk yang dipakai halaman publik.
+function keJamTitik(menit){
+  const j = Math.floor(menit / 60), n = menit % 60;
+  return `${String(j).padStart(2,'0')}.${String(n).padStart(2,'0')}`;
+}
+
+function rentangJam(mulai, selesai){
+  return `${keJamTitik(keMenit(mulai))} - ${keJamTitik(keMenit(selesai))}`;
+}
+
+function hariDariTanggal(iso){
+  const [y,m,d] = String(iso).split('-').map(Number);
+  if(!y || !m || !d) return null;
+  return HARI[new Date(Date.UTC(y, m-1, d)).getUTCDay()];
+}
+
+function tanggalPanjang(iso){
+  const [y,m,d] = String(iso).split('-').map(Number);
+  if(!y) return iso;
+  return `${hariDariTanggal(iso)}, ${d} ${BULAN[m-1]} ${y}`;
+}
+
+// Dua rentang waktu dianggap bentrok kalau saling menimpa, bukan sekadar
+// bersentuhan di ujungnya. Kelas 08.00-09.00 dan 09.00-10.00 tidak bentrok.
+function beririsan(mulai1, selesai1, mulai2, selesai2){
+  return mulai1 < selesai2 && mulai2 < selesai1;
+}
+
+function samakanRuang(r){
+  return String(r || '').trim().toUpperCase().replace(/\s+/g, ' ');
+}
+
+function pesan(el, teks, jenis){
+  el.className = 'op-pesan tampil ' + (jenis || '');
+  el.innerHTML = teks;
+}
+function bersihkanPesan(el){
+  el.className = 'op-pesan';
+  el.innerHTML = '';
+}
+
+function daftarKesalahan(judul, list){
+  return `${esc(judul)}<ul>${list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+}
+
+let waktuStatus = null;
+function status(teks, jenis){
+  const el = $('statusSimpan');
+  el.hidden = false;
+  el.className = 'op-status ' + (jenis || 'sibuk');
+  el.textContent = teks;
+  clearTimeout(waktuStatus);
+  if(jenis === 'benar'){
+    waktuStatus = setTimeout(() => { el.hidden = true; }, 4000);
+  }
+}
+
+/* ============================================================
+   2. Masuk dan keluar
+   ============================================================ */
+
+// Pesan bawaan Firebase berbahasa Inggris dan sebagian membingungkan,
+// jadi diterjemahkan ke kalimat yang bisa ditindaklanjuti pemakai.
+function pesanAuth(kode){
+  switch(kode){
+    case 'auth/invalid-email':
+      return 'Format email tidak benar.';
+    case 'auth/user-disabled':
+      return 'Akun ini dinonaktifkan. Hubungi pemegang akses Firebase Console.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Email atau kata sandi salah.';
+    case 'auth/too-many-requests':
+      return 'Terlalu banyak percobaan gagal. Tunggu beberapa menit lalu coba lagi.';
+    case 'auth/network-request-failed':
+      return 'Gagal menghubungi server. Periksa koneksi internet Anda.';
+    case 'auth/configuration-not-found':
+      return 'Metode masuk email dan kata sandi belum diaktifkan di Firebase Console.';
+    default:
+      return 'Tidak bisa masuk (' + kode + ').';
+  }
+}
+
+$('formMasuk').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const tombol = $('tombolMasuk');
+  bersihkanPesan($('pesanMasuk'));
+  tombol.disabled = true;
+  tombol.textContent = 'Memeriksa…';
+  try{
+    await signInWithEmailAndPassword(auth, $('email').value.trim(), $('sandi').value);
+    $('sandi').value = '';
+  }catch(err){
+    pesan($('pesanMasuk'), esc(pesanAuth(err.code || '')), 'salah');
+  }finally{
+    tombol.disabled = false;
+    tombol.textContent = 'Masuk';
+  }
+});
+
+$('tombolKeluar').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, async (user) => {
+  if(!user){
+    $('layarMasuk').hidden = false;
+    $('aplikasi').hidden = true;
+    return;
+  }
+
+  // Punya akun saja tidak cukup. Wewenang ditentukan oleh dokumen di koleksi
+  // "admins", dan aturan Firestore memeriksa hal yang sama di sisi server.
+  let profil = null;
+  try{
+    const snap = await getDoc(doc(db, 'admins', user.uid));
+    if(snap.exists()) profil = snap.data();
+  }catch(err){
+    console.error('Gagal memeriksa status admin', err);
+  }
+
+  if(!profil){
+    await signOut(auth);
+    pesan($('pesanMasuk'),
+      'Akun ini berhasil masuk, tapi belum terdaftar sebagai admin. '
+      + 'Minta pengurus mendaftarkan UID akun Anda di koleksi <code>admins</code>.',
+      'salah');
+    return;
+  }
+
+  $('siapa').textContent = (profil.nama ? profil.nama + ' · ' : '') + user.email;
+  $('layarMasuk').hidden = true;
+  $('aplikasi').hidden = false;
+  await muatSemua();
+});
+
+/* ============================================================
+   3. Memuat data
+   ============================================================ */
+
+const data = {
+  matakuliah: [],
+  jadwal: [],
+  perubahan: [],
+  pengumuman: [],
+  pengaturan: { mulaiDefault: '', perMatkul: {} },
+};
+
+async function ambilKoleksi(nama){
+  const snap = await getDocs(collection(db, nama));
+  const out = [];
+  snap.forEach(d => out.push({ id: d.id, ...d.data() }));
+  return out;
+}
+
+async function muatSemua(){
+  status('Memuat data…', 'sibuk');
+  try{
+    const [mk, jd, pb, pm] = await Promise.all([
+      ambilKoleksi('matakuliah'),
+      ambilKoleksi('jadwal'),
+      ambilKoleksi('perubahan'),
+      ambilKoleksi('pengumuman'),
+    ]);
+    data.matakuliah = mk.sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
+    data.jadwal = jd;
+    data.perubahan = pb.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
+    data.pengumuman = pm;
+
+    const st = await getDoc(doc(db, 'pengaturan', 'umum'));
+    data.pengaturan = st.exists()
+      ? { mulaiDefault: st.data().mulaiDefault || '', perMatkul: st.data().perMatkul || {} }
+      : { mulaiDefault: '', perMatkul: {} };
+
+    gambarSemua();
+    $('statusSimpan').hidden = true;
+  }catch(err){
+    console.error(err);
+    status('Gagal memuat data: ' + err.message, 'salah');
+  }
+}
+
+function gambarSemua(){
+  isiPilihanMatkul();
+  isiPilihanKelas();
+  gambarMatkul();
+  gambarJadwal();
+  gambarPerubahan();
+  gambarPengumuman();
+  gambarPengaturan();
+}
+
+function namaMatkul(kode){
+  const m = data.matakuliah.find(x => x.kode === kode);
+  return m ? m.nama : '';
+}
+
+/* ============================================================
+   4. Tab
+   ============================================================ */
+
+document.querySelectorAll('.op-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.op-tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.op-panel').forEach(p => {
+      p.hidden = p.id !== 'panel-' + btn.dataset.tab;
+    });
+  });
+});
+
+// Tombol "Batal ubah" pada tiap formulir mengembalikannya ke mode tambah.
+document.querySelectorAll('[data-batal]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const form = $(btn.dataset.batal);
+    form.reset();
+    form.querySelector('input[type=hidden]').value = '';
+    btn.hidden = true;
+    bersihkanPesan(form.querySelector('.op-pesan'));
+    if(form.id === 'formPerubahan') aturTampilanPerubahan();
+  });
+});
+
+function modeUbah(formId, aktif){
+  const btn = document.querySelector(`[data-batal="${formId}"]`);
+  if(btn) btn.hidden = !aktif;
+}
+
+/* ============================================================
+   5. Mata kuliah
+   ============================================================ */
+
+function gambarMatkul(){
+  const t = $('tabelMatkul');
+  if(data.matakuliah.length === 0){
+    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada mata kuliah. Tambahkan lewat formulir di atas.</td></tr></tbody>';
+    return;
+  }
+  t.innerHTML = `
+    <thead><tr><th>Kode</th><th>Nama</th><th>Dipakai jadwal</th><th></th></tr></thead>
+    <tbody>${data.matakuliah.map(m => {
+      const dipakai = data.jadwal.filter(j => j.kode === m.kode).length;
+      return `<tr>
+        <td><strong>${esc(m.kode)}</strong></td>
+        <td>${esc(m.nama)}</td>
+        <td class="op-samar">${dipakai} kelas</td>
+        <td><div class="op-tombol-baris">
+          <button class="op-mini" data-ubah-mk="${esc(m.id)}">Ubah</button>
+          <button class="op-mini op-hapus" data-hapus-mk="${esc(m.id)}">Hapus</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-ubah-mk]').forEach(b => b.addEventListener('click', () => {
+    const m = data.matakuliah.find(x => x.id === b.dataset.ubahMk);
+    if(!m) return;
+    $('mkId').value = m.id; $('mkKode').value = m.kode; $('mkNama').value = m.nama;
+    modeUbah('formMatkul', true);
+    $('mkKode').focus();
+  }));
+
+  t.querySelectorAll('[data-hapus-mk]').forEach(b => b.addEventListener('click', () => {
+    hapusMatkul(b.dataset.hapusMk);
+  }));
+}
+
+$('formMatkul').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanMatkul');
+  const id = $('mkId').value;
+  const kode = $('mkKode').value.trim().toUpperCase();
+  const nama = $('mkNama').value.trim();
+
+  const salah = [];
+  if(!kode) salah.push('Kode tidak boleh kosong.');
+  if(!nama) salah.push('Nama tidak boleh kosong.');
+  const kembar = data.matakuliah.find(m => m.kode === kode && m.id !== id);
+  if(kembar) salah.push(`Kode ${kode} sudah dipakai untuk "${kembar.nama}".`);
+
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
+
+  try{
+    status('Menyimpan…', 'sibuk');
+    if(id){
+      const lama = data.matakuliah.find(m => m.id === id);
+      await updateDoc(doc(db, 'matakuliah', id), { kode, nama });
+      // Kode adalah tali penghubung ke jadwal, jadi kalau kode berubah,
+      // semua jadwal yang memakainya harus ikut diperbarui. Kalau tidak,
+      // jadwalnya jadi yatim dan namanya hilang di halaman publik.
+      if(lama && lama.kode !== kode){
+        const terdampak = data.jadwal.filter(j => j.kode === lama.kode);
+        for(const j of terdampak) await updateDoc(doc(db, 'jadwal', j.id), { kode });
+        const pbTerdampak = data.perubahan.filter(p => p.kode === lama.kode);
+        for(const p of pbTerdampak) await updateDoc(doc(db, 'perubahan', p.id), { kode });
+      }
+    }else{
+      await addDoc(collection(db, 'matakuliah'), { kode, nama });
+    }
+    e.target.reset(); $('mkId').value = ''; modeUbah('formMatkul', false);
+    bersihkanPesan(el);
+    await muatSemua();
+    await terbitkan();
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
+
+async function hapusMatkul(id){
+  const m = data.matakuliah.find(x => x.id === id);
+  if(!m) return;
+  const dipakai = data.jadwal.filter(j => j.kode === m.kode);
+  if(dipakai.length){
+    pesan($('pesanMatkul'),
+      `"${esc(m.nama)}" masih dipakai ${dipakai.length} kelas di Jadwal Permanen. `
+      + 'Hapus atau pindahkan kelas-kelas itu dulu supaya jadwal tidak kehilangan namanya.',
+      'salah');
+    return;
+  }
+  if(!confirm(`Hapus mata kuliah "${m.nama}" (${m.kode})?`)) return;
+  try{
+    status('Menghapus…', 'sibuk');
+    await deleteDoc(doc(db, 'matakuliah', id));
+    await muatSemua();
+    await terbitkan();
+  }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
+}
+
+/* ============================================================
+   6. Jadwal permanen
+   ============================================================ */
+
+function isiPilihanMatkul(){
+  const opsi = data.matakuliah
+    .map(m => `<option value="${esc(m.kode)}">${esc(m.kode)} · ${esc(m.nama)}</option>`).join('');
+  $('jdKode').innerHTML = '<option value="">— pilih —</option>' + opsi;
+  $('stKode').innerHTML = '<option value="">— pilih —</option>' + opsi;
+}
+
+function urutJadwal(a, b){
+  const ha = HARI.indexOf(a.hari), hb = HARI.indexOf(b.hari);
+  if(ha !== hb) return ha - hb;
+  return (keMenit(a.mulai) || 0) - (keMenit(b.mulai) || 0);
+}
+
+function gambarJadwal(){
+  const t = $('tabelJadwal');
+  const q = ($('cariJadwal').value || '').trim().toLowerCase();
+  const baris = data.jadwal
+    .filter(j => !q || [j.kode, namaMatkul(j.kode), j.kp, j.ruang, j.hari].join(' ').toLowerCase().includes(q))
+    .sort(urutJadwal);
+
+  if(baris.length === 0){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">${
+      data.jadwal.length ? 'Tidak ada yang cocok dengan pencarian.' : 'Belum ada jadwal.'
+    }</td></tr></tbody>`;
+    return;
+  }
+
+  t.innerHTML = `
+    <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>KP</th><th>Ruang</th><th></th></tr></thead>
+    <tbody>${baris.map(j => `<tr>
+      <td>${esc(j.hari)}</td>
+      <td>${esc(rentangJam(j.mulai, j.selesai))}</td>
+      <td>${esc(namaMatkul(j.kode) || '(kode tidak dikenal)')}<br><span class="op-samar">${esc(j.kode)}</span></td>
+      <td>${esc(j.kp)}</td>
+      <td>${esc(j.ruang || '—')}</td>
+      <td><div class="op-tombol-baris">
+        <button class="op-mini" data-ubah-jd="${esc(j.id)}">Ubah</button>
+        <button class="op-mini op-hapus" data-hapus-jd="${esc(j.id)}">Hapus</button>
+      </div></td>
+    </tr>`).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-ubah-jd]').forEach(b => b.addEventListener('click', () => {
+    const j = data.jadwal.find(x => x.id === b.dataset.ubahJd);
+    if(!j) return;
+    $('jdId').value = j.id; $('jdKode').value = j.kode; $('jdKp').value = j.kp;
+    $('jdHari').value = j.hari; $('jdMulai').value = j.mulai;
+    $('jdSelesai').value = j.selesai; $('jdRuang').value = j.ruang || '';
+    modeUbah('formJadwal', true);
+    $('jdKode').focus();
+  }));
+
+  t.querySelectorAll('[data-hapus-jd]').forEach(b => b.addEventListener('click', () => {
+    hapusJadwal(b.dataset.hapusJd);
+  }));
+}
+
+$('cariJadwal').addEventListener('input', gambarJadwal);
+
+// Pemeriksaan inilah yang mencegah dua kelas memakai ruangan yang sama pada
+// jam yang beririsan, dan mencegah satu KP tercatat dua kali.
+function periksaJadwal({ id, kode, kp, hari, mulai, selesai, ruang }){
+  const salah = [];
+  const hati = [];
+
+  if(!kode) salah.push('Mata kuliah belum dipilih.');
+  else if(!data.matakuliah.some(m => m.kode === kode))
+    salah.push(`Kode ${kode} tidak ada di daftar Mata Kuliah.`);
+
+  if(!kp) salah.push('KP belum diisi.');
+
+  const m1 = keMenit(mulai), m2 = keMenit(selesai);
+  if(m1 === null) salah.push('Jam mulai tidak valid.');
+  if(m2 === null) salah.push('Jam selesai tidak valid.');
+  if(m1 !== null && m2 !== null && m2 <= m1)
+    salah.push('Jam selesai harus lebih akhir daripada jam mulai.');
+
+  if(m1 !== null && m2 !== null){
+    const kembar = data.jadwal.find(j =>
+      j.id !== id && j.kode === kode && String(j.kp).toUpperCase() === String(kp).toUpperCase());
+    if(kembar){
+      salah.push(`${kode} KP ${kp} sudah terdaftar pada ${kembar.hari} ${rentangJam(kembar.mulai, kembar.selesai)}.`);
+    }
+
+    if(samakanRuang(ruang)){
+      const bentrok = data.jadwal.filter(j =>
+        j.id !== id
+        && j.hari === hari
+        && samakanRuang(j.ruang) === samakanRuang(ruang)
+        && beririsan(m1, m2, keMenit(j.mulai), keMenit(j.selesai)));
+      for(const b of bentrok){
+        salah.push(
+          `Ruang ${ruang} sudah dipakai ${b.kode} KP ${b.kp} pada ${b.hari} `
+          + `${rentangJam(b.mulai, b.selesai)}.`);
+      }
+    }else{
+      hati.push('Ruang dikosongkan, jadi bentrok ruangan tidak bisa diperiksa.');
+    }
+
+    // Bukan kesalahan, tapi pantas ditanyakan: satu mata kuliah dengan dua KP
+    // berbeda di jam yang sama biasanya berarti salah ketik KP.
+    const barengan = data.jadwal.filter(j =>
+      j.id !== id && j.kode === kode && j.hari === hari
+      && beririsan(m1, m2, keMenit(j.mulai), keMenit(j.selesai)));
+    if(barengan.length){
+      hati.push(`${kode} juga punya kelas lain (KP ${barengan.map(b => b.kp).join(', ')}) di jam yang beririsan.`);
+    }
+  }
+
+  return { salah, hati };
+}
+
+$('formJadwal').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanJadwal');
+  const isi = {
+    id: $('jdId').value,
+    kode: $('jdKode').value,
+    kp: $('jdKp').value.trim().toUpperCase(),
+    hari: $('jdHari').value,
+    mulai: $('jdMulai').value,
+    selesai: $('jdSelesai').value,
+    ruang: $('jdRuang').value.trim(),
+  };
+
+  const { salah, hati } = periksaJadwal(isi);
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
+  if(hati.length && el.dataset.konfirmasi !== '1'){
+    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi kalau memang benar:', hati), 'hati');
+    el.dataset.konfirmasi = '1';
+    return;
+  }
+  el.dataset.konfirmasi = '';
+
+  const muatan = {
+    kode: isi.kode, kp: isi.kp, hari: isi.hari,
+    mulai: isi.mulai, selesai: isi.selesai, ruang: isi.ruang,
+  };
+
+  try{
+    status('Menyimpan…', 'sibuk');
+    if(isi.id) await updateDoc(doc(db, 'jadwal', isi.id), muatan);
+    else await addDoc(collection(db, 'jadwal'), muatan);
+    e.target.reset(); $('jdId').value = ''; modeUbah('formJadwal', false);
+    bersihkanPesan(el);
+    await muatSemua();
+    await terbitkan();
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
+
+async function hapusJadwal(id){
+  const j = data.jadwal.find(x => x.id === id);
+  if(!j) return;
+  const terkait = data.perubahan.filter(p => p.jadwalId === id);
+  const tambahan = terkait.length
+    ? `\n\n${terkait.length} perubahan sementara yang menunjuk kelas ini akan ikut terhapus.` : '';
+  if(!confirm(`Hapus kelas ${j.kode} KP ${j.kp} (${j.hari} ${rentangJam(j.mulai, j.selesai)})?${tambahan}`)) return;
+  try{
+    status('Menghapus…', 'sibuk');
+    for(const p of terkait) await deleteDoc(doc(db, 'perubahan', p.id));
+    await deleteDoc(doc(db, 'jadwal', id));
+    await muatSemua();
+    await terbitkan();
+  }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
+}
+
+/* ============================================================
+   7. Perubahan sementara
+   ============================================================ */
+
+function isiPilihanKelas(){
+  const opsi = [...data.jadwal].sort(urutJadwal).map(j =>
+    `<option value="${esc(j.id)}">${esc(j.kode)} KP ${esc(j.kp)} · ${esc(j.hari)} ${esc(rentangJam(j.mulai, j.selesai))} · ${esc(j.ruang || 'tanpa ruang')}</option>`
+  ).join('');
+  const el = $('pbKelas');
+  const terpilih = el.value;
+  el.innerHTML = '<option value="">— pilih —</option>' + opsi;
+  if(terpilih) el.value = terpilih;
+}
+
+function aturTampilanPerubahan(){
+  const tipe = $('pbTipe').value;
+  $('barisPindah').hidden = tipe !== 'pindah';
+  $('barisRuang').hidden = !(tipe === 'pindah' || tipe === 'ruang');
+}
+$('pbTipe').addEventListener('change', aturTampilanPerubahan);
+aturTampilanPerubahan();
+
+function gambarPerubahan(){
+  const t = $('tabelPerubahan');
+  if(data.perubahan.length === 0){
+    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada perubahan sementara.</td></tr></tbody>';
+    return;
+  }
+  const hariIni = new Date().toISOString().slice(0,10);
+  t.innerHTML = `
+    <thead><tr><th>Tanggal</th><th>Jenis</th><th>Kelas</th><th>Keterangan</th><th></th></tr></thead>
+    <tbody>${data.perubahan.map(p => {
+      const j = data.jadwal.find(x => x.id === p.jadwalId);
+      const lewat = p.tanggal < hariIni;
+      let ket = esc(p.catatan || '');
+      if(p.tipe === 'pindah'){
+        ket = `Ke ${esc(tanggalPanjang(p.tanggalBaru))} ${esc(rentangJam(p.mulaiBaru, p.selesaiBaru))}`
+            + (p.ruangBaru ? ` di ${esc(p.ruangBaru)}` : '') + (p.catatan ? `<br><span class="op-samar">${esc(p.catatan)}</span>` : '');
+      }else if(p.tipe === 'ruang'){
+        ket = `Pindah ke ruang ${esc(p.ruangBaru || '?')}`
+            + (p.catatan ? `<br><span class="op-samar">${esc(p.catatan)}</span>` : '');
+      }
+      const label = { libur:'Ditiadakan', pindah:'Dipindah', ruang:'Ganti ruang' }[p.tipe] || p.tipe;
+      return `<tr${lewat ? ' style="opacity:.55"' : ''}>
+        <td>${esc(tanggalPanjang(p.tanggal))}${lewat ? '<br><span class="op-samar">sudah lewat</span>' : ''}</td>
+        <td><span class="op-lencana ${esc(p.tipe)}">${esc(label)}</span></td>
+        <td>${esc(p.kode)} KP ${esc(p.kp)}${j ? '' : '<br><span class="op-samar">kelas sudah dihapus</span>'}</td>
+        <td>${ket}</td>
+        <td><div class="op-tombol-baris">
+          <button class="op-mini" data-ubah-pb="${esc(p.id)}">Ubah</button>
+          <button class="op-mini op-hapus" data-hapus-pb="${esc(p.id)}">Hapus</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-ubah-pb]').forEach(b => b.addEventListener('click', () => {
+    const p = data.perubahan.find(x => x.id === b.dataset.ubahPb);
+    if(!p) return;
+    $('pbId').value = p.id; $('pbTipe').value = p.tipe; $('pbKelas').value = p.jadwalId || '';
+    $('pbTanggal').value = p.tanggal || '';
+    $('pbTanggalBaru').value = p.tanggalBaru || '';
+    $('pbMulai').value = p.mulaiBaru || ''; $('pbSelesai').value = p.selesaiBaru || '';
+    $('pbRuang').value = p.ruangBaru || ''; $('pbCatatan').value = p.catatan || '';
+    aturTampilanPerubahan(); modeUbah('formPerubahan', true);
+    $('pbTipe').focus();
+  }));
+
+  t.querySelectorAll('[data-hapus-pb]').forEach(b => b.addEventListener('click', async () => {
+    const p = data.perubahan.find(x => x.id === b.dataset.hapusPb);
+    if(!p || !confirm(`Hapus perubahan ${p.kode} KP ${p.kp} pada ${tanggalPanjang(p.tanggal)}?`)) return;
+    try{
+      status('Menghapus…', 'sibuk');
+      await deleteDoc(doc(db, 'perubahan', p.id));
+      await muatSemua();
+      await terbitkan();
+    }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
+  }));
+}
+
+function periksaPerubahan(isi){
+  const salah = [];
+  const hati = [];
+  const j = data.jadwal.find(x => x.id === isi.jadwalId);
+
+  if(!j){ salah.push('Kelas belum dipilih.'); return { salah, hati }; }
+  if(!isi.tanggal){ salah.push('Tanggal terdampak belum diisi.'); return { salah, hati }; }
+
+  // Tanggal harus jatuh pada hari kelas itu berlangsung. Tanpa pemeriksaan ini
+  // orang gampang salah pilih tanggal dan perubahannya tidak pernah muncul.
+  const hari = hariDariTanggal(isi.tanggal);
+  if(hari !== j.hari){
+    salah.push(`${tanggalPanjang(isi.tanggal)} jatuh pada ${hari}, sedangkan kelas ini berlangsung hari ${j.hari}.`);
+  }
+
+  const kembar = data.perubahan.find(p =>
+    p.id !== isi.id && p.jadwalId === isi.jadwalId && p.tanggal === isi.tanggal);
+  if(kembar) salah.push('Kelas ini sudah punya perubahan lain pada tanggal yang sama.');
+
+  if(isi.tipe === 'ruang' && !samakanRuang(isi.ruangBaru)){
+    salah.push('Ruang baru belum diisi.');
+  }
+
+  if(isi.tipe === 'pindah'){
+    if(!isi.tanggalBaru) salah.push('Tanggal pengganti belum diisi.');
+    const m1 = keMenit(isi.mulaiBaru), m2 = keMenit(isi.selesaiBaru);
+    if(m1 === null || m2 === null) salah.push('Jam pengganti belum lengkap.');
+    else if(m2 <= m1) salah.push('Jam selesai pengganti harus lebih akhir daripada jam mulai.');
+
+    if(isi.tanggalBaru && isi.tanggalBaru === isi.tanggal){
+      salah.push('Tanggal pengganti sama dengan tanggal aslinya.');
+    }
+
+    if(isi.tanggalBaru && m1 !== null && m2 !== null){
+      const hariBaru = hariDariTanggal(isi.tanggalBaru);
+      const ruang = samakanRuang(isi.ruangBaru) || samakanRuang(j.ruang);
+
+      // Kelas pengganti tidak boleh menabrak kelas rutin di ruangan yang sama.
+      if(ruang){
+        const bentrok = data.jadwal.filter(x =>
+          x.hari === hariBaru
+          && samakanRuang(x.ruang) === ruang
+          && beririsan(m1, m2, keMenit(x.mulai), keMenit(x.selesai)));
+        for(const b of bentrok){
+          salah.push(`Ruang ${isi.ruangBaru || j.ruang} sudah dipakai ${b.kode} KP ${b.kp} setiap ${b.hari} ${rentangJam(b.mulai, b.selesai)}.`);
+        }
+      }
+
+      // Dan tidak boleh menabrak kelas pengganti lain di tanggal yang sama.
+      const gantiLain = data.perubahan.filter(p =>
+        p.id !== isi.id && p.tipe === 'pindah' && p.tanggalBaru === isi.tanggalBaru);
+      for(const p of gantiLain){
+        const sama = ruang && samakanRuang(p.ruangBaru) === ruang;
+        if(sama && beririsan(m1, m2, keMenit(p.mulaiBaru), keMenit(p.selesaiBaru))){
+          salah.push(`Ruang itu sudah dipakai kelas pengganti ${p.kode} KP ${p.kp} pada tanggal yang sama.`);
+        }
+      }
+
+      const durasiAsli = keMenit(j.selesai) - keMenit(j.mulai);
+      if(Math.abs((m2 - m1) - durasiAsli) > 10){
+        hati.push(`Durasi pengganti ${m2-m1} menit, aslinya ${durasiAsli} menit. Pastikan bukan salah ketik.`);
+      }
+    }
+  }
+
+  return { salah, hati };
+}
+
+$('formPerubahan').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanPerubahan');
+  const j = data.jadwal.find(x => x.id === $('pbKelas').value);
+
+  const isi = {
+    id: $('pbId').value,
+    tipe: $('pbTipe').value,
+    jadwalId: $('pbKelas').value,
+    tanggal: $('pbTanggal').value,
+    tanggalBaru: $('pbTanggalBaru').value,
+    mulaiBaru: $('pbMulai').value,
+    selesaiBaru: $('pbSelesai').value,
+    ruangBaru: $('pbRuang').value.trim(),
+    catatan: $('pbCatatan').value.trim(),
+  };
+
+  const { salah, hati } = periksaPerubahan(isi);
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
+  if(hati.length && el.dataset.konfirmasi !== '1'){
+    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi kalau memang benar:', hati), 'hati');
+    el.dataset.konfirmasi = '1';
+    return;
+  }
+  el.dataset.konfirmasi = '';
+
+  const muatan = {
+    tipe: isi.tipe, jadwalId: isi.jadwalId, kode: j.kode, kp: j.kp,
+    tanggal: isi.tanggal, catatan: isi.catatan,
+    tanggalBaru: isi.tipe === 'pindah' ? isi.tanggalBaru : '',
+    mulaiBaru: isi.tipe === 'pindah' ? isi.mulaiBaru : '',
+    selesaiBaru: isi.tipe === 'pindah' ? isi.selesaiBaru : '',
+    ruangBaru: (isi.tipe === 'pindah' || isi.tipe === 'ruang') ? isi.ruangBaru : '',
+  };
+
+  try{
+    status('Menyimpan…', 'sibuk');
+    if(isi.id) await updateDoc(doc(db, 'perubahan', isi.id), muatan);
+    else await addDoc(collection(db, 'perubahan'), muatan);
+    e.target.reset(); $('pbId').value = ''; modeUbah('formPerubahan', false);
+    aturTampilanPerubahan(); bersihkanPesan(el);
+    await muatSemua();
+    await terbitkan();
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
+
+/* ============================================================
+   8. Pengumuman
+   ============================================================ */
+
+function gambarPengumuman(){
+  const t = $('tabelPengumuman');
+  if(data.pengumuman.length === 0){
+    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada pengumuman.</td></tr></tbody>';
+    return;
+  }
+  const hariIni = new Date().toISOString().slice(0,10);
+  const urut = [...data.pengumuman].sort((a,b) =>
+    (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || String(b.mulai||'').localeCompare(String(a.mulai||'')));
+
+  t.innerHTML = `
+    <thead><tr><th>Judul</th><th>Tayang</th><th>Status</th><th></th></tr></thead>
+    <tbody>${urut.map(p => {
+      const belum = p.mulai && hariIni < p.mulai;
+      const habis = p.selesai && hariIni > p.selesai;
+      const stat = habis ? 'Sudah lewat' : (belum ? 'Belum tayang' : 'Sedang tayang');
+      return `<tr${(belum||habis) ? ' style="opacity:.55"' : ''}>
+        <td>${p.pin ? '<span class="op-lencana pin">Disematkan</span><br>' : ''}<strong>${esc(p.judul)}</strong>
+            ${p.isi ? `<br><span class="op-samar">${esc(String(p.isi).slice(0,90))}${String(p.isi).length>90?'…':''}</span>` : ''}</td>
+        <td class="op-samar">${esc(p.mulai || 'kapan saja')} s/d ${esc(p.selesai || 'seterusnya')}</td>
+        <td class="op-samar">${esc(stat)}</td>
+        <td><div class="op-tombol-baris">
+          <button class="op-mini" data-ubah-pm="${esc(p.id)}">Ubah</button>
+          <button class="op-mini op-hapus" data-hapus-pm="${esc(p.id)}">Hapus</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-ubah-pm]').forEach(b => b.addEventListener('click', () => {
+    const p = data.pengumuman.find(x => x.id === b.dataset.ubahPm);
+    if(!p) return;
+    $('pmId').value = p.id; $('pmJudul').value = p.judul; $('pmIsi').value = p.isi || '';
+    $('pmMulai').value = p.mulai || ''; $('pmSelesai').value = p.selesai || '';
+    $('pmPin').checked = !!p.pin;
+    modeUbah('formPengumuman', true);
+    $('pmJudul').focus();
+  }));
+
+  t.querySelectorAll('[data-hapus-pm]').forEach(b => b.addEventListener('click', async () => {
+    const p = data.pengumuman.find(x => x.id === b.dataset.hapusPm);
+    if(!p || !confirm(`Hapus pengumuman "${p.judul}"?`)) return;
+    try{
+      status('Menghapus…', 'sibuk');
+      await deleteDoc(doc(db, 'pengumuman', p.id));
+      await muatSemua();
+      await terbitkan();
+    }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
+  }));
+}
+
+$('formPengumuman').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanPengumuman');
+  const isi = {
+    id: $('pmId').value,
+    judul: $('pmJudul').value.trim(),
+    isi: $('pmIsi').value.trim(),
+    mulai: $('pmMulai').value,
+    selesai: $('pmSelesai').value,
+    pin: $('pmPin').checked,
+  };
+
+  const salah = [];
+  if(!isi.judul) salah.push('Judul belum diisi.');
+  if(isi.mulai && isi.selesai && isi.selesai < isi.mulai)
+    salah.push('Tanggal berhenti tampil lebih awal daripada tanggal mulai.');
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
+
+  const muatan = { judul: isi.judul, isi: isi.isi, mulai: isi.mulai, selesai: isi.selesai, pin: isi.pin };
+  try{
+    status('Menyimpan…', 'sibuk');
+    if(isi.id) await updateDoc(doc(db, 'pengumuman', isi.id), muatan);
+    else await addDoc(collection(db, 'pengumuman'), muatan);
+    e.target.reset(); $('pmId').value = ''; modeUbah('formPengumuman', false);
+    bersihkanPesan(el);
+    await muatSemua();
+    await terbitkan();
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
+
+/* ============================================================
+   9. Pengaturan
+   ============================================================ */
+
+function gambarPengaturan(){
+  $('stMulai').value = data.pengaturan.mulaiDefault || '';
+  const daftar = Object.entries(data.pengaturan.perMatkul || {});
+  const el = $('daftarPengecualian');
+  if(daftar.length === 0){
+    el.innerHTML = '<p class="op-samar" style="margin:0 0 12px;">Belum ada pengecualian.</p>';
+    return;
+  }
+  el.innerHTML = `<div class="op-tabel-bungkus" style="margin-bottom:14px;"><table class="op-tabel">
+    <thead><tr><th>Mata Kuliah</th><th>Mulai</th><th></th></tr></thead>
+    <tbody>${daftar.map(([kode, tgl]) => `<tr>
+      <td>${esc(kode)}<br><span class="op-samar">${esc(namaMatkul(kode) || 'tidak ada di daftar')}</span></td>
+      <td>${esc(tanggalPanjang(tgl))}</td>
+      <td><button class="op-mini op-hapus" data-buang-kec="${esc(kode)}">Hapus</button></td>
+    </tr>`).join('')}</tbody></table></div>`;
+
+  el.querySelectorAll('[data-buang-kec]').forEach(b => b.addEventListener('click', () => {
+    delete data.pengaturan.perMatkul[b.dataset.buangKec];
+    gambarPengaturan();
+    pesan($('pesanPengaturan'), 'Pengecualian dihapus dari daftar. Tekan "Simpan pengaturan" supaya benar-benar tersimpan.', 'hati');
+  }));
+}
+
+$('tambahPengecualian').addEventListener('click', () => {
+  const kode = $('stKode').value, tgl = $('stTanggal').value;
+  const el = $('pesanPengaturan');
+  if(!kode || !tgl){ pesan(el, 'Pilih mata kuliah dan tanggalnya dulu.', 'salah'); return; }
+  data.pengaturan.perMatkul[kode] = tgl;
+  $('stKode').value = ''; $('stTanggal').value = '';
+  gambarPengaturan();
+  pesan(el, 'Ditambahkan ke daftar. Tekan "Simpan pengaturan" supaya benar-benar tersimpan.', 'hati');
+});
+
+$('formPengaturan').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanPengaturan');
+  data.pengaturan.mulaiDefault = $('stMulai').value;
+  try{
+    status('Menyimpan…', 'sibuk');
+    await setDoc(doc(db, 'pengaturan', 'umum'), {
+      mulaiDefault: data.pengaturan.mulaiDefault,
+      perMatkul: data.pengaturan.perMatkul,
+    });
+    bersihkanPesan(el);
+    await muatSemua();
+    await terbitkan();
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
+
+/* ============================================================
+   10. Menerbitkan ke halaman publik
+   ============================================================ */
+
+/*
+  Halaman publik sengaja TIDAK membaca koleksi satu per satu, karena itu berarti
+  puluhan pembacaan Firestore untuk setiap pengunjung. Sebagai gantinya seluruh
+  isinya dirangkum jadi SATU dokumen di sini, sehingga pengunjung cukup membaca
+  satu dokumen saja. Penulisan jarang, pembacaan sering, jadi kerja beratnya
+  ditaruh di sisi penulisan.
+*/
+async function terbitkan(){
+  status('Menerbitkan ke halaman publik…', 'sibuk');
+  try{
+    const days = [];
+    for(const hari of ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu']){
+      const kelas = data.jadwal
+        .filter(j => j.hari === hari)
+        .sort((a,b) => (keMenit(a.mulai)||0) - (keMenit(b.mulai)||0))
+        .map(j => ({
+          kode: j.kode,
+          nama: namaMatkul(j.kode) || j.kode,
+          kp: j.kp,
+          jam: rentangJam(j.mulai, j.selesai),
+          ruang: j.ruang || '',
+        }));
+      if(kelas.length) days.push({ day: hari, classes: kelas });
+    }
+
+    const changes = [];
+    for(const p of data.perubahan){
+      const j = data.jadwal.find(x => x.id === p.jadwalId);
+      if(!j) continue;   // kelasnya sudah dihapus, lewati
+      const nama = namaMatkul(j.kode) || j.kode;
+
+      if(p.tipe === 'libur'){
+        changes.push({
+          tanggal: p.tanggal, tipe: 'libur', kode: j.kode, kp: j.kp, nama,
+          jam: rentangJam(j.mulai, j.selesai), ruang: j.ruang || '',
+          catatan: p.catatan || 'Kelas ditiadakan',
+        });
+      }else if(p.tipe === 'pindah'){
+        changes.push({
+          tanggal: p.tanggal, tipe: 'libur', kode: j.kode, kp: j.kp, nama,
+          jam: rentangJam(j.mulai, j.selesai), ruang: j.ruang || '',
+          catatan: `Diganti ke ${tanggalPanjang(p.tanggalBaru)} pukul ${rentangJam(p.mulaiBaru, p.selesaiBaru)}`
+            + ` di ${p.ruangBaru || j.ruang || '(ruang belum ditentukan)'}`,
+        });
+        changes.push({
+          tanggal: p.tanggalBaru, tipe: 'pengganti', kode: j.kode, kp: j.kp, nama,
+          jam: rentangJam(p.mulaiBaru, p.selesaiBaru), ruang: p.ruangBaru || j.ruang || '',
+          catatan: p.catatan || `Kelas pengganti dari ${tanggalPanjang(p.tanggal)}`,
+        });
+      }else if(p.tipe === 'ruang'){
+        changes.push({
+          tanggal: p.tanggal, tipe: 'ruang', kode: j.kode, kp: j.kp, nama,
+          jam: rentangJam(j.mulai, j.selesai), ruang: p.ruangBaru || '',
+          ruangLama: j.ruang || '',
+          catatan: p.catatan || `Pindah ruang dari ${j.ruang || '(belum ada)'} ke ${p.ruangBaru}`,
+        });
+      }
+    }
+    changes.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)) || a.jam.localeCompare(b.jam));
+
+    const hariIni = new Date().toISOString().slice(0,10);
+    const pengumuman = data.pengumuman
+      .filter(p => (!p.mulai || p.mulai <= hariIni) && (!p.selesai || p.selesai >= hariIni))
+      .sort((a,b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || String(b.mulai||'').localeCompare(String(a.mulai||'')))
+      .map(p => ({ judul: p.judul, isi: p.isi || '', pin: !!p.pin, mulai: p.mulai || '', selesai: p.selesai || '' }));
+
+    await setDoc(doc(db, 'publik', 'terkini'), {
+      updatedAt: new Date().toISOString(),
+      mulai: {
+        default: data.pengaturan.mulaiDefault || null,
+        perMatkul: data.pengaturan.perMatkul || {},
+      },
+      days, changes, pengumuman,
+    });
+
+    status('Tersimpan dan sudah tayang di halaman publik.', 'benar');
+  }catch(err){
+    console.error(err);
+    status(
+      'Data tersimpan, TAPI gagal menerbitkan ke halaman publik: ' + err.message
+      + '. Coba simpan ulang salah satu data supaya penerbitan diulang.', 'salah');
+  }
+}
+
+/* ============================================================
+   11. Impor sekali dari data lama
+   ============================================================ */
+
+$('tombolImpor').addEventListener('click', async () => {
+  const el = $('pesanImpor');
+  bersihkanPesan(el);
+
+  // Penjaga: menolak jalan kalau sudah ada isinya, supaya tidak menimpa
+  // pekerjaan yang sudah dimasukkan lewat halaman ini.
+  if(data.matakuliah.length || data.jadwal.length){
+    pesan(el, 'Impor dibatalkan karena basis data sudah berisi. Tombol ini hanya untuk pemakaian pertama kali.', 'salah');
+    return;
+  }
+  if(!confirm('Impor daftar mata kuliah dan jadwal permanen dari data lama?')) return;
+
+  try{
+    status('Mengimpor…', 'sibuk');
+    const res = await fetch('data/jadwal.json', { cache: 'no-cache' });
+    if(!res.ok) throw new Error('berkas data lama tidak terbaca (HTTP ' + res.status + ')');
+    const lama = await res.json();
+
+    const matkul = new Map();
+    let jumlahJadwal = 0;
+
+    for(const hari of (lama.days || [])){
+      for(const k of (hari.classes || [])){
+        if(k.kode && !matkul.has(k.kode)) matkul.set(k.kode, k.nama || k.kode);
+      }
+    }
+    for(const [kode, nama] of matkul){
+      await addDoc(collection(db, 'matakuliah'), { kode, nama });
+    }
+
+    for(const hari of (lama.days || [])){
+      for(const k of (hari.classes || [])){
+        const m = String(k.jam || '').match(/(\d{1,2})[.:](\d{2})\s*-\s*(\d{1,2})[.:](\d{2})/);
+        if(!m) continue;
+        await addDoc(collection(db, 'jadwal'), {
+          kode: k.kode,
+          kp: String(k.kp || '').toUpperCase(),
+          hari: hari.day,
+          mulai: `${m[1].padStart(2,'0')}:${m[2]}`,
+          selesai: `${m[3].padStart(2,'0')}:${m[4]}`,
+          ruang: k.ruang || '',
+        });
+        jumlahJadwal++;
+      }
+    }
+
+    if(lama.mulai){
+      await setDoc(doc(db, 'pengaturan', 'umum'), {
+        mulaiDefault: lama.mulai.default || '',
+        perMatkul: lama.mulai.perMatkul || {},
+      });
+    }
+
+    await muatSemua();
+    await terbitkan();
+    pesan(el,
+      `Selesai. ${matkul.size} mata kuliah dan ${jumlahJadwal} kelas berhasil diimpor. `
+      + 'Perubahan sementara tidak ikut diimpor karena bentuk datanya berbeda, '
+      + 'silakan masukkan ulang lewat tab Perubahan Sementara bila masih berlaku.',
+      'benar');
+  }catch(err){
+    console.error(err);
+    pesan(el, 'Impor gagal: ' + esc(err.message), 'salah');
+    status('Impor gagal.', 'salah');
+  }
+});
