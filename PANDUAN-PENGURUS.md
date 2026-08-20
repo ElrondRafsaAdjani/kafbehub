@@ -13,6 +13,20 @@ halaman operasional sudah bisa dipakai, lompat ke Bagian 2.
 Semua langkah di bawah butuh akses ke
 [Firebase Console](https://console.firebase.google.com) proyek **kafbe-hub**.
 
+> **Menunya susah dicari?** Tata letak Firebase Console cukup sering berubah,
+> jadi lebih aman memakai alamat langsung berikut:
+>
+> | Untuk langkah | Alamat |
+> |---|---|
+> | 1.1 Metode masuk | <https://console.firebase.google.com/project/kafbe-hub/authentication/providers> |
+> | 1.2 Daftar akun | <https://console.firebase.google.com/project/kafbe-hub/authentication/users> |
+> | 1.3 Isi basis data | <https://console.firebase.google.com/project/kafbe-hub/firestore/databases/-default-/data> |
+> | 1.4 Aturan keamanan | <https://console.firebase.google.com/project/kafbe-hub/firestore/databases/-default-/rules> |
+>
+> Halaman Firestore punya beberapa tab berjajar di atas panel utama, kira-kira
+> **Data · Rules · Indexes · Usage**. Kalau yang tampil justru grafik Reads dan
+> Writes, berarti Anda sedang berada di tab **Usage**, bukan **Data**.
+
 ### 1.1 Aktifkan metode masuk
 
 1. Firebase Console → **Authentication** → **Get started**
