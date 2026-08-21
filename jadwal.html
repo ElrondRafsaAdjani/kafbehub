@@ -374,7 +374,7 @@
     elSemester.innerHTML = `
       <div class="kotak kotak-info">
         <h3>🗓️ Sebagian perkuliahan belum dimulai</h3>
-        <p>Kelas yang belum berjalan tetap ditampilkan agar rencananya terlihat, tapi diredupkan dan diberi label <strong>Belum dimulai</strong>.</p>
+        <p>Kelas yang belum berjalan diredupkan dan diberi label <strong>Belum dimulai</strong>.</p>
         <ul class="perub-list" style="margin-top:14px;">${item}</ul>
       </div>`;
   }
@@ -415,9 +415,8 @@
     if(data._cadangan){
       elPering.innerHTML = `
         <div class="kotak kotak-warn">
-          <h3>⚠️ Jadwal terkini sedang tidak bisa diambil</h3>
-          <p>Yang ditampilkan di bawah adalah salinan cadangan dan mungkin sudah tertinggal.
-          Untuk kepastian, konfirmasi ke asisten atau cek Instagram KAFBE.</p>
+          <h3>⚠️ Jadwal mungkin belum yang terbaru</h3>
+          <p>Untuk kepastian, konfirmasi ke asisten atau cek Instagram KAFBE.</p>
         </div>`;
       return;
     }
@@ -426,10 +425,8 @@
     if(s.length === 0) return;
     elPering.innerHTML = `
       <div class="kotak kotak-warn">
-        <h3>⚠️ Ada perubahan jadwal yang belum bisa ditampilkan</h3>
-        <p>${s.length} baris di spreadsheet perubahan formatnya belum bisa dibaca otomatis,
-        jadi ada kemungkinan info yang terlewat di halaman ini.
-        Untuk kepastian, konfirmasi ke asisten atau cek Instagram KAFBE.</p>
+        <h3>⚠️ Sebagian perubahan jadwal belum tampil</h3>
+        <p>Untuk kepastian, konfirmasi ke asisten atau cek Instagram KAFBE.</p>
       </div>`;
   }
 
