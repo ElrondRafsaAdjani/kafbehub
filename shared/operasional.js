@@ -20,7 +20,7 @@ const {
 } = await import(`${SDK}/firebase-auth.js`);
 const {
   getFirestore, collection, doc, getDoc, getDocs,
-  addDoc, setDoc, updateDoc, deleteDoc,
+  addDoc, setDoc, updateDoc, deleteDoc, writeBatch,
 } = await import(`${SDK}/firebase-firestore.js`);
 
 const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
@@ -287,6 +287,7 @@ function gambarSemua(){
   gambarMatkul();
   gambarJadwal();
   gambarPerubahan();
+  gambarKelompok();
   gambarPengumuman();
   gambarPengaturan();
 }
@@ -612,6 +613,8 @@ function isiPilihanKelas(){
   if(terpilih) el.value = terpilih;
 }
 
+// Jenis "daring" dan "libur" tidak butuh ruang maupun tanggal pengganti,
+// jadi kolomnya disembunyikan supaya tidak membingungkan.
 function aturTampilanPerubahan(){
   const tipe = $('pbTipe').value;
   $('barisPindah').hidden = tipe !== 'pindah';
@@ -639,8 +642,14 @@ function gambarPerubahan(){
       }else if(p.tipe === 'ruang'){
         ket = `Pindah ke ruang ${esc(p.ruangBaru || '?')}`
             + (p.catatan ? `<br><span class="op-samar">${esc(p.catatan)}</span>` : '');
+      }else if(p.tipe === 'daring'){
+        ket = 'Kelas berlangsung daring'
+            + (p.catatan ? `<br><span class="op-samar">${esc(p.catatan)}</span>` : '');
       }
-      const label = { libur:'Ditiadakan', pindah:'Dipindah', ruang:'Ganti ruang' }[p.tipe] || p.tipe;
+      if(p.kelompok){
+        ket += `<br><span class="op-samar">dari pembuatan massal: ${esc(p.kelompok)}</span>`;
+      }
+      const label = { libur:'Ditiadakan', daring:'Online', pindah:'Dipindah', ruang:'Ganti ruang' }[p.tipe] || p.tipe;
       return `<tr${lewat ? ' style="opacity:.55"' : ''}>
         <td>${esc(tanggalPanjang(p.tanggal))}${lewat ? '<br><span class="op-samar">sudah lewat</span>' : ''}</td>
         <td><span class="op-lencana ${esc(p.tipe)}">${esc(label)}</span></td>
@@ -793,6 +802,216 @@ $('formPerubahan').addEventListener('submit', async (e) => {
     status('Gagal menyimpan: ' + err.message, 'salah');
   }
 });
+
+/* ============================================================
+   7b. Pembuatan massal
+   ============================================================
+
+   Memasukkan perubahan satu per satu tidak masuk akal untuk kejadian yang
+   menyentuh puluhan kelas sekaligus, misalnya sepekan kuliah daring saat
+   orientasi. Di sini pengurus memilih rentang tanggal, mencentang kelas mana
+   saja yang terdampak, lalu semuanya dibuat sekali jalan.
+
+   Tiap hasilnya diberi penanda kelompok. Tanpa penanda itu, membatalkan
+   pembuatan massal berarti menghapus puluhan baris satu per satu, dan
+   pengurus kembali ke persoalan yang sama.
+*/
+
+// Semua tanggal antara dua tanggal, termasuk kedua ujungnya.
+function rentangTanggal(dari, sampai){
+  const out = [];
+  const a = new Date(dari + 'T00:00:00Z');
+  const b = new Date(sampai + 'T00:00:00Z');
+  if(isNaN(a) || isNaN(b) || b < a) return out;
+  for(let d = new Date(a); d <= b; d.setUTCDate(d.getUTCDate() + 1)){
+    out.push(d.toISOString().slice(0, 10));
+  }
+  return out;
+}
+
+function mulaiUntukKode(kode){
+  return data.pengaturan.perMatkul[kode] || data.pengaturan.mulaiDefault || null;
+}
+
+let massalKandidat = [];   // { jadwalId, tanggalList[], belumMulai }
+
+$('msTampilkan').addEventListener('click', () => {
+  const el = $('pesanMassal');
+  const dari = $('msDari').value, sampai = $('msSampai').value;
+  bersihkanPesan(el);
+  $('msDaftar').innerHTML = '';
+  $('msAksi').hidden = true;
+  massalKandidat = [];
+
+  if(!dari || !sampai){ pesan(el, 'Isi dulu tanggal mulai dan tanggal akhirnya.', 'salah'); return; }
+  const tanggalList = rentangTanggal(dari, sampai);
+  if(tanggalList.length === 0){ pesan(el, 'Tanggal akhir mendahului tanggal mulai.', 'salah'); return; }
+  if(tanggalList.length > 31){ pesan(el, 'Rentangnya lebih dari 31 hari. Persempit dulu supaya tidak salah buat.', 'salah'); return; }
+
+  // Satu kelas bisa muncul beberapa kali dalam rentang, misalnya rentang dua
+  // pekan. Pencentangannya tetap per kelas, lalu entri dibuat untuk setiap
+  // kemunculannya.
+  const peta = new Map();
+  for(const tgl of tanggalList){
+    const hari = HARI[new Date(tgl + 'T00:00:00Z').getUTCDay()];
+    for(const j of data.jadwal.filter(x => x.hari === hari)){
+      if(!peta.has(j.id)) peta.set(j.id, []);
+      peta.get(j.id).push(tgl);
+    }
+  }
+
+  if(peta.size === 0){ pesan(el, 'Tidak ada kelas yang jatuh pada rentang tanggal itu.', 'salah'); return; }
+
+  massalKandidat = [...peta.entries()].map(([jadwalId, tgls]) => {
+    const j = data.jadwal.find(x => x.id === jadwalId);
+    const mulai = mulaiUntukKode(j.kode);
+    // Kelas yang perkuliahannya belum dimulai pada seluruh rentang tidak perlu
+    // diubah, jadi tidak dicentang secara bawaan.
+    const belumMulai = mulai && tgls.every(t => t < mulai);
+    return { jadwalId, tanggalList: tgls, belumMulai };
+  }).sort((a, b) => {
+    const ja = data.jadwal.find(x => x.id === a.jadwalId);
+    const jb = data.jadwal.find(x => x.id === b.jadwalId);
+    return urutJadwal(ja, jb);
+  });
+
+  const baris = massalKandidat.map(k => {
+    const j = data.jadwal.find(x => x.id === k.jadwalId);
+    return `<label class="op-centang-baris${k.belumMulai ? ' op-redup' : ''}">
+      <input type="checkbox" data-massal="${esc(k.jadwalId)}"${k.belumMulai ? '' : ' checked'} />
+      <span>
+        <strong>${esc(namaMatkul(j.kode) || j.kode)}</strong> KP ${esc(j.kp)}
+        <span class="op-samar">· ${esc(j.hari)} ${esc(rentangJam(j.mulai, j.selesai))} · ${esc(j.ruang || 'tanpa ruang')}
+        · ${k.tanggalList.length} tanggal${k.belumMulai ? ' · belum dimulai' : ''}</span>
+      </span>
+    </label>`;
+  }).join('');
+
+  const jumlahTercentang = massalKandidat.filter(k => !k.belumMulai).length;
+  $('msDaftar').innerHTML = `
+    <div class="op-massal-kepala">
+      <strong>${massalKandidat.length} kelas</strong> jatuh pada ${tanggalList.length} hari terpilih.
+      <button type="button" class="op-mini" id="msSemua">Centang semua</button>
+      <button type="button" class="op-mini" id="msKosong">Hapus semua centang</button>
+    </div>
+    <div class="op-massal-daftar">${baris}</div>`;
+
+  $('msSemua').addEventListener('click', () =>
+    $('msDaftar').querySelectorAll('[data-massal]').forEach(c => c.checked = true));
+  $('msKosong').addEventListener('click', () =>
+    $('msDaftar').querySelectorAll('[data-massal]').forEach(c => c.checked = false));
+
+  $('msAksi').hidden = false;
+  pesan(el, `${jumlahTercentang} kelas tercentang. Hapus centang pada kelas yang tidak terdampak, lalu tekan "Buat sekaligus".`, 'hati');
+});
+
+$('msBuat').addEventListener('click', async () => {
+  const el = $('pesanMassal');
+  const tipe = $('msTipe').value;
+  const catatan = $('msCatatan').value.trim();
+  const terpilih = [...$('msDaftar').querySelectorAll('[data-massal]:checked')].map(c => c.dataset.massal);
+
+  if(terpilih.length === 0){ pesan(el, 'Belum ada kelas yang dicentang.', 'salah'); return; }
+
+  // Kelas yang sudah punya perubahan pada tanggal itu dilewati, bukan
+  // ditimpa. Perubahan yang dibuat manual lebih spesifik, jadi tidak pantas
+  // tergilas oleh pembuatan massal.
+  const akanDibuat = [];
+  let dilewati = 0;
+  for(const jadwalId of terpilih){
+    const k = massalKandidat.find(x => x.jadwalId === jadwalId);
+    const j = data.jadwal.find(x => x.id === jadwalId);
+    if(!k || !j) continue;
+    for(const tgl of k.tanggalList){
+      const sudahAda = data.perubahan.some(p => p.jadwalId === jadwalId && p.tanggal === tgl);
+      if(sudahAda){ dilewati++; continue; }
+      akanDibuat.push({ j, tgl });
+    }
+  }
+
+  if(akanDibuat.length === 0){
+    pesan(el, `Tidak ada yang dibuat. Seluruh ${dilewati} kemunculan sudah punya perubahan sendiri.`, 'salah');
+    return;
+  }
+
+  const namaJenis = tipe === 'daring' ? 'Daring' : 'Ditiadakan';
+  const kelompok = `${namaJenis} ${$('msDari').value} s/d ${$('msSampai').value}`;
+  const ringkas = `${akanDibuat.length} entri untuk ${terpilih.length} kelas`
+    + (dilewati ? `, ${dilewati} dilewati karena sudah punya perubahan sendiri` : '');
+
+  if(!confirm(`Buat ${ringkas}?\n\nKelompok: ${kelompok}`)) return;
+
+  try{
+    status('Membuat ' + akanDibuat.length + ' perubahan…', 'sibuk');
+
+    // Ditulis sebagai satu transaksi. Kalau di tengah jalan gagal, tidak ada
+    // yang tersimpan sama sekali, sehingga tidak pernah ada keadaan separuh
+    // jadi yang membingungkan untuk dibereskan.
+    const BATAS = 450;   // Firestore membatasi 500 operasi per transaksi
+    for(let i = 0; i < akanDibuat.length; i += BATAS){
+      const batch = writeBatch(db);
+      for(const { j, tgl } of akanDibuat.slice(i, i + BATAS)){
+        batch.set(doc(collection(db, 'perubahan')), {
+          tipe, jadwalId: j.id, kode: j.kode, kp: j.kp,
+          tanggal: tgl, catatan,
+          tanggalBaru: '', mulaiBaru: '', selesaiBaru: '', ruangBaru: '',
+          kelompok,
+        });
+      }
+      await batch.commit();
+    }
+
+    $('msDaftar').innerHTML = ''; $('msAksi').hidden = true; massalKandidat = [];
+    $('msCatatan').value = '';
+    await muatSemua();
+    await terbitkan();
+    pesan(el, `Selesai. ${ringkas}.`, 'benar');
+  }catch(err){
+    console.error(err);
+    pesan(el, 'Gagal membuat: ' + esc(err.message), 'salah');
+    status('Pembuatan massal gagal.', 'salah');
+  }
+});
+
+/* Daftar kelompok, supaya pembuatan massal bisa dibatalkan sekaligus. */
+function gambarKelompok(){
+  const el = $('daftarKelompok');
+  const peta = new Map();
+  for(const p of data.perubahan){
+    if(!p.kelompok) continue;
+    peta.set(p.kelompok, (peta.get(p.kelompok) || 0) + 1);
+  }
+  if(peta.size === 0){ el.innerHTML = ''; return; }
+
+  el.innerHTML = `<div class="op-kelompok">
+    <h3>Hasil pembuatan massal</h3>
+    <p class="op-catatan">Menghapus kelompok akan membuang seluruh perubahan yang dibuat bersamaan dengannya.</p>
+    ${[...peta.entries()].map(([nama, n]) => `<div class="op-kelompok-baris">
+      <span><strong>${esc(nama)}</strong> <span class="op-samar">· ${n} perubahan</span></span>
+      <button class="op-mini op-hapus" data-hapus-kelompok="${esc(nama)}">Hapus kelompok</button>
+    </div>`).join('')}
+  </div>`;
+
+  el.querySelectorAll('[data-hapus-kelompok]').forEach(b => b.addEventListener('click', async () => {
+    const nama = b.dataset.hapusKelompok;
+    const anggota = data.perubahan.filter(p => p.kelompok === nama);
+    if(!confirm(`Hapus ${anggota.length} perubahan dalam kelompok "${nama}"?`)) return;
+    try{
+      status(`Menghapus ${anggota.length} perubahan…`, 'sibuk');
+      const BATAS = 450;
+      for(let i = 0; i < anggota.length; i += BATAS){
+        const batch = writeBatch(db);
+        for(const p of anggota.slice(i, i + BATAS)) batch.delete(doc(db, 'perubahan', p.id));
+        await batch.commit();
+      }
+      await muatSemua();
+      await terbitkan();
+    }catch(err){
+      console.error(err);
+      status('Gagal menghapus kelompok: ' + err.message, 'salah');
+    }
+  }));
+}
 
 /* ============================================================
    8. Pengumuman
@@ -996,6 +1215,15 @@ async function terbitkan(){
           jam: rentangJam(j.mulai, j.selesai), ruang: p.ruangBaru || '',
           ruangLama: j.ruang || '',
           catatan: p.catatan || `Pindah ruang dari ${j.ruang || '(belum ada)'} ke ${p.ruangBaru}`,
+        });
+      }else if(p.tipe === 'daring'){
+        // Jamnya tetap, yang berubah hanya tempatnya. Kolom ruang sengaja
+        // diisi "Online" supaya tabel jadwal tetap terbaca wajar.
+        changes.push({
+          tanggal: p.tanggal, tipe: 'daring', kode: j.kode, kp: j.kp, nama,
+          jam: rentangJam(j.mulai, j.selesai), ruang: 'Online',
+          ruangLama: j.ruang || '',
+          catatan: p.catatan || 'Kelas berlangsung daring',
         });
       }
     }

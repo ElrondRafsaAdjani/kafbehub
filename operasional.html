@@ -182,6 +182,7 @@
             <label for="pbTipe">Jenis perubahan</label>
             <select id="pbTipe" required>
               <option value="libur">Kelas ditiadakan</option>
+              <option value="daring">Kelas jadi daring (online)</option>
               <option value="pindah">Dipindah ke tanggal lain</option>
               <option value="ruang">Pindah ruangan saja</option>
             </select>
@@ -231,6 +232,51 @@
         </div>
         <p class="op-pesan" id="pesanPerubahan" role="alert"></p>
       </form>
+
+      <!-- ---------- Pembuatan massal ---------- -->
+      <details class="op-massal" id="massalBungkus">
+        <summary>Buat banyak sekaligus, misalnya satu pekan daring</summary>
+
+        <div class="op-form" style="margin-top:14px;">
+          <div class="op-baris">
+            <div class="op-field">
+              <label for="msTipe">Jenis</label>
+              <select id="msTipe">
+                <option value="daring">Kelas jadi daring (online)</option>
+                <option value="libur">Kelas ditiadakan</option>
+              </select>
+            </div>
+            <div class="op-field">
+              <label for="msDari">Dari tanggal</label>
+              <input type="date" id="msDari" />
+            </div>
+            <div class="op-field">
+              <label for="msSampai">Sampai tanggal</label>
+              <input type="date" id="msSampai" />
+            </div>
+            <div class="op-field op-centang">
+              <button type="button" class="btn btn-ghost op-kecil" id="msTampilkan">Tampilkan kelas</button>
+            </div>
+          </div>
+
+          <div class="op-baris">
+            <div class="op-field op-lebar">
+              <label for="msCatatan">Catatan (tampil ke mahasiswa)</label>
+              <input type="text" id="msCatatan" maxlength="160" placeholder="Pekan orientasi mahasiswa baru" />
+            </div>
+          </div>
+
+          <div id="msDaftar"></div>
+
+          <div class="op-aksi" id="msAksi" hidden>
+            <button type="button" class="btn btn-primary op-kecil" id="msBuat">Buat sekaligus</button>
+          </div>
+
+          <p class="op-pesan" id="pesanMassal" role="alert"></p>
+        </div>
+      </details>
+
+      <div id="daftarKelompok"></div>
 
       <div class="op-tabel-bungkus">
         <table class="op-tabel" id="tabelPerubahan"></table>

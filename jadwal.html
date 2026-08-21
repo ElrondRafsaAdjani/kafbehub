@@ -179,10 +179,13 @@
     const libur = new Map();
     for(const c of perub.filter(c => c.tipe === 'libur')) libur.set(kunci(c), c);
 
-    // Pindah ruang: kelasnya tetap berjalan pada jam yang sama, hanya ruangnya
-    // yang berbeda khusus di tanggal ini.
+    // Pindah ruang dan daring sama-sama hanya mengubah TEMPAT, jamnya tetap,
+    // jadi keduanya ditangani lewat jalur yang sama.
     const gantiRuang = new Map();
     for(const c of perub.filter(c => c.tipe === 'ruang')) gantiRuang.set(kunci(c), c);
+
+    const daring = new Map();
+    for(const c of perub.filter(c => c.tipe === 'daring')) daring.set(kunci(c), c);
 
     const hasil = dasar.map(k => {
       // Kelas yang perkuliahannya belum dimulai tidak bisa "ditiadakan".
@@ -193,6 +196,9 @@
       }
       const c = libur.get(kunci(k));
       if(c) return { ...k, status:'libur', catatan:c.catatan };
+
+      const d = daring.get(kunci(k));
+      if(d) return { ...k, ruang: 'Online', status:'daring', catatan: d.catatan };
 
       const g = gantiRuang.get(kunci(k));
       if(g) return { ...k, ruang: g.ruang || k.ruang, status:'ruang', catatan: g.catatan };
@@ -281,13 +287,14 @@
 
     const KELAS_BARIS = {
       libur:'row-libur', pengganti:'row-pengganti',
-      belum:'row-belum', ruang:'row-ruang',
+      belum:'row-belum', ruang:'row-ruang', daring:'row-daring',
     };
     const LABEL = {
       libur: '<span class="tag tag-libur">Ditiadakan</span>',
       pengganti: '<span class="tag tag-pengganti">Kelas pengganti</span>',
       belum: '<span class="tag tag-belum">Belum dimulai</span>',
       ruang: '<span class="tag tag-ruang">Pindah ruang</span>',
+      daring: '<span class="tag tag-daring">Online</span>',
     };
 
     const baris = kelas.map(k => {
@@ -312,6 +319,7 @@
       `${kelas.length} kelas${q ? ' cocok' : ''}`,
       hitung('belum')     ? `${hitung('belum')} belum dimulai` : '',
       hitung('libur')     ? `${hitung('libur')} ditiadakan` : '',
+      hitung('daring')    ? `${hitung('daring')} daring` : '',
       hitung('ruang')     ? `${hitung('ruang')} pindah ruang` : '',
       hitung('pengganti') ? `${hitung('pengganti')} kelas pengganti` : '',
     ].filter(Boolean).join(' · ');
@@ -384,7 +392,7 @@
       <li class="perub-item">
         <span class="perub-tanggal">${esc(tglPanjang(c.tanggal))}</span>
         <span class="perub-teks">
-          <span class="tag tag-${esc(c.tipe)}">${esc({ libur:'Ditiadakan', pengganti:'Pengganti', ruang:'Pindah ruang' }[c.tipe] || c.tipe)}</span>
+          <span class="tag tag-${esc(c.tipe)}">${esc({ libur:'Ditiadakan', pengganti:'Pengganti', ruang:'Pindah ruang', daring:'Online' }[c.tipe] || c.tipe)}</span>
           <strong>${esc(c.nama)}</strong> KP ${esc(c.kp)} · ${esc(c.jam)}${c.ruang ? ' · ' + esc(c.ruang) : ''}
         </span>
       </li>`).join('');

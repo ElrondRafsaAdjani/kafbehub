@@ -117,6 +117,7 @@ Berlaku hanya pada satu tanggal. Tiga jenisnya:
 | Jenis | Untuk apa |
 |---|---|
 | Kelas ditiadakan | Tanggal merah atau acara kampus, tanpa kelas pengganti |
+| Kelas jadi daring | Jam tetap, kelas berlangsung online. Di halaman jadwal ruangnya berubah jadi label **Online** |
 | Dipindah ke tanggal lain | Kelas diganti di hari lain, sekalian atur jam dan ruangnya |
 | Pindah ruangan saja | Jam tetap, hanya ruangnya berubah hari itu |
 
@@ -127,6 +128,33 @@ tidak menabrak kelas rutin maupun kelas pengganti lain.
 Perubahan yang tanggalnya sudah lewat tidak mengganggu tampilan dan otomatis
 hilang sendiri dari halaman publik. Rapikan sekali-sekali agar daftarnya enak
 dibaca.
+
+#### Membuat banyak sekaligus
+
+Untuk kejadian yang menyentuh puluhan kelas, misalnya sepekan kuliah daring
+saat orientasi, jangan memasukkannya satu per satu. Buka **"Buat banyak
+sekaligus"** di tab yang sama.
+
+1. Pilih jenisnya: **daring** atau **ditiadakan**
+2. Isi **dari tanggal** dan **sampai tanggal**, misalnya Senin sampai Jumat
+3. Tekan **Tampilkan kelas**
+
+Semua kelas yang jatuh pada rentang itu muncul sebagai daftar centang, sudah
+tercentang semua. **Hapus centang** pada kelas yang tidak terdampak, lalu tekan
+**Buat sekaligus**.
+
+Beberapa hal yang otomatis dijaga:
+
+- Kelas yang perkuliahannya **belum dimulai** tidak dicentang secara bawaan,
+  karena menandainya daring tidak ada gunanya
+- Kelas yang **sudah punya perubahan sendiri** pada tanggal itu dilewati, tidak
+  ditimpa, karena entri manual lebih spesifik daripada pembuatan massal
+- Rentang lebih dari 31 hari ditolak, sebagai pengaman dari salah ketik tanggal
+
+**Membatalkan.** Tiap pembuatan massal diberi penanda kelompok dan muncul di
+kotak **"Hasil pembuatan massal"**. Satu tombol di situ menghapus seluruh
+anggotanya sekaligus. Tanpa itu, membatalkan berarti menghapus puluhan baris
+satu per satu, yaitu persoalan yang justru ingin dihindari.
 
 ### Pengumuman
 
