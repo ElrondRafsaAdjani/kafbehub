@@ -200,6 +200,35 @@ satu per satu, tiap pengunjung menimbulkan puluhan pembacaan Firestore dan
 kuota harian bisa habis. Penulisan jarang, pembacaan sering, jadi kerja
 merangkumnya ditaruh di sisi penulisan.
 
+### Membuat halaman baru
+
+Navigasi atas **tidak boleh ditulis ulang** di halaman baru. Daftar menunya
+hanya ada di [`shared/nav.js`](shared/nav.js), dan setiap halaman memanggilnya.
+
+Dulu markup navigasi disalin di tiap berkas, dan akibatnya selalu sama: menu
+baru hanya masuk ke sebagian halaman, sehingga pengunjung melihat menu yang
+berbeda-beda. Itu bukan kelalaian, melainkan hal yang pasti terjadi kalau satu
+informasi disimpan di sembilan tempat.
+
+Untuk halaman baru, letakkan dua baris ini di awal `<body>`:
+
+```html
+<div id="kafbeNav"></div>
+<script src="/shared/nav.js"></script>
+```
+
+Halaman itu juga perlu memuat `styles.css` dan menyalin blok `<symbol
+id="kafbe-owl">` dari halaman yang sudah ada, karena lambangnya dipakai
+navigasi.
+
+**Menambah menu baru** cukup dengan menambah satu baris pada daftar `TAUTAN` di
+`shared/nav.js`. Seluruh halaman langsung ikut berubah, termasuk yang dibuat
+setelahnya.
+
+Halaman `/operasional` sengaja tidak memakai navigasi ini dan tidak boleh
+dimasukkan ke daftar menu, karena halaman pengurus memang tidak ditautkan dari
+mana pun di situs.
+
 ### Keamanan
 
 Seluruh JavaScript situs ini bisa dibaca siapa pun, dan siapa pun bisa
