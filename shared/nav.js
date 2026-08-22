@@ -33,11 +33,11 @@
   //           kedalaman folder mana pun (materi/, game-santai/, dan seterusnya)
   //   aktif : pola alamat yang membuat menu ini ditandai sedang dibuka
   var TAUTAN = [
-    { teks: 'Beranda',             href: '/index.html#beranda',        aktif: /^\/(index\.html)?$/ },
-    { teks: 'Jadwal Kelas',        href: '/jadwal.html',               aktif: /^\/jadwal(\.html)?$/ },
-    { teks: 'Visualisasi Materi',  href: '/index.html#visualisasi',    aktif: /^\/materi\// },
-    { teks: 'Belajar Sambil Main', href: '/index.html#belajar-main',   aktif: /^\/belajar-sambil-main\// },
-    { teks: 'Main Santai',         href: '/index.html#main-santai',    aktif: /^\/game-santai\// }
+    { teks: 'Beranda',             en: 'Home',              href: '/index.html#beranda',      aktif: /^\/(index\.html)?$/ },
+    { teks: 'Jadwal Kelas',        en: 'Class Schedule',    href: '/jadwal.html',             aktif: /^\/jadwal(\.html)?$/ },
+    { teks: 'Visualisasi Materi',  en: 'Course Visuals',    href: '/index.html#visualisasi',  aktif: /^\/materi\// },
+    { teks: 'Belajar Sambil Main', en: 'Learn by Playing',  href: '/index.html#belajar-main', aktif: /^\/belajar-sambil-main\// },
+    { teks: 'Main Santai',         en: 'Casual Games',      href: '/index.html#main-santai',  aktif: /^\/game-santai\// }
   ];
 
   var wadah = document.getElementById('kafbeNav');
@@ -51,11 +51,20 @@
     });
   }
 
+  // Menu memakai data-en supaya ikut berganti lewat mekanisme yang sama dengan
+  // isi halaman, bukan digambar ulang sendiri.
   var butir = TAUTAN.map(function(t){
     var aktif = t.aktif && t.aktif.test(jalur);
-    return '<a href="' + esc(t.href) + '"' + (aktif ? ' class="aktif" aria-current="page"' : '') + '>'
+    return '<a href="' + esc(t.href) + '" data-en="' + esc(t.en) + '"'
+         + (aktif ? ' class="aktif" aria-current="page"' : '') + '>'
          + esc(t.teks) + '</a>';
   }).join('');
+
+  var saklarBahasa =
+    '<div class="saklar-bahasa" role="group" aria-label="Pilih bahasa">' +
+      '<button type="button" data-bahasa="id">ID</button>' +
+      '<button type="button" data-bahasa="en">EN</button>' +
+    '</div>';
 
   wadah.outerHTML =
     '<header class="nav">' +
@@ -64,10 +73,32 @@
           '<svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>' +
           '<span class="brand-text"><span class="blue">KA</span><span class="gold">FBE</span><span class="blue"> Hub</span></span>' +
         '</a>' +
-        '<button class="nav-toggle" id="navToggle" aria-label="Buka menu" aria-expanded="false">☰</button>' +
+        '<div class="nav-kanan">' +
+          saklarBahasa +
+          '<button class="nav-toggle" id="navToggle" aria-label="Buka menu" aria-expanded="false">☰</button>' +
+        '</div>' +
         '<nav class="links" id="navLinks">' + butir + '</nav>' +
       '</div>' +
     '</header>';
+
+  // Saklar bahasa
+  var tombolBahasa = document.querySelectorAll('[data-bahasa]');
+  function tandaiBahasa(){
+    var b = window.KafbeBahasa ? window.KafbeBahasa.kini() : 'id';
+    for(var i = 0; i < tombolBahasa.length; i++){
+      tombolBahasa[i].classList.toggle('aktif', tombolBahasa[i].dataset.bahasa === b);
+    }
+  }
+  for(var i = 0; i < tombolBahasa.length; i++){
+    tombolBahasa[i].addEventListener('click', function(){
+      if(window.KafbeBahasa) window.KafbeBahasa.ganti(this.dataset.bahasa);
+    });
+  }
+  document.addEventListener('bahasaberubah', tandaiBahasa);
+  tandaiBahasa();
+
+  // Menu baru saja disisipkan, jadi perlu diterjemahkan sekarang juga.
+  if(window.KafbeBahasa) window.KafbeBahasa.terapkan();
 
   // Tombol menu untuk layar kecil. Ditangani di sini, bukan di main.js, supaya
   // tidak ada dua penangan yang saling membatalkan saat tombolnya ditekan.
