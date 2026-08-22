@@ -1,0 +1,160 @@
+/*
+  Gaya khusus halaman /adminkafbe.
+
+  Halaman ini memuat styles.css dan operasional.css lebih dulu, jadi seluruh
+  tombol, tab, tabel, dan layar masuknya sudah sama persis dengan halaman
+  operasional. Berkas ini hanya menambah bagian yang memang belum ada di sana:
+  palang pengunci, cerminan susunan situs, dan riwayat versi.
+*/
+
+/* ---------- Palang pengunci ----------
+   Ditaruh menempel di atas isi dan tidak pernah disembunyikan, karena hampir
+   semua kebingungan di halaman seperti ini berasal dari satu pertanyaan yang
+   sama: kenapa tombol simpannya menolak bekerja. Jawabannya harus selalu
+   terlihat, bukan baru muncul setelah penyimpanan gagal. */
+.ak-gembok{
+  display:flex; align-items:flex-start; gap:12px;
+  border-radius:var(--radius-md); padding:14px 18px; margin-bottom:20px;
+  font-size:0.9rem; line-height:1.6; border-left:5px solid transparent;
+}
+.ak-gembok strong{display:block; font-size:0.96rem; margin-bottom:2px;}
+.ak-gembok-terkunci{background:#FDEEDB; border-left-color:var(--gold-deep); color:#7A5410;}
+.ak-gembok-terbuka {background:#E1F5E9; border-left-color:#1E7A44; color:#14532D;}
+.ak-gembok .btn{margin-left:auto; flex:none;}
+
+/* Lampu status kecil di bilah atas, supaya keadaan situs tetap terbaca
+   walaupun sedang membuka tab yang lain. */
+.ak-lampu{
+  font-size:0.74rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
+  padding:4px 10px; border-radius:100px; white-space:nowrap;
+}
+.ak-lampu-aktif{background:#E1F5E9; color:#1E7A44;}
+.ak-lampu-tutup{background:#FADDDD; color:#9B2C2C;}
+
+/* ---------- Cerminan susunan situs ---------- */
+.ak-cermin{display:flex; flex-direction:column; gap:26px; margin-top:8px;}
+
+.ak-halaman{
+  border:1px solid var(--line); border-radius:var(--radius-md);
+  background:var(--surface); overflow:hidden;
+}
+.ak-halaman-kepala{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:14px 18px; background:var(--bg-deep); border-bottom:1px solid var(--line);
+}
+.ak-halaman-kepala h3{font-size:1.02rem;}
+.ak-jalur{
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:0.78rem; color:var(--ink-soft);
+}
+.ak-halaman-kepala .op-tautan-luar{margin-left:auto;}
+
+.ak-bagian{padding:16px 18px; border-bottom:1px solid var(--line);}
+.ak-bagian:last-child{border-bottom:none;}
+.ak-bagian-nama{
+  font-weight:800; font-size:0.74rem; letter-spacing:0.08em;
+  text-transform:uppercase; color:var(--gold-deep); margin-bottom:12px;
+}
+
+/* Satu butir yang bisa diubah: fitur, atau sepotong naskah. */
+.ak-butir{
+  border:1px solid var(--line); border-radius:14px;
+  padding:14px 16px; margin-bottom:12px; background:var(--bg);
+}
+.ak-butir:last-child{margin-bottom:0;}
+.ak-butir-kepala{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;
+}
+.ak-butir-label{font-weight:700; font-size:0.92rem;}
+.ak-kunci{
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:0.72rem; color:var(--ink-soft);
+  background:var(--bg-deep); padding:2px 7px; border-radius:6px;
+}
+.ak-diubah{
+  font-size:0.7rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
+  background:#FDEEDB; color:var(--gold-deep); padding:3px 9px; border-radius:100px;
+}
+.ak-butir-kepala .ak-balik{margin-left:auto;}
+
+/* Dua bahasa berdampingan, supaya terjemahan yang tertinggal langsung terlihat
+   tanpa perlu berpindah-pindah. Di layar sempit keduanya menumpuk. */
+.ak-dwibahasa{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+@media (max-width:860px){ .ak-dwibahasa{grid-template-columns:1fr;} }
+
+.ak-kotak label{
+  display:block; font-size:0.76rem; font-weight:700;
+  color:var(--ink-soft); margin-bottom:5px;
+}
+.ak-kotak textarea{
+  width:100%; font:inherit; font-size:0.9rem; line-height:1.5;
+  padding:9px 11px; border:1px solid var(--line); border-radius:10px;
+  background:var(--surface); color:var(--ink); resize:vertical; min-height:62px;
+}
+.ak-kotak textarea:focus{outline:2px solid var(--owl-mid); outline-offset:1px;}
+.ak-kotak textarea:disabled{background:var(--bg-deep); color:var(--ink-soft); cursor:not-allowed;}
+
+.ak-status-pilih{
+  font:inherit; font-size:0.88rem; font-weight:600;
+  padding:7px 11px; border:1px solid var(--line); border-radius:10px;
+  background:var(--surface); color:var(--ink);
+}
+.ak-status-pilih:disabled{background:var(--bg-deep); color:var(--ink-soft); cursor:not-allowed;}
+
+.ak-balik{
+  border:none; background:none; padding:0; cursor:pointer;
+  font:inherit; font-size:0.8rem; font-weight:700;
+  color:var(--gold-deep); text-decoration:underline;
+}
+.ak-balik:disabled{color:var(--ink-soft); text-decoration:none; cursor:not-allowed;}
+
+.ak-kosong{color:var(--ink-soft); font-size:0.9rem; line-height:1.6; padding:6px 0;}
+
+/* ---------- Pilihan status situs ---------- */
+.ak-pilihan-status{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:6px;}
+@media (max-width:760px){ .ak-pilihan-status{grid-template-columns:1fr;} }
+
+.ak-pilih{
+  display:flex; align-items:flex-start; gap:11px; cursor:pointer;
+  border:2px solid var(--line); border-radius:14px; padding:15px 17px;
+  background:var(--surface);
+}
+.ak-pilih:has(input:checked){border-color:var(--owl-mid); background:var(--bg-deep);}
+.ak-pilih input{margin-top:3px; flex:none;}
+.ak-pilih span{font-size:0.88rem; line-height:1.55; color:var(--ink-soft);}
+.ak-pilih strong{display:block; color:var(--ink); font-size:0.98rem; margin-bottom:3px;}
+
+/* ---------- Daftar centang halaman pada catatan versi ---------- */
+.ak-centang{display:flex; flex-wrap:wrap; gap:8px 16px; padding-top:4px;}
+.ak-centang label{
+  display:flex; align-items:center; gap:7px;
+  font-size:0.88rem; font-weight:500; color:var(--ink); cursor:pointer;
+}
+
+/* ---------- Riwayat versi ---------- */
+.ak-riwayat{display:flex; flex-direction:column; gap:14px; margin-top:22px;}
+
+.ak-versi{
+  border:1px solid var(--line); border-left:5px solid var(--owl-mid);
+  border-radius:var(--radius-md); background:var(--surface); padding:16px 18px;
+}
+.ak-versi-kepala{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:8px;}
+.ak-versi-nomor{
+  font-family:'Baloo 2', system-ui, sans-serif;
+  font-weight:800; font-size:1.1rem; color:var(--owl-dark);
+}
+.ak-versi-tanggal{font-size:0.85rem; color:var(--ink-soft);}
+.ak-versi-kepala .op-tombol-baris{margin-left:auto;}
+
+.ak-versi ul{margin:0; padding-left:20px;}
+.ak-versi li{font-size:0.92rem; line-height:1.65; color:var(--ink);}
+
+.ak-tanda{display:flex; flex-wrap:wrap; gap:6px; margin-top:11px;}
+.ak-tanda span{
+  font-size:0.74rem; font-weight:700;
+  background:var(--bg-deep); color:var(--owl-dark);
+  padding:3px 10px; border-radius:100px;
+}
+.ak-versi-oleh{
+  margin-top:10px; font-size:0.78rem; color:var(--ink-soft);
+}

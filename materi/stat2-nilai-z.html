@@ -121,8 +121,15 @@
   }
   .fakta b{display:block; color:var(--owl-dark2); font-size:0.95rem; margin-bottom:3px;}
 </style>
+
+<!-- Pengaturan situs dari /adminkafbe: status situs, status fitur, dan naskah
+     pengganti. Sengaja dimuat di <head> dan tidak ditunda, supaya layar
+     pemeliharaan sempat dipasang SEBELUM isi halaman tergambar. Kalau berkas
+     ini gagal, halaman tetap tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
 </head>
-<body>
+<body data-fitur-halaman="materi-stat2">
 
 <div id="kafbeNav"></div>
 <script src="/shared/bahasa.js"></script>

@@ -32,12 +32,15 @@
   //   href  : alamat tujuan, ditulis dari akar situs supaya benar dari
   //           kedalaman folder mana pun (materi/, game-santai/, dan seterusnya)
   //   aktif : pola alamat yang membuat menu ini ditandai sedang dibuka
+  //   fitur : kunci fitur di halaman /adminkafbe. Kalau fitur itu sedang tidak
+  //           aktif, menunya diredupkan oleh shared/situs.js supaya pengunjung
+  //           tidak diantar ke halaman yang ujungnya menolak membuka diri.
   var TAUTAN = [
     { teks: 'Beranda',             en: 'Home',              href: '/index.html#beranda',      aktif: /^\/(index\.html)?$/ },
-    { teks: 'Jadwal Kelas',        en: 'Class Schedule',    href: '/jadwal.html',             aktif: /^\/jadwal(\.html)?$/ },
-    { teks: 'Visualisasi Materi',  en: 'Course Visuals',    href: '/index.html#visualisasi',  aktif: /^\/materi\// },
-    { teks: 'Belajar Sambil Main', en: 'Learn by Playing',  href: '/index.html#belajar-main', aktif: /^\/belajar-sambil-main\// },
-    { teks: 'Main Santai',         en: 'Casual Games',      href: '/index.html#main-santai',  aktif: /^\/game-santai\// }
+    { teks: 'Jadwal Kelas',        en: 'Class Schedule',    href: '/jadwal.html',             aktif: /^\/jadwal(\.html)?$/,   fitur: 'jadwal' },
+    { teks: 'Visualisasi Materi',  en: 'Course Visuals',    href: '/index.html#visualisasi',  aktif: /^\/materi\//,           fitur: 'visualisasi' },
+    { teks: 'Belajar Sambil Main', en: 'Learn by Playing',  href: '/index.html#belajar-main', aktif: /^\/belajar-sambil-main\//, fitur: 'belajar-main' },
+    { teks: 'Main Santai',         en: 'Casual Games',      href: '/index.html#main-santai',  aktif: /^\/game-santai\//,      fitur: 'main-santai' }
   ];
 
   var wadah = document.getElementById('kafbeNav');
@@ -56,6 +59,7 @@
   var butir = TAUTAN.map(function(t){
     var aktif = t.aktif && t.aktif.test(jalur);
     return '<a href="' + esc(t.href) + '" data-en="' + esc(t.en) + '"'
+         + (t.fitur ? ' data-fitur-tautan="' + esc(t.fitur) + '"' : '')
          + (aktif ? ' class="aktif" aria-current="page"' : '') + '>'
          + esc(t.teks) + '</a>';
   }).join('');

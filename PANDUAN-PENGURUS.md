@@ -1,11 +1,20 @@
 # Panduan Pengurus KAFBE Hub
 
-Panduan untuk yang mengelola jadwal dan pengumuman di kafbehub.vercel.app.
-Tidak perlu bisa coding untuk memakai halaman operasional.
+Panduan untuk yang mengelola kafbehub.vercel.app. Tidak perlu bisa coding.
+
+Ada dua halaman pengurus, dengan wewenang terpisah:
+
+| Halaman | Untuk apa | Daftar wewenang |
+|---|---|---|
+| `/operasional` | Jadwal, perubahan sementara, pengajar, pengumuman | koleksi `admins` |
+| `/adminkafbe` | Naskah situs, status fitur, status situs, catatan versi | koleksi `adminutama` |
+
+Keduanya tidak saling mewarisi. Akun operasional tidak bisa membuka
+`/adminkafbe`. Keduanya juga tidak ditautkan dari mana pun di situs.
 
 ---
 
-## Bagian 1 — Pemasangan pertama kali
+## Bagian 1 - Pemasangan pertama kali
 
 Bagian ini **hanya dikerjakan sekali**, saat sistem baru dipasang. Kalau
 halaman operasional sudah bisa dipakai, lompat ke Bagian 2.
@@ -81,7 +90,7 @@ berlaku.
 
 ---
 
-## Bagian 2 — Pemakaian sehari-hari
+## Bagian 2 - Pemakaian sehari-hari
 
 Alamatnya: **<https://kafbehub.vercel.app/operasional>**
 
@@ -192,23 +201,127 @@ pengecualian.
 
 ---
 
-## Bagian 3 — Mengelola admin
+## Bagian 2B - Halaman Admin Situs (`/adminkafbe`)
 
-### Menambah admin baru
+Halaman terpisah dari `/operasional`, dengan daftar wewenang sendiri. Di sini
+diatur **tampilan** situs: naskah judul dan keterangan, status tiap fitur, dan
+status seluruh situs.
+
+Yang **tidak** diatur di sini: isi materi, isi jadwal, dan isi permainan.
+Semua itu tetap lewat `/operasional` atau lewat berkas materinya.
+
+### Kenapa akun operasional tidak bisa masuk
+
+Wewenangnya ditentukan koleksi `adminutama`, bukan `admins`. Keduanya terpisah
+dan tidak saling mewarisi. Pengurus operasional berganti tiap kepengurusan dan
+jumlahnya banyak, sedangkan yang boleh menutup situs sebaiknya sedikit.
+
+Cara memberi akses admin utama ada di **Bagian 3**.
+
+### Aturan yang paling sering bikin bingung
+
+**Naskah dan status fitur hanya bisa diubah saat situs berstatus
+pemeliharaan.** Selama situs aktif, semua kotak isian mati dan tombol
+simpannya menolak bekerja.
+
+Ini bukan sekadar tombol yang dimatikan di halaman. Aturan Firestore menolak
+penyimpanannya di server, jadi tidak bisa dilewati dengan cara apa pun.
+
+Urutan kerjanya:
+
+1. Buka tab **Status Situs**, pilih **Pemeliharaan**, tekan **Terapkan status**.
+   Mulai saat ini pengunjung melihat layar pemberitahuan.
+2. Kerjakan perubahannya di tab **Tampilan Situs**, lalu tekan
+   **Simpan perubahan**.
+3. Kembali ke **Status Situs**, pilih **Aktif**, tekan **Terapkan status**.
+
+Palang berwarna di bagian atas halaman selalu menunjukkan keadaan yang sedang
+berlaku, lengkap dengan tombol pintas untuk berpindah status.
+
+### Tab Tampilan Situs
+
+Isinya cerminan halaman publik, disusun mengikuti urutan aslinya: per halaman,
+lalu per bagian.
+
+**Status fitur** punya tiga pilihan:
+
+| Status | Yang dilihat pengunjung |
+|---|---|
+| Aktif | Lencana hijau, tombolnya bisa ditekan |
+| Dalam Pengembangan | Lencana kuning, tombolnya disembunyikan, kartunya diredupkan |
+| Pemeliharaan | Lencana merah, tombolnya disembunyikan, kartunya diredupkan |
+
+Mematikan sebuah fitur juga menutup halamannya. Misalnya, menyetel
+**Statistika 2** ke Pemeliharaan membuat `/materi/stat2` dan seluruh halaman
+visualisasinya menampilkan pemberitahuan, bukan isinya. Menu di bilah atas
+yang menuju fitur itu ikut diredupkan.
+
+**Naskah** diisi dalam dua bahasa berdampingan. Kotak yang dikosongkan berarti
+"pakai naskah bawaan halaman", bukan "kosongkan tulisannya".
+
+Penebalan dan miring boleh dipakai dengan `<b>`, `<i>`, `<em>`, `<strong>`, dan
+`<br>`. Tag lain di luar itu akan tampil sebagai tulisan biasa, bukan sebagai
+format.
+
+Butir yang sedang menimpa naskah bawaan diberi tanda **Diubah**, dan punya
+tautan **Kembalikan ke bawaan** untuk melepasnya.
+
+> **Yang disimpan hanya selisihnya.** Kolom yang isinya sama dengan naskah asli
+> di HTML tidak ikut tersimpan. Jadi kalau suatu hari naskah di berkas HTML
+> diperbaiki, perbaikan itu tetap sampai ke pengunjung selama kolomnya belum
+> pernah ditimpa lewat halaman ini.
+
+### Tab Status Situs
+
+Selain saklar aktif dan pemeliharaan, di sini juga diatur naskah yang dibaca
+pengunjung selama situs ditutup. Dikosongkan berarti memakai kalimat bawaan.
+
+Halaman `/adminkafbe` dan `/operasional` tetap bisa dibuka selama pemeliharaan.
+
+### Tab Catatan Versi
+
+Rekaman perubahan: nomor versi, tanggal, daftar perubahan (satu baris per
+perubahan), dan centang halaman atau tab mana saja yang tersentuh.
+
+Nomor versi yang sudah pernah dipakai akan ditolak, supaya riwayatnya tetap
+bisa dipercaya.
+
+Berbeda dari naskah dan status fitur, catatan versi **bisa ditulis kapan saja**,
+termasuk saat situs sedang aktif. Catatan ini merekam pekerjaan yang sudah
+selesai, dan biasanya baru sempat ditulis setelah situs dinyalakan kembali.
+
+Nomor versi yang tampil di kaki halaman publik tidak diambil dari sini. Itu
+naskah biasa bernama `penutup.versi` di tab **Tampilan Situs**, jadi ubah di
+sana kalau ingin ikut berganti.
+
+---
+
+## Bagian 3 - Mengelola admin
+
+### Menambah admin operasional baru
 
 Ulangi langkah **1.2** dan **1.3**. Keduanya harus dikerjakan; melewatkan 1.3
 membuat akun itu bisa masuk tapi tidak bisa mengubah apa pun.
 
+### Menambah admin utama (akses `/adminkafbe`)
+
+Sama seperti di atas, tapi pada langkah 1.3 pakai koleksi **`adminutama`**,
+bukan `admins`.
+
+Satu akun boleh terdaftar di kedua koleksi kalau memang perlu membuka kedua
+halaman. Terdaftar di salah satunya saja tidak memberi akses ke yang lain.
+
 ### Mencabut akses
 
-Hapus dokumennya dari koleksi `admins` di Firestore. Efeknya langsung.
+Hapus dokumennya dari koleksi `admins` (untuk operasional) atau `adminutama`
+(untuk admin situs) di Firestore. Efeknya langsung.
 
 Saat kepengurusan berganti, **cabut akses pengurus lama** dan buatkan akun baru
 untuk penggantinya. Jangan mewariskan akun beserta kata sandinya.
 
 ---
 
-## Bagian 4 — Kalau ada masalah
+## Bagian 4 - Kalau ada masalah
 
 **"Akun ini berhasil masuk, tapi belum terdaftar sebagai admin"**
 Langkah 1.3 belum dikerjakan untuk akun itu, atau Document ID-nya salah ketik.
@@ -228,9 +341,31 @@ cadangan yang mungkin usang. Periksa status Firebase dan aturan di langkah 1.4.
 Muat ulang halaman publik dengan Ctrl+F5. Kalau tetap, buka halaman
 operasional lalu simpan ulang salah satu data untuk memicu penerbitan ulang.
 
+**Di `/adminkafbe`, semua kotak isian mati dan tidak bisa diketik**
+Situsnya sedang berstatus aktif. Masuk ke pemeliharaan dulu lewat tab
+**Status Situs**, atau lewat tombol pintas di palang atas halaman.
+
+**"Akun ini bukan admin utama"**
+Akun itu belum didaftarkan di koleksi `adminutama`. Terdaftar di `admins` saja
+tidak cukup, karena `/operasional` dan `/adminkafbe` memakai daftar terpisah.
+Lihat Bagian 3.
+
+**Menyimpan di `/adminkafbe` ditolak padahal statusnya sudah pemeliharaan**
+Layarnya mungkin memegang keadaan lama. Tekan **Muat ulang dari situs**, lalu
+periksa lagi warna palang di atas halaman.
+
+**Situs publik terlanjur tertutup dan lupa cara membukanya**
+Buka `/adminkafbe`, masuk, lalu tekan **Nyalakan situs** di palang atas.
+Halaman `/adminkafbe` dan `/operasional` tidak pernah ikut tertutup.
+
+**Semua halaman publik menampilkan layar pemeliharaan padahal statusnya aktif**
+Peramban menyimpan status kunjungan sebelumnya untuk menghindari kedipan.
+Muat ulang dengan Ctrl+F5. Status tersimpan itu selalu ditimpa jawaban dari
+Firestore, jadi keadaannya akan menyesuaikan sendiri.
+
 ---
 
-## Bagian 5 — Catatan teknis
+## Bagian 5 - Catatan teknis
 
 Bagian ini untuk yang membaca kodenya. Pemakai biasa boleh melewatkannya.
 
@@ -247,6 +382,21 @@ Halaman publik sengaja hanya membaca **satu dokumen**. Kalau ia membaca koleksi
 satu per satu, tiap pengunjung menimbulkan puluhan pembacaan Firestore dan
 kuota harian bisa habis. Penulisan jarang, pembacaan sering, jadi kerja
 merangkumnya ditaruh di sisi penulisan.
+
+Pengaturan tampilan mengalir terpisah, lewat dokumennya sendiri:
+
+```
+Admin     →  /adminkafbe  →  satu dokumen  publik/situs
+                                    ↓ dibaca tiap halaman publik
+Mahasiswa →  halaman publik  ←  shared/situs.js
+```
+
+Jadi beranda membaca dua dokumen (`publik/terkini` untuk pengumuman dan
+`publik/situs` untuk pengaturan), halaman lain membaca satu.
+
+Dokumen `publik/situs` menyimpan **selisihnya saja**, bukan salinan lengkap
+seluruh naskah situs. Naskah bawaan tetap tinggal di berkas HTML, sehingga
+halaman tetap utuh saat Firestore tidak terjangkau.
 
 ### Membuat halaman baru
 
@@ -273,9 +423,56 @@ navigasi.
 `shared/nav.js`. Seluruh halaman langsung ikut berubah, termasuk yang dibuat
 setelahnya.
 
-Halaman `/operasional` sengaja tidak memakai navigasi ini dan tidak boleh
-dimasukkan ke daftar menu, karena halaman pengurus memang tidak ditautkan dari
-mana pun di situs.
+Halaman `/operasional` dan `/adminkafbe` sengaja tidak memakai navigasi ini dan
+tidak boleh dimasukkan ke daftar menu, karena halaman pengurus memang tidak
+ditautkan dari mana pun di situs.
+
+**Supaya halaman baru ikut mengenal status situs**, tambahkan dua baris ini di
+dalam `<head>`, sebelum penutup `</head>`:
+
+```html
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
+```
+
+Harus di `<head>` dan tanpa `defer`, supaya layar pemeliharaan sempat dipasang
+sebelum isi halaman tergambar.
+
+### Membuat naskah yang bisa diubah dari `/adminkafbe`
+
+Tidak ada daftar yang perlu diperbarui di berkas mana pun. Cukup tandai
+elemennya di HTML:
+
+```html
+<h2 data-teks="berita.judul" data-label="Judul halaman">Kabar Terbaru</h2>
+```
+
+- `data-teks` - nama kuncinya, harus unik di seluruh situs
+- `data-label` - tulisan yang dibaca admin di panel
+
+Untuk kartu yang punya status, tandai kartunya:
+
+```html
+<div class="feature-card" data-fitur="berita" data-fitur-label="Kabar Terbaru">
+  <span class="badge badge-live">Aktif</span>
+  ...
+</div>
+```
+
+Lencana bawaannya menentukan status awal: `badge-live` berarti Aktif,
+`badge-soon` berarti Dalam Pengembangan, `badge-maint` berarti Pemeliharaan.
+
+Bungkus tiap kelompok dengan `data-bagian="Nama Bagian"` supaya panel admin
+mengelompokkannya. Kalau ingin seluruh halaman ikut mati saat fiturnya
+dimatikan, tambahkan `data-fitur-halaman="berita"` pada `<body>`.
+
+Terakhir, daftarkan halamannya di `DAFTAR_HALAMAN` pada
+[`shared/adminkafbe.js`](shared/adminkafbe.js). Itu satu-satunya bagian yang
+masih manual.
+
+Naskah aslinya **tetap ditulis di HTML** dan tidak boleh dikosongkan. Itulah
+yang tampil kalau JavaScript mati, jaringan putus, atau Firestore bermasalah.
+Nilai dari admin hanya menimpa, tidak pernah menggantikan.
 
 ### Keamanan
 

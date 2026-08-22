@@ -66,8 +66,15 @@
      di bawahnya, dimatikan khusus di halaman ini demi performa. */
   header.nav{ backdrop-filter:none; background:var(--bg); }
 </style>
+
+<!-- Pengaturan situs dari /adminkafbe: status situs, status fitur, dan naskah
+     pengganti. Sengaja dimuat di <head> dan tidak ditunda, supaya layar
+     pemeliharaan sempat dipasang SEBELUM isi halaman tergambar. Kalau berkas
+     ini gagal, halaman tetap tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
 </head>
-<body>
+<body data-fitur-halaman="main-santai">
 
 <div id="kafbeNav"></div>
 <script src="/shared/bahasa.js"></script>
@@ -108,10 +115,10 @@
 
 <section class="wrap" style="padding-top:32px;">
   <a class="back-link" href="../index.html">← Kembali ke Hub</a>
-  <div class="section-head" style="margin-top:18px;">
-    <span class="kicker">Main Santai</span>
-    <h2>Flappy Owl 🦉</h2>
-    <p>Terbangin si hantu biru KAFBE melewati rak buku setinggi mungkin. Klik / ketuk / tekan Spasi untuk terbang.</p>
+  <div class="section-head" style="margin-top:18px;" data-bagian="Kepala Halaman">
+    <span class="kicker" data-teks="santai.label" data-label="Label bagian">Main Santai</span>
+    <h2 data-teks="santai.judul" data-label="Judul halaman">Flappy Owl 🦉</h2>
+    <p data-teks="santai.teks" data-label="Keterangan halaman">Terbangin si hantu biru KAFBE melewati rak buku setinggi mungkin. Klik / ketuk / tekan Spasi untuk terbang.</p>
   </div>
 
   <div class="game-panel">

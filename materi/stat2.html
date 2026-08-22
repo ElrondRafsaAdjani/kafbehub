@@ -25,8 +25,15 @@
   .course-hero h1{color:#fff; font-size:1.8rem;}
   .course-hero p{color:#CFE0EC; margin-top:6px; max-width:60ch; line-height:1.55;}
 </style>
+
+<!-- Pengaturan situs dari /adminkafbe: status situs, status fitur, dan naskah
+     pengganti. Sengaja dimuat di <head> dan tidak ditunda, supaya layar
+     pemeliharaan sempat dipasang SEBELUM isi halaman tergambar. Kalau berkas
+     ini gagal, halaman tetap tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
 </head>
-<body data-judul-en="Statistics 2 - KAFBE Hub">
+<body data-judul-en="Statistics 2 - KAFBE Hub" data-fitur-halaman="materi-stat2">
 
 <div id="kafbeNav"></div>
 <script src="/shared/bahasa.js"></script>
@@ -61,11 +68,11 @@
 <section class="wrap" style="padding-top:32px; padding-bottom:64px;">
   <a class="back-link" href="../index.html#visualisasi">← Kembali ke Hub</a>
 
-  <div class="course-hero">
+  <div class="course-hero" data-bagian="Kepala Halaman">
     <div class="icon">📊</div>
     <div>
-      <h1 data-en="Statistics 2">Statistika 2</h1>
-      <p data-en="Step-by-step visuals for Statistics 2, starting with the normal curve and how its shape emerges from real data.">Visualisasi langkah kerja untuk konsep-konsep Statistika 2, dimulai dari kurva normal dan bagaimana bentuknya muncul dari data nyata.</p>
+      <h1 data-en="Statistics 2" data-teks="stat2.judul" data-label="Judul mata kuliah">Statistika 2</h1>
+      <p data-en="Step-by-step visuals for Statistics 2, starting with the normal curve and how its shape emerges from real data." data-teks="stat2.teks" data-label="Keterangan mata kuliah">Visualisasi langkah kerja untuk konsep-konsep Statistika 2, dimulai dari kurva normal dan bagaimana bentuknya muncul dari data nyata.</p>
     </div>
   </div>
 

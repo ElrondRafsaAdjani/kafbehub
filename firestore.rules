@@ -24,6 +24,20 @@
      - Field       : nama (string), isi nama orangnya
   Tanpa langkah nomor 3, akun itu bisa login tapi tidak bisa mengubah apa pun.
 
+  DUA TINGKAT WEWENANG, DAN KENAPA DIPISAH:
+
+    admins      -> halaman /operasional. Mengelola jadwal, perubahan
+                   sementara, pengajar, dan pengumuman.
+    adminutama  -> halaman /adminkafbe. Mengubah naskah situs, mematikan
+                   fitur, dan menutup seluruh situs untuk pemeliharaan.
+
+  Keduanya koleksi terpisah dan tidak saling mewarisi. Terdaftar di "admins"
+  tidak memberi akses ke /adminkafbe. Untuk memberi wewenang admin utama,
+  ulangi langkah 1 sampai 3 di atas tapi pakai koleksi "adminutama".
+
+  Pemisahan ini disengaja: pengurus operasional berganti tiap kepengurusan dan
+  jumlahnya banyak, sedangkan yang boleh menutup situs sebaiknya sedikit.
+
   CARA MENCABUT AKSES ADMIN:
   Hapus dokumennya dari koleksi "admins". Efeknya langsung. Menghapus akunnya
   di Authentication juga boleh, tapi menghapus dokumen admin sudah cukup.
@@ -46,6 +60,22 @@ service cloud.firestore {
       return adminTerdaftar();
     }
 
+    /*
+      Tingkat kedua, di atas admin operasional.
+
+      Pengurus operasional mengelola jadwal dan pengumuman. Yang mengubah
+      tampilan situs, mematikan fitur, dan menutup seluruh situs adalah orang
+      lain lagi, dan wewenang itu ditentukan koleksi "adminutama".
+
+      Terdaftar di "admins" TIDAK memberi wewenang ini. Kedua koleksi berdiri
+      sendiri, jadi pengurus operasional yang membuka /adminkafbe akan ditolak
+      di sini, bukan cuma disembunyikan tombolnya di halaman.
+    */
+    function adminUtama() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/adminutama/$(request.auth.uid));
+    }
+
     // ---------- Daftar admin ----------
     // Sengaja tidak bisa ditulis dari web sama sekali, bahkan oleh admin.
     // Penambahan admin hanya lewat Firebase Console, supaya seorang admin yang
@@ -55,11 +85,65 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // ---------- Daftar admin utama ----------
+    // Aturannya sama dengan "admins": hanya bisa ditambah lewat Firebase
+    // Console, tidak pernah dari web, bahkan oleh admin utama sendiri.
+    match /adminutama/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
     // ---------- Dokumen ringkasan untuk halaman publik ----------
     // Dibaca semua pengunjung, ditulis ulang oleh halaman admin tiap menyimpan.
+    //
+    // Dokumen "situs" sengaja DIKECUALIKAN di sini dan diatur sendiri di bawah.
+    // Firestore mengizinkan akses bila ADA SATU saja aturan yang mengizinkan,
+    // bukan yang paling khusus, jadi tanpa pengecualian ini pengurus
+    // operasional tetap bisa menulis publik/situs lewat aturan umum ini.
     match /publik/{doc} {
       allow read: if true;
-      allow write: if tulisanAdmin();
+      allow write: if tulisanAdmin() && doc != 'situs';
+    }
+
+    // ---------- Pengaturan tampilan situs ----------
+    /*
+      Ditulis hanya dari /adminkafbe, dibaca setiap halaman publik.
+
+      Syarat "situs harus berstatus maintenance sebelum boleh diubah"
+      ditegakkan DI SINI, bukan sekadar dengan menonaktifkan kotak isian di
+      halaman admin. Halaman admin bisa dilewati lewat Console peramban;
+      aturan ini tidak bisa.
+
+      Ada dua jalan yang diizinkan:
+        1. Dokumennya sudah berstatus maintenance, sehingga isinya bebas
+           diubah selagi pengunjung melihat layar pemeliharaan.
+        2. Yang berubah hanya saklar statusnya sendiri, sehingga situs tetap
+           bisa dimasukkan ke dan dikeluarkan dari pemeliharaan.
+
+      Akibatnya, mengubah naskah atau status fitur saat situs masih aktif
+      selalu ditolak server, siapa pun yang mencoba dan lewat cara apa pun.
+    */
+    match /publik/situs {
+      allow read: if true;
+      allow create: if adminUtama();
+      allow update: if adminUtama() && (
+           resource.data.statusSitus == 'maintenance'
+        || request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['statusSitus', 'diperbaruiPada', 'diperbaruiOleh'])
+      );
+      allow delete: if false;
+    }
+
+    // ---------- Catatan versi ----------
+    // Catatan perubahan yang ditulis admin utama. Tidak dibuka untuk publik
+    // karena isinya catatan kerja internal, termasuk siapa yang menulisnya.
+    //
+    // Sengaja TIDAK ikut disyaratkan status maintenance: catatan ini merekam
+    // pekerjaan yang sudah selesai, dan biasanya baru ditulis setelah situs
+    // dinyalakan kembali. Menguncinya akan membuat catatan justru tidak ditulis.
+    match /catatanversi/{id} {
+      allow read: if adminUtama();
+      allow write: if adminUtama();
     }
 
     // ---------- Data kerja admin ----------

@@ -10,8 +10,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+
+<!-- Pengaturan situs dari /adminkafbe: status situs, status fitur, dan naskah
+     pengganti. Sengaja dimuat di <head> dan tidak ditunda, supaya layar
+     pemeliharaan sempat dipasang SEBELUM isi halaman tergambar. Kalau berkas
+     ini gagal, halaman tetap tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
 </head>
-<body>
+<body data-fitur-halaman="jadwal">
 
 <!-- ============ NAV ============ -->
 <div id="kafbeNav"></div>
@@ -46,10 +53,10 @@
 </svg>
 
 <!-- ============ ISI ============ -->
-<section class="wrap" style="padding-top:44px;">
+<section class="wrap" style="padding-top:44px;" data-bagian="Kepala Halaman">
   <div class="section-head">
-    <span class="kicker">Jadwal Kelas</span>
-    <h2>Jadwal mata kuliah per minggu</h2>
+    <span class="kicker" data-teks="jadwal.label" data-label="Label bagian">Jadwal Kelas</span>
+    <h2 data-teks="jadwal.judul" data-label="Judul halaman">Jadwal mata kuliah per minggu</h2>
   </div>
 
   <div id="kotakSemester"></div>

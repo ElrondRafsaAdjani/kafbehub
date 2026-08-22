@@ -29,8 +29,15 @@
     font-size:0.78rem; font-weight:700; padding:5px 12px; border-radius:100px; margin-top:12px;
   }
 </style>
+
+<!-- Pengaturan situs dari /adminkafbe: status situs, status fitur, dan naskah
+     pengganti. Sengaja dimuat di <head> dan tidak ditunda, supaya layar
+     pemeliharaan sempat dipasang SEBELUM isi halaman tergambar. Kalau berkas
+     ini gagal, halaman tetap tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
 </head>
-<body data-judul-en="Information Systems - KAFBE Hub">
+<body data-judul-en="Information Systems - KAFBE Hub" data-fitur-halaman="materi-si">
 
 <div id="kafbeNav"></div>
 <script src="/shared/bahasa.js"></script>
@@ -64,11 +71,11 @@
 <section class="wrap" style="padding-top:32px; padding-bottom:64px;">
   <a class="back-link" href="../index.html#visualisasi">← Kembali ke Hub</a>
 
-  <div class="course-hero">
+  <div class="course-hero" data-bagian="Kepala Halaman">
     <div class="icon">🗂️</div>
     <div>
-      <h1 data-en="Information Systems">Sistem Informasi</h1>
-      <p>Visualisasi langkah kerja untuk konsep-konsep Sistem Informasi. Dimulai dari menggambarkan proses bisnis dengan flowchart, dibangun langkah demi langkah, disinkronkan dengan narasi kasusnya.</p>
+      <h1 data-en="Information Systems" data-teks="si.judul" data-label="Judul mata kuliah">Sistem Informasi</h1>
+      <p data-teks="si.teks" data-label="Keterangan mata kuliah">Visualisasi langkah kerja untuk konsep-konsep Sistem Informasi. Dimulai dari menggambarkan proses bisnis dengan flowchart, dibangun langkah demi langkah, disinkronkan dengan narasi kasusnya.</p>
       <span class="desktop-note">🖥️ Sebagian fitur di sini butuh layar lebar (laptop/PC/tablet)</span>
     </div>
   </div>

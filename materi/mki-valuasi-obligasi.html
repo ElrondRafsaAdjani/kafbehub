@@ -86,8 +86,15 @@
   .lencana.prem{background:#E1F5E9; color:#1E7A44;}
   .lencana.par{background:#E7EDF1; color:#5C7285;}
 </style>
+
+<!-- Pengaturan situs dari /adminkafbe: status situs, status fitur, dan naskah
+     pengganti. Sengaja dimuat di <head> dan tidak ditunda, supaya layar
+     pemeliharaan sempat dipasang SEBELUM isi halaman tergambar. Kalau berkas
+     ini gagal, halaman tetap tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
 </head>
-<body>
+<body data-fitur-halaman="materi-mki">
 
 <div id="kafbeNav"></div>
 <script src="/shared/bahasa.js"></script>

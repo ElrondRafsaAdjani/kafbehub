@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'none';" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Situs - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="operasional.css">
+<link rel="stylesheet" href="adminkafbe.css">
+</head>
+<body class="op-body">
+
+<!-- ============ LAYAR MASUK ============ -->
+<section id="layarMasuk" class="op-masuk">
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1>Admin Situs KAFBE</h1>
+    <p class="op-sub">Pengaturan tampilan, status fitur, dan status situs.</p>
+
+    <form id="formMasuk" autocomplete="on">
+      <label for="email">Email admin utama</label>
+      <input type="email" id="email" name="email" required autocomplete="username" placeholder="nama@contoh.com" />
+
+      <label for="sandi">Kata sandi</label>
+      <input type="password" id="sandi" name="sandi" required autocomplete="current-password" />
+
+      <button type="submit" class="btn btn-primary op-penuh" id="tombolMasuk">Masuk</button>
+    </form>
+
+    <p class="op-pesan" id="pesanMasuk" role="alert"></p>
+
+    <details class="op-diagnosa" id="diagnosaBungkus" hidden>
+      <summary>Rincian teknis percobaan masuk</summary>
+      <pre id="diagnosa"></pre>
+    </details>
+
+    <p class="op-catatan">
+      Halaman ini terpisah dari halaman operasional dan memakai daftar
+      wewenangnya sendiri. Akun pengurus operasional tidak bisa masuk ke sini.
+    </p>
+  </div>
+</section>
+
+<!-- ============ APLIKASI ADMIN ============ -->
+<div id="aplikasi" hidden>
+  <header class="op-nav">
+    <div class="op-nav-dalam">
+      <div class="op-merek">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <span>Admin <strong>Situs</strong></span>
+      </div>
+      <div class="op-nav-kanan">
+        <span class="ak-lampu" id="lampuStatus"></span>
+        <span class="op-siapa" id="siapa"></span>
+        <a href="/index.html" class="op-tautan-luar" target="_blank" rel="noopener">Lihat situs publik</a>
+        <button class="btn btn-ghost op-kecil" id="tombolKeluar">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="op-wrap">
+    <div class="op-status" id="statusSimpan" role="status" aria-live="polite" hidden></div>
+
+    <!-- Palang pengunci. Selalu terlihat, karena keadaan inilah yang
+         menentukan apakah tombol simpan mana pun akan bekerja. -->
+    <div class="ak-gembok" id="gembok" role="status" aria-live="polite"></div>
+
+    <nav class="op-tab" role="tablist">
+      <button class="op-tab-btn active" data-tab="tampilan" role="tab">Tampilan Situs</button>
+      <button class="op-tab-btn" data-tab="status" role="tab">Status Situs</button>
+      <button class="op-tab-btn" data-tab="catatan" role="tab">Catatan Versi</button>
+    </nav>
+
+    <!-- ---------- TAMPILAN SITUS ---------- -->
+    <section class="op-panel" id="panel-tampilan">
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Tampilan Situs</h2>
+          <p>
+            Cerminan halaman publik, disusun mengikuti urutan aslinya. Tiap fitur
+            bisa diberi status, dan tiap judul serta keterangan bisa ditulis ulang
+            dalam dua bahasa. Isi materi, jadwal, dan permainan tidak diatur di sini.
+          </p>
+        </div>
+        <div class="op-tombol-baris">
+          <button type="button" class="btn btn-ghost op-kecil" id="tombolMuatUlang">Muat ulang dari situs</button>
+          <button type="button" class="btn btn-primary op-kecil" id="tombolSimpanTampilan">Simpan perubahan</button>
+        </div>
+      </div>
+
+      <div class="op-saring">
+        <input type="search" id="cariTampilan" placeholder="Cari judul, keterangan, atau nama fitur…" aria-label="Cari isi situs" />
+      </div>
+
+      <p class="op-pesan" id="pesanTampilan" role="alert"></p>
+
+      <div id="cerminSitus" class="ak-cermin"></div>
+    </section>
+
+    <!-- ---------- STATUS SITUS ---------- -->
+    <section class="op-panel" id="panel-status" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Status Situs</h2>
+          <p>
+            Saat berstatus pemeliharaan, seluruh halaman publik diganti layar
+            pemberitahuan. Halaman ini dan halaman operasional tetap bisa dibuka.
+          </p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formStatus">
+        <div class="ak-pilihan-status">
+          <label class="ak-pilih">
+            <input type="radio" name="statusSitus" value="aktif" />
+            <span>
+              <strong>Aktif</strong>
+              Situs terbuka untuk pengunjung. Naskah dan status fitur terkunci.
+            </span>
+          </label>
+          <label class="ak-pilih">
+            <input type="radio" name="statusSitus" value="maintenance" />
+            <span>
+              <strong>Pemeliharaan</strong>
+              Pengunjung melihat layar pemberitahuan. Naskah dan status fitur bisa diubah.
+            </span>
+          </label>
+        </div>
+
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil" id="tombolStatus">Terapkan status</button>
+        </div>
+        <p class="op-pesan" id="pesanStatus" role="alert"></p>
+      </form>
+
+      <hr class="op-garis" />
+
+      <h3>Naskah layar pemeliharaan</h3>
+      <p class="op-catatan">
+        Yang dibaca pengunjung selama situs ditutup. Kosongkan untuk memakai
+        kalimat bawaan. Seperti naskah lain, ini hanya bisa disimpan saat situs
+        berstatus pemeliharaan.
+      </p>
+
+      <form class="op-form" id="formPesanTutup">
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="mtJudul">Judul (Indonesia)</label>
+            <input type="text" id="mtJudul" maxlength="120" placeholder="Situs sedang dalam pemeliharaan" />
+          </div>
+          <div class="op-field op-lebar">
+            <label for="mtJudulEn">Judul (Inggris)</label>
+            <input type="text" id="mtJudulEn" maxlength="120" placeholder="The site is under maintenance" />
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="mtIsi">Keterangan (Indonesia)</label>
+            <textarea id="mtIsi" rows="2" maxlength="400" placeholder="KAFBE Hub sedang diperbarui. Silakan kembali beberapa saat lagi."></textarea>
+          </div>
+          <div class="op-field op-lebar">
+            <label for="mtIsiEn">Keterangan (Inggris)</label>
+            <textarea id="mtIsiEn" rows="2" maxlength="400" placeholder="KAFBE Hub is being updated. Please check back shortly."></textarea>
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan naskah pemeliharaan</button>
+        </div>
+        <p class="op-pesan" id="pesanTutup" role="alert"></p>
+      </form>
+    </section>
+
+    <!-- ---------- CATATAN VERSI ---------- -->
+    <section class="op-panel" id="panel-catatan" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Catatan Versi</h2>
+          <p>Rekaman perubahan situs: nomor versi, tanggal, isi perubahan, dan bagian mana saja yang tersentuh.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formCatatan">
+        <input type="hidden" id="cvId" />
+        <div class="op-baris">
+          <div class="op-field op-sempit">
+            <label for="cvVersi">Versi</label>
+            <input type="text" id="cvVersi" required maxlength="20" placeholder="1.1" />
+          </div>
+          <div class="op-field">
+            <label for="cvTanggal">Tanggal</label>
+            <input type="date" id="cvTanggal" required />
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="cvRingkasan">Perubahan</label>
+            <textarea id="cvRingkasan" rows="4" required maxlength="1200"
+              placeholder="Satu baris per perubahan."></textarea>
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label>Halaman dan tab yang diperbarui</label>
+            <div class="ak-centang" id="cvHalaman"></div>
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan catatan</button>
+          <button type="button" class="btn btn-ghost op-kecil" id="cvBatal" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanCatatan" role="alert"></p>
+      </form>
+
+      <div id="daftarCatatan" class="ak-riwayat"></div>
+    </section>
+  </div>
+</div>
+
+<!-- Lambang burung hantu, dipakai ulang di beberapa tempat -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<script src="firebase-config.js"></script>
+<script type="module" src="shared/adminkafbe.js"></script>
+</body>
+</html>
