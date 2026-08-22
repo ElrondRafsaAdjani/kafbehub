@@ -3,8 +3,18 @@
 
   Halaman ini memuat styles.css dan operasional.css lebih dulu, jadi seluruh
   tombol, tab, tabel, dan layar masuknya sudah sama persis dengan halaman
-  operasional. Berkas ini hanya menambah bagian yang memang belum ada di sana:
-  palang pengunci, cerminan susunan situs, dan riwayat versi.
+  operasional. Berkas ini hanya menambah bagian yang memang belum ada di sana.
+
+  CATATAN PENTING SOAL CERMIN SITUS
+
+  Tab "Tampilan Situs" menggambar ulang potongan halaman publik apa adanya,
+  memakai styles.css yang sama. Itu disengaja: yang dilihat pengurus harus
+  benar-benar sama dengan yang dilihat mahasiswa, bukan gambaran kasarnya.
+
+  Akibatnya, aturan di bawah ini TIDAK BOLEH mengubah rupa kartu, tipografi,
+  warna, atau jarak di dalam .ak-panggung. Yang ditambahkan hanya lapisan alat
+  milik panel: bingkai, tombol ubah, dan pegangan seret. Begitu berkas ini
+  mulai merapikan tampilan kartu, cerminnya berhenti jadi cermin.
 */
 
 /* ---------- Palang pengunci ----------
@@ -22,8 +32,6 @@
 .ak-gembok-terbuka {background:#E1F5E9; border-left-color:#1E7A44; color:#14532D;}
 .ak-gembok .btn{margin-left:auto; flex:none;}
 
-/* Lampu status kecil di bilah atas, supaya keadaan situs tetap terbaca
-   walaupun sedang membuka tab yang lain. */
 .ak-lampu{
   font-size:0.74rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
   padding:4px 10px; border-radius:100px; white-space:nowrap;
@@ -31,56 +39,133 @@
 .ak-lampu-aktif{background:#E1F5E9; color:#1E7A44;}
 .ak-lampu-tutup{background:#FADDDD; color:#9B2C2C;}
 
-/* ---------- Cerminan susunan situs ---------- */
-.ak-cermin{display:flex; flex-direction:column; gap:26px; margin-top:8px;}
+/* ---------- Cermin situs ---------- */
+.ak-cermin{display:flex; flex-direction:column; gap:22px; margin-top:14px;}
 
-.ak-halaman{
+.ak-bingkai{
   border:1px solid var(--line); border-radius:var(--radius-md);
   background:var(--surface); overflow:hidden;
 }
-.ak-halaman-kepala{
-  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-  padding:14px 18px; background:var(--bg-deep); border-bottom:1px solid var(--line);
+.ak-bingkai-kepala{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:11px 16px; background:var(--bg-deep); border-bottom:1px solid var(--line);
 }
-.ak-halaman-kepala h3{font-size:1.02rem;}
-.ak-jalur{
-  font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size:0.78rem; color:var(--ink-soft);
+.ak-bingkai-halaman{font-weight:800; font-size:0.9rem; color:var(--owl-dark);}
+.ak-bingkai-bagian{
+  font-size:0.74rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--gold-deep);
 }
-.ak-halaman-kepala .op-tautan-luar{margin-left:auto;}
+.ak-bingkai-alat{display:flex; align-items:center; gap:12px; margin-left:auto;}
 
-.ak-bagian{padding:16px 18px; border-bottom:1px solid var(--line);}
-.ak-bagian:last-child{border-bottom:none;}
-.ak-bagian-nama{
-  font-weight:800; font-size:0.74rem; letter-spacing:0.08em;
-  text-transform:uppercase; color:var(--gold-deep); margin-bottom:12px;
+/* Panggung tempat potongan halaman publik digambar ulang.
+   Latarnya disamakan dengan latar situs supaya kartu putih tetap terbaca
+   sebagai kartu, bukan melebur ke dalam panel yang juga putih. */
+.ak-panggung{
+  background:var(--bg); padding:6px 0 14px;
+  overflow-x:auto; overflow-y:hidden;
 }
 
-/* Satu butir yang bisa diubah: fitur, atau sepotong naskah. */
-.ak-butir{
-  border:1px solid var(--line); border-radius:14px;
-  padding:14px 16px; margin-bottom:12px; background:var(--bg);
+/* Bagian publik kadang punya jarak atas-bawah yang besar karena di halaman
+   aslinya berdiri sendiri. Di dalam bingkai sesempit ini jarak sebesar itu
+   hanya jadi ruang kosong, jadi dirampingkan seperlunya. Yang diubah hanya
+   jarak luar, bukan rupa kartunya. */
+.ak-panggung > section,
+.ak-panggung > footer{padding-top:14px !important; padding-bottom:4px !important;}
+.ak-panggung .hero{border-radius:0;}
+.ak-panggung .hero-owl-stage{display:none;}
+
+/* ---------- Alat pada tiap kartu ---------- */
+.ak-panggung .ak-kartu{position:relative;}
+
+.ak-alat-kartu{
+  position:absolute; top:10px; right:10px;
+  display:flex; align-items:center; gap:6px; z-index:2;
 }
-.ak-butir:last-child{margin-bottom:0;}
-.ak-butir-kepala{
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;
+
+.ak-tombol-ubah{
+  font:inherit; font-size:0.76rem; font-weight:800;
+  padding:5px 12px; border-radius:100px; cursor:pointer;
+  border:1px solid var(--owl-dark); background:var(--owl-dark); color:#fff;
+  box-shadow:0 4px 10px -4px rgba(15,37,64,0.5);
 }
-.ak-butir-label{font-weight:700; font-size:0.92rem;}
+.ak-tombol-ubah:hover{background:var(--owl-dark2); border-color:var(--owl-dark2);}
+.ak-tombol-ubah:disabled{
+  background:var(--line); border-color:var(--line);
+  color:var(--ink-soft); cursor:not-allowed; box-shadow:none;
+}
+
+.ak-genggam{
+  cursor:grab; user-select:none; line-height:1;
+  font-size:1rem; color:var(--ink-soft);
+  padding:4px 7px; border-radius:8px;
+  background:var(--surface); border:1px solid var(--line);
+}
+.ak-genggam:active{cursor:grabbing;}
+.ak-genggam-contoh{
+  font-size:0.95rem; padding:1px 6px; border-radius:6px;
+  background:var(--bg-deep); border:1px solid var(--line);
+}
+
+/* Kartu yang sedang diseret diredupkan supaya jelas mana yang ikut berpindah,
+   dan celah yang ditinggalkannya tetap terbaca. */
+.ak-sedang-diseret{opacity:0.4; outline:2px dashed var(--owl-mid); outline-offset:3px;}
+
+/* Saat situs masih aktif seluruh cermin hanya boleh dilihat. Pegangan seretnya
+   ikut dimatikan supaya tidak ada yang mengira urutannya bisa diubah lalu
+   kehilangan pekerjaannya saat penyimpanan ditolak. */
+.ak-terkunci .ak-genggam{opacity:0.4; cursor:not-allowed;}
+
+/* ---------- Jendela penyuntingan ---------- */
+.ak-tirai{
+  position:fixed; inset:0; z-index:60;
+  display:flex; align-items:center; justify-content:center; padding:22px;
+  background:rgba(15,37,64,0.55);
+}
+.ak-jendela{
+  background:var(--surface); border-radius:var(--radius-lg);
+  width:100%; max-width:44rem; max-height:88vh;
+  display:flex; flex-direction:column; overflow:hidden;
+  box-shadow:0 30px 70px -30px rgba(15,37,64,0.7);
+}
+.ak-jendela-kepala{
+  display:flex; align-items:center; gap:12px;
+  padding:16px 20px; border-bottom:1px solid var(--line); background:var(--bg-deep);
+}
+.ak-jendela-kepala h3{font-size:1.06rem; margin:0;}
+.ak-silang{
+  margin-left:auto; border:none; background:none; cursor:pointer;
+  font-size:1.6rem; line-height:1; color:var(--ink-soft); padding:0 4px;
+}
+.ak-silang:hover{color:var(--owl-dark2);}
+
+.ak-jendela-isi{padding:18px 20px; overflow-y:auto; flex:1;}
+
+.ak-jendela-kaki{
+  display:flex; align-items:center; gap:10px;
+  padding:14px 20px; border-top:1px solid var(--line); background:var(--bg);
+}
+.ak-jendela-kanan{display:flex; gap:10px; margin-left:auto;}
+
+.ak-medan{margin-bottom:18px;}
+.ak-medan:last-child{margin-bottom:0;}
+.ak-medan-label{
+  display:flex; align-items:center; gap:9px; flex-wrap:wrap;
+  font-weight:700; font-size:0.9rem; margin-bottom:8px;
+}
 .ak-kunci{
   font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size:0.72rem; color:var(--ink-soft);
+  font-weight:400; font-size:0.72rem; color:var(--ink-soft);
   background:var(--bg-deep); padding:2px 7px; border-radius:6px;
 }
 .ak-diubah{
   font-size:0.7rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
   background:#FDEEDB; color:var(--gold-deep); padding:3px 9px; border-radius:100px;
 }
-.ak-butir-kepala .ak-balik{margin-left:auto;}
 
 /* Dua bahasa berdampingan, supaya terjemahan yang tertinggal langsung terlihat
    tanpa perlu berpindah-pindah. Di layar sempit keduanya menumpuk. */
 .ak-dwibahasa{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-@media (max-width:860px){ .ak-dwibahasa{grid-template-columns:1fr;} }
+@media (max-width:720px){ .ak-dwibahasa{grid-template-columns:1fr;} }
 
 .ak-kotak label{
   display:block; font-size:0.76rem; font-weight:700;
@@ -89,24 +174,15 @@
 .ak-kotak textarea{
   width:100%; font:inherit; font-size:0.9rem; line-height:1.5;
   padding:9px 11px; border:1px solid var(--line); border-radius:10px;
-  background:var(--surface); color:var(--ink); resize:vertical; min-height:62px;
+  background:var(--surface); color:var(--ink); resize:vertical; min-height:70px;
 }
 .ak-kotak textarea:focus{outline:2px solid var(--owl-mid); outline-offset:1px;}
-.ak-kotak textarea:disabled{background:var(--bg-deep); color:var(--ink-soft); cursor:not-allowed;}
 
 .ak-status-pilih{
-  font:inherit; font-size:0.88rem; font-weight:600;
-  padding:7px 11px; border:1px solid var(--line); border-radius:10px;
+  font:inherit; font-size:0.9rem; font-weight:600; width:100%;
+  padding:9px 11px; border:1px solid var(--line); border-radius:10px;
   background:var(--surface); color:var(--ink);
 }
-.ak-status-pilih:disabled{background:var(--bg-deep); color:var(--ink-soft); cursor:not-allowed;}
-
-.ak-balik{
-  border:none; background:none; padding:0; cursor:pointer;
-  font:inherit; font-size:0.8rem; font-weight:700;
-  color:var(--gold-deep); text-decoration:underline;
-}
-.ak-balik:disabled{color:var(--ink-soft); text-decoration:none; cursor:not-allowed;}
 
 .ak-kosong{color:var(--ink-soft); font-size:0.9rem; line-height:1.6; padding:6px 0;}
 
@@ -155,6 +231,4 @@
   background:var(--bg-deep); color:var(--owl-dark);
   padding:3px 10px; border-radius:100px;
 }
-.ak-versi-oleh{
-  margin-top:10px; font-size:0.78rem; color:var(--ink-soft);
-}
+.ak-versi-oleh{margin-top:10px; font-size:0.78rem; color:var(--ink-soft);}

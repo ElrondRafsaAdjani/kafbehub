@@ -245,8 +245,8 @@ onAuthStateChanged(auth, async (user) => {
             perbaikan naskah langsung di HTML tetap sampai ke pengunjung
             selama kolom itu belum pernah ditimpa lewat halaman ini.
 */
-const bawaan  = { fitur: new Map(), teks: new Map() };
-let   simpanan = { statusSitus: 'aktif', pesanMaintenance: {}, fitur: {}, teks: {} };
+const bawaan  = { fitur: new Map(), teks: new Map(), urutan: new Map() };
+let   simpanan = { statusSitus: 'aktif', pesanMaintenance: {}, fitur: {}, teks: {}, urutan: {} };
 let   susunan  = [];      // hasil pembacaan halaman publik
 let   catatan  = [];      // isi koleksi catatanversi
 let   dokumenAda = false;
@@ -268,61 +268,59 @@ function statusDariLencana(kartu){
 }
 
 /*
-  Satu kunci hanya boleh muncul sekali di panel ini.
+  Nama yang dibaca manusia untuk tiap kunci, diambil dari data-fitur-label dan
+  data-label di HTML. Kemunculan PERTAMA yang dipakai.
 
-  Di halaman publik kunci yang sama memang boleh dipakai berkali-kali, dan itu
+  Di halaman publik satu kunci memang boleh dipakai berkali-kali, dan itu
   disengaja: kartu "Main Santai" muncul dua kali di beranda dan keduanya harus
-  ikut satu status yang sama. Tapi kalau panel ini menggambar dua kotak isian
-  untuk kunci yang sama, keduanya bisa diisi berbeda dan yang tersimpan cuma
-  salah satunya tanpa ketahuan mana. Jadi kemunculan pertama yang dipakai.
+  ikut satu status yang sama.
 */
-let sudahTampil = new Set();
+const labelFitur = new Map();
+const labelTeks  = new Map();
 
+/*
+  Markup asli tiap bagian disimpan apa adanya, lalu digambar ulang di panel ini
+  memakai styles.css yang sama dengan halaman publik.
+
+  Sebelumnya panel ini hanya menampilkan daftar kotak isian bertuliskan nama
+  kunci. Itu benar isinya, tapi tidak menjawab pertanyaan yang sebenarnya
+  dipakai saat mengelola situs, yaitu "kalau saya ubah ini, halamannya jadi
+  seperti apa". Sekarang yang tampil kartu yang sama persis dengan yang dilihat
+  mahasiswa, dan yang diubah ditunjuk langsung di gambarnya.
+*/
 async function bacaHalaman(h){
   const res = await fetch(h.berkas, { cache: 'no-cache' });
   if(!res.ok) throw new Error(`${h.berkas} tidak terbaca (HTTP ${res.status})`);
   const dok = new DOMParser().parseFromString(await res.text(), 'text/html');
 
-  // Satu kueri untuk keduanya, supaya urutannya persis urutan di halaman:
-  // kartu fitur lebih dulu, lalu judul dan keterangan miliknya.
-  const elemen = dok.querySelectorAll('[data-fitur], [data-teks]');
   const bagian = [];
 
-  const cariBagian = (nama) => {
-    let g = bagian.find(x => x.nama === nama);
-    if(!g){ g = { nama, butir: [] }; bagian.push(g); }
-    return g;
-  };
-
-  elemen.forEach(el => {
-    const induk = el.closest('[data-bagian]');
-    const namaBagian = induk ? induk.dataset.bagian : 'Umum';
-
-    if(el.dataset.fitur !== undefined){
+  dok.querySelectorAll('[data-bagian]').forEach(sec => {
+    // Naskah dan status bawaannya dicatat dari markup ini, jadi apa yang
+    // ditawarkan panel sebagai "bawaan" tidak mungkin berbeda dari halaman.
+    sec.querySelectorAll('[data-fitur]').forEach(el => {
       const kunci = el.dataset.fitur;
-      const asal  = statusDariLencana(el);
-      if(sudahTampil.has('fitur:' + kunci)) return;
-      sudahTampil.add('fitur:' + kunci);
-      bawaan.fitur.set(kunci, asal);
-      cariBagian(namaBagian).butir.push({
-        jenis: 'fitur',
-        kunci,
-        label: el.dataset.fiturLabel || kunci,
-        asal,
-      });
-    }else{
+      if(!bawaan.fitur.has(kunci)) bawaan.fitur.set(kunci, statusDariLencana(el));
+      if(!labelFitur.has(kunci)) labelFitur.set(kunci, el.dataset.fiturLabel || kunci);
+    });
+
+    sec.querySelectorAll('[data-teks]').forEach(el => {
       const kunci = el.dataset.teks;
-      const asal  = { id: rapikan(el.innerHTML), en: rapikan(el.dataset.en || '') };
-      if(sudahTampil.has('teks:' + kunci)) return;
-      sudahTampil.add('teks:' + kunci);
-      bawaan.teks.set(kunci, asal);
-      cariBagian(namaBagian).butir.push({
-        jenis: 'teks',
-        kunci,
-        label: el.dataset.label || kunci,
-        asal,
+      if(bawaan.teks.has(kunci)) return;
+      bawaan.teks.set(kunci, {
+        id: rapikan(el.innerHTML),
+        en: rapikan(el.dataset.en || ''),
       });
-    }
+      labelTeks.set(kunci, el.dataset.label || kunci);
+    });
+
+    // Urutan bawaan tiap kisi kartu, dipakai tombol "kembalikan urutan".
+    sec.querySelectorAll('[data-urutan]').forEach(kisi => {
+      bawaan.urutan.set(kisi.dataset.urutan,
+        [...kisi.querySelectorAll('[data-fitur]')].map(x => x.dataset.fitur));
+    });
+
+    bagian.push({ nama: sec.dataset.bagian, html: sec.outerHTML });
   });
 
   return { nama: h.nama, berkas: h.berkas, bagian };
@@ -331,7 +329,9 @@ async function bacaHalaman(h){
 async function bacaSusunan(){
   bawaan.fitur.clear();
   bawaan.teks.clear();
-  sudahTampil = new Set();
+  bawaan.urutan.clear();
+  labelFitur.clear();
+  labelTeks.clear();
 
   const hasil = [];
   const gagal = [];
@@ -363,8 +363,9 @@ async function muatSemua(){
       simpanan = {
         statusSitus: d.statusSitus === 'maintenance' ? 'maintenance' : 'aktif',
         pesanMaintenance: d.pesanMaintenance || {},
-        fitur: d.fitur || {},
-        teks:  d.teks  || {},
+        fitur:  d.fitur  || {},
+        teks:   d.teks   || {},
+        urutan: d.urutan || {},
       };
     }
 
@@ -433,12 +434,13 @@ function gambarGembok(){
     $('gembokTutup').addEventListener('click', () => ubahStatus('maintenance'));
   }
 
-  // Semua kotak isian yang menulis naskah ikut mengunci diri.
+  // Semua yang menulis naskah ikut mengunci diri.
   const terkunci = !sedangDipelihara();
-  document.querySelectorAll('#panel-tampilan textarea, #panel-tampilan select, '
-    + '#panel-tampilan .ak-balik, #tombolSimpanTampilan, '
+  document.querySelectorAll('#tombolSimpanTampilan, #tombolUrutanBawaan, '
     + '#formPesanTutup input, #formPesanTutup textarea, #formPesanTutup button')
     .forEach(x => { x.disabled = terkunci; });
+
+  kunciCermin();
 }
 
 /* ============================================================
@@ -458,159 +460,414 @@ function nilaiFitur(kunci){
   return bawaan.fitur.get(kunci) || 'aktif';
 }
 
-function sudahDitimpa(butir){
-  if(butir.jenis === 'fitur') return !!simpanan.fitur[butir.kunci];
-  return !!simpanan.teks[butir.kunci];
+function nilaiUrutan(kunci){
+  const simpan = simpanan.urutan[kunci];
+  if(simpan && simpan.length) return simpan;
+  return bawaan.urutan.get(kunci) || [];
 }
 
-function gambarButir(b){
-  const ditimpa = sudahDitimpa(b)
-    ? '<span class="ak-diubah">Diubah</span>' : '';
-  const tombolBalik = sudahDitimpa(b)
-    ? `<button type="button" class="ak-balik" data-balik="${esc(b.jenis)}:${esc(b.kunci)}">Kembalikan ke bawaan</button>`
-    : '';
+const LENCANA = {
+  aktif:        { kelas: 'badge-live',  teks: 'Aktif' },
+  pengembangan: { kelas: 'badge-soon',  teks: 'Dalam Pengembangan' },
+  maintenance:  { kelas: 'badge-maint', teks: 'Pemeliharaan' },
+};
 
-  const kepala =
-    '<div class="ak-butir-kepala">'
-    + `<span class="ak-butir-label">${esc(b.label)}</span>`
-    + `<span class="ak-kunci">${esc(b.kunci)}</span>`
-    + ditimpa + tombolBalik
-    + '</div>';
+/*
+  Naskah dan status yang sedang berlaku dipasang ke salinan markup, memakai
+  aturan yang sama dengan shared/situs.js. Jadi yang tampil di panel ini bukan
+  gambaran kasar, melainkan hasil akhirnya.
+*/
+function pasangNilai(wadah){
+  wadah.querySelectorAll('[data-teks]').forEach(el => {
+    const isi = nilaiTeks(el.dataset.teks, 'id');
+    if(isi) el.innerHTML = isi;
+  });
 
-  if(b.jenis === 'fitur'){
-    const kini = nilaiFitur(b.kunci);
-    const opsi = STATUS_FITUR.map(s =>
-      `<option value="${s.nilai}"${s.nilai === kini ? ' selected' : ''}>${esc(s.label)}</option>`
-    ).join('');
-    return `<div class="ak-butir">${kepala}`
-      + `<select class="ak-status-pilih" data-fitur="${esc(b.kunci)}">${opsi}</select>`
-      + '</div>';
-  }
+  wadah.querySelectorAll('[data-fitur]').forEach(kartu => {
+    const s = nilaiFitur(kartu.dataset.fitur);
+    const l = LENCANA[s] || LENCANA.aktif;
+    const lencana = kartu.querySelector('.badge');
+    if(lencana){
+      lencana.className = 'badge ' + l.kelas;
+      lencana.textContent = l.teks;
+    }
+    kartu.querySelectorAll('a.btn').forEach(a => { a.hidden = (s !== 'aktif'); });
+    kartu.classList.toggle('fitur-tidak-aktif', s !== 'aktif');
+  });
+}
 
-  return `<div class="ak-butir">${kepala}`
-    + '<div class="ak-dwibahasa">'
-      + '<div class="ak-kotak"><label>Indonesia</label>'
-      + `<textarea data-teks="${esc(b.kunci)}" data-bahasa="id">${esc(nilaiTeks(b.kunci,'id'))}</textarea></div>`
-      + '<div class="ak-kotak"><label>Inggris</label>'
-      + `<textarea data-teks="${esc(b.kunci)}" data-bahasa="en">${esc(nilaiTeks(b.kunci,'en'))}</textarea></div>`
-    + '</div></div>';
+function urutkanKisi(wadah){
+  wadah.querySelectorAll('[data-urutan]').forEach(kisi => {
+    const daftar = nilaiUrutan(kisi.dataset.urutan);
+    if(!daftar.length) return;
+    const anak = [...kisi.children];
+    const punyaKunci = [];
+    const sisa = [];
+    anak.forEach(el => {
+      const i = el.dataset.fitur === undefined ? -1 : daftar.indexOf(el.dataset.fitur);
+      if(i >= 0) punyaKunci.push({ el, i }); else sisa.push(el);
+    });
+    punyaKunci.sort((a,b) => a.i - b.i);
+    punyaKunci.forEach(x => kisi.appendChild(x.el));
+    sisa.forEach(el => kisi.appendChild(el));
+  });
+}
+
+function adaTimpaan(wadah){
+  const kunciTeks  = [...wadah.querySelectorAll('[data-teks]')].map(x => x.dataset.teks);
+  const kunciFitur = [...wadah.querySelectorAll('[data-fitur]')].map(x => x.dataset.fitur);
+  const kunciKisi  = [...wadah.querySelectorAll('[data-urutan]')].map(x => x.dataset.urutan);
+  return kunciTeks.some(k => simpanan.teks[k])
+      || kunciFitur.some(k => simpanan.fitur[k])
+      || kunciKisi.some(k => simpanan.urutan[k]);
+}
+
+/*
+  Tombol di dalam salinan ini mengarah ke halaman publik. Kalau dibiarkan,
+  sekali salah klik pengurus terlempar keluar dari panel dan pekerjaan yang
+  belum disimpan hilang. Semua klik di dalam cermin ditahan di sini, kecuali
+  klik pada tombol milik panel ini sendiri.
+*/
+function tahanKlik(wadah){
+  wadah.addEventListener('click', (e) => {
+    if(e.target.closest('.ak-alat')) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
 }
 
 function gambarCermin(){
   const wadah = $('cerminSitus');
   const cari = rapikan($('cariTampilan').value).toLowerCase();
+  wadah.innerHTML = '';
 
-  const cocok = (b) => {
-    if(!cari) return true;
-    const bahan = [b.label, b.kunci,
-      nilaiTeks(b.kunci,'id'), nilaiTeks(b.kunci,'en')].join(' ').toLowerCase();
-    return bahan.includes(cari);
-  };
+  let adaIsi = false;
 
-  const bagianHtml = (h) => h.bagian
-    .map(g => {
-      const butir = g.butir.filter(cocok);
-      if(!butir.length) return '';
-      return '<div class="ak-bagian">'
-        + `<div class="ak-bagian-nama">${esc(g.nama)}</div>`
-        + butir.map(gambarButir).join('')
+  susunan.forEach(h => {
+    h.bagian.forEach((g, iBagian) => {
+      const kotak = document.createElement('div');
+      kotak.innerHTML = g.html;
+      const sec = kotak.firstElementChild;
+      if(!sec) return;
+
+      urutkanKisi(sec);
+      pasangNilai(sec);
+
+      // Penyaringan bekerja atas naskah yang SEDANG berlaku, bukan atas nama
+      // kuncinya saja, supaya mencari kalimat yang terlihat di layar berhasil.
+      if(cari){
+        const bahan = [h.nama, g.nama, sec.textContent,
+          ...[...sec.querySelectorAll('[data-teks]')].map(x => x.dataset.teks),
+          ...[...sec.querySelectorAll('[data-fitur]')].map(x => x.dataset.fitur),
+        ].join(' ').toLowerCase();
+        if(!bahan.includes(cari)) return;
+      }
+
+      adaIsi = true;
+
+      const bingkai = document.createElement('article');
+      bingkai.className = 'ak-bingkai';
+      bingkai.innerHTML =
+        '<div class="ak-bingkai-kepala">'
+        + `<span class="ak-bingkai-halaman">${esc(h.nama)}</span>`
+        + `<span class="ak-bingkai-bagian">${esc(g.nama)}</span>`
+        + (adaTimpaan(sec) ? '<span class="ak-diubah">Diubah</span>' : '')
+        + '<span class="ak-bingkai-alat">'
+          + `<button type="button" class="btn btn-ghost op-mini ak-alat" data-ubah-bagian="${esc(h.berkas)}|${iBagian}">Ubah teks bagian</button>`
+          + `<a class="op-tautan-luar ak-alat" href="${esc(h.berkas)}" target="_blank" rel="noopener">Buka halaman</a>`
+        + '</span>'
         + '</div>';
-    })
-    .join('');
 
-  const html = susunan.map(h => {
-    const isi = bagianHtml(h);
-    if(!isi) return '';
-    const alamat = h.berkas.replace(/\.html$/, '');
-    return '<article class="ak-halaman">'
-      + '<div class="ak-halaman-kepala">'
-        + `<h3>${esc(h.nama)}</h3>`
-        + `<span class="ak-jalur">${esc(alamat)}</span>`
-        + `<a class="op-tautan-luar" href="${esc(h.berkas)}" target="_blank" rel="noopener">Buka halaman</a>`
-      + '</div>' + isi + '</article>';
-  }).join('');
+      const panggung = document.createElement('div');
+      panggung.className = 'ak-panggung';
+      panggung.appendChild(sec);
+      bingkai.appendChild(panggung);
+      wadah.appendChild(bingkai);
 
-  wadah.innerHTML = html || '<p class="ak-kosong">'
-    + (cari
-        ? 'Tidak ada yang cocok dengan pencarian itu.'
-        : 'Belum ada isi yang bisa diatur. Pastikan halaman publiknya memakai atribut '
-          + '<code>data-teks</code> dan <code>data-fitur</code>.')
-    + '</p>';
-
-  wadah.querySelectorAll('[data-balik]').forEach(t => {
-    t.addEventListener('click', () => {
-      const [jenis, ...sisa] = t.dataset.balik.split(':');
-      const kunci = sisa.join(':');
-      if(jenis === 'fitur') delete simpanan.fitur[kunci];
-      else delete simpanan.teks[kunci];
-      gambarCermin();
-      gambarGembok();
-      pesan($('pesanTampilan'),
-        'Dikembalikan ke naskah bawaan halaman. Tekan <strong>Simpan perubahan</strong> supaya berlaku di situs publik.',
-        'benar');
+      pasangAlatKartu(sec);
+      pasangSeret(sec);
+      tahanKlik(panggung);
     });
   });
 
-  // Setelah menggambar ulang, penguncian dipasang lagi karena elemennya baru.
-  const terkunci = !sedangDipelihara();
-  wadah.querySelectorAll('textarea, select, .ak-balik')
-    .forEach(x => { x.disabled = terkunci; });
+  if(!adaIsi){
+    wadah.innerHTML = '<p class="ak-kosong">'
+      + (cari ? 'Tidak ada yang cocok dengan pencarian itu.'
+              : 'Belum ada isi yang bisa diatur.')
+      + '</p>';
+  }
+
+  kunciCermin();
 }
 
+/* ---------- Tombol ubah pada tiap kartu ---------- */
+
+function pasangAlatKartu(sec){
+  sec.querySelectorAll('[data-fitur]').forEach(kartu => {
+    kartu.classList.add('ak-kartu');
+
+    const bisaGeser = !!kartu.closest('[data-urutan]');
+    const alat = document.createElement('div');
+    alat.className = 'ak-alat ak-alat-kartu';
+    alat.innerHTML =
+      (bisaGeser ? '<span class="ak-genggam" title="Seret untuk memindahkan urutan">&#10495;</span>' : '')
+      + '<button type="button" class="ak-tombol-ubah">Ubah</button>';
+    kartu.appendChild(alat);
+
+    alat.querySelector('.ak-tombol-ubah').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      bukaPenyunting({ jenis: 'kartu', kartu });
+    });
+  });
+}
+
+/* ---------- Memindahkan urutan kartu ---------- */
+
+/*
+  Yang bisa dipindah HANYA urutannya. Sengaja tidak ada pengaturan posisi
+  bebas, kemiringan, atau ukuran, sebab tata letak situs diatur styles.css dan
+  harus tetap rapi dari layar ponsel sampai layar lebar. Kartu yang ditaruh di
+  titik bebas akan berantakan begitu lebar layarnya berubah, dan kerusakan itu
+  baru ketahuan di perangkat orang lain.
+*/
+let kartuDiseret = null;
+
+function pasangSeret(sec){
+  sec.querySelectorAll('[data-urutan]').forEach(kisi => {
+    kisi.querySelectorAll('[data-fitur]').forEach(kartu => {
+      kartu.draggable = true;
+
+      kartu.addEventListener('dragstart', (e) => {
+        if(!sedangDipelihara()){ e.preventDefault(); return; }
+        kartuDiseret = kartu;
+        kartu.classList.add('ak-sedang-diseret');
+        e.dataTransfer.effectAllowed = 'move';
+        // Sebagian peramban membatalkan seretan kalau tidak ada data sama sekali.
+        e.dataTransfer.setData('text/plain', kartu.dataset.fitur);
+      });
+
+      kartu.addEventListener('dragend', () => {
+        kartu.classList.remove('ak-sedang-diseret');
+        kartuDiseret = null;
+        simpanUrutanKisi(kisi);
+      });
+    });
+
+    kisi.addEventListener('dragover', (e) => {
+      if(!kartuDiseret || !kisi.contains(kartuDiseret)) return;
+      e.preventDefault();
+      const sasaran = e.target.closest('[data-fitur]');
+      if(!sasaran || sasaran === kartuDiseret || sasaran.parentElement !== kisi) return;
+
+      // Titik tengah kartu sasaran menentukan sisi mana yang dituju, supaya
+      // kartunya tidak bolak-balik melompat saat kursor bergerak sedikit.
+      const kotak = sasaran.getBoundingClientRect();
+      const setelah = (e.clientX - kotak.left) > kotak.width / 2;
+      kisi.insertBefore(kartuDiseret, setelah ? sasaran.nextSibling : sasaran);
+    });
+  });
+}
+
+function simpanUrutanKisi(kisi){
+  const kunci = kisi.dataset.urutan;
+  const baru = [...kisi.querySelectorAll('[data-fitur]')].map(x => x.dataset.fitur);
+  const asal = bawaan.urutan.get(kunci) || [];
+
+  if(baru.join('|') === asal.join('|')) delete simpanan.urutan[kunci];
+  else simpanan.urutan[kunci] = baru;
+
+  pesan($('pesanTampilan'),
+    'Urutan diubah. Tekan <strong>Simpan perubahan</strong> supaya berlaku di situs publik.', 'benar');
+}
+
+/* ---------- Penguncian saat situs aktif ---------- */
+
+function kunciCermin(){
+  const terkunci = !sedangDipelihara();
+  const wadah = $('cerminSitus');
+  wadah.classList.toggle('ak-terkunci', terkunci);
+  wadah.querySelectorAll('.ak-tombol-ubah, [data-ubah-bagian]')
+    .forEach(x => { x.disabled = terkunci; });
+  // Hanya kartu yang memang berada di dalam kisi ber-atribut data-urutan yang
+  // boleh diseret. Kartu di luar kisi itu tidak punya penangan seret sama
+  // sekali, jadi menandainya bisa diseret cuma menjanjikan sesuatu yang tidak
+  // akan terjadi.
+  wadah.querySelectorAll('[data-urutan] [data-fitur]')
+    .forEach(x => { x.draggable = !terkunci; });
+}
+
+/* ============================================================
+   8B. Jendela penyuntingan
+   ============================================================ */
+
+let sedangDisunting = null;
+
+function medanTeks(kunci){
+  const label = labelTeks.get(kunci) || kunci;
+  return '<div class="ak-medan">'
+    + `<div class="ak-medan-label">${esc(label)}<span class="ak-kunci">${esc(kunci)}</span></div>`
+    + '<div class="ak-dwibahasa">'
+      + '<div class="ak-kotak"><label>Indonesia</label>'
+      + `<textarea data-teks="${esc(kunci)}" data-bahasa="id">${esc(nilaiTeks(kunci,'id'))}</textarea></div>`
+      + '<div class="ak-kotak"><label>Inggris</label>'
+      + `<textarea data-teks="${esc(kunci)}" data-bahasa="en">${esc(nilaiTeks(kunci,'en'))}</textarea></div>`
+    + '</div></div>';
+}
+
+function bukaPenyunting(konteks){
+  if(!sedangDipelihara()){
+    pesan($('pesanTampilan'),
+      'Situs masih aktif. Masuk ke pemeliharaan dulu lewat tab <strong>Status Situs</strong>.', 'salah');
+    return;
+  }
+
+  let judul;
+  let kunciFitur = null;
+  let kunciTeks = [];
+
+  if(konteks.jenis === 'kartu'){
+    kunciFitur = konteks.kartu.dataset.fitur;
+    judul = labelFitur.get(kunciFitur) || kunciFitur;
+    kunciTeks = [...konteks.kartu.querySelectorAll('[data-teks]')].map(x => x.dataset.teks);
+  }else{
+    judul = konteks.namaBagian;
+    // Naskah yang sudah punya tombol ubah sendiri di kartunya tidak diulang di
+    // sini, supaya satu kunci tidak bisa diisi dari dua tempat sekaligus.
+    kunciTeks = [...konteks.sec.querySelectorAll('[data-teks]')]
+      .filter(x => !x.closest('[data-fitur]'))
+      .map(x => x.dataset.teks);
+  }
+
+  sedangDisunting = { kunciFitur, kunciTeks };
+  $('penyuntingJudul').textContent = judul;
+
+  const bagianStatus = kunciFitur
+    ? '<div class="ak-medan"><div class="ak-medan-label">Status fitur</div>'
+      + '<select class="ak-status-pilih" id="penyuntingStatus">'
+      + STATUS_FITUR.map(s =>
+          `<option value="${s.nilai}"${s.nilai === nilaiFitur(kunciFitur) ? ' selected' : ''}>${esc(s.label)}</option>`
+        ).join('')
+      + '</select>'
+      + '<p class="op-catatan">Selain Aktif, tombol pada kartu ini disembunyikan dan halamannya ikut tertutup.</p>'
+      + '</div>'
+    : '';
+
+  $('penyuntingIsi').innerHTML = bagianStatus
+    + (kunciTeks.length
+        ? kunciTeks.map(medanTeks).join('')
+        : '<p class="ak-kosong">Bagian ini tidak punya naskah yang bisa diubah.</p>');
+
+  $('penyunting').hidden = false;
+  const pertama = $('penyuntingIsi').querySelector('textarea, select');
+  if(pertama) pertama.focus();
+}
+
+function tutupPenyunting(){
+  $('penyunting').hidden = true;
+  sedangDisunting = null;
+}
+
+/*
+  Nilai yang sama dengan bawaannya TIDAK disimpan, dan kotak yang dikosongkan
+  berarti "pakai naskah bawaan halaman", bukan "kosongkan tulisannya". Itu yang
+  menjaga dokumen Firestore tetap berisi selisihnya saja.
+*/
+function simpanPenyunting(){
+  if(!sedangDisunting) return;
+
+  const sel = $('penyuntingStatus');
+  if(sel && sedangDisunting.kunciFitur){
+    const k = sedangDisunting.kunciFitur;
+    if(sel.value === (bawaan.fitur.get(k) || 'aktif')) delete simpanan.fitur[k];
+    else simpanan.fitur[k] = { status: sel.value };
+  }
+
+  $('penyuntingIsi').querySelectorAll('textarea[data-teks]').forEach(ta => {
+    const kunci = ta.dataset.teks;
+    const bahasa = ta.dataset.bahasa;
+    const asal = bawaan.teks.get(kunci) || { id:'', en:'' };
+    const isi = rapikan(ta.value);
+
+    if(isi === '' || isi === asal[bahasa]){
+      if(simpanan.teks[kunci]) delete simpanan.teks[kunci][bahasa];
+    }else{
+      if(!simpanan.teks[kunci]) simpanan.teks[kunci] = {};
+      simpanan.teks[kunci][bahasa] = isi;
+    }
+    if(simpanan.teks[kunci] && Object.keys(simpanan.teks[kunci]).length === 0){
+      delete simpanan.teks[kunci];
+    }
+  });
+
+  tutupPenyunting();
+  gambarCermin();
+  pesan($('pesanTampilan'),
+    'Perubahan tercatat. Tekan <strong>Simpan perubahan</strong> supaya berlaku di situs publik.', 'benar');
+}
+
+function kembalikanBawaan(){
+  if(!sedangDisunting) return;
+  if(sedangDisunting.kunciFitur) delete simpanan.fitur[sedangDisunting.kunciFitur];
+  sedangDisunting.kunciTeks.forEach(k => { delete simpanan.teks[k]; });
+  tutupPenyunting();
+  gambarCermin();
+  pesan($('pesanTampilan'),
+    'Dikembalikan ke naskah bawaan halaman. Tekan <strong>Simpan perubahan</strong> supaya berlaku di situs publik.', 'benar');
+}
+
+$('penyuntingSimpan').addEventListener('click', simpanPenyunting);
+$('penyuntingBatal').addEventListener('click', tutupPenyunting);
+$('penyuntingBawaan').addEventListener('click', kembalikanBawaan);
+$('penyuntingTutup').addEventListener('click', tutupPenyunting);
+
+$('penyunting').addEventListener('click', (e) => {
+  if(e.target.id === 'penyunting') tutupPenyunting();
+});
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && !$('penyunting').hidden) tutupPenyunting();
+});
+
+/*
+  Tombol "Ubah teks bagian" ditangani dari wadahnya, bukan dipasang satu per
+  satu, karena isi cermin digambar ulang tiap ada perubahan dan penangan yang
+  menempel di tombol lama akan ikut terbuang.
+*/
+$('cerminSitus').addEventListener('click', (e) => {
+  const t = e.target.closest('[data-ubah-bagian]');
+  if(!t) return;
+  e.preventDefault();
+  const potong = t.dataset.ubahBagian.lastIndexOf('|');
+  const berkas = t.dataset.ubahBagian.slice(0, potong);
+  const iBagian = +t.dataset.ubahBagian.slice(potong + 1);
+  const h = susunan.find(x => x.berkas === berkas);
+  if(!h) return;
+  const sec = t.closest('.ak-bingkai').querySelector('.ak-panggung > *');
+  bukaPenyunting({ jenis: 'bagian', sec, namaBagian: h.bagian[iBagian].nama });
+});
+
 $('cariTampilan').addEventListener('input', gambarCermin);
+
 $('tombolMuatUlang').addEventListener('click', async () => {
   bersihkanPesan($('pesanTampilan'));
   await muatSemua();
 });
 
+$('tombolUrutanBawaan').addEventListener('click', () => {
+  if(!sedangDipelihara()){
+    pesan($('pesanTampilan'), 'Situs masih aktif, jadi urutannya terkunci.', 'salah');
+    return;
+  }
+  simpanan.urutan = {};
+  gambarCermin();
+  pesan($('pesanTampilan'),
+    'Urutan kartu dikembalikan seperti bawaan halaman. Tekan <strong>Simpan perubahan</strong> supaya berlaku.', 'benar');
+});
+
 /* ============================================================
    9. Menyimpan tampilan
    ============================================================ */
-
-/*
-  Yang disimpan hanya yang berbeda dari bawaannya. Kolom yang dikosongkan
-  kembali atau diketik persis sama dengan naskah aslinya dianggap tidak
-  ditimpa, sehingga dokumennya tetap ramping dan perbaikan naskah di HTML
-  masih bisa mengalir ke pengunjung.
-*/
-function kumpulkanPerubahan(){
-  const fitur = {};
-  const teks  = {};
-
-  document.querySelectorAll('#cerminSitus select[data-fitur]').forEach(sel => {
-    const kunci = sel.dataset.fitur;
-    if(sel.value !== (bawaan.fitur.get(kunci) || 'aktif')){
-      fitur[kunci] = { status: sel.value };
-    }
-  });
-
-  document.querySelectorAll('#cerminSitus textarea[data-teks]').forEach(ta => {
-    const kunci = ta.dataset.teks;
-    const asal = bawaan.teks.get(kunci) || { id:'', en:'' };
-    const isi  = rapikan(ta.value);
-    if(isi === '' || isi === asal[ta.dataset.bahasa]) return;
-    if(!teks[kunci]) teks[kunci] = {};
-    teks[kunci][ta.dataset.bahasa] = isi;
-  });
-
-  /*
-    Pencarian menyembunyikan sebagian butir dari layar, dan butir yang tidak
-    tergambar tidak punya kotak isian untuk dibaca di atas. Kalau tahap ini
-    dilewat, menyimpan sambil menyaring akan menghapus diam-diam semua naskah
-    yang kebetulan sedang tidak terlihat.
-  */
-  const terlihatFitur = new Set([...document.querySelectorAll('#cerminSitus select[data-fitur]')].map(x => x.dataset.fitur));
-  const terlihatTeks  = new Set([...document.querySelectorAll('#cerminSitus textarea[data-teks]')].map(x => x.dataset.teks));
-
-  for(const [kunci, nilai] of Object.entries(simpanan.fitur)){
-    if(!terlihatFitur.has(kunci)) fitur[kunci] = nilai;
-  }
-  for(const [kunci, nilai] of Object.entries(simpanan.teks)){
-    if(!terlihatTeks.has(kunci)) teks[kunci] = nilai;
-  }
-
-  return { fitur, teks };
-}
 
 async function tulisDokumen(isi){
   if(dokumenAda){
@@ -621,6 +878,7 @@ async function tulisDokumen(isi){
       pesanMaintenance: {},
       fitur: {},
       teks: {},
+      urutan: {},
       ...isi,
     });
     dokumenAda = true;
@@ -645,25 +903,24 @@ $('tombolSimpanTampilan').addEventListener('click', async () => {
     return;
   }
 
-  const { fitur, teks } = kumpulkanPerubahan();
-
   try{
     status('Menyimpan…', 'sibuk');
     await tulisDokumen({
-      fitur, teks,
+      fitur:  simpanan.fitur,
+      teks:   simpanan.teks,
+      urutan: simpanan.urutan,
       diperbaruiPada: new Date().toISOString(),
       diperbaruiOleh: akun ? akun.email : '',
     });
-    simpanan.fitur = fitur;
-    simpanan.teks  = teks;
     gambarCermin();
-    gambarGembok();
 
-    const jumlah = Object.keys(fitur).length + Object.keys(teks).length;
+    const jumlah = Object.keys(simpanan.fitur).length
+                 + Object.keys(simpanan.teks).length
+                 + Object.keys(simpanan.urutan).length;
     status('Tersimpan.', 'benar');
     pesan(el, jumlah === 0
-      ? 'Tersimpan. Sekarang tidak ada satu pun yang menimpa naskah bawaan halaman.'
-      : `Tersimpan. ${jumlah} bagian sedang menimpa naskah bawaan halaman.`, 'benar');
+      ? 'Tersimpan. Sekarang tidak ada satu pun yang menimpa bawaan halaman.'
+      : `Tersimpan. ${jumlah} bagian sedang menimpa bawaan halaman.`, 'benar');
   }catch(err){
     console.error(err);
     pesan(el, jelaskanGagal(err), 'salah');

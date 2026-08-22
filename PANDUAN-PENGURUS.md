@@ -240,8 +240,39 @@ berlaku, lengkap dengan tombol pintas untuk berpindah status.
 
 ### Tab Tampilan Situs
 
-Isinya cerminan halaman publik, disusun mengikuti urutan aslinya: per halaman,
-lalu per bagian.
+Isinya **halaman publik yang digambar ulang apa adanya**, bukan daftar kotak
+isian. Kartu yang Anda lihat di sini sama persis dengan yang dilihat mahasiswa,
+lengkap dengan warna, lencana, dan tombolnya.
+
+Tiap kartu punya dua alat di pojok kanan atas:
+
+| Alat | Gunanya |
+|---|---|
+| **Ubah** | Membuka jendela penyuntingan: status fitur, judul, keterangan, dan tombol, dalam dua bahasa |
+| Pegangan **⠿** | Diseret untuk menukar urutan kartu |
+
+Naskah yang bukan milik kartu, misalnya judul bagian dan kalimat pembuka,
+diubah lewat tombol **Ubah teks bagian** di kepala tiap bingkai.
+
+Semua perubahan baru tercatat di layar. Yang membuatnya berlaku di situs publik
+tetap tombol **Simpan perubahan** di atas.
+
+#### Memindahkan urutan kartu
+
+Seret kartu ke kiri atau ke kanan untuk menukar posisinya dengan kartu lain.
+Urutannya langsung tercatat begitu kartu dilepas.
+
+**Yang bisa dipindah hanya urutan.** Tidak ada pengaturan posisi bebas,
+kemiringan, atau ukuran, dan itu disengaja. Tata letak situs diatur `styles.css`
+supaya menyesuaikan diri dari layar ponsel sampai layar lebar. Kartu yang
+ditaruh di titik bebas akan berantakan begitu lebar layarnya berubah, dan
+kerusakan itu baru ketahuan di perangkat orang lain, bukan di layar Anda.
+
+Tombol **Kembalikan urutan** di atas mengembalikan semua kartu ke urutan
+bawaan halaman sekaligus.
+
+Kartu yang tidak berada di dalam kelompok yang bisa diurutkan tidak punya
+pegangan seret. Itu bukan kerusakan, memang tidak ada kartu lain untuk ditukar.
 
 **Status fitur** punya tiga pilihan:
 
@@ -465,6 +496,21 @@ Lencana bawaannya menentukan status awal: `badge-live` berarti Aktif,
 Bungkus tiap kelompok dengan `data-bagian="Nama Bagian"` supaya panel admin
 mengelompokkannya. Kalau ingin seluruh halaman ikut mati saat fiturnya
 dimatikan, tambahkan `data-fitur-halaman="berita"` pada `<body>`.
+
+Supaya kartu di sebuah kelompok bisa ditukar urutannya, beri kisinya nama:
+
+```html
+<div class="card-grid" data-urutan="beranda-berita">
+```
+
+Namanya ditulis eksplisit, bukan disimpulkan dari nama halaman atau nama
+bagian. Nama bagian seperti "Kepala Halaman" dipakai berulang di banyak
+halaman, jadi menyimpulkan kunci dari situ akan membuat urutan satu halaman
+merembet ke halaman lain suatu hari nanti.
+
+Kartu yang kuncinya belum tercatat dalam urutan tersimpan tidak hilang, hanya
+ditaruh di belakang. Jadi menambah kartu baru tetap aman meski urutannya belum
+diperbarui lewat panel.
 
 Terakhir, daftarkan halamannya di `DAFTAR_HALAMAN` pada
 [`shared/adminkafbe.js`](shared/adminkafbe.js). Itu satu-satunya bagian yang

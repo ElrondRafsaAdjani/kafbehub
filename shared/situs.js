@@ -230,7 +230,47 @@
     return true;
   }
 
-  /* ---------- 3. Naskah pengganti ---------- */
+  /* ---------- 3. Urutan kartu ---------- */
+
+  /*
+    Kisi kartu yang boleh diatur urutannya ditandai data-urutan di HTML, dan
+    tiap kartunya dikenali lewat data-fitur.
+
+    Kuncinya ditulis eksplisit di HTML, bukan disimpulkan dari nama halaman
+    atau nama bagian. Nama bagian seperti "Kepala Halaman" dipakai berulang di
+    banyak halaman, jadi menyimpulkan kunci dari situ akan membuat urutan satu
+    halaman merembet ke halaman lain suatu hari nanti.
+
+    Kartu yang kuncinya tidak disebut dalam daftar urutan tidak dibuang, hanya
+    ditaruh di belakang dengan urutan aslinya. Jadi menambah kartu baru di HTML
+    tetap aman meski daftar urutannya belum diperbarui.
+  */
+  function terapkanUrutan(urutan){
+    var kisi = document.querySelectorAll('[data-urutan]');
+
+    for(var i = 0; i < kisi.length; i++){
+      var daftar = urutan[kisi[i].dataset.urutan];
+      if(!daftar || !daftar.length) continue;
+
+      var anak = Array.prototype.slice.call(kisi[i].children);
+      var pesanan = [];
+      var sisa = [];
+
+      for(var j = 0; j < anak.length; j++){
+        var kunci = anak[j].dataset ? anak[j].dataset.fitur : undefined;
+        var urut = (kunci === undefined) ? -1 : daftar.indexOf(kunci);
+        if(urut >= 0) pesanan.push({ el: anak[j], urut: urut });
+        else sisa.push(anak[j]);
+      }
+
+      pesanan.sort(function(a, b){ return a.urut - b.urut; });
+
+      for(var k = 0; k < pesanan.length; k++) kisi[i].appendChild(pesanan[k].el);
+      for(var m = 0; m < sisa.length; m++) kisi[i].appendChild(sisa[m]);
+    }
+  }
+
+  /* ---------- 4. Naskah pengganti ---------- */
 
   /*
     Nilai admin dipasang lewat data-asli dan data-en, lalu pengalih bahasa
@@ -275,6 +315,7 @@
 
     if(tutupHalamanFitur(fitur)) return;
 
+    terapkanUrutan(cfg.urutan || {});
     terapkanFitur(fitur);
     terapkanTeks(cfg.teks || {});
     bukaTirai();

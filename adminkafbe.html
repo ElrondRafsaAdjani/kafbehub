@@ -91,10 +91,19 @@
           </p>
         </div>
         <div class="op-tombol-baris">
+          <button type="button" class="btn btn-ghost op-kecil" id="tombolUrutanBawaan">Kembalikan urutan</button>
           <button type="button" class="btn btn-ghost op-kecil" id="tombolMuatUlang">Muat ulang dari situs</button>
           <button type="button" class="btn btn-primary op-kecil" id="tombolSimpanTampilan">Simpan perubahan</button>
         </div>
       </div>
+
+      <p class="op-catatan">
+        Tekan <strong>Ubah</strong> pada sebuah kartu untuk menyunting judul,
+        keterangan, dan statusnya. Seret kartu lewat pegangan
+        <span class="ak-genggam-contoh">&#10495;</span> untuk menukar urutannya.
+        Yang bisa dipindah hanya urutan, bukan posisi atau ukuran, supaya tata
+        letaknya tetap rapi dari layar ponsel sampai layar lebar.
+      </p>
 
       <div class="op-saring">
         <input type="search" id="cariTampilan" placeholder="Cari judul, keterangan, atau nama fitur…" aria-label="Cari isi situs" />
@@ -221,6 +230,28 @@
 
       <div id="daftarCatatan" class="ak-riwayat"></div>
     </section>
+  </div>
+</div>
+
+<!-- ============ JENDELA PENYUNTINGAN ============ -->
+<!-- Dibuka lewat tombol "Ubah" pada kartu atau pada kepala bagian. Isinya
+     dirakit shared/adminkafbe.js sesuai apa yang sedang disunting. -->
+<div class="ak-tirai" id="penyunting" hidden role="dialog" aria-modal="true" aria-labelledby="penyuntingJudul">
+  <div class="ak-jendela">
+    <div class="ak-jendela-kepala">
+      <h3 id="penyuntingJudul"></h3>
+      <button type="button" class="ak-silang" id="penyuntingTutup" aria-label="Tutup">&times;</button>
+    </div>
+
+    <div class="ak-jendela-isi" id="penyuntingIsi"></div>
+
+    <div class="ak-jendela-kaki">
+      <button type="button" class="btn btn-ghost op-kecil" id="penyuntingBawaan">Kembalikan ke bawaan</button>
+      <span class="ak-jendela-kanan">
+        <button type="button" class="btn btn-ghost op-kecil" id="penyuntingBatal">Batal</button>
+        <button type="button" class="btn btn-primary op-kecil" id="penyuntingSimpan">Terapkan</button>
+      </span>
+    </div>
   </div>
 </div>
 
