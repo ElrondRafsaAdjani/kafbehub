@@ -248,11 +248,30 @@ const data = {
   pengaturan: { mulaiDefault: '', perMatkul: {} },
 };
 
+/*
+  Tiap koleksi diambil sendiri-sendiri dan kegagalannya ditangkap di sini.
+
+  Sebelumnya semuanya diambil dengan Promise.all, sehingga satu koleksi yang
+  gagal menjatuhkan seluruh halaman: jadwal, perubahan, dan pengumuman ikut
+  kosong padahal tidak bermasalah. Sekarang bagian yang berhasil tetap tampil,
+  dan yang gagal dilaporkan sendiri.
+*/
+const gagalMuat = new Map();   // nama koleksi -> pesan kegagalan
+
 async function ambilKoleksi(nama){
-  const snap = await getDocs(collection(db, nama));
-  const out = [];
-  snap.forEach(d => out.push({ id: d.id, ...d.data() }));
-  return out;
+  try{
+    const snap = await getDocs(collection(db, nama));
+    const out = [];
+    snap.forEach(d => out.push({ id: d.id, ...d.data() }));
+    gagalMuat.delete(nama);
+    return out;
+  }catch(err){
+    console.error(`Gagal memuat koleksi "${nama}"`, err);
+    gagalMuat.set(nama, err.code === 'permission-denied'
+      ? 'Aturan keamanan Firestore belum mengizinkan koleksi ini. Tempel ulang isi firestore.rules lewat Firebase Console, lihat langkah 1.4 di PANDUAN-PENGURUS.md.'
+      : (err.message || 'tidak diketahui'));
+    return [];
+  }
 }
 
 async function muatSemua(){
@@ -271,13 +290,26 @@ async function muatSemua(){
     data.pengumuman = pm;
     data.pengajar = pg;
 
-    const st = await getDoc(doc(db, 'pengaturan', 'umum'));
-    data.pengaturan = st.exists()
-      ? { mulaiDefault: st.data().mulaiDefault || '', perMatkul: st.data().perMatkul || {} }
-      : { mulaiDefault: '', perMatkul: {} };
+    try{
+      const st = await getDoc(doc(db, 'pengaturan', 'umum'));
+      data.pengaturan = st.exists()
+        ? { mulaiDefault: st.data().mulaiDefault || '', perMatkul: st.data().perMatkul || {} }
+        : { mulaiDefault: '', perMatkul: {} };
+      gagalMuat.delete('pengaturan');
+    }catch(err){
+      console.error('Gagal memuat pengaturan', err);
+      gagalMuat.set('pengaturan', err.message || 'tidak diketahui');
+    }
 
     gambarSemua();
-    $('statusSimpan').hidden = true;
+
+    if(gagalMuat.size === 0){
+      $('statusSimpan').hidden = true;
+    }else{
+      status(
+        `Sebagian data tidak bisa dimuat: ${[...gagalMuat.keys()].join(', ')}. `
+        + 'Bagian lainnya tetap bisa dipakai seperti biasa.', 'salah');
+    }
   }catch(err){
     console.error(err);
     status('Gagal memuat data: ' + err.message, 'salah');
@@ -1120,6 +1152,15 @@ function gambarPengajar(){
       (namaMatkul(a.kode) || a.kode).localeCompare(namaMatkul(b.kode) || b.kode)
       || String(a.kp).localeCompare(String(b.kp))
       || String(a.nama).localeCompare(String(b.nama)));
+
+  // Koleksi yang gagal dimuat terlihat sama dengan koleksi kosong, padahal
+  // artinya jauh berbeda. Bedanya dijelaskan supaya tidak dikira datanya hilang.
+  if(gagalMuat.has('pengajar')){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">
+      Data pengajar belum bisa dimuat.<br><br>${esc(gagalMuat.get('pengajar'))}
+    </td></tr></tbody>`;
+    return;
+  }
 
   if(baris.length === 0){
     t.innerHTML = `<tbody><tr><td class="op-kosong">${
