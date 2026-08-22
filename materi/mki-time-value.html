@@ -133,9 +133,15 @@
       <button type="button" data-arah="mundur">Discounting, mundur ke belakang</button>
     </div>
 
+    <div class="saklar" id="contohCepat">
+      <button type="button" data-contoh="tabungan">Nabung buat laptop</button>
+      <button type="button" data-contoh="deposito">Deposito hasil kerja magang</button>
+      <button type="button" data-contoh="warisan">Uang yang baru cair 5 tahun lagi</button>
+    </div>
+
     <div class="kendali">
-      <label>Jumlah uang <span id="lblUang" class="nilai-besar">Rp1.000.000</span>
-        <input type="range" id="inUang" min="1" max="20" step="1" value="10" />
+      <label>Jumlah uang
+        <input type="number" id="inUang" value="1000000" step="100000" min="0" />
       </label>
       <label>Bunga per tahun <span id="lblBunga" class="nilai-besar">10%</span>
         <input type="range" id="inBunga" min="1" max="30" step="1" value="10" />
@@ -157,6 +163,23 @@
     <div class="dua">
       <div><b>Compounding</b>Dari nilai sekarang menuju nilai nanti. Uangnya dikalikan (1 + r) tiap tahun, jadi bertambah.</div>
       <div><b>Discounting</b>Dari nilai nanti menuju nilai sekarang. Uangnya dibagi (1 + r) tiap tahun, jadi menyusut.</div>
+    </div>
+
+    <h4>Contoh yang sering ditemui</h4>
+    <div class="dua">
+      <div><b>Menabung untuk laptop</b>
+        Punya Rp1.000.000 sekarang, ditaruh di tabungan berbunga 6% setahun. Empat tahun lagi
+        jumlahnya jadi Rp1.262.477. Selisih Rp262.477 itu upah karena uangnya tidak dipakai dulu.</div>
+      <div><b>Uang yang baru cair nanti</b>
+        Dijanjikan Rp20.000.000 lima tahun lagi. Kalau uang bisa dibungakan 8% setahun, janji itu
+        setara Rp13.611.664 hari ini. Karena itu menerima Rp15.000.000 sekarang lebih untung
+        daripada menunggu Rp20.000.000.</div>
+      <div><b>Beli tunai atau dicicil</b>
+        Harga tunai selalu lebih murah daripada jumlah seluruh cicilan. Selisihnya bukan penipuan,
+        melainkan harga dari kesempatan membayar belakangan.</div>
+      <div><b>Kenapa THR terasa lebih berharga</b>
+        Uang yang diterima lebih awal bisa langsung dipakai atau dibungakan, sedangkan uang yang
+        sama besarnya di tahun depan tidak sempat melakukan keduanya.</div>
     </div>
 
     <h4>Rumusnya saling kebalikan</h4>
@@ -249,12 +272,29 @@
   }));
   [inUang, inBunga, inTahun].forEach(el => el.addEventListener('input', gambarWaktu));
 
+  // Contoh yang dekat dengan keseharian mahasiswa, supaya angkanya terasa nyata
+  // sebelum dioprek sendiri.
+  const CONTOH = {
+    tabungan:  { uang:1000000, bunga:6,  tahun:4, arah:'maju' },
+    deposito:  { uang:5000000, bunga:6,  tahun:3, arah:'maju' },
+    warisan:   { uang:20000000, bunga:8, tahun:5, arah:'mundur' },
+  };
+
+  document.querySelectorAll('[data-contoh]').forEach(b => b.addEventListener('click', () => {
+    const c = CONTOH[b.dataset.contoh];
+    inUang.value = c.uang; inBunga.value = c.bunga; inTahun.value = c.tahun;
+    arah = c.arah;
+    document.querySelectorAll('[data-arah]').forEach(x =>
+      x.classList.toggle('aktif', x.dataset.arah === c.arah));
+    document.querySelectorAll('[data-contoh]').forEach(x => x.classList.toggle('aktif', x === b));
+    gambarWaktu();
+  }));
+
   function gambarWaktu(){
-    const pokok = +inUang.value * 100000;      // 1 langkah = Rp100.000
+    const pokok = +inUang.value || 0;
     const r = +inBunga.value / 100;
     const n = +inTahun.value;
 
-    document.getElementById('lblUang').textContent = rp(pokok);
     document.getElementById('lblBunga').textContent = (+inBunga.value) + '%';
     document.getElementById('lblTahun').textContent = n + ' tahun';
 

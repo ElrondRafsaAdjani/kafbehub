@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Valuasi Saham - Manajemen Keuangan dan Investasi - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .saklar{display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 0;}
+  .saklar button{
+    font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.88rem;
+    padding:10px 18px; border-radius:100px; cursor:pointer;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink-soft);
+  }
+  .saklar button:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+  .saklar button.aktif{background:var(--owl-dark2); color:#fff; border-color:var(--owl-dark2);}
+
+  .story-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:28px; box-shadow:var(--shadow); margin-top:18px;
+  }
+  .chapter-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .chapter-badge{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
+    background:var(--bg-deep); color:var(--owl-dark2);
+  }
+  .progress-dots{display:flex; gap:6px;}
+  .progress-dots .dot{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s, transform .2s;}
+  .progress-dots .dot.active{background:var(--gold); transform:scale(1.3);}
+  .progress-dots .dot.done{background:var(--owl-mid);}
+
+  .story-layout{display:grid; grid-template-columns:290px 1fr; gap:26px; align-items:start;}
+  @media (max-width:860px){ .story-layout{display:flex; flex-direction:column; gap:18px;} }
+  .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .owl-panel svg{width:140px;}
+  .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
+  @media (max-width:860px){ .owl-panel svg{width:80px;} }
+
+  .bubble{
+    position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
+    font-size:0.93rem; line-height:1.65; color:var(--ink); min-height:160px;
+  }
+  .bubble::before{
+    content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:9px solid var(--bg-deep);
+  }
+  @media (min-width:861px){
+    .bubble::before{ top:26px; left:-9px; transform:none; border-left:none; border-bottom:9px solid transparent; border-top:9px solid transparent; border-right:9px solid var(--bg-deep); }
+  }
+  .bubble .hit{
+    display:block; margin-top:10px; padding:9px 12px; background:var(--surface);
+    border-radius:10px; font-family:'Baloo 2', serif; font-size:1rem; color:var(--owl-dark2);
+  }
+
+  .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:16px;}
+  #svgSaham{width:100%; height:auto; aspect-ratio:640/400; display:block;}
+  .viz-hide{opacity:0; transition:opacity .5s ease;}
+  .viz-hide.revealed{opacity:1;}
+
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
+  .nav-row .spacer{flex:1;}
+  #btnRestart{display:none;}
+
+  .kotak-materi{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:26px; margin-top:22px;
+  }
+  .kotak-materi h3{font-size:1.2rem; margin-bottom:6px;}
+  .kotak-materi > p{color:var(--ink-soft); font-size:0.94rem; line-height:1.65; margin:0 0 14px; max-width:74ch;}
+  .rumus{
+    display:inline-block; background:var(--bg-deep); border-radius:14px; padding:14px 20px;
+    font-size:1.05rem; color:var(--owl-dark2); font-family:'Baloo 2', serif; margin:4px 8px 10px 0;
+  }
+  .rumus .pecahan{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 4px;}
+  .rumus .pecahan .atas{border-bottom:2px solid var(--owl-dark2); padding:0 8px 2px;}
+  .rumus .pecahan .bawah{padding:2px 8px 0;}
+
+  .dua{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;}
+  @media (max-width:760px){ .dua{grid-template-columns:1fr;} }
+  .dua > div{background:var(--bg-deep); border-radius:16px; padding:16px 18px; font-size:0.9rem; line-height:1.65; color:var(--ink-soft);}
+  .dua b{display:block; color:var(--owl-dark2); font-size:1rem; margin-bottom:4px;}
+  .dua ul{margin:6px 0 0; padding-left:18px;}
+</style>
+</head>
+<body>
+
+<div id="kafbeNav"></div>
+<script src="/shared/nav.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="mki.html">← Kembali ke Manajemen Keuangan dan Investasi</a>
+
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Manajemen Keuangan dan Investasi</span>
+    <h2>Valuasi Saham</h2>
+    <p>Harga wajar selembar saham adalah seluruh dividen yang akan diterimanya kelak, setelah ditarik ke nilai hari ini.</p>
+  </div>
+
+  <div class="saklar" id="pilihModel">
+    <button type="button" data-model="nol" class="aktif">1. Zero Growth</button>
+    <button type="button" data-model="tetap">2. Constant Growth</button>
+    <button type="button" data-model="ubah">3. Variable Growth</button>
+  </div>
+
+  <div class="story-card">
+    <div class="chapter-row">
+      <span class="chapter-badge" id="chapterBadge"></span>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <div class="story-layout">
+      <div class="owl-panel">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <div class="bubble" id="bubbleText"></div>
+      </div>
+      <div class="chart-wrap">
+        <svg id="svgSaham" viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
+    </div>
+  </div>
+
+  <div class="kotak-materi">
+    <h3>Ketiga rumusnya berdampingan</h3>
+    <p>Ketiganya menjawab pertanyaan yang sama, dan hanya berbeda pada anggapan tentang perilaku dividennya.</p>
+
+    <div class="rumus">Zero growth &nbsp; P<sub>0</sub> =
+      <span class="pecahan"><span class="atas">D</span><span class="bawah">r</span></span>
+    </div>
+    <div class="rumus">Constant growth &nbsp; P<sub>0</sub> =
+      <span class="pecahan"><span class="atas">D<sub>1</sub></span><span class="bawah">r &minus; g</span></span>
+      =
+      <span class="pecahan"><span class="atas">D<sub>0</sub>(1 + g)</span><span class="bawah">r &minus; g</span></span>
+    </div>
+    <div class="rumus">Variable growth &nbsp; P<sub>0</sub> = Σ
+      <span class="pecahan"><span class="atas">D<sub>i</sub></span><span class="bawah">(1 + r)<sup>i</sup></span></span>
+      +
+      <span class="pecahan"><span class="atas">D<sub>n+1</sub></span><span class="bawah">r &minus; g</span></span>
+      × (1 + r)<sup>&minus;n</sup>
+    </div>
+
+    <p style="margin-top:10px;">
+      <strong>P<sub>0</sub></strong> nilai saham hari ini &nbsp;·&nbsp;
+      <strong>D<sub>0</sub></strong> dividen periode berjalan &nbsp;·&nbsp;
+      <strong>D<sub>1</sub></strong> dividen periode berikutnya &nbsp;·&nbsp;
+      <strong>r</strong> imbal hasil yang diminta &nbsp;·&nbsp;
+      <strong>g</strong> laju pertumbuhan dividen
+    </p>
+
+    <h3 style="margin-top:24px;">Mencari laju pertumbuhannya</h3>
+    <p>Kalau yang diketahui hanya dividen paling awal dan paling akhir, lajunya dicari dengan akar.</p>
+    <div class="rumus">g = <sup>n</sup>√(FV ÷ PV) &minus; 1</div>
+  </div>
+
+  <div class="kotak-materi">
+    <h3>Dua jenis saham</h3>
+    <div class="dua">
+      <div><b>Common stock</b>
+        Kepemilikan atas perusahaan beserta hak atas sebagian labanya. Dividennya tidak dijanjikan,
+        bahkan banyak perusahaan yang sengaja tidak pernah membagikannya. Risikonya harga bisa turun,
+        tapi kerugiannya tidak pernah melebihi uang yang ditanamkan.
+        <ul><li>Hak membeli lebih dulu saat penerbitan baru</li><li>Hak suara dalam rapat pemegang saham</li></ul>
+      </div>
+      <div><b>Preferred stock</b>
+        Lebih mirip obligasi. Dividennya tetap dan dibayarkan lebih dulu, tapi harganya jarang naik jauh
+        sehingga peluang untungnya juga terbatas. Karena lebih pasti, imbal hasil yang diharapkan
+        lebih kecil daripada common stock.
+        <ul><li>Didahulukan dalam pembagian dividen</li><li>Didahulukan bila perusahaan dilikuidasi</li>
+        <li>Sebagian bisa ditukar jadi common stock</li><li>Umumnya tanpa hak suara</li></ul>
+      </div>
+    </div>
+    <p style="margin-top:14px;">Karena dividen preferred stock tetap besarnya dan berlangsung terus, penilaiannya memakai model zero growth.</p>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong>, Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="../main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  const usd = (x) => '$' + x.toLocaleString('id-ID', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  const pct = (x) => (x * 100).toFixed(0) + '%';
+
+  /* ===================================================================
+     Tiga model, masing-masing punya contoh dan ceritanya sendiri.
+     Yang digambar selalu sama bentuknya: deretan dividen per tahun, lalu
+     nilainya setelah ditarik ke hari ini. Yang berbeda cuma perilaku
+     dividennya, supaya perpindahan antar model terasa menyambung.
+  =================================================================== */
+
+  const MODEL = {};
+
+  /* ---------- 1. Zero growth ---------- */
+  {
+    const D = 3, r = 0.15, P0 = D / r;
+    MODEL.nol = {
+      judul: 'Zero Growth',
+      dividen: (t) => D,
+      tahun: 8,
+      r,
+      P0,
+      babAwal: 'Bagian: Dividen yang tidak berubah',
+      langkah: [
+        { tampil:[], teks:
+          `Sebuah perusahaan membagikan dividen <strong>${usd(D)}</strong> per lembar, dan diperkirakan segitu terus tanpa pernah berubah.` },
+        { tampil:['d1','d2','d3','d4','d5','d6','d7','d8','dst'], teks:
+          `Dividennya sama besar tiap tahun, dan tidak berhenti. Batang yang berderet ke kanan itu tidak pernah habis.` },
+        { tampil:['pv1','pv2','pv3','pv4','pv5','pv6','pv7','pv8'], teks:
+          `Tapi dividen tahun kedelapan tidak sepenting tahun pertama, karena harus ditunggu delapan tahun. Setelah didiskonto, batangnya makin pendek ke kanan.` },
+        { tampil:['jumlah'], teks:
+          `Kalau seluruhnya dijumlahkan sampai tak terhingga, hasilnya tidak membesar tanpa batas. Deret yang menyusut seperti ini punya jumlah yang terbatas.
+           <span class="hit">P<sub>0</sub> = ${usd(D)} ÷ ${pct(r)} = <strong>${usd(P0)}</strong></span>` },
+        { tampil:['hasil'], teks:
+          `Jadi selembar sahamnya bernilai <strong>${usd(P0)}</strong>. Model ini juga yang dipakai menilai <strong>preferred stock</strong>, sebab dividennya memang tetap.` }
+      ]
+    };
+  }
+
+  /* ---------- 2. Constant growth ---------- */
+  {
+    const D0 = 1.80, g = 0.05, r = 0.15;
+    const D1 = D0 * (1 + g), P0 = D1 / (r - g);
+    MODEL.tetap = {
+      judul: 'Constant Growth',
+      dividen: (t) => D0 * Math.pow(1 + g, t),
+      tahun: 8,
+      r,
+      P0,
+      babAwal: 'Bagian: Dividen yang tumbuh tetap',
+      langkah: [
+        { tampil:[], teks:
+          `Perusahaan yang sudah mapan biasanya menaikkan dividennya sedikit demi sedikit. Misalnya dividen tahun ini <strong>${usd(D0)}</strong> dan naik <strong>${pct(g)}</strong> tiap tahun.` },
+        { tampil:['d1','d2','d3','d4','d5','d6','d7','d8','dst'], teks:
+          `Dividennya menanjak.
+           <span class="hit">D<sub>1</sub> = ${usd(D0)} × (1 + ${pct(g)}) = ${usd(D1)}</span>` },
+        { tampil:['pv1','pv2','pv3','pv4','pv5','pv6','pv7','pv8'], teks:
+          `Dividennya naik ${pct(g)} tiap tahun, tapi pendiskontoannya ${pct(r)} tiap tahun. Karena pembaginya tumbuh lebih cepat, nilai sekarangnya tetap menyusut.` },
+        { tampil:['jumlah'], teks:
+          `Yang dijumlahkan bukan lagi ${pct(r)} penuh, melainkan selisihnya terhadap pertumbuhan.
+           <span class="hit">P<sub>0</sub> = ${usd(D1)} ÷ (${pct(r)} &minus; ${pct(g)}) = <strong>${usd(P0)}</strong></span>` },
+        { tampil:['hasil'], teks:
+          `Perhatikan penyebutnya <strong>r &minus; g</strong>. Kalau pertumbuhan mendekati imbal hasil yang diminta, penyebutnya mengecil dan harganya melonjak. Karena itu model ini hanya sahih bila <strong>g lebih kecil daripada r</strong>.` }
+      ]
+    };
+  }
+
+  /* ---------- 3. Variable growth ---------- */
+  {
+    const D0 = 1.50, gCepat = 0.20, gTetap = 0.05, r = 0.15, n = 3;
+    const div = [];
+    for(let t = 1; t <= n; t++) div.push(D0 * Math.pow(1 + gCepat, t));
+    const Dn1 = div[n - 1] * (1 + gTetap);
+    const nilaiAkhir = Dn1 / (r - gTetap);
+    const pvDiv = div.reduce((s, d, i) => s + d / Math.pow(1 + r, i + 1), 0);
+    const pvAkhir = nilaiAkhir / Math.pow(1 + r, n);
+    const P0 = pvDiv + pvAkhir;
+
+    MODEL.ubah = {
+      judul: 'Variable Growth',
+      dividen: (t) => t <= n ? div[t - 1] : div[n - 1] * Math.pow(1 + gTetap, t - n),
+      tahun: 8,
+      r,
+      P0,
+      batas: n,
+      babAwal: 'Bagian: Dividen yang tumbuh dua tahap',
+      langkah: [
+        { tampil:[], teks:
+          `Perusahaan muda bisa tumbuh cepat, tapi tidak selamanya. Misalnya dividen naik <strong>${pct(gCepat)}</strong> selama <strong>${n} tahun</strong>, setelah itu melambat jadi <strong>${pct(gTetap)}</strong> seterusnya.` },
+        { tampil:['d1','d2','d3','garisBatas'], teks:
+          `Tiga tahun pertama naiknya tajam.
+           <span class="hit">${div.map(d => usd(d)).join(' &nbsp; ')}</span>` },
+        { tampil:['pv1','pv2','pv3'], teks:
+          `Ketiganya didiskonto satu per satu, persis seperti biasa.
+           <span class="hit">Jumlahnya = ${usd(pvDiv)}</span>` },
+        { tampil:['d4','d5','d6','d7','d8','dst'], teks:
+          `Mulai tahun keempat pertumbuhannya sudah tetap. Bagian ini tidak perlu dihitung satu per satu, karena bentuknya sama dengan model constant growth.` },
+        { tampil:['kotakAkhir'], teks:
+          `Seluruh dividen sejak tahun keempat diringkas jadi satu angka, seolah saham itu dijual di akhir tahun ketiga.
+           <span class="hit">${usd(Dn1)} ÷ (${pct(r)} &minus; ${pct(gTetap)}) = ${usd(nilaiAkhir)}</span>` },
+        { tampil:['pvAkhir'], teks:
+          `Angka itu masih berada di tahun ketiga, jadi harus ditarik ke hari ini juga.
+           <span class="hit">${usd(nilaiAkhir)} ÷ (1 + ${pct(r)})<sup>${n}</sup> = ${usd(pvAkhir)}</span>` },
+        { tampil:['jumlah','hasil'], teks:
+          `Tinggal menjumlahkan dua bagian tadi.
+           <span class="hit">${usd(pvDiv)} + ${usd(pvAkhir)} = <strong>${usd(P0)}</strong></span>` }
+      ]
+    };
+  }
+
+  /* ===================================================================
+     Gambar
+  =================================================================== */
+  const W = 640, H = 400;
+  const tepi = { kiri:92, kanan:34, atas:40, bawah:74 };
+  const lebar = W - tepi.kiri - tepi.kanan;
+  const dasar = H - tepi.bawah;
+  const tinggiMaks = dasar - tepi.atas;
+  const xTotal = 44;
+
+  function gambar(m){
+    const N = m.tahun;
+    const div = [];
+    for(let t = 1; t <= N; t++) div.push(m.dividen(t));
+    const pv = div.map((d, i) => d / Math.pow(1 + m.r, i + 1));
+    const puncak = Math.max(...div) * 1.25;
+    const x = (t) => tepi.kiri + (lebar / N) * (t - 0.5);
+    const tinggi = (v) => Math.max(3, (v / puncak) * tinggiMaks);
+    const lebarBatang = Math.min(30, lebar / N - 10);
+
+    let s = `<defs><marker id="kiri" viewBox="0 0 10 10" refX="9" refY="5"
+             markerWidth="6" markerHeight="6" orient="auto">
+             <path d="M0,0 L10,5 L0,10 Z" fill="var(--gold-deep)"/></marker></defs>`;
+
+    s += `<line x1="${xTotal - 26}" y1="${dasar}" x2="${W - tepi.kanan}" y2="${dasar}"
+           stroke="var(--owl-dark2)" stroke-width="2"/>`;
+    s += `<text x="${xTotal}" y="${dasar + 20}" text-anchor="middle" font-size="12"
+           font-weight="800" fill="var(--owl-dark2)">Sekarang</text>`;
+
+    // Dividen tiap tahun
+    for(let t = 1; t <= N; t++){
+      const h = tinggi(div[t - 1]);
+      const lewatBatas = m.batas && t > m.batas;
+      s += `<g id="d${t}" class="viz-hide">
+              <rect x="${x(t) - lebarBatang / 2}" y="${dasar - h}" width="${lebarBatang}" height="${h}"
+               rx="4" fill="${lewatBatas ? 'var(--owl-light2)' : 'var(--owl-light)'}"/>
+              <text x="${x(t)}" y="${dasar - h - 6}" text-anchor="middle" font-size="9.5"
+               font-weight="700" fill="var(--ink-soft)">${usd(div[t - 1])}</text>
+            </g>`;
+      s += `<text x="${x(t)}" y="${dasar + 18}" text-anchor="middle" font-size="10.5"
+             fill="var(--ink-soft)">th ${t}</text>`;
+    }
+    s += `<text id="dst" class="viz-hide" x="${W - tepi.kanan + 4}" y="${dasar - 6}"
+           text-anchor="end" font-size="15" font-weight="800" fill="var(--ink-soft)">…</text>`;
+
+    // Nilai tiap dividen setelah ditarik ke hari ini, ditumpuk di kiri
+    let tumpuk = 0;
+    for(let t = 1; t <= N; t++){
+      const h = tinggi(pv[t - 1]);
+      const y = dasar - tumpuk - h;
+      s += `<rect id="pv${t}" class="viz-hide" x="${xTotal - 20}" y="${y}" width="40" height="${h}"
+             rx="3" fill="var(--gold)" opacity="0.92"/>`;
+      tumpuk += h;
+    }
+    const yJumlah = dasar - tumpuk;
+    s += `<text id="jumlah" class="viz-hide" x="${xTotal}" y="${yJumlah - 8}" text-anchor="middle"
+           font-size="11" font-weight="800" fill="var(--gold-deep)">jumlah</text>`;
+    s += `<text id="hasil" class="viz-hide" x="${xTotal}" y="${yJumlah - 26}" text-anchor="middle"
+           font-size="14" font-weight="800" fill="var(--owl-dark2)">${usd(m.P0)}</text>`;
+
+    // Khusus variable growth: batas tahap dan kotak nilai akhir
+    if(m.batas){
+      const xb = tepi.kiri + (lebar / N) * m.batas;
+      s += `<line id="garisBatas" class="viz-hide" x1="${xb}" y1="${tepi.atas - 14}" x2="${xb}" y2="${dasar}"
+             stroke="var(--owl-dark)" stroke-width="1.8" stroke-dasharray="5 4"/>`;
+      s += `<text id="kotakAkhir" class="viz-hide" x="${xb + 8}" y="${tepi.atas - 2}"
+             font-size="11" font-weight="800" fill="var(--owl-dark)">sisanya diringkas jadi satu angka</text>`;
+      s += `<path id="pvAkhir" class="viz-hide" d="M${xb + 6},${tepi.atas + 16}
+             Q${(xb + xTotal) / 2},${tepi.atas - 4} ${xTotal + 22},${yJumlah + 18}"
+             fill="none" stroke="var(--gold-deep)" stroke-width="1.8" marker-end="url(#kiri)"/>`;
+    }
+
+    document.getElementById('svgSaham').innerHTML = s;
+  }
+
+  /* ===================================================================
+     Jalannya cerita
+  =================================================================== */
+  const bubble = document.getElementById('bubbleText');
+  const badge  = document.getElementById('chapterBadge');
+  const dots   = document.getElementById('progressDots');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnUlang = document.getElementById('btnRestart');
+
+  let kunci = 'nol', ke = 0;
+
+  function tampilkan(){
+    const m = MODEL[kunci];
+    const L = m.langkah;
+    const munculkan = new Set();
+    for(let i = 0; i <= ke; i++) L[i].tampil.forEach(id => munculkan.add(id));
+
+    for(const l of L){
+      for(const id of l.tampil){
+        const el = document.getElementById(id);
+        if(el) el.classList.toggle('revealed', munculkan.has(id));
+      }
+    }
+
+    bubble.innerHTML = L[ke].teks;
+    badge.textContent = m.babAwal;
+    dots.innerHTML = L.map((_, i) =>
+      `<span class="dot ${i === ke ? 'active' : (i < ke ? 'done' : '')}"></span>`).join('');
+
+    btnPrev.disabled = ke === 0;
+    const akhir = ke === L.length - 1;
+    btnNext.style.display = akhir ? 'none' : '';
+    btnUlang.style.display = akhir ? '' : 'none';
+  }
+
+  function pilihModel(k){
+    kunci = k; ke = 0;
+    gambar(MODEL[k]);
+    tampilkan();
+  }
+
+  document.querySelectorAll('[data-model]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-model]').forEach(x => x.classList.toggle('aktif', x === b));
+    pilihModel(b.dataset.model);
+  }));
+
+  btnNext.addEventListener('click', () => {
+    if(ke < MODEL[kunci].langkah.length - 1){ ke++; tampilkan(); }
+  });
+  btnPrev.addEventListener('click', () => { if(ke > 0){ ke--; tampilkan(); } });
+  btnUlang.addEventListener('click', () => { ke = 0; tampilkan(); });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowRight') btnNext.click();
+    if(e.key === 'ArrowLeft') btnPrev.click();
+  });
+
+  pilihModel('nol');
+})();
+</script>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

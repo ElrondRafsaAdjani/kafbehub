@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Valuasi Obligasi - Manajemen Keuangan dan Investasi - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .story-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:28px; box-shadow:var(--shadow); margin-top:24px;
+  }
+  .chapter-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .chapter-badge{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
+    background:var(--bg-deep); color:var(--owl-dark2);
+  }
+  .progress-dots{display:flex; gap:6px;}
+  .progress-dots .dot{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s, transform .2s;}
+  .progress-dots .dot.active{background:var(--gold); transform:scale(1.3);}
+  .progress-dots .dot.done{background:var(--owl-mid);}
+
+  .story-layout{display:grid; grid-template-columns:290px 1fr; gap:26px; align-items:start;}
+  @media (max-width:860px){ .story-layout{display:flex; flex-direction:column; gap:18px;} }
+
+  .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .owl-panel svg{width:140px;}
+  .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
+  @media (max-width:860px){ .owl-panel svg{width:80px;} }
+
+  .bubble{
+    position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
+    font-size:0.93rem; line-height:1.65; color:var(--ink); min-height:150px;
+  }
+  .bubble::before{
+    content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:9px solid var(--bg-deep);
+  }
+  @media (min-width:861px){
+    .bubble::before{ top:26px; left:-9px; transform:none; border-left:none; border-bottom:9px solid transparent; border-top:9px solid transparent; border-right:9px solid var(--bg-deep); }
+  }
+  .bubble .hit{
+    display:block; margin-top:10px; padding:9px 12px; background:var(--surface);
+    border-radius:10px; font-family:'Baloo 2', serif; font-size:1rem; color:var(--owl-dark2);
+  }
+
+  .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:16px;}
+  #svgObligasi{width:100%; height:auto; aspect-ratio:640/430; display:block;}
+
+  .viz-hide{opacity:0; transition:opacity .5s ease;}
+  .viz-hide.revealed{opacity:1;}
+  .tumbuh{transition:height .55s ease, y .55s ease;}
+
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
+  .nav-row .spacer{flex:1;}
+  #btnRestart{display:none;}
+
+  .kotak-materi{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:26px; margin-top:22px;
+  }
+  .kotak-materi h3{font-size:1.2rem; margin-bottom:6px;}
+  .kotak-materi > p{color:var(--ink-soft); font-size:0.94rem; line-height:1.65; margin:0 0 14px; max-width:74ch;}
+  .rumus{
+    display:inline-block; background:var(--bg-deep); border-radius:14px; padding:14px 20px;
+    font-size:1.05rem; color:var(--owl-dark2); font-family:'Baloo 2', serif; margin:4px 8px 10px 0;
+  }
+  .rumus .pecahan{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 4px;}
+  .rumus .pecahan .atas{border-bottom:2px solid var(--owl-dark2); padding:0 8px 2px;}
+  .rumus .pecahan .bawah{padding:2px 8px 0;}
+
+  table.syarat{width:100%; border-collapse:collapse; margin-top:12px; font-size:0.9rem;}
+  table.syarat th, table.syarat td{padding:11px 12px; border-bottom:1px solid var(--line); text-align:left;}
+  table.syarat th{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold-deep);}
+  table.syarat td:first-child{font-family:'Baloo 2'; font-weight:700; color:var(--owl-dark2); white-space:nowrap;}
+  .lencana{display:inline-block; padding:3px 10px; border-radius:100px; font-size:0.74rem; font-weight:800;}
+  .lencana.disk{background:#FBE3E2; color:#B03B37;}
+  .lencana.prem{background:#E1F5E9; color:#1E7A44;}
+  .lencana.par{background:#E7EDF1; color:#5C7285;}
+</style>
+</head>
+<body>
+
+<div id="kafbeNav"></div>
+<script src="/shared/nav.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="mki.html">← Kembali ke Manajemen Keuangan dan Investasi</a>
+
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Manajemen Keuangan dan Investasi</span>
+    <h2>Valuasi Obligasi</h2>
+    <p>Menjumlahkan seluruh bunga yang akan diterima, ditambah pokok yang dikembalikan di akhir, setelah semuanya ditarik ke nilai hari ini.</p>
+  </div>
+
+  <div class="story-card">
+    <div class="chapter-row">
+      <span class="chapter-badge" id="chapterBadge">Bagian: Mengenal obligasinya</span>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <div class="story-layout">
+      <div class="owl-panel">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <div class="bubble" id="bubbleText"></div>
+      </div>
+      <div class="chart-wrap">
+        <svg id="svgObligasi" viewBox="0 0 640 430" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
+    </div>
+  </div>
+
+  <div class="kotak-materi">
+    <h3>Rumusnya</h3>
+    <p>Yang barusan dikerjakan langkah demi langkah adalah persamaan ini. Bagian kiri menjumlahkan seluruh bunga, bagian kanan mengurus pokok yang kembali di akhir.</p>
+    <div class="rumus">
+      B<sub>0</sub> = I ×
+      <span class="pecahan"><span class="atas">1 &minus; 1 ÷ (1 + r<sub>d</sub>)<sup>n</sup></span><span class="bawah">r<sub>d</sub></span></span>
+      + M ×
+      <span class="pecahan"><span class="atas">1</span><span class="bawah">(1 + r<sub>d</sub>)<sup>n</sup></span></span>
+    </div>
+    <p style="margin-top:10px;">
+      <strong>B<sub>0</sub></strong> nilai obligasi hari ini &nbsp;·&nbsp;
+      <strong>I</strong> bunga per tahun dalam rupiah, yaitu M × i &nbsp;·&nbsp;
+      <strong>M</strong> nilai par &nbsp;·&nbsp;
+      <strong>n</strong> sisa tahun sampai jatuh tempo &nbsp;·&nbsp;
+      <strong>r<sub>d</sub></strong> imbal hasil yang diminta pasar
+    </p>
+    <p>Bagian pertama itu tidak lain penjumlahan CF₁/(1+r)¹ sampai CFₙ/(1+r)ⁿ yang dipendekkan, karena bunganya sama besar tiap tahun.</p>
+  </div>
+
+  <div class="kotak-materi">
+    <h3>Kenapa harganya bisa di bawah atau di atas par</h3>
+    <p>Bunga yang dijanjikan obligasi sudah dikunci sejak diterbitkan, sedangkan imbal hasil yang diminta pasar terus berubah. Selisih keduanya yang menentukan harga.</p>
+    <table class="syarat">
+      <thead><tr><th>Keadaan</th><th>Harga</th><th>Disebut</th><th>Alasannya</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>r<sub>d</sub> &gt; i</td><td>B<sub>0</sub> &lt; par</td>
+          <td><span class="lencana disk">Discount</span></td>
+          <td>Bunganya kalah menarik dibanding yang diminta pasar, jadi harganya harus turun agar ada yang mau membeli.</td>
+        </tr>
+        <tr>
+          <td>r<sub>d</sub> &lt; i</td><td>B<sub>0</sub> &gt; par</td>
+          <td><span class="lencana prem">Premium</span></td>
+          <td>Bunganya lebih besar daripada yang diminta pasar, jadi orang rela membayar lebih mahal.</td>
+        </tr>
+        <tr>
+          <td>r<sub>d</sub> = i</td><td>B<sub>0</sub> = par</td>
+          <td><span class="lencana par">At par</span></td>
+          <td>Yang dijanjikan tepat sama dengan yang diminta, jadi tidak ada alasan menawar naik atau turun.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="kotak-materi">
+    <h3>Kalau bunganya dibayar dua kali setahun</h3>
+    <p>Semua angka yang berkaitan dengan satu periode dibelah dua, dan banyaknya periode dikalikan dua. Bentuk persamaannya tidak berubah sama sekali.</p>
+    <div class="rumus">
+      B<sub>0</sub> =
+      <span class="pecahan"><span class="atas">I</span><span class="bawah">2</span></span>
+      ×
+      <span class="pecahan"><span class="atas">1 &minus; 1 ÷ (1 + r<sub>d</sub>/2)<sup>2n</sup></span><span class="bawah">r<sub>d</sub> ÷ 2</span></span>
+      + M ×
+      <span class="pecahan"><span class="atas">1</span><span class="bawah">(1 + r<sub>d</sub>/2)<sup>2n</sup></span></span>
+    </div>
+  </div>
+
+  <div class="kotak-materi">
+    <h3>Yield to Maturity</h3>
+    <p>Kalau harga obligasinya sudah diketahui dan yang dicari justru imbal hasilnya, pertanyaannya dibalik: berapa tingkat pengembalian yang didapat pembeli bila obligasi dipegang sampai jatuh tempo. Perkiraan cepatnya memakai rumus berikut.</p>
+    <div class="rumus">
+      YTM =
+      <span class="pecahan">
+        <span class="atas">I + (par &minus; N<sub>d</sub>) ÷ n</span>
+        <span class="bawah">(par + N<sub>d</sub>) ÷ 2</span>
+      </span>
+    </div>
+    <p style="margin-top:10px;"><strong>N<sub>d</sub></strong> adalah nilai pasar dikurangi biaya penerbitan. Pembilangnya menjumlahkan bunga tahunan dengan selisih harga yang tersebar rata sepanjang sisa umurnya, sedangkan penyebutnya memakai harga rata-rata antara sekarang dan saat jatuh tempo.</p>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong>, Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="../main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ===================================================================
+     Contohnya sengaja memakai angka bulat dan rd di atas i, supaya di akhir
+     terlihat obligasinya dijual di bawah par. Keadaan itu yang paling sering
+     membingungkan waktu pertama belajar.
+  =================================================================== */
+  const M = 1000;      // nilai par
+  const i = 0.08;      // bunga yang dijanjikan
+  const rd = 0.10;     // imbal hasil yang diminta pasar
+  const n = 5;         // sisa tahun
+  const I = M * i;     // bunga per tahun dalam dolar
+
+  const pvKupon = (t) => I / Math.pow(1 + rd, t);
+  const pvPar = M / Math.pow(1 + rd, n);
+
+  // Memakai toLocaleString supaya pemisah ribuannya ikut, sebab toFixed saja
+  // menghasilkan "1000,00" alih-alih "1.000,00".
+  const usd = (x) => '$' + x.toLocaleString('id-ID', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+  const totalKupon = [1,2,3,4,5].reduce((s, t) => s + pvKupon(t), 0);
+  const nilai = totalKupon + pvPar;
+
+  const BAB = {
+    kenal:'Bagian: Mengenal obligasinya',
+    kupon:'Bagian: Mendiskonto bunganya',
+    par:  'Bagian: Pokok yang kembali',
+    hasil:'Bagian: Nilainya'
+  };
+
+  const LANGKAH = [
+    { bab:'kenal', tampil:[], teks:
+      `Obligasi itu surat utang. Penerbitnya berjanji membayar <strong>bunga tiap tahun</strong>, lalu mengembalikan <strong>pokoknya</strong> saat jatuh tempo.` },
+    { bab:'kenal', tampil:['kupon1','kupon2','kupon3','kupon4','kupon5','labelKupon'], teks:
+      `Contohnya obligasi bernilai par <strong>${usd(M)}</strong> dengan bunga <strong>8%</strong> setahun selama <strong>5 tahun</strong>. Artinya tiap tahun pemegangnya menerima ${usd(I)}.` },
+    { bab:'kenal', tampil:['par','labelPar'], teks:
+      `Di tahun kelima, selain bunga terakhir, pokok sebesar <strong>${usd(M)}</strong> juga dikembalikan. Batang tinggi di ujung kanan itulah pokoknya.` },
+    { bab:'kenal', tampil:['catatanR'], teks:
+      `Sekarang pasar meminta imbal hasil <strong>10%</strong> untuk obligasi sejenis. Angka itu yang dipakai mendiskonto, bukan bunga 8% yang tertulis di suratnya.` },
+
+    { bab:'kupon', tampil:['pv1','panah1'], teks:
+      `Bunga ${usd(I)} tahun pertama baru diterima setahun lagi, jadi nilainya hari ini lebih kecil.
+       <span class="hit">${usd(I)} ÷ (1 + 10%)<sup>1</sup> = ${usd(pvKupon(1))}</span>` },
+    { bab:'kupon', tampil:['pv2','panah2'], teks:
+      `Bunga tahun kedua menunggu dua tahun, jadi dibagi dua kali.
+       <span class="hit">${usd(I)} ÷ (1 + 10%)<sup>2</sup> = ${usd(pvKupon(2))}</span>` },
+    { bab:'kupon', tampil:['pv3','panah3','pv4','panah4','pv5','panah5'], teks:
+      `Begitu seterusnya sampai tahun kelima. Makin jauh tahunnya, makin kecil sisanya.
+       <span class="hit">${usd(pvKupon(3))} &nbsp; ${usd(pvKupon(4))} &nbsp; ${usd(pvKupon(5))}</span>` },
+    { bab:'kupon', tampil:['totalKupon'], teks:
+      `Kelima bunga itu dijumlahkan setelah masing-masing dikecilkan.
+       <span class="hit">Jumlah bunga = ${usd(totalKupon)}</span>
+       Padahal kalau dijumlahkan mentah-mentah tanpa didiskonto, angkanya ${usd(I * n)}.` },
+
+    { bab:'par', tampil:['pvPar','panahPar'], teks:
+      `Pokok ${usd(M)} juga baru kembali lima tahun lagi, jadi diperlakukan sama.
+       <span class="hit">${usd(M)} ÷ (1 + 10%)<sup>5</sup> = ${usd(pvPar)}</span>` },
+
+    { bab:'hasil', tampil:['totalAkhir'], teks:
+      `Nilai obligasinya adalah jumlah keduanya.
+       <span class="hit">${usd(totalKupon)} + ${usd(pvPar)} = <strong>${usd(nilai)}</strong></span>` },
+    { bab:'hasil', tampil:['garisPar','labelBanding'], teks:
+      `Nilainya <strong>${usd(nilai)}</strong>, di bawah par ${usd(M)}. Obligasi ini dijual <strong>at discount</strong>.
+       Sebabnya pasar meminta 10% sementara suratnya cuma menjanjikan 8%, jadi harganya turun sampai selisihnya tertutup.` }
+  ];
+
+  /* ---------- Gambar ---------- */
+  const W = 640, H = 430;
+  const tepi = { kiri:96, kanan:30, atas:34, bawah:96 };
+  const lebar = W - tepi.kiri - tepi.kanan;
+  const dasar = H - tepi.bawah;
+  const tinggiMaks = dasar - tepi.atas;
+  const puncak = M * 1.12;
+  const x = (t) => tepi.kiri + (lebar / n) * (t - 0.5);
+  const tinggi = (v) => Math.max(3, (v / puncak) * tinggiMaks);
+  const xTotal = 46;
+
+  function gambar(){
+    let s = '';
+
+    s += `<defs><marker id="kiri" viewBox="0 0 10 10" refX="9" refY="5"
+           markerWidth="6" markerHeight="6" orient="auto">
+           <path d="M0,0 L10,5 L0,10 Z" fill="var(--gold-deep)"/></marker></defs>`;
+
+    // Sumbu waktu dan tahunnya
+    s += `<line x1="${xTotal - 26}" y1="${dasar}" x2="${W - tepi.kanan}" y2="${dasar}"
+           stroke="var(--owl-dark2)" stroke-width="2"/>`;
+    for(let t = 1; t <= n; t++){
+      s += `<text x="${x(t)}" y="${dasar + 20}" text-anchor="middle" font-size="12"
+             font-weight="700" fill="var(--ink-soft)">Tahun ${t}</text>`;
+    }
+    s += `<text x="${xTotal}" y="${dasar + 20}" text-anchor="middle" font-size="12"
+           font-weight="800" fill="var(--owl-dark2)">Sekarang</text>`;
+
+    // Bunga tiap tahun
+    for(let t = 1; t <= n; t++){
+      const h = tinggi(I);
+      s += `<g id="kupon${t}" class="viz-hide">
+              <rect x="${x(t) - 19}" y="${dasar - h}" width="38" height="${h}" rx="5" fill="var(--owl-light)"/>
+              <text x="${x(t)}" y="${dasar - h - 7}" text-anchor="middle" font-size="11"
+               font-weight="700" fill="var(--ink-soft)">${usd(I)}</text>
+            </g>`;
+    }
+    s += `<text id="labelKupon" class="viz-hide" x="${x(1)}" y="${tepi.atas + 4}" font-size="11.5"
+           font-weight="700" fill="var(--ink-soft)">bunga ${usd(I)} tiap tahun</text>`;
+
+    // Pokok di tahun terakhir
+    const hPar = tinggi(M);
+    s += `<g id="par" class="viz-hide">
+            <rect x="${x(n) + 22} " y="${dasar - hPar}" width="34" height="${hPar}" rx="5" fill="var(--owl-mid)"/>
+            <text x="${x(n) + 39}" y="${dasar - hPar - 7}" text-anchor="middle" font-size="11"
+             font-weight="800" fill="var(--owl-dark)">${usd(M)}</text>
+          </g>`;
+    s += `<text id="labelPar" class="viz-hide" x="${x(n) + 39}" y="${dasar - hPar - 24}"
+           text-anchor="middle" font-size="11" font-weight="700" fill="var(--owl-dark)">pokok</text>`;
+
+    s += `<text id="catatanR" class="viz-hide" x="${W - tepi.kanan}" y="${tepi.atas + 4}"
+           text-anchor="end" font-size="12" font-weight="800" fill="#B03B37">pasar meminta r = 10%</text>`;
+
+    // Nilai tiap arus setelah didiskontokan, ditumpuk di sisi "Sekarang"
+    let tumpuk = 0;
+    for(let t = 1; t <= n; t++){
+      const v = pvKupon(t), h = tinggi(v);
+      const y = dasar - tumpuk - h;
+      s += `<rect id="pv${t}" class="viz-hide" x="${xTotal - 22}" y="${y}" width="44" height="${h}"
+             rx="4" fill="var(--gold)" opacity="0.9"/>`;
+      s += `<path id="panah${t}" class="viz-hide" d="M${x(t) - 20},${dasar - tinggi(I) / 2}
+             Q${(x(t) + xTotal) / 2},${y - 34} ${xTotal + 24},${y + h / 2}"
+             fill="none" stroke="var(--gold-deep)" stroke-width="1.8" marker-end="url(#kiri)"/>`;
+      tumpuk += h;
+    }
+    const yTotalKupon = dasar - tumpuk;
+    s += `<text id="totalKupon" class="viz-hide" x="${xTotal}" y="${yTotalKupon - 8}"
+           text-anchor="middle" font-size="11.5" font-weight="800"
+           fill="var(--gold-deep)">${usd(totalKupon)}</text>`;
+
+    // Pokok yang sudah didiskontokan, ditumpuk di atasnya
+    const hPvPar = tinggi(pvPar);
+    const yPvPar = dasar - tumpuk - hPvPar;
+    s += `<rect id="pvPar" class="viz-hide" x="${xTotal - 22}" y="${yPvPar}" width="44"
+           height="${hPvPar}" rx="4" fill="var(--owl-mid)"/>`;
+    s += `<path id="panahPar" class="viz-hide" d="M${x(n) + 22},${dasar - hPar / 2}
+           Q${(x(n) + xTotal) / 2},${yPvPar - 46} ${xTotal + 24},${yPvPar + hPvPar / 2}"
+           fill="none" stroke="var(--gold-deep)" stroke-width="1.8" marker-end="url(#kiri)"/>`;
+
+    const yPuncak = yPvPar;
+    s += `<text id="totalAkhir" class="viz-hide" x="${xTotal}" y="${yPuncak - 26}"
+           text-anchor="middle" font-size="14" font-weight="800"
+           fill="var(--owl-dark2)">${usd(nilai)}</text>`;
+
+    // Garis par sebagai pembanding
+    s += `<line id="garisPar" class="viz-hide" x1="${xTotal - 34}" y1="${dasar - tinggi(M)}"
+           x2="${W - tepi.kanan}" y2="${dasar - tinggi(M)}"
+           stroke="#B03B37" stroke-width="2" stroke-dasharray="6 4"/>`;
+    s += `<text id="labelBanding" class="viz-hide" x="${W - tepi.kanan}" y="${dasar - tinggi(M) - 8}"
+           text-anchor="end" font-size="11.5" font-weight="800" fill="#B03B37">par ${usd(M)}</text>`;
+
+    document.getElementById('svgObligasi').innerHTML = s;
+  }
+
+  /* ---------- Jalannya cerita ---------- */
+  const bubble = document.getElementById('bubbleText');
+  const badge  = document.getElementById('chapterBadge');
+  const dots   = document.getElementById('progressDots');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnUlang = document.getElementById('btnRestart');
+
+  gambar();
+  let ke = 0;
+
+  function tampilkan(){
+    const munculkan = new Set();
+    for(let i = 0; i <= ke; i++) LANGKAH[i].tampil.forEach(id => munculkan.add(id));
+
+    for(const l of LANGKAH){
+      for(const id of l.tampil){
+        const el = document.getElementById(id);
+        if(el) el.classList.toggle('revealed', munculkan.has(id));
+      }
+    }
+
+    bubble.innerHTML = LANGKAH[ke].teks;
+    badge.textContent = BAB[LANGKAH[ke].bab];
+    dots.innerHTML = LANGKAH.map((_, i) =>
+      `<span class="dot ${i === ke ? 'active' : (i < ke ? 'done' : '')}"></span>`).join('');
+
+    btnPrev.disabled = ke === 0;
+    const akhir = ke === LANGKAH.length - 1;
+    btnNext.style.display = akhir ? 'none' : '';
+    btnUlang.style.display = akhir ? '' : 'none';
+  }
+
+  btnNext.addEventListener('click', () => { if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
+  btnPrev.addEventListener('click', () => { if(ke > 0){ ke--; tampilkan(); } });
+  btnUlang.addEventListener('click', () => { ke = 0; tampilkan(); });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowRight') btnNext.click();
+    if(e.key === 'ArrowLeft') btnPrev.click();
+  });
+
+  tampilkan();
+})();
+</script>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
