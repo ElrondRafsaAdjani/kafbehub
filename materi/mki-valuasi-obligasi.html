@@ -342,12 +342,16 @@
     */
     const hPar = tinggi(M);
     const yPar = dasar - hKupon - hPar;
+    /*
+      Tulisannya berwarna gelap, bukan putih. Batang ini memakai --owl-mid yang
+      cerah, dan teks putih di atasnya nyaris tidak terbaca.
+    */
     s += `<g id="par" class="viz-hide">
             <rect x="${x(n) - 19}" y="${yPar}" width="38" height="${hPar}" rx="5" fill="var(--owl-mid)"/>
             <text x="${x(n)}" y="${yPar + 20}" text-anchor="middle" font-size="11"
-             font-weight="800" fill="#fff">${usd(M)}</text>
+             font-weight="800" fill="var(--owl-dark2)">${usd(M)}</text>
             <text id="labelPar" x="${x(n)}" y="${yPar + 36}" text-anchor="middle" font-size="10"
-             font-weight="700" fill="#fff" opacity="0.85">pokok</text>
+             font-weight="700" fill="var(--owl-dark2)">pokok</text>
           </g>`;
 
     // Nilai tiap arus setelah didiskontokan, ditumpuk di sisi "Sekarang"
@@ -381,7 +385,7 @@
     // nilainya sama dengan par, padahal justru jarak antara puncak kolom dan
     // garis itulah diskonnya.
     s += `<text id="totalAkhir" class="viz-hide" x="${xTotal}" y="${yPvPar + 19}"
-           text-anchor="middle" font-size="14" font-weight="800" fill="#fff">${usd(nilai)}</text>`;
+           text-anchor="middle" font-size="14" font-weight="800" fill="var(--owl-dark2)">${usd(nilai)}</text>`;
 
     /*
       Garis par sengaja pendek dan hanya membentang di sisi kolom hasil, sebab

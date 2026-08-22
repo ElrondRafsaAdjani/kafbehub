@@ -357,9 +357,11 @@
     // Daerah setelah masa tumbuh cepat, ditandai lebih dulu supaya di belakang
     if(m.batas){
       const xb = tepi.kiri + (lebar / N) * m.batas;
+      // Bayangannya dibuat sangat tipis. Pada kadar sebelumnya, batang biru
+      // muda di dalamnya melebur dengan latarnya sendiri.
       s += `<rect id="daerahSisa" class="viz-hide" x="${xb}" y="${tepi.atas - 6}"
              width="${W - tepi.kanan - xb}" height="${dasar - tepi.atas + 6}"
-             fill="var(--owl-mid)" opacity="0.10" rx="8"/>`;
+             fill="var(--owl-dark2)" opacity="0.055" rx="8"/>`;
       s += `<line id="garisBatas" class="viz-hide" x1="${xb}" y1="${tepi.atas - 6}" x2="${xb}" y2="${dasar}"
              stroke="var(--owl-dark)" stroke-width="1.8" stroke-dasharray="5 4"/>`;
     }
@@ -372,7 +374,7 @@
 
       s += `<g id="d${t}" class="viz-hide">
               <rect x="${x(t) - wB - 2}" y="${dasar - hD}" width="${wB}" height="${hD}"
-               rx="4" fill="var(--owl-light)"/>
+               rx="4" fill="var(--owl-light)" stroke="var(--surface)" stroke-width="1"/>
               <text x="${x(t) - wB / 2 - 2}" y="${dasar - hD - 6}" text-anchor="middle" font-size="9"
                font-weight="700" fill="var(--ink-soft)">${usd(div[t - 1])}</text>
             </g>`;
