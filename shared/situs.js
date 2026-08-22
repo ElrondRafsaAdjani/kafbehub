@@ -129,24 +129,36 @@
     bukaTirai();
   }
 
-  // Lambangnya ikut disalin ulang karena isi <body> baru saja diganti dan
-  // <symbol id="kafbe-owl"> yang asli ikut terhapus bersamanya.
+  /*
+    Lambang burung hantu untuk layar penutup.
+
+    Isi <body> diganti seluruhnya saat layar penutup dipasang, dan
+    <symbol id="kafbe-owl"> milik halaman ikut terhapus bersamanya. Jadi
+    lambangnya harus dipasang kembali.
+
+    Yang dipasang adalah SALINAN LAMBANG ASLI yang diambil dari halaman itu
+    sendiri, bukan gambar tiruan yang ditulis ulang di sini.
+
+    Sebelumnya berkas ini memuat tiruannya, dan tiruannya kurang lengkap:
+    sayap, garis bulu di dada, dan kakinya hilang, sehingga burung hantunya
+    tampil separuh jadi. Menyalin ulang gambar yang sudah ada di tempat lain
+    memang selalu berakhir begitu, cepat atau lambat, karena yang satu berubah
+    dan yang satunya tertinggal.
+
+    Pemanggilannya aman meski isi <body> sedang diganti, sebab ruas kanan
+    sebuah penugasan dihitung lebih dulu sebelum hasilnya dipasang, jadi
+    lambang aslinya masih ada saat fungsi ini membacanya.
+  */
   function lambangOwl(){
-    return '<svg width="0" height="0" style="position:absolute">' +
-      '<symbol id="kafbe-owl" viewBox="0 0 300 300">' +
-        '<ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>' +
-        '<polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>' +
-        '<polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>' +
-        '<ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>' +
-        '<g class="eyes-blink">' +
-          '<circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>' +
-          '<circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>' +
-          '<circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>' +
-          '<circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>' +
-          '<circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>' +
-        '</g>' +
-        '<path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>' +
-      '</symbol></svg>';
+    var simbol = document.getElementById('kafbe-owl');
+    if(simbol){
+      return '<svg width="0" height="0" style="position:absolute">'
+        + simbol.outerHTML + '</svg>';
+    }
+
+    // Hanya terpakai kalau halamannya memang tidak punya lambang sama sekali.
+    // Layar penutup tetap tampil utuh, hanya tanpa gambar.
+    return '';
   }
 
   /* ---------- 2. Status fitur ---------- */
