@@ -173,12 +173,11 @@ Sistem menolak menyimpan bila:
 Kelas yang bersambung, misalnya 08.00–10.00 lalu 10.00–12.00, tidak dianggap
 bentrok.
 
-> **Data ini tidak pernah tampil ke mahasiswa.** Berbeda dari data lain di
-> halaman operasional, koleksi `pengajar` bahkan tidak bisa dibaca tanpa akun
-> admin, karena memuat nama dan NRP. Aturannya ada di
-> [`firestore.rules`](firestore.rules). Jangan mengubah aturan itu menjadi
-> `allow read: if true` seperti koleksi lain, karena akan membuat seluruh
-> isinya bisa diunduh siapa pun.
+> **Data ini tidak tampil ke mahasiswa.** Berbeda dari data lain di halaman
+> operasional, koleksi `pengajar` hanya bisa dibaca oleh akun admin, karena
+> memang tidak dipakai di halaman mana pun yang dibuka pengunjung. Aturannya
+> ada di [`firestore.rules`](firestore.rules), lengkap dengan cara
+> membukanya bila suatu saat data pengajar memang ingin ditampilkan di situs.
 
 ### Pengumuman
 

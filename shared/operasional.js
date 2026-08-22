@@ -1064,9 +1064,10 @@ function gambarKelompok(){
    7c. Pengajar
    ============================================================
 
-   Berbeda dari data lain di halaman ini, isinya TIDAK PERNAH ikut diterbitkan
-   ke dokumen publik. Lihat juga firestore.rules: koleksi ini bahkan tidak
-   boleh dibaca tanpa akun admin, karena memuat nama dan NRP.
+   Berbeda dari data lain di halaman ini, isinya tidak ikut diterbitkan ke
+   dokumen publik, dan di firestore.rules koleksinya hanya bisa dibaca akun
+   admin. Bukan karena isinya rahasia, melainkan karena memang tidak dipakai
+   di halaman mana pun yang dibuka pengunjung.
 */
 
 function isiPilihanPengajar(){

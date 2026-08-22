@@ -93,13 +93,15 @@ service cloud.firestore {
     // ---------- Data pengajar ----------
     // BERBEDA dari koleksi di atas: dibacanya pun HANYA oleh admin.
     //
-    // Koleksi lain boleh dibaca publik karena isinya memang ditampilkan di
-    // situs. Koleksi ini memuat nama dan NRP, yaitu data pribadi mahasiswa,
-    // dan tidak pernah ditampilkan ke pengunjung.
+    // Koleksi lain terbuka karena isinya memang ditampilkan di situs. Yang ini
+    // tidak pernah ditampilkan ke pengunjung, jadi tidak ada alasan
+    // membukanya. Ini bukan soal NRP yang rahasia, melainkan kebiasaan menutup
+    // apa yang memang tidak dipakai siapa pun di luar pengurus.
     //
-    // Menyembunyikannya dari tampilan saja tidak cukup. Tanpa baris di bawah,
-    // siapa pun bisa membaca seluruh isinya lewat REST API Firestore tanpa
-    // menyentuh halaman operasional sama sekali.
+    // Kalau suatu saat data pengajar ingin ditampilkan di situs, ganti baris
+    // di bawah menjadi seperti koleksi lain:
+    //     allow read: if true;
+    //     allow write: if tulisanAdmin();
     match /pengajar/{id} {
       allow read, write: if tulisanAdmin();
     }
