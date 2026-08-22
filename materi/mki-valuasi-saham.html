@@ -299,6 +299,7 @@
       r,
       P0,
       batas: n,
+      nilaiAkhir,
       babAwal: 'Bagian: Dividen yang tumbuh dua tahap',
       langkah: [
         { tampil:[], teks:
@@ -309,8 +310,8 @@
         { tampil:['pv1','pv2','pv3'], teks:
           `Ketiganya didiskonto satu per satu, persis seperti biasa.
            <span class="hit">Jumlahnya = ${usd(pvDiv)}</span>` },
-        { tampil:['d4','d5','d6','d7','d8','dst'], teks:
-          `Mulai tahun keempat pertumbuhannya sudah tetap. Bagian ini tidak perlu dihitung satu per satu, karena bentuknya sama dengan model constant growth.` },
+        { tampil:['daerahSisa','d4','d5','d6','d7','d8','dst'], teks:
+          `Mulai tahun keempat pertumbuhannya sudah tetap. Bagian berbayang ini tidak perlu dihitung satu per satu, karena bentuknya sama dengan model constant growth.` },
         { tampil:['kotakAkhir'], teks:
           `Seluruh dividen sejak tahun keempat diringkas jadi satu angka, seolah saham itu dijual di akhir tahun ketiga.
            <span class="hit">${usd(Dn1)} ÷ (${pct(r)} &minus; ${pct(gTetap)}) = ${usd(nilaiAkhir)}</span>` },
@@ -328,72 +329,106 @@
      Gambar
   =================================================================== */
   const W = 640, H = 400;
-  const tepi = { kiri:92, kanan:34, atas:40, bawah:74 };
+  const tepi = { kiri:40, kanan:30, atas:94, bawah:74 };
   const lebar = W - tepi.kiri - tepi.kanan;
   const dasar = H - tepi.bawah;
   const tinggiMaks = dasar - tepi.atas;
-  const xTotal = 44;
 
+  /*
+    Tiap tahun digambar dua batang berdampingan: dividennya apa adanya dan
+    nilainya setelah didiskonto. Menumpuk nilai itu jadi satu kolom seperti
+    sebelumnya membuat penyusutannya sama sekali tidak terlihat, padahal
+    justru penyusutan itu yang sedang diceritakan.
+  */
   function gambar(m){
     const N = m.tahun;
     const div = [];
     for(let t = 1; t <= N; t++) div.push(m.dividen(t));
     const pv = div.map((d, i) => d / Math.pow(1 + m.r, i + 1));
-    const puncak = Math.max(...div) * 1.25;
+    const puncak = Math.max(...div) * 1.2;
     const x = (t) => tepi.kiri + (lebar / N) * (t - 0.5);
     const tinggi = (v) => Math.max(3, (v / puncak) * tinggiMaks);
-    const lebarBatang = Math.min(30, lebar / N - 10);
+    const wB = Math.min(23, lebar / N / 2 - 5);
 
     let s = `<defs><marker id="kiri" viewBox="0 0 10 10" refX="9" refY="5"
-             markerWidth="6" markerHeight="6" orient="auto">
+             markerWidth="6.5" markerHeight="6.5" orient="auto">
              <path d="M0,0 L10,5 L0,10 Z" fill="var(--gold-deep)"/></marker></defs>`;
 
-    s += `<line x1="${xTotal - 26}" y1="${dasar}" x2="${W - tepi.kanan}" y2="${dasar}"
-           stroke="var(--owl-dark2)" stroke-width="2"/>`;
-    s += `<text x="${xTotal}" y="${dasar + 20}" text-anchor="middle" font-size="12"
-           font-weight="800" fill="var(--owl-dark2)">Sekarang</text>`;
+    // Daerah setelah masa tumbuh cepat, ditandai lebih dulu supaya di belakang
+    if(m.batas){
+      const xb = tepi.kiri + (lebar / N) * m.batas;
+      s += `<rect id="daerahSisa" class="viz-hide" x="${xb}" y="${tepi.atas - 6}"
+             width="${W - tepi.kanan - xb}" height="${dasar - tepi.atas + 6}"
+             fill="var(--owl-mid)" opacity="0.10" rx="8"/>`;
+      s += `<line id="garisBatas" class="viz-hide" x1="${xb}" y1="${tepi.atas - 6}" x2="${xb}" y2="${dasar}"
+             stroke="var(--owl-dark)" stroke-width="1.8" stroke-dasharray="5 4"/>`;
+    }
 
-    // Dividen tiap tahun
+    s += `<line x1="${tepi.kiri - 12}" y1="${dasar}" x2="${W - tepi.kanan}" y2="${dasar}"
+           stroke="var(--owl-dark2)" stroke-width="2"/>`;
+
     for(let t = 1; t <= N; t++){
-      const h = tinggi(div[t - 1]);
-      const lewatBatas = m.batas && t > m.batas;
+      const hD = tinggi(div[t - 1]), hP = tinggi(pv[t - 1]);
+
       s += `<g id="d${t}" class="viz-hide">
-              <rect x="${x(t) - lebarBatang / 2}" y="${dasar - h}" width="${lebarBatang}" height="${h}"
-               rx="4" fill="${lewatBatas ? 'var(--owl-light2)' : 'var(--owl-light)'}"/>
-              <text x="${x(t)}" y="${dasar - h - 6}" text-anchor="middle" font-size="9.5"
+              <rect x="${x(t) - wB - 2}" y="${dasar - hD}" width="${wB}" height="${hD}"
+               rx="4" fill="var(--owl-light)"/>
+              <text x="${x(t) - wB / 2 - 2}" y="${dasar - hD - 6}" text-anchor="middle" font-size="9"
                font-weight="700" fill="var(--ink-soft)">${usd(div[t - 1])}</text>
             </g>`;
+
+      s += `<g id="pv${t}" class="viz-hide">
+              <rect x="${x(t) + 2}" y="${dasar - hP}" width="${wB}" height="${hP}"
+               rx="4" fill="var(--gold)"/>
+              <text x="${x(t) + wB / 2 + 2}" y="${dasar - hP - 6}" text-anchor="middle" font-size="9"
+               font-weight="800" fill="var(--gold-deep)">${usd(pv[t - 1])}</text>
+            </g>`;
+
       s += `<text x="${x(t)}" y="${dasar + 18}" text-anchor="middle" font-size="10.5"
              fill="var(--ink-soft)">th ${t}</text>`;
     }
-    s += `<text id="dst" class="viz-hide" x="${W - tepi.kanan + 4}" y="${dasar - 6}"
+
+    s += `<text id="dst" class="viz-hide" x="${W - tepi.kanan}" y="${dasar - 6}"
            text-anchor="end" font-size="15" font-weight="800" fill="var(--ink-soft)">…</text>`;
 
-    // Nilai tiap dividen setelah ditarik ke hari ini, ditumpuk di kiri
-    let tumpuk = 0;
-    for(let t = 1; t <= N; t++){
-      const h = tinggi(pv[t - 1]);
-      const y = dasar - tumpuk - h;
-      s += `<rect id="pv${t}" class="viz-hide" x="${xTotal - 20}" y="${y}" width="40" height="${h}"
-             rx="3" fill="var(--gold)" opacity="0.92"/>`;
-      tumpuk += h;
-    }
-    const yJumlah = dasar - tumpuk;
-    s += `<text id="jumlah" class="viz-hide" x="${xTotal}" y="${yJumlah - 8}" text-anchor="middle"
-           font-size="11" font-weight="800" fill="var(--gold-deep)">jumlah</text>`;
-    s += `<text id="hasil" class="viz-hide" x="${xTotal}" y="${yJumlah - 26}" text-anchor="middle"
-           font-size="14" font-weight="800" fill="var(--owl-dark2)">${usd(m.P0)}</text>`;
+    // Keterangan warna
+    s += `<rect x="${tepi.kiri}" y="${dasar + 30}" width="11" height="11" rx="3" fill="var(--owl-light)"/>`;
+    s += `<text x="${tepi.kiri + 16}" y="${dasar + 39}" font-size="10.5" fill="var(--ink-soft)">dividen tahun itu</text>`;
+    s += `<rect x="${tepi.kiri + 128}" y="${dasar + 30}" width="11" height="11" rx="3" fill="var(--gold)"/>`;
+    s += `<text x="${tepi.kiri + 144}" y="${dasar + 39}" font-size="10.5" fill="var(--ink-soft)">nilainya hari ini</text>`;
 
-    // Khusus variable growth: batas tahap dan kotak nilai akhir
+    // Kotak hasil di kiri atas
+    s += `<g id="jumlah" class="viz-hide">
+            <rect x="${tepi.kiri - 6}" y="14" width="196" height="58" rx="14"
+             fill="var(--gold)" opacity="0.22"/>
+            <text x="${tepi.kiri + 8}" y="36" font-size="11.5" font-weight="700"
+             fill="var(--owl-dark)">Nilai wajar selembar saham</text>
+          </g>`;
+    s += `<text id="hasil" class="viz-hide" x="${tepi.kiri + 8}" y="62" font-size="21"
+           font-weight="800" fill="var(--owl-dark2)">${usd(m.P0)}</text>`;
+
+    /*
+      Khusus variable growth: seluruh dividen setelah masa tumbuh cepat
+      diringkas jadi satu kotak, lalu kotak itu ditarik ke kotak hasil dengan
+      satu anak panah mendatar. Sebelumnya panahnya melengkung tinggi sehingga
+      arahnya justru tidak terbaca.
+    */
     if(m.batas){
       const xb = tepi.kiri + (lebar / N) * m.batas;
-      s += `<line id="garisBatas" class="viz-hide" x1="${xb}" y1="${tepi.atas - 14}" x2="${xb}" y2="${dasar}"
-             stroke="var(--owl-dark)" stroke-width="1.8" stroke-dasharray="5 4"/>`;
-      s += `<text id="kotakAkhir" class="viz-hide" x="${xb + 8}" y="${tepi.atas - 2}"
-             font-size="11" font-weight="800" fill="var(--owl-dark)">sisanya diringkas jadi satu angka</text>`;
-      s += `<path id="pvAkhir" class="viz-hide" d="M${xb + 6},${tepi.atas + 16}
-             Q${(xb + xTotal) / 2},${tepi.atas - 4} ${xTotal + 22},${yJumlah + 18}"
-             fill="none" stroke="var(--gold-deep)" stroke-width="1.8" marker-end="url(#kiri)"/>`;
+      const xk = xb + 14;
+      s += `<g id="kotakAkhir" class="viz-hide">
+              <rect x="${xk}" y="14" width="222" height="58" rx="14"
+               fill="var(--owl-mid)" opacity="0.20"/>
+              <text x="${xk + 14}" y="34" font-size="11" font-weight="700"
+               fill="var(--owl-dark)">Seluruh dividen sejak tahun ${m.batas + 1}</text>
+              <text x="${xk + 14}" y="58" font-size="18" font-weight="800"
+               fill="var(--owl-dark2)">${usd(m.nilaiAkhir)}</text>
+              <line x1="${xk + 6}" y1="72" x2="${xk + 6}" y2="${tepi.atas - 6}"
+               stroke="var(--owl-dark)" stroke-width="1.4" stroke-dasharray="3 3"/>
+            </g>`;
+      s += `<line id="pvAkhir" class="viz-hide" x1="${xk - 6}" y1="43"
+             x2="${tepi.kiri + 196}" y2="43"
+             stroke="var(--gold-deep)" stroke-width="2.4" marker-end="url(#kiri)"/>`;
     }
 
     document.getElementById('svgSaham').innerHTML = s;

@@ -290,11 +290,13 @@
 
   /* ---------- Gambar ---------- */
   const W = 640, H = 430;
-  const tepi = { kiri:96, kanan:30, atas:34, bawah:96 };
+  const tepi = { kiri:96, kanan:52, atas:44, bawah:96 };
   const lebar = W - tepi.kiri - tepi.kanan;
   const dasar = H - tepi.bawah;
   const tinggiMaks = dasar - tepi.atas;
-  const puncak = M * 1.12;
+  // Ruang atas dilebihkan supaya batang tahun kelima, yang memuat bunga dan
+  // pokok sekaligus, tidak menabrak keterangan di barisan paling atas.
+  const puncak = M * 1.42;
   const x = (t) => tepi.kiri + (lebar / n) * (t - 0.5);
   const tinggi = (v) => Math.max(3, (v / puncak) * tinggiMaks);
   const xTotal = 46;
@@ -317,29 +319,36 @@
            font-weight="800" fill="var(--owl-dark2)">Sekarang</text>`;
 
     // Bunga tiap tahun
+    const hKupon = tinggi(I);
     for(let t = 1; t <= n; t++){
-      const h = tinggi(I);
       s += `<g id="kupon${t}" class="viz-hide">
-              <rect x="${x(t) - 19}" y="${dasar - h}" width="38" height="${h}" rx="5" fill="var(--owl-light)"/>
-              <text x="${x(t)}" y="${dasar - h - 7}" text-anchor="middle" font-size="11"
+              <rect x="${x(t) - 19}" y="${dasar - hKupon}" width="38" height="${hKupon}" rx="5" fill="var(--owl-light)"/>
+              <text x="${x(t)}" y="${dasar - hKupon - 7}" text-anchor="middle" font-size="11"
                font-weight="700" fill="var(--ink-soft)">${usd(I)}</text>
             </g>`;
     }
-    s += `<text id="labelKupon" class="viz-hide" x="${x(1)}" y="${tepi.atas + 4}" font-size="11.5"
+
+    // Barisan keterangan paling atas, dipisah kiri dan kanan supaya tidak bertumpuk
+    s += `<text id="labelKupon" class="viz-hide" x="${tepi.kiri - 10}" y="20" font-size="11.5"
            font-weight="700" fill="var(--ink-soft)">bunga ${usd(I)} tiap tahun</text>`;
-
-    // Pokok di tahun terakhir
-    const hPar = tinggi(M);
-    s += `<g id="par" class="viz-hide">
-            <rect x="${x(n) + 22} " y="${dasar - hPar}" width="34" height="${hPar}" rx="5" fill="var(--owl-mid)"/>
-            <text x="${x(n) + 39}" y="${dasar - hPar - 7}" text-anchor="middle" font-size="11"
-             font-weight="800" fill="var(--owl-dark)">${usd(M)}</text>
-          </g>`;
-    s += `<text id="labelPar" class="viz-hide" x="${x(n) + 39}" y="${dasar - hPar - 24}"
-           text-anchor="middle" font-size="11" font-weight="700" fill="var(--owl-dark)">pokok</text>`;
-
-    s += `<text id="catatanR" class="viz-hide" x="${W - tepi.kanan}" y="${tepi.atas + 4}"
+    s += `<text id="catatanR" class="viz-hide" x="${W - tepi.kanan + 20}" y="20"
            text-anchor="end" font-size="12" font-weight="800" fill="#B03B37">pasar meminta r = 10%</text>`;
+
+    /*
+      Pokok digambar bertumpuk di atas bunga tahun kelima, bukan sebagai batang
+      terpisah di sebelahnya. Selain lebih jujur, sebab tahun kelima memang
+      menerima keduanya sekaligus, cara ini juga membebaskan ruang di tepi kanan
+      yang sebelumnya membuat keterangannya saling menimpa.
+    */
+    const hPar = tinggi(M);
+    const yPar = dasar - hKupon - hPar;
+    s += `<g id="par" class="viz-hide">
+            <rect x="${x(n) - 19}" y="${yPar}" width="38" height="${hPar}" rx="5" fill="var(--owl-mid)"/>
+            <text x="${x(n)}" y="${yPar + 20}" text-anchor="middle" font-size="11"
+             font-weight="800" fill="#fff">${usd(M)}</text>
+            <text id="labelPar" x="${x(n)}" y="${yPar + 36}" text-anchor="middle" font-size="10"
+             font-weight="700" fill="#fff" opacity="0.85">pokok</text>
+          </g>`;
 
     // Nilai tiap arus setelah didiskontokan, ditumpuk di sisi "Sekarang"
     let tumpuk = 0;
@@ -363,21 +372,28 @@
     const yPvPar = dasar - tumpuk - hPvPar;
     s += `<rect id="pvPar" class="viz-hide" x="${xTotal - 22}" y="${yPvPar}" width="44"
            height="${hPvPar}" rx="4" fill="var(--owl-mid)"/>`;
-    s += `<path id="panahPar" class="viz-hide" d="M${x(n) + 22},${dasar - hPar / 2}
-           Q${(x(n) + xTotal) / 2},${yPvPar - 46} ${xTotal + 24},${yPvPar + hPvPar / 2}"
+    s += `<path id="panahPar" class="viz-hide" d="M${x(n) - 22},${yPar + hPar / 2}
+           Q${(x(n) + xTotal) / 2},${Math.min(yPar, yPvPar) - 34} ${xTotal + 24},${yPvPar + hPvPar / 2}"
            fill="none" stroke="var(--gold-deep)" stroke-width="1.8" marker-end="url(#kiri)"/>`;
 
-    const yPuncak = yPvPar;
-    s += `<text id="totalAkhir" class="viz-hide" x="${xTotal}" y="${yPuncak - 26}"
-           text-anchor="middle" font-size="14" font-weight="800"
-           fill="var(--owl-dark2)">${usd(nilai)}</text>`;
+    // Hasil akhir ditulis DI DALAM puncak kolom, bukan di atasnya. Kalau
+    // ditaruh di atas, tulisannya sejajar garis par dan sekilas terbaca seolah
+    // nilainya sama dengan par, padahal justru jarak antara puncak kolom dan
+    // garis itulah diskonnya.
+    s += `<text id="totalAkhir" class="viz-hide" x="${xTotal}" y="${yPvPar + 19}"
+           text-anchor="middle" font-size="14" font-weight="800" fill="#fff">${usd(nilai)}</text>`;
 
-    // Garis par sebagai pembanding
-    s += `<line id="garisPar" class="viz-hide" x1="${xTotal - 34}" y1="${dasar - tinggi(M)}"
-           x2="${W - tepi.kanan}" y2="${dasar - tinggi(M)}"
+    /*
+      Garis par sengaja pendek dan hanya membentang di sisi kolom hasil, sebab
+      gunanya membandingkan nilai obligasi terhadap par, bukan membandingkan
+      batang arus kas di sebelah kanan.
+    */
+    const yGarisPar = dasar - tinggi(M);
+    s += `<line id="garisPar" class="viz-hide" x1="${xTotal - 40}" y1="${yGarisPar}"
+           x2="${x(2) - 26}" y2="${yGarisPar}"
            stroke="#B03B37" stroke-width="2" stroke-dasharray="6 4"/>`;
-    s += `<text id="labelBanding" class="viz-hide" x="${W - tepi.kanan}" y="${dasar - tinggi(M) - 8}"
-           text-anchor="end" font-size="11.5" font-weight="800" fill="#B03B37">par ${usd(M)}</text>`;
+    s += `<text id="labelBanding" class="viz-hide" x="${x(2) - 20}" y="${yGarisPar + 4}"
+           font-size="11.5" font-weight="800" fill="#B03B37">par ${usd(M)}</text>`;
 
     document.getElementById('svgObligasi').innerHTML = s;
   }
