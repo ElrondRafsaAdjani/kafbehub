@@ -244,6 +244,7 @@ const data = {
   jadwal: [],
   perubahan: [],
   pengumuman: [],
+  pengajar: [],
   pengaturan: { mulaiDefault: '', perMatkul: {} },
 };
 
@@ -257,16 +258,18 @@ async function ambilKoleksi(nama){
 async function muatSemua(){
   status('Memuat data…', 'sibuk');
   try{
-    const [mk, jd, pb, pm] = await Promise.all([
+    const [mk, jd, pb, pm, pg] = await Promise.all([
       ambilKoleksi('matakuliah'),
       ambilKoleksi('jadwal'),
       ambilKoleksi('perubahan'),
       ambilKoleksi('pengumuman'),
+      ambilKoleksi('pengajar'),
     ]);
     data.matakuliah = mk.sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
     data.jadwal = jd;
     data.perubahan = pb.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
     data.pengumuman = pm;
+    data.pengajar = pg;
 
     const st = await getDoc(doc(db, 'pengaturan', 'umum'));
     data.pengaturan = st.exists()
@@ -284,10 +287,12 @@ async function muatSemua(){
 function gambarSemua(){
   isiPilihanMatkul();
   isiPilihanKelas();
+  isiPilihanPengajar();
   gambarMatkul();
   gambarJadwal();
   gambarPerubahan();
   gambarKelompok();
+  gambarPengajar();
   gambarPengumuman();
   gambarPengaturan();
 }
@@ -393,6 +398,8 @@ $('formMatkul').addEventListener('submit', async (e) => {
         for(const j of terdampak) await updateDoc(doc(db, 'jadwal', j.id), { kode });
         const pbTerdampak = data.perubahan.filter(p => p.kode === lama.kode);
         for(const p of pbTerdampak) await updateDoc(doc(db, 'perubahan', p.id), { kode });
+        const pgTerdampak = data.pengajar.filter(p => p.kode === lama.kode);
+        for(const p of pgTerdampak) await updateDoc(doc(db, 'pengajar', p.id), { kode });
       }
     }else{
       await addDoc(collection(db, 'matakuliah'), { kode, nama });
@@ -415,6 +422,14 @@ async function hapusMatkul(id){
     pesan($('pesanMatkul'),
       `"${esc(m.nama)}" masih dipakai ${dipakai.length} kelas di Jadwal Permanen. `
       + 'Hapus atau pindahkan kelas-kelas itu dulu supaya jadwal tidak kehilangan namanya.',
+      'salah');
+    return;
+  }
+  const pengajarnya = data.pengajar.filter(p => p.kode === m.kode);
+  if(pengajarnya.length){
+    pesan($('pesanMatkul'),
+      `"${esc(m.nama)}" masih punya ${pengajarnya.length} pengajar terdaftar. `
+      + 'Hapus dulu datanya di tab Pengajar.',
       'salah');
     return;
   }
@@ -1012,6 +1027,183 @@ function gambarKelompok(){
     }
   }));
 }
+
+/* ============================================================
+   7c. Pengajar
+   ============================================================
+
+   Berbeda dari data lain di halaman ini, isinya TIDAK PERNAH ikut diterbitkan
+   ke dokumen publik. Lihat juga firestore.rules: koleksi ini bahkan tidak
+   boleh dibaca tanpa akun admin, karena memuat nama dan NRP.
+*/
+
+function isiPilihanPengajar(){
+  const el = $('pgKode');
+  const terpilih = el.value;
+  el.innerHTML = '<option value="">— pilih —</option>' + data.matakuliah
+    .map(m => `<option value="${esc(m.kode)}">${esc(m.kode)} · ${esc(m.nama)}</option>`).join('');
+  if(terpilih) el.value = terpilih;
+  perbaruiSaranKp();
+}
+
+// Saran KP diambil dari jadwal mata kuliah yang sedang dipilih, supaya
+// pengurus tidak perlu mengingat-ingat sendiri KP apa saja yang ada.
+function perbaruiSaranKp(){
+  const kode = $('pgKode').value;
+  const kp = [...new Set(data.jadwal.filter(j => j.kode === kode).map(j => j.kp))].sort();
+  $('daftarKp').innerHTML = kp.map(k => `<option value="${esc(k)}"></option>`).join('');
+}
+$('pgKode').addEventListener('change', perbaruiSaranKp);
+
+function kelasDari(kode, kp){
+  return data.jadwal.find(j =>
+    j.kode === kode && String(j.kp).toUpperCase() === String(kp).toUpperCase());
+}
+
+function periksaPengajar({ id, kode, kp, nama, nrp }){
+  const salah = [];
+  const hati = [];
+
+  if(!kode) salah.push('Mata kuliah belum dipilih.');
+  else if(!data.matakuliah.some(m => m.kode === kode))
+    salah.push(`Kode ${kode} tidak ada di daftar Mata Kuliah.`);
+
+  if(!kp) salah.push('KP belum diisi.');
+  if(!nama) salah.push('Nama belum diisi.');
+  if(!nrp) salah.push('NRP belum diisi.');
+
+  if(kode && kp && nrp){
+    const kembar = data.pengajar.find(p =>
+      p.id !== id && p.kode === kode
+      && String(p.kp).toUpperCase() === kp
+      && String(p.nrp).trim() === nrp);
+    if(kembar) salah.push(`NRP ${nrp} sudah terdaftar sebagai pengajar ${kode} KP ${kp}.`);
+
+    const kelas = kelasDari(kode, kp);
+    if(!kelas){
+      hati.push(`${kode} KP ${kp} belum ada di Jadwal Permanen, jadi jadwal mengajarnya belum bisa diperiksa.`);
+    }else{
+      // Satu orang tidak mungkin berada di dua ruang pada waktu bersamaan,
+      // jadi jadwal mengajarnya diperiksa terhadap kelas lain yang dipegangnya.
+      const m1 = keMenit(kelas.mulai), m2 = keMenit(kelas.selesai);
+      const lain = data.pengajar.filter(p => p.id !== id && String(p.nrp).trim() === nrp);
+      for(const p of lain){
+        const k = kelasDari(p.kode, p.kp);
+        if(!k || k.hari !== kelas.hari) continue;
+        if(k.id === kelas.id) continue;
+        if(beririsan(m1, m2, keMenit(k.mulai), keMenit(k.selesai))){
+          salah.push(
+            `NRP ${nrp} sudah mengajar ${p.kode} KP ${p.kp} pada ${k.hari} `
+            + `${rentangJam(k.mulai, k.selesai)}, jamnya beririsan dengan kelas ini.`);
+        }
+      }
+
+      const namaLain = data.pengajar.find(p =>
+        p.id !== id && String(p.nrp).trim() === nrp
+        && String(p.nama).trim().toLowerCase() !== String(nama).trim().toLowerCase());
+      if(namaLain){
+        hati.push(`NRP ${nrp} sebelumnya tercatat atas nama "${namaLain.nama}". Pastikan tidak salah ketik.`);
+      }
+    }
+  }
+
+  return { salah, hati };
+}
+
+function gambarPengajar(){
+  const t = $('tabelPengajar');
+  const q = ($('cariPengajar').value || '').trim().toLowerCase();
+
+  const baris = data.pengajar
+    .filter(p => !q || [p.kode, namaMatkul(p.kode), p.kp, p.nama, p.nrp].join(' ').toLowerCase().includes(q))
+    .sort((a, b) =>
+      (namaMatkul(a.kode) || a.kode).localeCompare(namaMatkul(b.kode) || b.kode)
+      || String(a.kp).localeCompare(String(b.kp))
+      || String(a.nama).localeCompare(String(b.nama)));
+
+  if(baris.length === 0){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">${
+      data.pengajar.length ? 'Tidak ada yang cocok dengan pencarian.' : 'Belum ada pengajar.'
+    }</td></tr></tbody>`;
+    return;
+  }
+
+  t.innerHTML = `
+    <thead><tr><th>Mata Kuliah</th><th>KP</th><th>Nama</th><th>NRP</th><th>Jadwal</th><th></th></tr></thead>
+    <tbody>${baris.map(p => {
+      const k = kelasDari(p.kode, p.kp);
+      return `<tr>
+        <td>${esc(namaMatkul(p.kode) || '(kode tidak dikenal)')}<br><span class="op-samar">${esc(p.kode)}</span></td>
+        <td>${esc(p.kp)}</td>
+        <td>${esc(p.nama)}</td>
+        <td>${esc(p.nrp)}</td>
+        <td class="op-samar">${k ? esc(k.hari + ' ' + rentangJam(k.mulai, k.selesai)) : 'belum ada di jadwal'}</td>
+        <td><div class="op-tombol-baris">
+          <button class="op-mini" data-ubah-pg="${esc(p.id)}">Ubah</button>
+          <button class="op-mini op-hapus" data-hapus-pg="${esc(p.id)}">Hapus</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-ubah-pg]').forEach(b => b.addEventListener('click', () => {
+    const p = data.pengajar.find(x => x.id === b.dataset.ubahPg);
+    if(!p) return;
+    $('pgId').value = p.id; $('pgKode').value = p.kode; $('pgKp').value = p.kp;
+    $('pgNama').value = p.nama; $('pgNrp').value = p.nrp;
+    perbaruiSaranKp(); modeUbah('formPengajar', true);
+    $('pgKode').focus();
+  }));
+
+  t.querySelectorAll('[data-hapus-pg]').forEach(b => b.addEventListener('click', async () => {
+    const p = data.pengajar.find(x => x.id === b.dataset.hapusPg);
+    if(!p || !confirm(`Hapus ${p.nama} (${p.nrp}) sebagai pengajar ${p.kode} KP ${p.kp}?`)) return;
+    try{
+      status('Menghapus…', 'sibuk');
+      await deleteDoc(doc(db, 'pengajar', p.id));
+      await muatSemua();
+      status('Pengajar dihapus.', 'benar');
+    }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
+  }));
+}
+
+$('cariPengajar').addEventListener('input', gambarPengajar);
+
+$('formPengajar').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanPengajar');
+  const isi = {
+    id: $('pgId').value,
+    kode: $('pgKode').value,
+    kp: $('pgKp').value.trim().toUpperCase(),
+    nama: $('pgNama').value.trim(),
+    nrp: $('pgNrp').value.trim(),
+  };
+
+  const { salah, hati } = periksaPengajar(isi);
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
+  if(hati.length && el.dataset.konfirmasi !== '1'){
+    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi kalau memang benar:', hati), 'hati');
+    el.dataset.konfirmasi = '1';
+    return;
+  }
+  el.dataset.konfirmasi = '';
+
+  const muatan = { kode: isi.kode, kp: isi.kp, nama: isi.nama, nrp: isi.nrp };
+  try{
+    status('Menyimpan…', 'sibuk');
+    if(isi.id) await updateDoc(doc(db, 'pengajar', isi.id), muatan);
+    else await addDoc(collection(db, 'pengajar'), muatan);
+    e.target.reset(); $('pgId').value = ''; modeUbah('formPengajar', false);
+    bersihkanPesan(el);
+    await muatSemua();
+    // Sengaja TIDAK memanggil terbitkan(): data pengajar tidak boleh ikut
+    // masuk ke dokumen yang dibaca pengunjung.
+    status('Pengajar tersimpan.', 'benar');
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
 
 /* ============================================================
    8. Pengumuman

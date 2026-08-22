@@ -69,6 +69,7 @@
       <button class="op-tab-btn active" data-tab="matakuliah" role="tab">Mata Kuliah</button>
       <button class="op-tab-btn" data-tab="jadwal" role="tab">Jadwal Permanen</button>
       <button class="op-tab-btn" data-tab="perubahan" role="tab">Perubahan Sementara</button>
+      <button class="op-tab-btn" data-tab="pengajar" role="tab">Pengajar</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
       <button class="op-tab-btn" data-tab="pengaturan" role="tab">Pengaturan</button>
     </nav>
@@ -280,6 +281,54 @@
 
       <div class="op-tabel-bungkus">
         <table class="op-tabel" id="tabelPerubahan"></table>
+      </div>
+    </section>
+
+    <!-- ---------- PENGAJAR ---------- -->
+    <section class="op-panel" id="panel-pengajar" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Pengajar</h2>
+          <p>Nama dan NRP pengajar untuk tiap KP. Data ini hanya bisa dilihat pengurus yang sudah masuk, dan tidak pernah ditampilkan di halaman mana pun yang dibuka mahasiswa.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formPengajar">
+        <input type="hidden" id="pgId" />
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="pgKode">Mata kuliah</label>
+            <select id="pgKode" required></select>
+          </div>
+          <div class="op-field op-sempit">
+            <label for="pgKp">KP</label>
+            <input type="text" id="pgKp" required maxlength="6" placeholder="A" list="daftarKp" />
+            <datalist id="daftarKp"></datalist>
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="pgNama">Nama pengajar</label>
+            <input type="text" id="pgNama" required maxlength="80" placeholder="Nama lengkap" />
+          </div>
+          <div class="op-field">
+            <label for="pgNrp">NRP</label>
+            <input type="text" id="pgNrp" required maxlength="20" placeholder="130223203" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
+          <button type="button" class="btn btn-ghost op-kecil" data-batal="formPengajar" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanPengajar" role="alert"></p>
+      </form>
+
+      <div class="op-saring">
+        <input type="search" id="cariPengajar" placeholder="Cari nama, NRP, kode, atau KP…" aria-label="Cari pengajar" />
+      </div>
+
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelPengajar"></table>
       </div>
     </section>
 

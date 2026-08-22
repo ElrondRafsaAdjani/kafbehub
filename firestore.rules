@@ -90,6 +90,20 @@ service cloud.firestore {
       allow write: if tulisanAdmin();
     }
 
+    // ---------- Data pengajar ----------
+    // BERBEDA dari koleksi di atas: dibacanya pun HANYA oleh admin.
+    //
+    // Koleksi lain boleh dibaca publik karena isinya memang ditampilkan di
+    // situs. Koleksi ini memuat nama dan NRP, yaitu data pribadi mahasiswa,
+    // dan tidak pernah ditampilkan ke pengunjung.
+    //
+    // Menyembunyikannya dari tampilan saja tidak cukup. Tanpa baris di bawah,
+    // siapa pun bisa membaca seluruh isinya lewat REST API Firestore tanpa
+    // menyentuh halaman operasional sama sekali.
+    match /pengajar/{id} {
+      allow read, write: if tulisanAdmin();
+    }
+
     // ---------- Papan skor game ----------
     // Dibiarkan seperti sebelumnya: siapa pun boleh menambah skor tanpa login,
     // tapi bentuk datanya dibatasi, dan skor yang sudah masuk tidak bisa

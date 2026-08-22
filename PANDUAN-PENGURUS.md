@@ -156,6 +156,30 @@ kotak **"Hasil pembuatan massal"**. Satu tombol di situ menghapus seluruh
 anggotanya sekaligus. Tanpa itu, membatalkan berarti menghapus puluhan baris
 satu per satu, yaitu persoalan yang justru ingin dihindari.
 
+### Pengajar
+
+Nama dan NRP pengajar untuk tiap KP. Mata kuliahnya dipilih dari daftar **Mata
+Kuliah**, jadi kode yang belum terdaftar di sana tidak bisa dipakai.
+
+Satu KP boleh punya lebih dari satu pengajar. Kolom KP menampilkan saran
+berdasarkan jadwal mata kuliah yang sedang dipilih.
+
+Sistem menolak menyimpan bila:
+
+- NRP yang sama didaftarkan dua kali pada KP yang sama
+- NRP yang sama mengajar kelas lain yang **jamnya beririsan**, karena satu orang
+  tidak mungkin berada di dua ruang pada waktu bersamaan
+
+Kelas yang bersambung, misalnya 08.00–10.00 lalu 10.00–12.00, tidak dianggap
+bentrok.
+
+> **Data ini tidak pernah tampil ke mahasiswa.** Berbeda dari data lain di
+> halaman operasional, koleksi `pengajar` bahkan tidak bisa dibaca tanpa akun
+> admin, karena memuat nama dan NRP. Aturannya ada di
+> [`firestore.rules`](firestore.rules). Jangan mengubah aturan itu menjadi
+> `allow read: if true` seperti koleksi lain, karena akan membuat seluruh
+> isinya bisa diunduh siapa pun.
+
 ### Pengumuman
 
 Tampil di halaman utama. Centang **Sematkan** untuk menaruhnya paling atas.
