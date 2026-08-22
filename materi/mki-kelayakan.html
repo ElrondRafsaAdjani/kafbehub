@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kelayakan Proyek - Manajemen Keuangan dan Investasi - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .lompat{display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 6px;}
+  .lompat a{
+    font-weight:700; font-size:0.86rem; padding:9px 16px; border-radius:100px;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink-soft);
+    text-decoration:none; transition:border-color .15s, color .15s;
+  }
+  .lompat a:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+
+  .kotak-materi{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:26px; margin-top:22px;
+  }
+  .kotak-materi h3{font-size:1.2rem; margin-bottom:6px;}
+  .kotak-materi > p{color:var(--ink-soft); font-size:0.94rem; line-height:1.65; margin:0 0 16px; max-width:74ch;}
+  .kotak-materi h4{font-size:0.98rem; margin:22px 0 8px; color:var(--owl-dark2);}
+
+  .saklar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .saklar button{
+    font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.88rem;
+    padding:10px 18px; border-radius:100px; cursor:pointer;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink-soft);
+  }
+  .saklar button:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+  .saklar button.aktif{background:var(--owl-dark2); color:#fff; border-color:var(--owl-dark2);}
+
+  .kendali{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:14px; align-items:flex-end;}
+  .kendali label{display:flex; flex-direction:column; gap:5px; font-size:0.8rem; font-weight:700; color:var(--owl-dark2); flex:1 1 130px;}
+  .kendali input{
+    font-family:'Plus Jakarta Sans'; font-size:0.92rem; padding:9px 12px;
+    border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); width:100%;
+  }
+  .kendali input[type=range]{padding:0;}
+  .nilai-besar{font-family:'Baloo 2'; font-size:1.25rem; color:var(--gold-deep); font-weight:800;}
+
+  .gambar-kotak{background:var(--bg-deep); border-radius:18px; padding:14px; margin:6px 0 4px;}
+  .gambar-kotak svg{width:100%; height:auto; display:block;}
+  #svgPp{aspect-ratio:660/260;} #svgNpv{aspect-ratio:660/300;} #svgIrr{aspect-ratio:660/300;}
+  #svgGaris{aspect-ratio:660/200;}
+
+  table.data{width:100%; border-collapse:collapse; font-size:0.9rem; margin-top:10px;}
+  table.data th, table.data td{padding:9px 12px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap;}
+  table.data th:first-child, table.data td:first-child{text-align:left;}
+  table.data th{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold-deep);}
+  table.data tfoot td{font-weight:800; color:var(--owl-dark2); border-bottom:none;}
+
+  .langkah-hitung{
+    background:var(--bg); border:1px solid var(--line); border-left:4px solid var(--gold);
+    border-radius:var(--radius-md); padding:16px 18px; margin-top:14px;
+    font-family:'Baloo 2', serif; font-size:1.02rem; line-height:2; color:var(--owl-dark2);
+  }
+  .langkah-hitung .jawab{font-size:1.28rem; font-weight:800; color:var(--gold-deep); margin-top:6px;}
+  .catatan{font-size:0.86rem; color:var(--ink-soft); line-height:1.65; margin-top:12px; font-family:'Plus Jakarta Sans';}
+
+  table.putusan{width:100%; border-collapse:collapse; margin-top:16px; font-size:0.9rem;}
+  table.putusan th, table.putusan td{padding:11px 12px; border-bottom:1px solid var(--line); text-align:center;}
+  table.putusan th:first-child, table.putusan td:first-child{text-align:left; font-weight:700; color:var(--owl-dark2);}
+  table.putusan thead th{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold-deep);}
+  td.lolos{color:#1E7A44; font-weight:800;}
+  td.gagal{color:#B03B37; font-weight:800;}
+
+  .dua{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;}
+  @media (max-width:760px){ .dua{grid-template-columns:1fr;} }
+  .dua > div{background:var(--bg-deep); border-radius:16px; padding:16px 18px; font-size:0.9rem; line-height:1.65; color:var(--ink-soft);}
+  .dua b{display:block; color:var(--owl-dark2); font-size:1rem; margin-bottom:4px;}
+</style>
+</head>
+<body>
+
+<div id="kafbeNav"></div>
+<script src="/shared/nav.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="mki.html">← Kembali ke Manajemen Keuangan dan Investasi</a>
+
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Manajemen Keuangan dan Investasi</span>
+    <h2>Kelayakan Proyek</h2>
+    <p>Empat cara menilai apakah sebuah proyek pantas dijalankan: Payback Period, NPV, IRR, dan Profitability Index.</p>
+  </div>
+
+  <nav class="lompat">
+    <a href="#soal">Soal</a>
+    <a href="#pp">Payback Period</a>
+    <a href="#npv">NPV</a>
+    <a href="#irr">IRR</a>
+    <a href="#pi">PI</a>
+    <a href="#putusan">Kesimpulan</a>
+  </nav>
+
+  <!-- ============ SOAL ============ -->
+  <div class="kotak-materi" id="soal">
+    <h3>Soal yang dipakai</h3>
+    <p>Venus Corp. mempertimbangkan dua proyek yang saling meniadakan. Modal awal masing-masing $121.000, batas payback period 2 tahun, dan biaya modal 20%. Angkanya boleh diubah sendiri.</p>
+
+    <div class="saklar">
+      <button type="button" data-proyek="X" class="aktif">Proyek X</button>
+      <button type="button" data-proyek="Y">Proyek Y</button>
+    </div>
+
+    <div class="kendali">
+      <label>Modal awal <input type="number" id="inModal" value="121000" step="1000" /></label>
+      <label>Arus kas tahun 1 <input type="number" id="cf0" value="87000" step="1000" /></label>
+      <label>Arus kas tahun 2 <input type="number" id="cf1" value="87000" step="1000" /></label>
+      <label>Arus kas tahun 3 <input type="number" id="cf2" value="87000" step="1000" /></label>
+    </div>
+    <div class="kendali">
+      <label>Biaya modal <span id="lblCoc" class="nilai-besar">20%</span>
+        <input type="range" id="inCoc" min="0" max="60" step="1" value="20" />
+      </label>
+      <label>Batas payback period (tahun) <input type="number" id="inBatas" value="2" step="1" min="1" /></label>
+    </div>
+  </div>
+
+  <!-- ============ PAYBACK PERIOD ============ -->
+  <div class="kotak-materi" id="pp">
+    <h3>Payback Period</h3>
+    <p>Berapa lama modal awal kembali. Arus kas dikumpulkan tahun demi tahun sampai menutup modalnya. Cara ini mengabaikan nilai waktu uang, jadi tidak pernah dipakai sendirian.</p>
+
+    <div class="gambar-kotak"><svg id="svgPp" viewBox="0 0 660 260"></svg></div>
+    <div class="langkah-hitung" id="hitungPp"></div>
+  </div>
+
+  <!-- ============ NPV ============ -->
+  <div class="kotak-materi" id="npv">
+    <h3>Net Present Value</h3>
+    <p>Seluruh arus kas ditarik ke nilai hari ini, lalu dikurangi modal awal. Sisanya adalah tambahan kekayaan yang benar-benar didapat setelah biaya modal terpenuhi.</p>
+
+    <div class="gambar-kotak"><svg id="svgNpv" viewBox="0 0 660 300"></svg></div>
+    <table class="data" id="tabelNpv"></table>
+    <div class="langkah-hitung" id="hitungNpv"></div>
+  </div>
+
+  <!-- ============ IRR ============ -->
+  <div class="kotak-materi" id="irr">
+    <h3>Internal Rate of Return</h3>
+    <p>Tingkat diskonto yang membuat NPV tepat nol. Tidak ada rumus langsungnya, jadi dicari dengan coba-coba: ambil dua tingkat diskonto, hitung NPV masing-masing, lalu tarik garis lurus di antaranya untuk menebak di mana NPV menyentuh nol.</p>
+
+    <div class="kendali">
+      <label>Tebakan pertama <span id="lblR1" class="nilai-besar">15%</span>
+        <input type="range" id="inR1" min="0" max="99" step="1" value="15" />
+      </label>
+      <label>Tebakan kedua <span id="lblR2" class="nilai-besar">55%</span>
+        <input type="range" id="inR2" min="0" max="99" step="1" value="55" />
+      </label>
+    </div>
+
+    <h4>Garis bantu interpolasi</h4>
+    <div class="gambar-kotak"><svg id="svgGaris" viewBox="0 0 660 200"></svg></div>
+    <div class="langkah-hitung" id="hitungIrr"></div>
+
+    <h4>Kalau NPV digambar untuk semua tingkat diskonto</h4>
+    <div class="gambar-kotak"><svg id="svgIrr" viewBox="0 0 660 300"></svg></div>
+    <p class="catatan" id="catatanIrr"></p>
+  </div>
+
+  <!-- ============ PI ============ -->
+  <div class="kotak-materi" id="pi">
+    <h3>Profitability Index</h3>
+    <p>Nilai sekarang dari seluruh arus kas dibagi modal awal. Menjawab pertanyaan berapa rupiah manfaat yang didapat untuk tiap satu rupiah yang ditanam.</p>
+    <div class="langkah-hitung" id="hitungPi"></div>
+    <p class="catatan">PI dan NPV selalu sepakat: bila NPV di atas nol, PI pasti di atas satu. Bedanya, NPV menyebut jumlah uangnya, sedangkan PI menyebut perbandingannya, sehingga lebih enak dipakai membandingkan proyek yang modalnya berbeda jauh.</p>
+  </div>
+
+  <!-- ============ KESIMPULAN ============ -->
+  <div class="kotak-materi" id="putusan">
+    <h3>Kesimpulan</h3>
+    <p>Kedua proyek dinilai dengan seluruh alat ukur pada angka yang sedang dipakai di atas.</p>
+    <table class="putusan" id="tabelPutusan"></table>
+    <p class="catatan" id="catatanPutusan"></p>
+
+    <div class="dua">
+      <div><b>Kalau alat ukurnya berbeda pendapat</b>Untuk proyek yang saling meniadakan, NPV yang dipakai, karena langsung menyatakan berapa tambahan kekayaan dalam rupiah. IRR bisa menyesatkan ketika modal kedua proyek berbeda jauh.</div>
+      <div><b>Payback period bukan penentu</b>Ia hanya mengukur kecepatan kembalinya modal dan mengabaikan seluruh arus kas setelah titik impas. Berguna sebagai penyaring awal, bukan sebagai keputusan akhir.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong>, Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="../main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  const PROYEK = { X: [87000, 87000, 87000], Y: [42000, 51000, 65000] };
+
+  const uang = (n) => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const f2 = (n) => n.toFixed(2).replace('.', ',');
+  const persen = (n) => f2(n * 100) + '%';
+
+  const el = (id) => document.getElementById(id);
+
+  function ambil(){
+    return {
+      modal: +el('inModal').value || 0,
+      cf: [0, 1, 2].map(i => +el('cf' + i).value || 0),
+      coc: +el('inCoc').value / 100,
+      batas: +el('inBatas').value || 0,
+      r1: +el('inR1').value / 100,
+      r2: +el('inR2').value / 100,
+    };
+  }
+
+  const pvArus = (cf, r) => cf.reduce((s, c, i) => s + c / Math.pow(1 + r, i + 1), 0);
+  const npv = (cf, r, modal) => pvArus(cf, r) - modal;
+
+  // IRR sebenarnya, dicari dengan membelah selang berulang kali.
+  function irrTepat(cf, modal){
+    let lo = -0.99, hi = 10;
+    if(npv(cf, lo, modal) < 0) return null;
+    for(let i = 0; i < 200; i++){
+      const m = (lo + hi) / 2;
+      if(npv(cf, m, modal) > 0) lo = m; else hi = m;
+    }
+    return (lo + hi) / 2;
+  }
+
+  /* ---------- Payback period ---------- */
+  function hitungPp(modal, cf){
+    let sisa = modal;
+    for(let i = 0; i < cf.length; i++){
+      if(sisa <= cf[i]){
+        const pecahan = cf[i] === 0 ? 0 : sisa / cf[i];
+        const tahun = i + pecahan;
+        const bulanUtuh = pecahan * 12;
+        const hari = (bulanUtuh - Math.floor(bulanUtuh)) * 30;
+        return { tercapai:true, tahunPenuh:i, pecahan, tahun,
+                 bulan:Math.floor(bulanUtuh), hari:Math.round(hari), sisaSebelum:sisa, cfTahunIni:cf[i] };
+      }
+      sisa -= cf[i];
+    }
+    return { tercapai:false, kurang:sisa };
+  }
+
+  function ppTeks(p){
+    if(!p.tercapai) return 'tidak pernah kembali';
+    const bag = [];
+    if(p.tahunPenuh) bag.push(p.tahunPenuh + ' tahun');
+    if(p.bulan) bag.push(p.bulan + ' bulan');
+    if(p.hari) bag.push(p.hari + ' hari');
+    return bag.length ? bag.join(' ') : 'kurang dari sehari';
+  }
+
+  /* ===================================================================
+     Gambar
+  =================================================================== */
+
+  // Payback: arus kas dikumpulkan sampai memotong garis modal awal.
+  function gambarPp(modal, cf, p){
+    const W = 660, H = 260, tepi = { kiri:60, kanan:26, atas:26, bawah:52 };
+    const lebar = W - tepi.kiri - tepi.kanan, dasar = H - tepi.bawah;
+    const tinggiMaks = dasar - tepi.atas;
+    const kumulatif = [];
+    let jml = 0;
+    for(const c of cf){ jml += c; kumulatif.push(jml); }
+    const puncak = Math.max(modal, ...kumulatif) * 1.1;
+    const x = (i) => tepi.kiri + (lebar / cf.length) * (i + 0.5);
+    const y = (v) => dasar - (v / puncak) * tinggiMaks;
+    const lebarBatang = Math.min(58, lebar / cf.length - 22);
+
+    let s = '';
+    kumulatif.forEach((k, i) => {
+      const tertutup = k >= modal;
+      s += `<rect x="${x(i) - lebarBatang / 2}" y="${y(k)}" width="${lebarBatang}"
+             height="${dasar - y(k)}" rx="6" fill="${tertutup ? 'var(--gold)' : 'var(--owl-light)'}"/>`;
+      s += `<text x="${x(i)}" y="${y(k) - 8}" text-anchor="middle" font-size="11"
+             font-weight="800" fill="var(--owl-dark2)">${uang(k)}</text>`;
+      s += `<text x="${x(i)}" y="${dasar + 19}" text-anchor="middle" font-size="12"
+             font-weight="700" fill="var(--ink-soft)">Tahun ${i + 1}</text>`;
+    });
+
+    s += `<line x1="${tepi.kiri - 14}" y1="${y(modal)}" x2="${W - tepi.kanan}" y2="${y(modal)}"
+           stroke="var(--owl-dark2)" stroke-width="2.4" stroke-dasharray="7 5"/>`;
+    s += `<text x="${tepi.kiri - 18}" y="${y(modal) - 7}" font-size="11.5" font-weight="800"
+           fill="var(--owl-dark2)">modal awal ${uang(modal)}</text>`;
+    s += `<line x1="${tepi.kiri - 14}" y1="${dasar}" x2="${W - tepi.kanan}" y2="${dasar}"
+           stroke="var(--owl-dark2)" stroke-width="2"/>`;
+    s += `<text x="${tepi.kiri - 14}" y="${dasar + 40}" font-size="11.5" fill="var(--ink-soft)">${
+      p.tercapai ? 'batang menjadi emas begitu modal tertutup' : 'modal belum tertutup sampai tahun terakhir'
+    }</text>`;
+
+    el('svgPp').innerHTML = s;
+  }
+
+  // NPV: arus kas apa adanya dibanding nilainya setelah didiskontokan.
+  function gambarNpv(modal, cf, r){
+    const W = 660, H = 300, tepi = { kiri:46, kanan:24, atas:34, bawah:66 };
+    const lebar = W - tepi.kiri - tepi.kanan, dasar = H - tepi.bawah;
+    const tinggiMaks = dasar - tepi.atas;
+    const pv = cf.map((c, i) => c / Math.pow(1 + r, i + 1));
+    const puncak = Math.max(...cf, modal, 1);
+    const slot = lebar / (cf.length + 1);
+    const lebarBatang = Math.min(34, slot / 2 - 8);
+
+    let s = '';
+    // Modal awal digambar sebagai batang merah di kiri
+    const hModal = (modal / puncak) * tinggiMaks;
+    s += `<rect x="${tepi.kiri + slot * 0.5 - 22}" y="${dasar - hModal}" width="44" height="${hModal}"
+           rx="6" fill="#E4A6A3"/>`;
+    s += `<text x="${tepi.kiri + slot * 0.5}" y="${dasar - hModal - 8}" text-anchor="middle"
+           font-size="11" font-weight="800" fill="#B03B37">${uang(modal)}</text>`;
+    s += `<text x="${tepi.kiri + slot * 0.5}" y="${dasar + 19}" text-anchor="middle" font-size="12"
+           font-weight="700" fill="var(--ink-soft)">Modal</text>`;
+
+    cf.forEach((c, i) => {
+      const xt = tepi.kiri + slot * (i + 1.5);
+      const hCf = (c / puncak) * tinggiMaks, hPv = (pv[i] / puncak) * tinggiMaks;
+      s += `<rect x="${xt - lebarBatang - 3}" y="${dasar - hCf}" width="${lebarBatang}" height="${hCf}"
+             rx="5" fill="var(--owl-light)"/>`;
+      s += `<rect x="${xt + 3}" y="${dasar - hPv}" width="${lebarBatang}" height="${hPv}"
+             rx="5" fill="var(--gold)"/>`;
+      s += `<text x="${xt + lebarBatang / 2 + 3}" y="${dasar - hPv - 7}" text-anchor="middle"
+             font-size="10.5" font-weight="800" fill="var(--gold-deep)">${uang(Math.round(pv[i]))}</text>`;
+      s += `<text x="${xt}" y="${dasar + 19}" text-anchor="middle" font-size="12"
+             font-weight="700" fill="var(--ink-soft)">Tahun ${i + 1}</text>`;
+      s += `<text x="${xt}" y="${dasar + 36}" text-anchor="middle" font-size="10.5"
+             fill="var(--ink-soft)">÷ ${f2(Math.pow(1 + r, i + 1))}</text>`;
+    });
+
+    s += `<line x1="${tepi.kiri - 10}" y1="${dasar}" x2="${W - tepi.kanan}" y2="${dasar}"
+           stroke="var(--owl-dark2)" stroke-width="2"/>`;
+    s += `<rect x="${tepi.kiri}" y="10" width="12" height="12" rx="3" fill="var(--owl-light)"/>`;
+    s += `<text x="${tepi.kiri + 18}" y="20" font-size="11.5" fill="var(--ink-soft)">arus kas nanti</text>`;
+    s += `<rect x="${tepi.kiri + 130}" y="10" width="12" height="12" rx="3" fill="var(--gold)"/>`;
+    s += `<text x="${tepi.kiri + 148}" y="20" font-size="11.5" fill="var(--ink-soft)">nilainya hari ini</text>`;
+
+    el('svgNpv').innerHTML = s;
+  }
+
+  /*
+    Garis bantu interpolasi, mengikuti bentuk yang dipakai di lembar asistensi:
+    dua tebakan di kedua ujung, dan IRR ditaksir dari garis lurus di antaranya.
+  */
+  function gambarGaris(r1, n1, r2, n2, irrTaksir){
+    const W = 660, H = 200;
+    const kiri = 90, kanan = W - 90, yGaris = H / 2;
+    const rKiri = Math.min(r1, r2), rKanan = Math.max(r1, r2);
+    const nKiri = rKiri === r1 ? n1 : n2, nKanan = rKiri === r1 ? n2 : n1;
+    const pos = (r) => rKanan === rKiri ? (kiri + kanan) / 2
+      : kiri + ((r - rKiri) / (rKanan - rKiri)) * (kanan - kiri);
+    const xIrr = Math.max(kiri, Math.min(kanan, pos(irrTaksir)));
+
+    const titik = (x, atas, bawah, judul, warna) => `
+      <line x1="${x}" y1="${yGaris - 40}" x2="${x}" y2="${yGaris + 40}" stroke="${warna}" stroke-width="2.5"/>
+      <text x="${x}" y="${yGaris - 50}" text-anchor="middle" font-size="12.5" font-weight="800" fill="${warna}">${judul}</text>
+      <text x="${x}" y="${yGaris - 14}" text-anchor="middle" font-size="13" font-weight="800" fill="var(--owl-dark2)">${atas}</text>
+      <text x="${x}" y="${yGaris + 26}" text-anchor="middle" font-size="12" font-weight="700" fill="${warna}">${bawah}</text>`;
+
+    let s = `<line x1="${kiri}" y1="${yGaris}" x2="${kanan}" y2="${yGaris}"
+              stroke="var(--owl-dark2)" stroke-width="2"/>`;
+    s += titik(kiri, persen(rKiri), uang(Math.round(nKiri)), 'tebakan 1', 'var(--owl-dark)');
+    s += titik(kanan, persen(rKanan), uang(Math.round(nKanan)), 'tebakan 2', 'var(--owl-dark)');
+    s += titik(xIrr, persen(irrTaksir), '0', 'IRR', 'var(--gold-deep)');
+    s += `<text x="${W / 2}" y="${H - 12}" text-anchor="middle" font-size="11.5" fill="var(--ink-soft)">
+           baris atas: tingkat diskonto &nbsp;·&nbsp; baris bawah: NPV pada tingkat itu</text>`;
+
+    el('svgGaris').innerHTML = s;
+  }
+
+  // Lengkung NPV untuk seluruh tingkat diskonto, memperlihatkan di mana ia memotong nol.
+  function gambarLengkung(modal, cf, r1, r2, irrT, irrI, coc){
+    const W = 660, H = 300, tepi = { kiri:64, kanan:26, atas:24, bawah:52 };
+    const lebar = W - tepi.kiri - tepi.kanan, tinggi = H - tepi.atas - tepi.bawah;
+    const rMaks = Math.max(0.8, (irrT || 0.6) * 1.35, r1 * 1.2, r2 * 1.2);
+    const titik = [];
+    for(let r = 0; r <= rMaks; r += rMaks / 160) titik.push([r, npv(cf, r, modal)]);
+    const nMaks = Math.max(...titik.map(t => t[1])), nMin = Math.min(...titik.map(t => t[1]));
+    const rentang = (nMaks - nMin) || 1;
+    const x = (r) => tepi.kiri + (r / rMaks) * lebar;
+    const y = (n) => tepi.atas + ((nMaks - n) / rentang) * tinggi;
+
+    let s = `<path d="M${titik.map(t => `${x(t[0]).toFixed(1)},${y(t[1]).toFixed(1)}`).join(' L')}"
+              fill="none" stroke="var(--owl-dark2)" stroke-width="2.6"/>`;
+    s += `<line x1="${tepi.kiri}" y1="${y(0)}" x2="${W - tepi.kanan}" y2="${y(0)}"
+           stroke="var(--ink-soft)" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    s += `<text x="${tepi.kiri - 8}" y="${y(0) + 4}" text-anchor="end" font-size="11.5"
+           font-weight="700" fill="var(--ink-soft)">NPV = 0</text>`;
+
+    for(const [r, warna, nama] of [[r1, 'var(--owl-mid)', 'tebakan 1'], [r2, 'var(--owl-mid)', 'tebakan 2']]){
+      if(r > rMaks) continue;
+      const n = npv(cf, r, modal);
+      s += `<circle cx="${x(r)}" cy="${y(n)}" r="5" fill="var(--owl-mid)"/>`;
+      s += `<text x="${x(r)}" y="${y(n) - 11}" text-anchor="middle" font-size="10.5"
+             font-weight="700" fill="var(--owl-dark)">${nama}</text>`;
+    }
+    // Garis lurus penghubung dua tebakan, yaitu yang dipakai interpolasi
+    if(r1 <= rMaks && r2 <= rMaks){
+      s += `<line x1="${x(r1)}" y1="${y(npv(cf, r1, modal))}" x2="${x(r2)}" y2="${y(npv(cf, r2, modal))}"
+             stroke="var(--gold-deep)" stroke-width="2" stroke-dasharray="6 4"/>`;
+    }
+    if(irrT !== null && irrT <= rMaks){
+      s += `<circle cx="${x(irrT)}" cy="${y(0)}" r="6" fill="var(--gold-deep)"/>`;
+      s += `<text x="${x(irrT)}" y="${y(0) + 24}" text-anchor="middle" font-size="11.5"
+             font-weight="800" fill="var(--gold-deep)">IRR tepat ${persen(irrT)}</text>`;
+    }
+    if(coc <= rMaks){
+      s += `<line x1="${x(coc)}" y1="${tepi.atas}" x2="${x(coc)}" y2="${H - tepi.bawah}"
+             stroke="#B03B37" stroke-width="2" stroke-dasharray="4 4"/>`;
+      s += `<text x="${x(coc)}" y="${tepi.atas + 12}" text-anchor="middle" font-size="11"
+             font-weight="800" fill="#B03B37">biaya modal</text>`;
+    }
+    s += `<line x1="${tepi.kiri}" y1="${H - tepi.bawah}" x2="${W - tepi.kanan}" y2="${H - tepi.bawah}"
+           stroke="var(--owl-dark2)" stroke-width="2"/>`;
+    for(let p = 0; p <= rMaks + 0.001; p += 0.1){
+      s += `<text x="${x(p)}" y="${H - tepi.bawah + 18}" text-anchor="middle" font-size="10.5"
+             fill="var(--ink-soft)">${Math.round(p * 100)}%</text>`;
+    }
+    s += `<text x="${(tepi.kiri + W - tepi.kanan) / 2}" y="${H - 8}" text-anchor="middle"
+           font-size="11.5" font-weight="700" fill="var(--ink-soft)">tingkat diskonto</text>`;
+
+    el('svgIrr').innerHTML = s;
+  }
+
+  /* ===================================================================
+     Menghitung dan menampilkan
+  =================================================================== */
+  function perbarui(){
+    const { modal, cf, coc, batas, r1, r2 } = ambil();
+    el('lblCoc').textContent = (coc * 100).toFixed(0) + '%';
+    el('lblR1').textContent = (r1 * 100).toFixed(0) + '%';
+    el('lblR2').textContent = (r2 * 100).toFixed(0) + '%';
+
+    /* --- Payback period --- */
+    const p = hitungPp(modal, cf);
+    gambarPp(modal, cf, p);
+    if(p.tercapai){
+      el('hitungPp').innerHTML =
+        `Sisa modal setelah tahun ${p.tahunPenuh || 0}: ${uang(p.sisaSebelum)}<br>` +
+        `${uang(p.sisaSebelum)} ÷ ${uang(p.cfTahunIni)} = ${f2(p.pecahan)} tahun<br>` +
+        `${f2(p.pecahan)} × 12 bulan = ${f2(p.pecahan * 12)} bulan<br>` +
+        `sisa bulannya × 30 hari = ${f2((p.pecahan * 12 - Math.floor(p.pecahan * 12)) * 30)} hari` +
+        `<div class="jawab">${ppTeks(p)}</div>` +
+        `<div class="catatan">Batas perusahaan ${batas} tahun, jadi proyek ini ${
+          p.tahun <= batas ? 'memenuhi syarat' : 'tidak memenuhi syarat'}.</div>`;
+    }else{
+      el('hitungPp').innerHTML = `<div class="jawab">Modal tidak pernah kembali</div>
+        <div class="catatan">Masih kurang ${uang(p.kurang)} sampai tahun terakhir.</div>`;
+    }
+
+    /* --- NPV --- */
+    const pv = cf.map((c, i) => c / Math.pow(1 + coc, i + 1));
+    const totalPv = pv.reduce((a, b) => a + b, 0);
+    const nilaiNpv = totalPv - modal;
+    gambarNpv(modal, cf, coc);
+    el('tabelNpv').innerHTML = `
+      <thead><tr><th>Tahun</th><th>Arus kas</th><th>Pembagi</th><th>Nilai hari ini</th></tr></thead>
+      <tbody>${cf.map((c, i) => `<tr>
+        <td>Tahun ${i + 1}</td><td>${uang(c)}</td>
+        <td>(1 + ${(coc * 100).toFixed(0)}%)<sup>${i + 1}</sup> = ${f2(Math.pow(1 + coc, i + 1))}</td>
+        <td>${uang(Math.round(pv[i] * 100) / 100)}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td>Jumlah nilai sekarang</td><td></td><td></td><td>${uang(Math.round(totalPv * 100) / 100)}</td></tr></tfoot>`;
+    el('hitungNpv').innerHTML =
+      `${uang(Math.round(totalPv * 100) / 100)} &minus; ${uang(modal)}` +
+      `<div class="jawab">NPV = ${uang(Math.round(nilaiNpv * 100) / 100)}</div>` +
+      `<div class="catatan">${nilaiNpv > 0
+        ? 'NPV di atas nol, artinya proyek ini menambah kekayaan setelah biaya modal terpenuhi.'
+        : 'NPV di bawah nol, artinya hasilnya belum menutup biaya modal.'}</div>`;
+
+    /* --- IRR --- */
+    const n1 = npv(cf, r1, modal), n2 = npv(cf, r2, modal);
+    const irrT = irrTepat(cf, modal);
+    let irrI = null;
+    if(n1 !== n2) irrI = r1 + (n1 / (n1 - n2)) * (r2 - r1);
+
+    if(irrI === null || !isFinite(irrI)){
+      el('hitungIrr').innerHTML = `<div class="catatan">Kedua tebakan menghasilkan NPV yang sama, jadi garisnya tidak memotong nol. Ubah salah satu tebakan.</div>`;
+      el('svgGaris').innerHTML = '';
+    }else{
+      gambarGaris(r1, n1, r2, n2, irrI);
+      el('hitungIrr').innerHTML =
+        `Pada ${persen(r1)} NPV = ${uang(Math.round(n1 * 100) / 100)}<br>` +
+        `Pada ${persen(r2)} NPV = ${uang(Math.round(n2 * 100) / 100)}<br><br>` +
+        `IRR = ${persen(r1)} + <span style="white-space:nowrap;">[ ${uang(Math.round(n1 * 100) / 100)} ÷ ( ${uang(Math.round(n1 * 100) / 100)} &minus; ${uang(Math.round(n2 * 100) / 100)} ) ]</span> × ( ${persen(r2)} &minus; ${persen(r1)} )` +
+        `<div class="jawab">IRR ≈ ${persen(irrI)}</div>`;
+    }
+
+    gambarLengkung(modal, cf, r1, r2, irrT, irrI, coc);
+
+    const beda = (irrT !== null && irrI !== null) ? Math.abs(irrT - irrI) * 100 : null;
+    el('catatanIrr').innerHTML = irrT === null
+      ? 'Arus kas ini tidak menghasilkan IRR pada rentang yang wajar.'
+      : `Lengkung NPV sebenarnya melengkung, sedangkan interpolasi menariknya dengan garis lurus. `
+        + `Karena itu hasil coba-coba hampir selalu meleset sedikit: di sini interpolasi memberi `
+        + `<strong>${irrI === null ? '—' : persen(irrI)}</strong> sementara nilai tepatnya `
+        + `<strong>${persen(irrT)}</strong>${beda === null ? '' : `, selisih ${f2(beda)} poin persen`}. `
+        + `Semakin berdekatan kedua tebakan, semakin kecil selisihnya.`;
+
+    /* --- PI --- */
+    const nilaiPi = modal === 0 ? 0 : totalPv / modal;
+    el('hitungPi').innerHTML =
+      `PI = ${uang(Math.round(totalPv * 100) / 100)} ÷ ${uang(modal)}` +
+      `<div class="jawab">PI = ${f2(nilaiPi)}</div>` +
+      `<div class="catatan">${nilaiPi > 1
+        ? `Tiap $1 yang ditanam menghasilkan $${f2(nilaiPi)} nilai sekarang, jadi layak.`
+        : `Tiap $1 yang ditanam hanya menghasilkan $${f2(nilaiPi)} nilai sekarang, jadi belum layak.`}</div>`;
+
+    tabelPutusan(modal, coc, batas);
+  }
+
+  /* --- Ringkasan kedua proyek --- */
+  function tabelPutusan(modal, coc, batas){
+    const hasil = {};
+    for(const nama of ['X', 'Y']){
+      const cf = PROYEK[nama];
+      const pvT = pvArus(cf, coc);
+      const p = hitungPp(modal, cf);
+      hasil[nama] = {
+        pp: p, ppTahun: p.tercapai ? p.tahun : Infinity,
+        npv: pvT - modal, pi: modal ? pvT / modal : 0, irr: irrTepat(cf, modal),
+      };
+    }
+    const sel = (ok, isi) => `<td class="${ok ? 'lolos' : 'gagal'}">${isi}</td>`;
+    el('tabelPutusan').innerHTML = `
+      <thead><tr><th>Alat ukur</th><th>Proyek X</th><th>Proyek Y</th><th>Syarat</th></tr></thead>
+      <tbody>
+        <tr><td>Payback Period</td>
+          ${sel(hasil.X.ppTahun <= batas, ppTeks(hasil.X.pp))}
+          ${sel(hasil.Y.ppTahun <= batas, ppTeks(hasil.Y.pp))}
+          <td>≤ ${batas} tahun</td></tr>
+        <tr><td>NPV</td>
+          ${sel(hasil.X.npv > 0, uang(Math.round(hasil.X.npv)))}
+          ${sel(hasil.Y.npv > 0, uang(Math.round(hasil.Y.npv)))}
+          <td>&gt; 0</td></tr>
+        <tr><td>IRR</td>
+          ${sel(hasil.X.irr > coc, hasil.X.irr === null ? '—' : persen(hasil.X.irr))}
+          ${sel(hasil.Y.irr > coc, hasil.Y.irr === null ? '—' : persen(hasil.Y.irr))}
+          <td>&gt; ${(coc * 100).toFixed(0)}%</td></tr>
+        <tr><td>Profitability Index</td>
+          ${sel(hasil.X.pi > 1, f2(hasil.X.pi))}
+          ${sel(hasil.Y.pi > 1, f2(hasil.Y.pi))}
+          <td>&gt; 1</td></tr>
+      </tbody>`;
+
+    const lolosX = hasil.X.npv > 0 && hasil.X.pi > 1 && hasil.X.irr > coc;
+    const lolosY = hasil.Y.npv > 0 && hasil.Y.pi > 1 && hasil.Y.irr > coc;
+    let kesimpulan;
+    if(lolosX && lolosY) kesimpulan = hasil.X.npv >= hasil.Y.npv
+      ? 'Keduanya layak, tapi karena saling meniadakan yang dipilih Proyek X, sebab NPV-nya lebih besar.'
+      : 'Keduanya layak, tapi karena saling meniadakan yang dipilih Proyek Y, sebab NPV-nya lebih besar.';
+    else if(lolosX) kesimpulan = 'Hanya Proyek X yang lolos seluruh syarat, jadi Proyek X yang dipilih.';
+    else if(lolosY) kesimpulan = 'Hanya Proyek Y yang lolos seluruh syarat, jadi Proyek Y yang dipilih.';
+    else kesimpulan = 'Tidak ada yang lolos seluruh syarat pada angka ini, jadi keduanya sebaiknya ditolak.';
+    el('catatanPutusan').textContent = kesimpulan;
+  }
+
+  /* --- Kendali --- */
+  document.querySelectorAll('[data-proyek]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-proyek]').forEach(x => x.classList.toggle('aktif', x === b));
+    PROYEK[b.dataset.proyek].forEach((v, i) => { el('cf' + i).value = v; });
+    perbarui();
+  }));
+
+  ['inModal', 'cf0', 'cf1', 'cf2', 'inCoc', 'inBatas', 'inR1', 'inR2']
+    .forEach(id => el(id).addEventListener('input', perbarui));
+
+  perbarui();
+})();
+</script>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

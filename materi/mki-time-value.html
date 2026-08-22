@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Time Value of Money - Manajemen Keuangan dan Investasi - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .lompat{display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 6px;}
+  .lompat a{
+    font-weight:700; font-size:0.86rem; padding:9px 16px; border-radius:100px;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink-soft);
+    text-decoration:none; transition:border-color .15s, color .15s;
+  }
+  .lompat a:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+
+  .kotak-materi{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:26px; margin-top:22px;
+  }
+  .kotak-materi h3{font-size:1.2rem; margin-bottom:6px;}
+  .kotak-materi > p{color:var(--ink-soft); font-size:0.94rem; line-height:1.65; margin:0 0 16px; max-width:74ch;}
+  .kotak-materi h4{font-size:0.98rem; margin:22px 0 8px; color:var(--owl-dark2);}
+
+  .rumus{
+    display:inline-block; background:var(--bg-deep); border-radius:14px;
+    padding:14px 20px; font-size:1.1rem; color:var(--owl-dark2);
+    font-family:'Baloo 2', serif; margin:4px 8px 10px 0;
+  }
+  .rumus .pecahan{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 4px;}
+  .rumus .pecahan .atas{border-bottom:2px solid var(--owl-dark2); padding:0 8px 2px;}
+  .rumus .pecahan .bawah{padding:2px 8px 0;}
+
+  .kendali{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:14px;}
+  .kendali label{display:flex; flex-direction:column; gap:5px; font-size:0.8rem; font-weight:700; color:var(--owl-dark2); flex:1 1 140px;}
+  .kendali input[type=range]{width:100%;}
+  .nilai-besar{font-family:'Baloo 2'; font-size:1.25rem; color:var(--gold-deep); font-weight:800;}
+
+  .saklar{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+  .saklar button{
+    font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.88rem;
+    padding:10px 18px; border-radius:100px; cursor:pointer;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink-soft);
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .saklar button:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+  .saklar button.aktif{background:var(--owl-dark2); color:#fff; border-color:var(--owl-dark2);}
+
+  .gambar-kotak{background:var(--bg-deep); border-radius:18px; padding:14px; margin:6px 0 4px;}
+  .gambar-kotak svg{width:100%; height:auto; display:block;}
+  #svgWaktu{aspect-ratio:660/300;}
+  #svgSisi{aspect-ratio:660/330;}
+
+  .bacaan{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:var(--bg-deep); border-radius:14px; padding:14px 18px; margin-top:14px;
+  }
+  .bacaan .besar{font-family:'Baloo 2'; font-size:1.35rem; font-weight:800; color:var(--owl-dark2);}
+  .bacaan .panah{color:var(--ink-soft); font-size:1.2rem;}
+  .bacaan .hasil{font-family:'Baloo 2'; font-size:1.35rem; font-weight:800; color:var(--gold-deep);}
+  .bacaan .arti{font-size:0.86rem; color:var(--ink-soft); line-height:1.5; flex:1 1 220px;}
+
+  .dua{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;}
+  @media (max-width:760px){ .dua{grid-template-columns:1fr;} }
+  .dua > div{
+    background:var(--bg-deep); border-radius:16px; padding:16px 18px;
+    font-size:0.9rem; line-height:1.65; color:var(--ink-soft);
+  }
+  .dua b{display:block; color:var(--owl-dark2); font-size:1rem; margin-bottom:4px;}
+  .dua.sorot-kiri > div:first-child, .dua.sorot-kanan > div:last-child{
+    background:#FDF3DE; box-shadow:inset 0 0 0 2px var(--gold);
+  }
+
+  table.ringkas{width:100%; border-collapse:collapse; margin-top:14px; font-size:0.9rem;}
+  table.ringkas th, table.ringkas td{padding:10px 12px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top;}
+  table.ringkas th{font-size:0.74rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold-deep);}
+  table.ringkas td:first-child{font-weight:700; color:var(--owl-dark2); white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<div id="kafbeNav"></div>
+<script src="/shared/nav.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="mki.html">← Kembali ke Manajemen Keuangan dan Investasi</a>
+
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Manajemen Keuangan dan Investasi</span>
+    <h2>Time Value of Money</h2>
+    <p>Uang berpindah nilai saat berpindah waktu. Maju ke depan disebut compounding, mundur ke belakang disebut discounting.</p>
+  </div>
+
+  <nav class="lompat">
+    <a href="#arah">1. Compounding dan discounting</a>
+    <a href="#sisi">2. Discount rate dan interest rate</a>
+  </nav>
+
+  <!-- ============ 1. ARAH ============ -->
+  <div class="kotak-materi" id="arah">
+    <h3>1. Dua arah perpindahan nilai</h3>
+    <p>Rp1.000.000 hari ini dan Rp1.000.000 tahun depan bukan hal yang sama. Uang yang ada sekarang bisa dibungakan, sedangkan uang yang baru datang tahun depan tidak sempat. Selisih itulah yang dihitung.</p>
+
+    <div class="saklar">
+      <button type="button" data-arah="maju" class="aktif">Compounding, maju ke depan</button>
+      <button type="button" data-arah="mundur">Discounting, mundur ke belakang</button>
+    </div>
+
+    <div class="kendali">
+      <label>Jumlah uang <span id="lblUang" class="nilai-besar">Rp1.000.000</span>
+        <input type="range" id="inUang" min="1" max="20" step="1" value="10" />
+      </label>
+      <label>Bunga per tahun <span id="lblBunga" class="nilai-besar">10%</span>
+        <input type="range" id="inBunga" min="1" max="30" step="1" value="10" />
+      </label>
+      <label>Jangka waktu <span id="lblTahun" class="nilai-besar">5 tahun</span>
+        <input type="range" id="inTahun" min="1" max="8" step="1" value="5" />
+      </label>
+    </div>
+
+    <div class="gambar-kotak"><svg id="svgWaktu" viewBox="0 0 660 300"></svg></div>
+
+    <div class="bacaan">
+      <span class="besar" id="waktuRumus"></span>
+      <span class="panah">→</span>
+      <span class="hasil" id="waktuHasil"></span>
+      <span class="arti" id="waktuArti"></span>
+    </div>
+
+    <div class="dua">
+      <div><b>Compounding</b>Dari nilai sekarang menuju nilai nanti. Uangnya dikalikan (1 + r) tiap tahun, jadi bertambah.</div>
+      <div><b>Discounting</b>Dari nilai nanti menuju nilai sekarang. Uangnya dibagi (1 + r) tiap tahun, jadi menyusut.</div>
+    </div>
+
+    <h4>Rumusnya saling kebalikan</h4>
+    <div class="rumus">FV = PV × (1 + r)<sup>n</sup></div>
+    <div class="rumus">PV =
+      <span class="pecahan"><span class="atas">FV</span><span class="bawah">(1 + r)<sup>n</sup></span></span>
+    </div>
+    <p style="margin-top:6px;">Keduanya persamaan yang sama, hanya dibalik arah pandangnya. Kalau salah satu sudah bisa, yang lain otomatis bisa.</p>
+  </div>
+
+  <!-- ============ 2. SISI ============ -->
+  <div class="kotak-materi" id="sisi">
+    <h3>2. Discount rate dan interest rate</h3>
+    <p>Keduanya sering terasa membingungkan karena angkanya bisa sama persis. Yang membedakan bukan angkanya, melainkan siapa yang memandang dan ke arah mana pandangannya.</p>
+
+    <div class="saklar">
+      <button type="button" data-sisi="pemberi" class="aktif">Dari sisi pemberi modal</button>
+      <button type="button" data-sisi="penerima">Dari sisi penerima modal</button>
+    </div>
+
+    <div class="gambar-kotak"><svg id="svgSisi" viewBox="0 0 660 330"></svg></div>
+
+    <div class="dua" id="kotakSisi">
+      <div><b>Pemberi modal</b><span id="tekPemberi"></span></div>
+      <div><b>Penerima modal</b><span id="tekPenerima"></span></div>
+    </div>
+
+    <h4>Ringkasnya</h4>
+    <table class="ringkas">
+      <thead><tr><th>Istilah</th><th>Dipakai oleh</th><th>Artinya</th><th>Arah</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Interest rate</td>
+          <td>Penerima modal</td>
+          <td>Bunga yang harus dibayarkan atas uang yang dipakai</td>
+          <td>Maju, uang tumbuh ke depan</td>
+        </tr>
+        <tr>
+          <td>Discount rate</td>
+          <td>Pemberi modal</td>
+          <td>Imbal hasil yang diminta sebelum bersedia menyerahkan uangnya</td>
+          <td>Mundur, nilai nanti ditarik ke hari ini</td>
+        </tr>
+        <tr>
+          <td>Cost of capital</td>
+          <td>Perusahaan</td>
+          <td>Nama lain dari imbal hasil yang diminta pemodal, dilihat sebagai beban</td>
+          <td>Dipakai sebagai discount rate saat menilai proyek</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:16px;">Satu angka yang sama bisa disebut biaya oleh yang memakai uang, dan disebut imbal hasil oleh yang menyerahkan uang. Karena itu ketika perusahaan menilai proyek, angka yang dipakai untuk mendiskonto adalah biaya modalnya sendiri.</p>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong>, Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="../main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  const rp = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
+  const rpSingkat = (n) => {
+    if(n >= 1e9) return 'Rp' + (n / 1e9).toFixed(2).replace('.', ',') + ' M';
+    if(n >= 1e6) return 'Rp' + (n / 1e6).toFixed(2).replace('.', ',') + ' jt';
+    return rp(n);
+  };
+
+  /* ===================================================================
+     1. Compounding dan discounting
+     ===================================================================
+     Kedua arah memakai deretan nilai yang sama persis, karena memang
+     persamaan yang sama dibalik. Yang dibedakan hanya ujung mana yang
+     diketahui dan ke mana anak panahnya menunjuk, supaya terlihat bahwa
+     keduanya bukan dua rumus terpisah.
+  =================================================================== */
+  let arah = 'maju';
+  const inUang = document.getElementById('inUang');
+  const inBunga = document.getElementById('inBunga');
+  const inTahun = document.getElementById('inTahun');
+
+  document.querySelectorAll('[data-arah]').forEach(b => b.addEventListener('click', () => {
+    arah = b.dataset.arah;
+    document.querySelectorAll('[data-arah]').forEach(x => x.classList.toggle('aktif', x === b));
+    gambarWaktu();
+  }));
+  [inUang, inBunga, inTahun].forEach(el => el.addEventListener('input', gambarWaktu));
+
+  function gambarWaktu(){
+    const pokok = +inUang.value * 100000;      // 1 langkah = Rp100.000
+    const r = +inBunga.value / 100;
+    const n = +inTahun.value;
+
+    document.getElementById('lblUang').textContent = rp(pokok);
+    document.getElementById('lblBunga').textContent = (+inBunga.value) + '%';
+    document.getElementById('lblTahun').textContent = n + ' tahun';
+
+    // Deretan nilai tiap tahun. Ujung yang diketahui selalu bernilai "pokok".
+    const nilai = [];
+    for(let t = 0; t <= n; t++){
+      nilai.push(arah === 'maju' ? pokok * Math.pow(1 + r, t) : pokok / Math.pow(1 + r, n - t));
+    }
+
+    const W = 660, H = 300;
+    const tepi = { kiri:40, kanan:40, atas:58, bawah:74 };
+    const lebar = W - tepi.kiri - tepi.kanan;
+    const dasar = H - tepi.bawah;
+    const tinggiMaks = dasar - tepi.atas;
+    const puncak = Math.max(...nilai);
+    const x = (t) => tepi.kiri + (n === 0 ? 0 : (t / n) * lebar);
+    const tinggi = (v) => Math.max(6, (v / puncak) * tinggiMaks);
+
+    const iDiketahui = arah === 'maju' ? 0 : n;
+    const iHasil = arah === 'maju' ? n : 0;
+
+    let s = '';
+
+    // Batang nilai tiap tahun
+    const lebarBatang = Math.min(46, lebar / (n + 1) - 8);
+    for(let t = 0; t <= n; t++){
+      const h = tinggi(nilai[t]);
+      const utama = (t === iDiketahui || t === iHasil);
+      const warna = t === iDiketahui ? 'var(--owl-dark2)'
+                  : t === iHasil ? 'var(--gold)' : 'var(--owl-light)';
+      s += `<rect x="${x(t) - lebarBatang / 2}" y="${dasar - h}" width="${lebarBatang}" height="${h}"
+             rx="6" fill="${warna}"/>`;
+      s += `<text x="${x(t)}" y="${dasar - h - 8}" text-anchor="middle" font-size="11"
+             font-weight="${utama ? 800 : 600}"
+             fill="${utama ? 'var(--owl-dark2)' : 'var(--ink-soft)'}">${rpSingkat(nilai[t])}</text>`;
+      s += `<text x="${x(t)}" y="${dasar + 18}" text-anchor="middle" font-size="12"
+             font-weight="700" fill="var(--ink-soft)">${t === 0 ? 'sekarang' : 'th ' + t}</text>`;
+    }
+
+    // Garis waktu
+    s += `<line x1="${tepi.kiri - 18}" y1="${dasar}" x2="${W - tepi.kanan + 18}" y2="${dasar}"
+           stroke="var(--owl-dark2)" stroke-width="2"/>`;
+
+    // Anak panah arah perpindahan nilai
+    const yPanah = dasar + 44;
+    const xa = arah === 'maju' ? tepi.kiri : W - tepi.kanan;
+    const xb = arah === 'maju' ? W - tepi.kanan : tepi.kiri;
+    s += `<defs><marker id="ujung" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="var(--gold-deep)"/></marker></defs>`;
+    s += `<line x1="${xa}" y1="${yPanah}" x2="${xb}" y2="${yPanah}"
+           stroke="var(--gold-deep)" stroke-width="3" marker-end="url(#ujung)"/>`;
+    s += `<text x="${W / 2}" y="${yPanah + 20}" text-anchor="middle" font-size="12.5" font-weight="800"
+           fill="var(--gold-deep)">${arah === 'maju'
+             ? 'compounding: dikalikan (1 + r) tiap tahun'
+             : 'discounting: dibagi (1 + r) tiap tahun'}</text>`;
+
+    // Keterangan ujung yang diketahui dan ujung hasilnya
+    s += `<text x="${x(iDiketahui)}" y="${tepi.atas - 30}" text-anchor="middle" font-size="12"
+           font-weight="800" fill="var(--owl-dark2)">diketahui</text>`;
+    s += `<text x="${x(iHasil)}" y="${tepi.atas - 30}" text-anchor="middle" font-size="12"
+           font-weight="800" fill="var(--gold-deep)">dicari</text>`;
+
+    document.getElementById('svgWaktu').innerHTML = s;
+
+    const hasil = nilai[iHasil];
+    document.getElementById('waktuRumus').textContent = arah === 'maju'
+      ? `${rp(pokok)} × (1 + ${inBunga.value}%)^${n}`
+      : `${rp(pokok)} ÷ (1 + ${inBunga.value}%)^${n}`;
+    document.getElementById('waktuHasil').textContent = rp(hasil);
+    document.getElementById('waktuArti').textContent = arah === 'maju'
+      ? `Uang ${rp(pokok)} hari ini setara ${rp(hasil)} pada tahun ke-${n}.`
+      : `Uang ${rp(pokok)} pada tahun ke-${n} setara ${rp(hasil)} hari ini.`;
+  }
+
+  /* ===================================================================
+     2. Discount rate dan interest rate
+  =================================================================== */
+  let sisi = 'pemberi';
+
+  document.querySelectorAll('[data-sisi]').forEach(b => b.addEventListener('click', () => {
+    sisi = b.dataset.sisi;
+    document.querySelectorAll('[data-sisi]').forEach(x => x.classList.toggle('aktif', x === b));
+    gambarSisi();
+  }));
+
+  function gambarSisi(){
+    const W = 660, H = 330;
+    const kiriX = 120, kananX = 540;
+    const yModal = 96, yBalik = 196;
+    const terangKiri = sisi === 'pemberi', terangKanan = sisi === 'penerima';
+
+    const kotak = (cx, cy, judul, isi, terang) => `
+      <rect x="${cx - 96}" y="${cy - 42}" width="192" height="84" rx="16"
+       fill="${terang ? 'var(--gold)' : 'var(--surface)'}"
+       stroke="${terang ? 'var(--gold-deep)' : 'var(--line)'}" stroke-width="2"/>
+      <text x="${cx}" y="${cy - 12}" text-anchor="middle" font-size="14" font-weight="800"
+       fill="var(--owl-dark2)">${judul}</text>
+      <text x="${cx}" y="${cy + 10}" text-anchor="middle" font-size="11.5"
+       fill="${terang ? 'var(--owl-dark)' : 'var(--ink-soft)'}">${isi}</text>`;
+
+    let s = `<defs>
+      <marker id="pMaju" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L10,5 L0,10 Z" fill="var(--owl-dark)"/></marker>
+      <marker id="pBalik" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L10,5 L0,10 Z" fill="var(--gold-deep)"/></marker>
+    </defs>`;
+
+    s += kotak(kiriX, H / 2, 'Pemberi modal', 'investor, bank, pemegang saham', terangKiri);
+    s += kotak(kananX, H / 2, 'Penerima modal', 'perusahaan, proyek, peminjam', terangKanan);
+
+    // Modal mengalir ke kanan pada awal periode
+    s += `<line x1="${kiriX + 104}" y1="${yModal}" x2="${kananX - 104}" y2="${yModal}"
+           stroke="var(--owl-dark)" stroke-width="3" marker-end="url(#pMaju)"/>`;
+    s += `<text x="${W / 2}" y="${yModal - 12}" text-anchor="middle" font-size="12.5"
+           font-weight="800" fill="var(--owl-dark)">modal diserahkan hari ini</text>`;
+
+    // Pengembalian mengalir ke kiri selama bertahun-tahun
+    s += `<line x1="${kananX - 104}" y1="${yBalik}" x2="${kiriX + 104}" y2="${yBalik}"
+           stroke="var(--gold-deep)" stroke-width="3" marker-end="url(#pBalik)"/>`;
+    s += `<text x="${W / 2}" y="${yBalik + 22}" text-anchor="middle" font-size="12.5"
+           font-weight="800" fill="var(--gold-deep)">dikembalikan lebih besar, bertahun-tahun kemudian</text>`;
+
+    // Satu angka r yang sama, dua sebutan
+    s += `<rect x="${W / 2 - 118}" y="${H - 76}" width="236" height="52" rx="14"
+           fill="var(--bg-deep)" stroke="var(--line)"/>`;
+    s += `<text x="${W / 2}" y="${H - 54}" text-anchor="middle" font-size="12.5" font-weight="800"
+           fill="var(--owl-dark2)">angkanya satu dan sama: r</text>`;
+    s += `<text x="${W / 2}" y="${H - 35}" text-anchor="middle" font-size="11.5" fill="var(--ink-soft)">${
+      sisi === 'pemberi' ? 'disebut imbal hasil yang diminta' : 'disebut bunga atau biaya modal'
+    }</text>`;
+
+    document.getElementById('svgSisi').innerHTML = s;
+
+    document.getElementById('kotakSisi').className =
+      'dua ' + (sisi === 'pemberi' ? 'sorot-kiri' : 'sorot-kanan');
+
+    document.getElementById('tekPemberi').textContent = sisi === 'pemberi'
+      ? 'Menyerahkan uang hari ini dan menunggu. Karena menunggu itu ada risikonya, ia menetapkan imbal hasil minimum sebelum bersedia. Angka itu yang dipakainya untuk mendiskonto, guna menilai apakah tawaran yang ada layak diambil.'
+      : 'Menyerahkan uang hari ini dan menerima pengembalian lebih besar kemudian.';
+
+    document.getElementById('tekPenerima').textContent = sisi === 'penerima'
+      ? 'Memakai uang orang lain, jadi harus membayar lebih besar dari yang diterima. Bagi dirinya angka itu adalah beban, dan besarnya menentukan proyek seperti apa yang masih pantas dijalankan.'
+      : 'Menerima uang hari ini dan mengembalikannya lebih besar kemudian.';
+  }
+
+  gambarWaktu();
+  gambarSisi();
+})();
+</script>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
