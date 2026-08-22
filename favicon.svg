@@ -1,51 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
 <!--
   Lambang tab peramban KAFBE Hub.
 
-  KENAPA HANYA BURUNG HANTUNYA
+  KENAPA EMOJI, BUKAN GAMBAR BURUNG HANTU KAFBE
 
-  Lambang resmi KAFBE memuat tulisan "KAFBE" melengkung di atas dan "Kelompok
-  Asisten FBE" di bawah. Di bilah tab peramban gambar ini tampil sekitar 16
-  piksel, dan pada ukuran itu tulisan sekecil apa pun berubah jadi noda abu-abu
-  yang justru membuat lambangnya sulit dikenali. Jadi yang dipakai maskotnya
-  saja, seperti kebiasaan lambang tab pada umumnya.
+  Sempat dipakai gambar burung hantu situs ini, dan hasilnya tidak terbaca.
+  Di bilah tab gambarnya tampil sekitar 16 piksel. Pada ukuran itu mata,
+  paruh, sayap, dan garis tubuhnya saling melebur jadi satu gumpalan biru
+  yang tidak dikenali siapa pun sebagai burung hantu.
 
-  KENAPA GARIS BULU DADANYA TIDAK ADA
+  Emoji dirancang justru untuk ukuran sekecil itu: bentuknya sudah
+  disederhanakan dan kontrasnya sudah diatur oleh pembuat sistemnya, jadi
+  tetap terbaca di tab yang sempit.
 
-  Burung hantu di dalam situs punya tujuh garis bulu di dada dengan ketebalan
-  6 satuan. Pada 16 piksel ketebalan itu jatuh di bawah setengah piksel,
-  sehingga hasilnya bukan garis melainkan kabut kelabu yang mengotori dada.
-  Bagian itu sengaja dihilangkan HANYA di berkas ini. Burung hantu di dalam
-  situs tetap utuh.
-
-  Warnanya ditulis sebagai kode heks, bukan sebagai peubah warna seperti yang
-  dipakai styles.css, sebab berkas lambang dimuat sendiri oleh peramban dan
-  tidak pernah melihat styles.css.
+  Gambar burung hantu KAFBE yang lengkap tidak dibuang, hanya pindah tempat
+  ke ikon-ponsel.svg, yang dipakai untuk ikon layar utama ponsel. Di sana
+  ukurannya 180 piksel, dan detailnya justru terlihat.
 
   CATATAN: berkas ini XML, dan komentar XML TIDAK BOLEH memuat dua tanda
   hubung berurutan. Menulis nama peubah warna lengkap dengan awalannya di
-  dalam komentar ini akan membuat seluruh berkas dianggap rusak dan lambangnya
+  dalam komentar akan membuat seluruh berkas dianggap rusak dan lambangnya
   tidak muncul sama sekali.
 -->
-<rect width="300" height="300" rx="66" fill="#FFFFFF"/>
-
-<!-- Burung hantunya diperbesar dan dipusatkan supaya mengisi kotak lambang.
-     Tanpa ini ia tampak mengambang kekecilan di tengah bidang putih. -->
-<g transform="translate(150,150) scale(1.211) translate(-150,-154)">
-  <ellipse cx="150" cy="160" rx="98" ry="108" fill="#B7DAE8"/>
-  <polygon points="85,62 111,62 92,40" fill="#1F3A63"/>
-  <polygon points="189,62 215,62 208,40" fill="#1F3A63"/>
-  <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="#1F3A63"/>
-  <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="#1F3A63"/>
-  <ellipse cx="150" cy="185" rx="58" ry="66" fill="#EEF7F9"/>
-  <circle cx="115" cy="128" r="42" fill="#CFE7F0" stroke="#1F3A63" stroke-width="4"/>
-  <circle cx="185" cy="128" r="42" fill="#CFE7F0" stroke="#1F3A63" stroke-width="4"/>
-  <circle cx="115" cy="128" r="25" fill="#16294A"/>
-  <circle cx="185" cy="128" r="25" fill="#16294A"/>
-  <circle cx="107" cy="118" r="7" fill="#FFFFFF"/>
-  <circle cx="177" cy="118" r="7" fill="#FFFFFF"/>
-  <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="#F0B93D"/>
-  <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="#F0B93D"/>
-  <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="#F0B93D"/>
-</g>
+<text x="16" y="16" font-size="28" text-anchor="middle" dominant-baseline="central">🦉</text>
 </svg>

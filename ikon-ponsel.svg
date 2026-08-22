@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+<!--
+  Sumber gambar untuk ikon layar utama ponsel (apple-touch-icon.png).
+
+  BERKAS INI TIDAK DIPAKAI LANGSUNG OLEH HALAMAN MANA PUN.
+
+  iOS hanya menerima PNG untuk ikon layar utama, tidak menerima SVG. Jadi
+  berkas ini adalah sumbernya, dan hasil jadinya adalah apple-touch-icon.png
+  berukuran 180 piksel yang ada di sebelahnya.
+
+  CARA MEMBUAT ULANG PNG-NYA kalau gambar ini diubah: buka berkas ini di
+  peramban, gambar ke elemen canvas berukuran 180x180, lalu simpan hasilnya
+  sebagai apple-touch-icon.png. Selama gambarnya tidak diubah, tidak ada yang
+  perlu dikerjakan.
+
+  KENAPA LATARNYA PERSEGI PENUH, BUKAN BERSUDUT TUMPUL
+
+  iOS memasang sendiri sudut tumpul pada ikon layar utama. Kalau di sini
+  sudutnya sudah ditumpulkan, hasilnya tumpul dua kali dan tepinya tampak
+  tergerus. Latar juga tidak boleh tembus pandang, sebab iOS akan
+  menimpanya dengan hitam.
+
+  Berbeda dari lambang tab, garis bulu di dada DIPERTAHANKAN di sini. Pada
+  180 piksel ketebalannya masih di atas tiga piksel, jadi terlihat sebagai
+  garis dan bukan kabut.
+
+  CATATAN: berkas ini XML, dan komentar XML TIDAK BOLEH memuat dua tanda
+  hubung berurutan.
+-->
+<rect width="300" height="300" fill="#FFFFFF"/>
+
+<!-- Diperbesar dan dipusatkan supaya mengisi bidang ikon. Tanpa ini burung
+     hantunya tampak mengambang kekecilan di tengah bidang putih. -->
+<g transform="translate(150,150) scale(1.16) translate(-150,-154)">
+  <ellipse cx="150" cy="160" rx="98" ry="108" fill="#B7DAE8"/>
+  <polygon points="85,62 111,62 92,40" fill="#1F3A63"/>
+  <polygon points="189,62 215,62 208,40" fill="#1F3A63"/>
+  <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="#1F3A63"/>
+  <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="#1F3A63"/>
+  <ellipse cx="150" cy="185" rx="58" ry="66" fill="#EEF7F9"/>
+  <g fill="none" stroke="#1F3A63" stroke-width="6" stroke-linecap="round">
+    <path d="M122 168 q8 10 16 0"/>
+    <path d="M162 168 q8 10 16 0"/>
+    <path d="M112 192 q8 10 16 0"/>
+    <path d="M142 192 q8 10 16 0"/>
+    <path d="M172 192 q8 10 16 0"/>
+    <path d="M122 216 q8 10 16 0"/>
+    <path d="M162 216 q8 10 16 0"/>
+  </g>
+  <circle cx="115" cy="128" r="42" fill="#CFE7F0" stroke="#1F3A63" stroke-width="4"/>
+  <circle cx="185" cy="128" r="42" fill="#CFE7F0" stroke="#1F3A63" stroke-width="4"/>
+  <circle cx="115" cy="128" r="25" fill="#16294A"/>
+  <circle cx="185" cy="128" r="25" fill="#16294A"/>
+  <circle cx="107" cy="118" r="7" fill="#FFFFFF"/>
+  <circle cx="177" cy="118" r="7" fill="#FFFFFF"/>
+  <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="#F0B93D"/>
+  <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="#F0B93D"/>
+  <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="#F0B93D"/>
+</g>
+</svg>
