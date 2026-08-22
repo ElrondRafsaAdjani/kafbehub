@@ -91,19 +91,16 @@ service cloud.firestore {
     }
 
     // ---------- Data pengajar ----------
-    // BERBEDA dari koleksi di atas: dibacanya pun HANYA oleh admin.
+    // Nama dan NRP asisten memang sudah diumumkan lewat kanal resmi KAFBE,
+    // jadi tidak ada yang perlu dirahasiakan dan aturannya disamakan dengan
+    // koleksi lain.
     //
-    // Koleksi lain terbuka karena isinya memang ditampilkan di situs. Yang ini
-    // tidak pernah ditampilkan ke pengunjung, jadi tidak ada alasan
-    // membukanya. Ini bukan soal NRP yang rahasia, melainkan kebiasaan menutup
-    // apa yang memang tidak dipakai siapa pun di luar pengurus.
-    //
-    // Kalau suatu saat data pengajar ingin ditampilkan di situs, ganti baris
-    // di bawah menjadi seperti koleksi lain:
-    //     allow read: if true;
-    //     allow write: if tulisanAdmin();
+    // Meski begitu, datanya tetap TIDAK ditampilkan di halaman mana pun yang
+    // dibuka mahasiswa, dan tidak ikut ditulis ke dokumen publik/terkini.
+    // Hanya halaman operasional yang memakainya.
     match /pengajar/{id} {
-      allow read, write: if tulisanAdmin();
+      allow read: if true;
+      allow write: if tulisanAdmin();
     }
 
     // ---------- Papan skor game ----------
