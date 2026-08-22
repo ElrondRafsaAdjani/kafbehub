@@ -173,6 +173,18 @@ section{padding:64px 0;}
 .badge-live{background:#E1F5E9; color:#1E7A44;}
 .badge-soon{background:#FDEEDB; color:var(--gold-deep);}
 
+/* ---------- CATATAN UKURAN LAYAR ----------
+   Sekadar saran, bukan penghalang: isinya tetap bisa dibuka dari perangkat
+   apa pun. Sengaja hanya muncul di layar sempit, sebab memberi tahu pemakai
+   komputer supaya memakai komputer tidak ada gunanya. */
+.catatan-layar{
+  display:none; align-items:flex-start; gap:10px;
+  background:var(--bg-deep); border-radius:var(--radius-md);
+  padding:12px 16px; margin-top:16px; max-width:60ch;
+  font-size:0.86rem; line-height:1.55; color:var(--ink-soft);
+}
+@media (max-width:900px){ .catatan-layar{display:flex;} }
+
 /* ---------- PENGUMUMAN (halaman utama) ---------- */
 .pengumuman-wrap{ padding:26px 24px 0; }
 .pengumuman{
