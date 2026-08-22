@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nilai Z dan Tabel Z - Statistika 2 - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .lompat{display:flex; gap:8px; flex-wrap:wrap; margin:22px 0 6px;}
+  .lompat a{
+    font-weight:700; font-size:0.86rem; padding:9px 16px; border-radius:100px;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink-soft);
+    text-decoration:none; transition:border-color .15s, color .15s;
+  }
+  .lompat a:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+
+  .kotak-materi{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:26px; margin-top:22px;
+  }
+  .kotak-materi h3{font-size:1.2rem; margin-bottom:6px;}
+  .kotak-materi > p{color:var(--ink-soft); font-size:0.94rem; line-height:1.65; margin:0 0 16px; max-width:74ch;}
+  .kotak-materi h4{font-size:0.98rem; margin:22px 0 8px; color:var(--owl-dark2);}
+
+  .rumus{
+    display:inline-block; background:var(--bg-deep); border-radius:14px;
+    padding:14px 20px; font-size:1.15rem; color:var(--owl-dark2);
+    font-family:'Baloo 2', serif; margin:4px 0 10px;
+  }
+  .rumus .pecahan{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 4px;}
+  .rumus .pecahan .atas{border-bottom:2px solid var(--owl-dark2); padding:0 8px 2px;}
+  .rumus .pecahan .bawah{padding:2px 8px 0;}
+  .ket{font-size:0.88rem; color:var(--ink-soft); line-height:1.7;}
+  .ket b{color:var(--owl-dark2);}
+
+  /* ---------- Kurva ---------- */
+  .kurva-kotak{background:var(--bg-deep); border-radius:18px; padding:14px; margin:8px 0 4px;}
+  .kurva-kotak svg{width:100%; height:auto; aspect-ratio:460/210; display:block;}
+
+  /* ---------- Kendali ---------- */
+  .kendali{display:flex; gap:18px; flex-wrap:wrap; margin-bottom:14px;}
+  .kendali label{display:flex; flex-direction:column; gap:5px; font-size:0.8rem; font-weight:700; color:var(--owl-dark2); flex:1 1 130px;}
+  .kendali input[type=range]{width:100%;}
+  .kendali input[type=text], .kendali input[type=number], .kendali select{
+    font-family:'Plus Jakarta Sans'; font-size:0.92rem; padding:9px 12px;
+    border:1px solid var(--line); border-radius:10px; background:var(--surface); color:var(--ink); width:100%;
+  }
+  .nilai-besar{font-family:'Baloo 2'; font-size:1.5rem; color:var(--gold-deep); font-weight:800;}
+
+  /* ---------- Tabel Z ---------- */
+  .tabel-bungkus{
+    max-height:420px; overflow:auto; border:1px solid var(--line);
+    border-radius:var(--radius-md); background:var(--surface); margin-top:12px;
+  }
+  table.tz{border-collapse:separate; border-spacing:0; font-size:0.78rem; width:100%; min-width:620px;}
+  table.tz th, table.tz td{padding:6px 7px; text-align:center; white-space:nowrap;}
+  table.tz thead th{
+    position:sticky; top:0; z-index:2; background:var(--owl-dark2); color:#fff;
+    font-weight:700; font-size:0.74rem;
+  }
+  table.tz tbody th{
+    position:sticky; left:0; z-index:1; background:var(--bg-deep);
+    color:var(--owl-dark2); font-weight:800;
+  }
+  table.tz td{border-bottom:1px solid var(--line); cursor:pointer; font-variant-numeric:tabular-nums;}
+  table.tz td:hover{background:var(--bg-deep);}
+  table.tz td.pilih{background:var(--gold); color:var(--owl-dark2); font-weight:800;}
+  table.tz tr.baris-aktif th, table.tz tr.baris-aktif td{background:#FDF3DE;}
+  table.tz tr.baris-aktif td.pilih{background:var(--gold);}
+  table.tz thead th.kolom-aktif{background:var(--gold-deep);}
+  table.tz td.kolom-aktif{background:#FDF3DE;}
+
+  .bacaan{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:var(--bg-deep); border-radius:14px; padding:14px 18px; margin-top:14px;
+  }
+  .bacaan .besar{font-family:'Baloo 2'; font-size:1.6rem; font-weight:800; color:var(--owl-dark2);}
+  .bacaan .panah{color:var(--ink-soft); font-size:1.2rem;}
+  .bacaan .hasil{font-family:'Baloo 2'; font-size:1.6rem; font-weight:800; color:var(--gold-deep);}
+  .bacaan .arti{font-size:0.86rem; color:var(--ink-soft); line-height:1.5;}
+
+  /* ---------- Langkah membaca tabel ---------- */
+  ol.langkah{margin:0; padding-left:22px; color:var(--ink-soft); font-size:0.92rem; line-height:1.75;}
+  ol.langkah b{color:var(--owl-dark2);}
+  ol.langkah code{
+    font-family:ui-monospace, Menlo, Consolas, monospace; font-size:0.86em;
+    background:var(--bg-deep); padding:1px 6px; border-radius:5px; color:var(--owl-dark2);
+  }
+
+  /* ---------- Latihan ---------- */
+  .pilih-soal{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .pilih-soal button{
+    font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.82rem;
+    padding:8px 14px; border-radius:100px; cursor:pointer;
+    background:var(--surface); border:1px solid var(--line); color:var(--ink-soft);
+  }
+  .pilih-soal button:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+  .pilih-soal button.aktif{background:var(--owl-dark2); color:#fff; border-color:var(--owl-dark2);}
+
+  .hitungan{
+    background:var(--bg); border:1px solid var(--line); border-left:4px solid var(--gold);
+    border-radius:var(--radius-md); padding:16px 18px; margin-top:14px;
+    font-size:0.94rem; line-height:1.9; color:var(--ink);
+  }
+  .hitungan .baris-hitung{font-family:'Baloo 2'; font-size:1.05rem; color:var(--owl-dark2);}
+  .hitungan .jawab{font-family:'Baloo 2'; font-size:1.3rem; font-weight:800; color:var(--gold-deep); margin-top:6px;}
+  .hitungan .salah{color:#B03B37; font-size:0.9rem;}
+
+  .fakta{display:grid; grid-template-columns:repeat(auto-fit, minmax(210px,1fr)); gap:12px; margin-top:14px;}
+  .fakta div{
+    background:var(--bg-deep); border-radius:14px; padding:14px 16px;
+    font-size:0.88rem; line-height:1.6; color:var(--ink-soft);
+  }
+  .fakta b{display:block; color:var(--owl-dark2); font-size:0.95rem; margin-bottom:3px;}
+</style>
+</head>
+<body>
+
+<div id="kafbeNav"></div>
+<script src="/shared/nav.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path class="wing-l" d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path class="wing-r" d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="stat2.html">← Kembali ke Statistika 2</a>
+
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Statistika 2</span>
+    <h2>Nilai Z dan Tabel Z</h2>
+    <p>Mengubah nilai apa pun menjadi nilai z, membaca tabelnya, lalu menghitung peluang dari luas di bawah kurva.</p>
+  </div>
+
+  <nav class="lompat">
+    <a href="#konsep">1. Konsep</a>
+    <a href="#membaca">2. Cara membaca tabel</a>
+    <a href="#tabel">3. Tabel Z</a>
+    <a href="#latihan">4. Latihan</a>
+    <a href="#pendekatan">5. Poisson &amp; Binomial</a>
+  </nav>
+
+  <!-- ============ 1. KONSEP ============ -->
+  <div class="kotak-materi" id="konsep">
+    <h3>1. Kenapa harus diubah jadi nilai z</h3>
+    <p>Tinggi badan, nilai ujian, dan berat beras punya satuan yang berbeda-beda, jadi tidak mungkin dibuatkan tabel satu per satu. Nilai z menyeragamkan semuanya menjadi satu pertanyaan: <strong>berapa simpangan baku jaraknya dari rata-rata?</strong></p>
+
+    <div class="rumus">
+      Z =
+      <span class="pecahan"><span class="atas">x &minus; μ</span><span class="bawah">σ</span></span>
+    </div>
+    <p class="ket">
+      <b>x</b> = nilai variabel &nbsp;·&nbsp; <b>μ</b> = rata-rata populasi &nbsp;·&nbsp; <b>σ</b> = simpangan baku populasi
+    </p>
+
+    <h4>Geser sendiri angkanya</h4>
+    <div class="kendali">
+      <label>Nilai x <span id="lblX" class="nilai-besar">80</span>
+        <input type="range" id="inX" min="20" max="140" step="1" value="80" />
+      </label>
+      <label>Rata-rata μ <span id="lblMu" class="nilai-besar">70</span>
+        <input type="range" id="inMu" min="40" max="100" step="1" value="70" />
+      </label>
+      <label>Simpangan baku σ <span id="lblSd" class="nilai-besar">10</span>
+        <input type="range" id="inSd" min="2" max="30" step="1" value="10" />
+      </label>
+    </div>
+
+    <div class="kurva-kotak"><svg id="kurvaKonsep" viewBox="0 0 460 210"></svg></div>
+    <div class="bacaan">
+      <span class="besar" id="konsepZ">Z = 1,00</span>
+      <span class="panah">→</span>
+      <span class="hasil" id="konsepLuas">0,3413</span>
+      <span class="arti" id="konsepArti"></span>
+    </div>
+
+    <div class="fakta">
+      <div><b>Kurva gunung</b>Bentuknya simetris. Luas belahan kiri sama dengan luas belahan kanan, masing-masing 0,5.</div>
+      <div><b>Luas seluruhnya = 1</b>Seluruh wilayah di bawah kurva adalah 1, atau 100% dari data.</div>
+      <div><b>Isi tabel Z</b>Angka di tabel adalah luas dari <strong>0 sampai z</strong>, bukan dari ujung kiri. Karena itu sering perlu ditambah atau dikurangi 0,5.</div>
+    </div>
+  </div>
+
+  <!-- ============ 2. CARA MEMBACA TABEL ============ -->
+  <div class="kotak-materi" id="membaca">
+    <h3>2. Cara membaca tabel Z</h3>
+    <p>Bagian ini yang biasanya cuma dijelaskan lisan di kelas. Contohnya memakai <strong>z = 1,45</strong>.</p>
+
+    <ol class="langkah">
+      <li>Pecah nilai z jadi dua bagian: <b>satu angka di belakang koma</b> untuk baris, dan <b>angka keduanya</b> untuk kolom.<br>
+          <code>1,45</code> → baris <code>1,4</code> dan kolom <code>0,05</code></li>
+      <li>Cari baris <b>1,4</b> pada kolom paling kiri tabel.</li>
+      <li>Cari kolom <b>0,05</b> pada baris paling atas tabel.</li>
+      <li>Angka di titik pertemuannya adalah <b>0,4265</b>.</li>
+      <li>Artinya luas dari <b>0 sampai 1,45</b> adalah 0,4265, atau <b>42,65%</b> dari seluruh data.</li>
+    </ol>
+
+    <p style="margin-top:16px;">Karena tabel hanya memuat z positif, nilai z negatif dibaca dengan angka positifnya. Kurvanya simetris, jadi luas dari &minus;1,45 sampai 0 sama persis dengan luas dari 0 sampai 1,45.</p>
+
+    <button type="button" class="btn btn-gold op-kecil" id="tunjukkanContoh" style="margin-top:6px;">Tunjukkan 1,45 di tabel</button>
+  </div>
+
+  <!-- ============ 3. TABEL Z ============ -->
+  <div class="kotak-materi" id="tabel">
+    <h3>3. Tabel Z</h3>
+    <p>Isi tabel ini adalah <strong>luas dari 0 sampai z</strong>. Klik sel mana pun untuk melihat letaknya pada kurva, atau ketik nilai z untuk langsung menemukannya.</p>
+
+    <div class="kendali" style="max-width:280px;">
+      <label>Cari nilai z
+        <input type="text" id="cariZ" placeholder="misal 1,45" inputmode="decimal" />
+      </label>
+    </div>
+
+    <div class="bacaan">
+      <span class="besar" id="tzZ">z = 1,45</span>
+      <span class="panah">→</span>
+      <span class="hasil" id="tzLuas">0,4265</span>
+      <span class="arti">luas dari 0 sampai z</span>
+    </div>
+
+    <div class="kurva-kotak"><svg id="kurvaTabel" viewBox="0 0 460 210"></svg></div>
+
+    <div class="tabel-bungkus">
+      <table class="tz" id="tabelZ"></table>
+    </div>
+  </div>
+
+  <!-- ============ 4. LATIHAN ============ -->
+  <div class="kotak-materi" id="latihan">
+    <h3>4. Menghitung sendiri</h3>
+    <p>Pilih bentuk soalnya, isi angkanya, lalu lihat langkah pengerjaannya. Tombol di bawah berisi soal-soal dari buku asistensi supaya bisa langsung dicocokkan.</p>
+
+    <div class="kendali">
+      <label>Yang dicari
+        <select id="mode">
+          <option value="peluang">Peluang, bila z diketahui</option>
+          <option value="z">Nilai z, bila peluang diketahui</option>
+        </select>
+      </label>
+      <label>Bentuk soal
+        <select id="pola">
+          <option value="kiri">P(Z &lt; z)</option>
+          <option value="kanan">P(Z &gt; z)</option>
+          <option value="antara">P(a &lt; Z &lt; b)</option>
+          <option value="absKurang">P(|Z| &lt; z)</option>
+          <option value="absLebih">P(|Z| &gt; z)</option>
+        </select>
+      </label>
+      <label id="wadahA">Nilai <span id="namaA">z</span>
+        <input type="text" id="inA" value="1,45" inputmode="decimal" />
+      </label>
+      <label id="wadahB" hidden>Nilai b
+        <input type="text" id="inB" value="2,58" inputmode="decimal" />
+      </label>
+      <label id="wadahP" hidden>Peluang
+        <input type="text" id="inP" value="0,9591" inputmode="decimal" />
+      </label>
+    </div>
+
+    <div class="pilih-soal" id="soalBuku"></div>
+
+    <div class="kurva-kotak"><svg id="kurvaLatihan" viewBox="0 0 460 210"></svg></div>
+    <div class="hitungan" id="hasilHitung"></div>
+  </div>
+
+  <!-- ============ 5. PENDEKATAN ============ -->
+  <div class="kotak-materi" id="pendekatan">
+    <h3>5. Poisson dan Binomial yang didekati Normal</h3>
+    <p>Kalau datanya mencacah dan jumlahnya besar, distribusi Poisson dan Binomial bentuknya sudah mirip kurva normal, sehingga boleh dihitung memakai tabel Z yang sama.</p>
+
+    <h4>Poisson ≈ Normal</h4>
+    <div class="rumus">
+      Z =
+      <span class="pecahan"><span class="atas">a ± 0,5 &minus; λ</span><span class="bawah">√λ</span></span>
+    </div>
+    <p class="ket"><b>λ</b> = rata-rata</p>
+
+    <h4>Binomial ≈ Normal</h4>
+    <div class="rumus">
+      Z =
+      <span class="pecahan"><span class="atas">a ± 0,5 &minus; n·p</span><span class="bawah">√(n·p(1&minus;p))</span></span>
+    </div>
+    <p class="ket"><b>n</b> = banyaknya percobaan &nbsp;·&nbsp; <b>p</b> = peluang</p>
+
+    <h4>Kenapa ada ± 0,5</h4>
+    <p>Poisson dan Binomial mencacah dengan bilangan bulat, sedangkan kurva normal menerima nilai pecahan mana pun. Angka <strong>0,5</strong> menambal celah di antara dua bilangan bulat itu, dan disebut <strong>faktor koreksi</strong>.</p>
+    <div class="fakta">
+      <div><b>Pakai &minus; 0,5</b>Bila yang dicari termasuk batasnya ke arah kanan, misalnya <strong>P(X ≥ a)</strong>.</div>
+      <div><b>Pakai + 0,5</b>Bila yang dicari termasuk batasnya ke arah kiri, misalnya <strong>P(X ≤ a)</strong>.</div>
+      <div><b>Setelah ketemu Z</b>Langkahnya sama persis dengan bagian sebelumnya: baca tabel, lalu hitung luasnya.</div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Dibuat dengan 🦉 oleh <strong>KAFBE</strong>, Kelompok Asisten FBE.</p>
+</footer>
+
+<script src="../main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ===================================================================
+     Perhitungan
+     ===================================================================
+     Tabel Z pada buku asistensi memuat LUAS DARI 0 SAMPAI z, bukan luas
+     kumulatif dari ujung kiri. Bedanya tepat 0,5, dan itulah sebabnya di
+     buku sering muncul "0,5 + ..." atau "0,5 - ...".
+
+     Nilai-nilainya sudah dicocokkan dengan buku dan sama sampai empat
+     angka di belakang koma.
+  =================================================================== */
+  function erf(x){
+    const tanda = x < 0 ? -1 : 1;
+    x = Math.abs(x);
+    const p = 0.3275911;
+    const a = [0.254829592, -0.284496736, 1.421413741, -1.453152027, 1.061405429];
+    const t = 1 / (1 + p * x);
+    let y = 0;
+    for(let i = 4; i >= 0; i--) y = (y + a[i]) * t;
+    return tanda * (1 - y * Math.exp(-x * x));
+  }
+  const luas0 = (z) => 0.5 * erf(Math.abs(z) / Math.SQRT2);   // luas 0 sampai |z|
+  const kumulatif = (z) => 0.5 + (z < 0 ? -luas0(z) : luas0(z));   // P(Z < z)
+
+  // Kebalikannya: cari z dari luas 0 sampai z.
+  function zDariLuas0(L){
+    L = Math.min(Math.max(L, 0), 0.499999);
+    let lo = 0, hi = 6;
+    for(let i = 0; i < 80; i++){
+      const mid = (lo + hi) / 2;
+      if(luas0(mid) < L) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+  // Cari z dari peluang kumulatif P(Z < z).
+  function zDariKumulatif(P){
+    if(P <= 0.5) return -zDariLuas0(0.5 - P);
+    return zDariLuas0(P - 0.5);
+  }
+
+  const f4 = (n) => n.toFixed(4).replace('.', ',');
+  const f2 = (n) => n.toFixed(2).replace('.', ',');
+  const angka = (teks) => {
+    const n = parseFloat(String(teks).replace(',', '.').trim());
+    return Number.isFinite(n) ? n : null;
+  };
+
+  /* ===================================================================
+     Gambar kurva
+  =================================================================== */
+  const KW = 460, KH = 210;
+  const kTepi = { kiri:26, kanan:26, atas:16, bawah:38 };
+  const kLebar = KW - kTepi.kiri - kTepi.kanan;
+  const kTinggi = KH - kTepi.atas - kTepi.bawah;
+  const Z_TEPI = 3.6;
+  const kDasar = kTepi.atas + kTinggi;
+
+  const zx = (z) => kTepi.kiri + ((z + Z_TEPI) / (2 * Z_TEPI)) * kLebar;
+  const phi = (z) => Math.exp(-z * z / 2);
+  const zy = (z) => kDasar - phi(z) * kTinggi * 0.92;
+
+  function garisKurva(){
+    const t = [];
+    for(let z = -Z_TEPI; z <= Z_TEPI; z += 0.05) t.push(`${zx(z).toFixed(1)},${zy(z).toFixed(1)}`);
+    return 'M' + t.join(' L');
+  }
+
+  function arsir(z1, z2){
+    z1 = Math.max(z1, -Z_TEPI); z2 = Math.min(z2, Z_TEPI);
+    if(z2 <= z1) return '';
+    const t = [`${zx(z1).toFixed(1)},${kDasar.toFixed(1)}`];
+    for(let z = z1; z <= z2; z += 0.02) t.push(`${zx(z).toFixed(1)},${zy(z).toFixed(1)}`);
+    t.push(`${zx(z2).toFixed(1)},${zy(z2).toFixed(1)}`, `${zx(z2).toFixed(1)},${kDasar.toFixed(1)}`);
+    return 'M' + t.join(' L') + ' Z';
+  }
+
+  /*
+    daerah : daftar [z1, z2] yang diarsir
+    tanda  : daftar { z, teks } untuk garis putus-putus bertuliskan angka
+  */
+  function gambarKurva(svg, daerah, tanda){
+    let s = '';
+    for(const [a, b] of daerah){
+      const d = arsir(a, b);
+      if(d) s += `<path d="${d}" fill="var(--gold)" opacity="0.42"/>`;
+    }
+    s += `<path d="${garisKurva()}" fill="none" stroke="var(--owl-dark2)" stroke-width="2.4"/>`;
+    s += `<line x1="${kTepi.kiri - 6}" y1="${kDasar}" x2="${KW - kTepi.kanan + 6}" y2="${kDasar}"
+           stroke="var(--owl-dark2)" stroke-width="2"/>`;
+    s += `<line x1="${zx(0)}" y1="${zy(0)}" x2="${zx(0)}" y2="${kDasar}"
+           stroke="var(--owl-dark)" stroke-width="1.4" stroke-dasharray="4 4"/>`;
+    s += `<text x="${zx(0)}" y="${kDasar + 16}" text-anchor="middle" font-size="12"
+           font-weight="800" fill="var(--owl-dark)">0</text>`;
+
+    for(const t of (tanda || [])){
+      if(Math.abs(t.z) > Z_TEPI) continue;
+      s += `<line x1="${zx(t.z)}" y1="${zy(t.z)}" x2="${zx(t.z)}" y2="${kDasar}"
+             stroke="var(--gold-deep)" stroke-width="2" stroke-dasharray="4 3"/>`;
+      s += `<text x="${zx(t.z)}" y="${kDasar + 30}" text-anchor="middle" font-size="12"
+             font-weight="800" fill="var(--gold-deep)">${t.teks}</text>`;
+    }
+    svg.innerHTML = s;
+  }
+
+  /* ===================================================================
+     1. Konsep
+  =================================================================== */
+  const inX = document.getElementById('inX');
+  const inMu = document.getElementById('inMu');
+  const inSd = document.getElementById('inSd');
+
+  function perbaruiKonsep(){
+    const x = +inX.value, mu = +inMu.value, sd = +inSd.value;
+    document.getElementById('lblX').textContent = x;
+    document.getElementById('lblMu').textContent = mu;
+    document.getElementById('lblSd').textContent = sd;
+
+    const z = (x - mu) / sd;
+    const L = luas0(z);
+    document.getElementById('konsepZ').textContent = 'Z = ' + f2(z);
+    document.getElementById('konsepLuas').textContent = f4(L);
+    document.getElementById('konsepArti').innerHTML =
+      `x berjarak <strong>${f2(Math.abs(z))} simpangan baku</strong> dari rata-rata.<br>`
+      + `Luas antara μ dan x adalah ${f4(L)}, atau ${(L * 100).toFixed(2).replace('.', ',')}% dari data.`;
+
+    gambarKurva(document.getElementById('kurvaKonsep'),
+      z >= 0 ? [[0, z]] : [[z, 0]],
+      [{ z, teks: 'z = ' + f2(z) }]);
+  }
+  [inX, inMu, inSd].forEach(el => el.addEventListener('input', perbaruiKonsep));
+
+  /* ===================================================================
+     3. Tabel Z
+  =================================================================== */
+  const tabel = document.getElementById('tabelZ');
+  const BARIS = [];
+  for(let i = 0; i <= 39; i++) BARIS.push(i / 10);   // 0,0 sampai 3,9
+  const KOLOM = [];
+  for(let j = 0; j <= 9; j++) KOLOM.push(j / 100);
+
+  (function buatTabel(){
+    let s = '<thead><tr><th>z</th>' +
+      KOLOM.map(k => `<th data-kol="${k.toFixed(2)}">${k.toFixed(2).replace('.', ',')}</th>`).join('') +
+      '</tr></thead><tbody>';
+    for(const b of BARIS){
+      s += `<tr data-baris="${b.toFixed(1)}"><th>${b.toFixed(1).replace('.', ',')}</th>`;
+      for(const k of KOLOM){
+        const z = +(b + k).toFixed(2);
+        s += `<td data-z="${z.toFixed(2)}" data-kol="${k.toFixed(2)}">${f4(luas0(z))}</td>`;
+      }
+      s += '</tr>';
+    }
+    tabel.innerHTML = s + '</tbody>';
+  })();
+
+  function sorotTabel(z, gulir){
+    tabel.querySelectorAll('.pilih').forEach(e => e.classList.remove('pilih'));
+    tabel.querySelectorAll('.baris-aktif').forEach(e => e.classList.remove('baris-aktif'));
+    tabel.querySelectorAll('.kolom-aktif').forEach(e => e.classList.remove('kolom-aktif'));
+
+    const zb = Math.min(Math.max(z, 0), 3.99);
+    const baris = (Math.floor(zb * 10) / 10).toFixed(1);
+    const kol = (Math.round((zb - parseFloat(baris)) * 100) / 100).toFixed(2);
+
+    const tr = tabel.querySelector(`tr[data-baris="${baris}"]`);
+    const sel = tr && tr.querySelector(`td[data-kol="${kol}"]`);
+    if(!sel) return;
+
+    tr.classList.add('baris-aktif');
+    sel.classList.add('pilih');
+    tabel.querySelector(`thead th[data-kol="${kol}"]`).classList.add('kolom-aktif');
+    tabel.querySelectorAll(`tbody td[data-kol="${kol}"]`).forEach(td => td.classList.add('kolom-aktif'));
+
+    const nilai = +sel.dataset.z;
+    document.getElementById('tzZ').textContent = 'z = ' + f2(nilai);
+    document.getElementById('tzLuas').textContent = sel.textContent;
+    gambarKurva(document.getElementById('kurvaTabel'), [[0, nilai]], [{ z: nilai, teks: f2(nilai) }]);
+
+    if(gulir) sel.scrollIntoView({ block:'center', behavior:'smooth' });
+  }
+
+  tabel.addEventListener('click', (e) => {
+    const td = e.target.closest('td[data-z]');
+    if(td) sorotTabel(+td.dataset.z, false);
+  });
+
+  document.getElementById('cariZ').addEventListener('input', (e) => {
+    const z = angka(e.target.value);
+    if(z !== null && z >= 0 && z < 4) sorotTabel(z, true);
+  });
+
+  document.getElementById('tunjukkanContoh').addEventListener('click', () => {
+    document.getElementById('tabel').scrollIntoView({ behavior:'smooth' });
+    sorotTabel(1.45, true);
+  });
+
+  /* ===================================================================
+     4. Latihan
+  =================================================================== */
+  const elMode = document.getElementById('mode');
+  const elPola = document.getElementById('pola');
+  const elA = document.getElementById('inA');
+  const elB = document.getElementById('inB');
+  const elP = document.getElementById('inP');
+  const elHasil = document.getElementById('hasilHitung');
+
+  // Soal dari buku asistensi, supaya bisa langsung dicocokkan.
+  const SOAL = [
+    { label:'P(Z<1,45)',           mode:'peluang', pola:'kiri',      a:'1,45' },
+    { label:'P(Z>2,56)',           mode:'peluang', pola:'kanan',     a:'2,56' },
+    { label:'P(-3,43≤Z≤2,58)',     mode:'peluang', pola:'antara',    a:'-3,43', b:'2,58' },
+    { label:'P(Z≤4,37)',           mode:'peluang', pola:'kiri',      a:'4,37' },
+    { label:'P(|Z|≥1,56)',         mode:'peluang', pola:'absLebih',  a:'1,56' },
+    { label:'P(|Z|≤2,67)',         mode:'peluang', pola:'absKurang', a:'2,67' },
+    { label:'P(Z<z)=0,9591',       mode:'z', pola:'kiri',      p:'0,9591' },
+    { label:'P(Z>z)=0,2119',       mode:'z', pola:'kanan',     p:'0,2119' },
+    { label:'P(|Z|<z)=0,758',      mode:'z', pola:'absKurang', p:'0,758'  },
+    { label:'P(|Z|>z)=0,05',       mode:'z', pola:'absLebih',  p:'0,05'   },
+    { label:'P(-2,08<Z<z)=0,9004', mode:'z', pola:'antara',    a:'-2,08', b:'', p:'0,9004' },
+    { label:'P(z<Z<1,50)=0,1337',  mode:'z', pola:'antara',    a:'', b:'1,50', p:'0,1337' }
+  ];
+
+  // Label soal mengandung tanda "<". Kalau ditulis apa adanya, peramban
+  // membacanya sebagai awal tag sehingga tulisan sesudahnya hilang, misalnya
+  // "P(Z<z)=0,9591" hanya tampil sebagai "P(Z".
+  const escHtml = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  document.getElementById('soalBuku').innerHTML =
+    SOAL.map((s, i) => `<button type="button" data-soal="${i}">${escHtml(s.label)}</button>`).join('');
+
+  document.getElementById('soalBuku').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-soal]');
+    if(!b) return;
+    const s = SOAL[+b.dataset.soal];
+    elMode.value = s.mode; elPola.value = s.pola;
+    elA.value = s.a ?? ''; elB.value = s.b ?? ''; elP.value = s.p ?? '';
+    document.querySelectorAll('#soalBuku button').forEach(x => x.classList.toggle('aktif', x === b));
+    aturKolom(); hitung();
+  });
+
+  function aturKolom(){
+    const mode = elMode.value, pola = elPola.value;
+    const antara = pola === 'antara';
+    document.getElementById('wadahB').hidden = !antara;
+    document.getElementById('wadahP').hidden = mode !== 'z';
+    document.getElementById('wadahA').hidden = mode === 'z' && !antara;
+    document.getElementById('namaA').textContent = antara ? 'a' : 'z';
+  }
+  elMode.addEventListener('change', () => { aturKolom(); hitung(); });
+  elPola.addEventListener('change', () => { aturKolom(); hitung(); });
+  [elA, elB, elP].forEach(el => el.addEventListener('input', hitung));
+
+  function baris(t){ return `<div class="baris-hitung">${t}</div>`; }
+  function jawab(t){ return `<div class="jawab">${t}</div>`; }
+  function keliru(t){ elHasil.innerHTML = `<div class="salah">${t}</div>`; }
+
+  function hitung(){
+    const mode = elMode.value, pola = elPola.value;
+    const svg = document.getElementById('kurvaLatihan');
+
+    if(mode === 'peluang'){
+      const a = angka(elA.value);
+      if(a === null){ keliru('Isi nilai z dulu.'); gambarKurva(svg, [], []); return; }
+
+      let daerah = [], tanda = [], langkah = '', hasil = 0;
+      const La = luas0(a);
+
+      if(pola === 'kiri'){
+        hasil = kumulatif(a);
+        daerah = [[-Z_TEPI, a]];
+        tanda = [{ z:a, teks:f2(a) }];
+        langkah = a >= 0
+          ? baris(`L = 0,5 + ${f4(La)} = <strong>${f4(hasil)}</strong>`)
+          : baris(`L = 0,5 &minus; ${f4(La)} = <strong>${f4(hasil)}</strong>`);
+      }else if(pola === 'kanan'){
+        hasil = 1 - kumulatif(a);
+        daerah = [[a, Z_TEPI]];
+        tanda = [{ z:a, teks:f2(a) }];
+        langkah = a >= 0
+          ? baris(`L = 0,5 &minus; ${f4(La)} = <strong>${f4(hasil)}</strong>`)
+          : baris(`L = 0,5 + ${f4(La)} = <strong>${f4(hasil)}</strong>`);
+      }else if(pola === 'antara'){
+        const b = angka(elB.value);
+        if(b === null){ keliru('Isi nilai b dulu.'); return; }
+        const lo = Math.min(a, b), hi = Math.max(a, b);
+        hasil = kumulatif(hi) - kumulatif(lo);
+        daerah = [[lo, hi]];
+        tanda = [{ z:lo, teks:f2(lo) }, { z:hi, teks:f2(hi) }];
+        langkah = (lo < 0 && hi > 0)
+          ? baris(`L = ${f4(luas0(lo))} + ${f4(luas0(hi))} = <strong>${f4(hasil)}</strong>`)
+          : baris(`L = ${f4(Math.max(luas0(lo), luas0(hi)))} &minus; ${f4(Math.min(luas0(lo), luas0(hi)))} = <strong>${f4(hasil)}</strong>`);
+      }else if(pola === 'absKurang'){
+        const z = Math.abs(a);
+        hasil = 2 * luas0(z);
+        daerah = [[-z, z]];
+        tanda = [{ z:-z, teks:f2(-z) }, { z, teks:f2(z) }];
+        langkah = baris(`L = ${f4(luas0(z))} × 2 = <strong>${f4(hasil)}</strong>`);
+      }else{
+        const z = Math.abs(a);
+        hasil = 1 - 2 * luas0(z);
+        daerah = [[-Z_TEPI, -z], [z, Z_TEPI]];
+        tanda = [{ z:-z, teks:f2(-z) }, { z, teks:f2(z) }];
+        langkah = baris(`L = (0,5 &minus; ${f4(luas0(z))}) × 2 = <strong>${f4(hasil)}</strong>`);
+      }
+
+      gambarKurva(svg, daerah, tanda);
+      elHasil.innerHTML = langkah + jawab('Peluangnya = ' + f4(hasil));
+
+    }else{
+      const P = angka(elP.value);
+      if(P === null || P <= 0 || P >= 1){ keliru('Isi peluangnya, antara 0 dan 1.'); return; }
+
+      let z = 0, daerah = [], tanda = [], langkah = '';
+
+      if(pola === 'kiri'){
+        z = zDariKumulatif(P);
+        daerah = [[-Z_TEPI, z]]; tanda = [{ z, teks:f2(z) }];
+        langkah = P >= 0.5
+          ? baris(`0,5 + X = ${f4(P)}`) + baris(`X = ${f4(P)} &minus; 0,5 = ${f4(P - 0.5)}`)
+          : baris(`0,5 &minus; X = ${f4(P)}`) + baris(`X = 0,5 &minus; ${f4(P)} = ${f4(0.5 - P)}`);
+      }else if(pola === 'kanan'){
+        z = zDariKumulatif(1 - P);
+        daerah = [[z, Z_TEPI]]; tanda = [{ z, teks:f2(z) }];
+        langkah = P <= 0.5
+          ? baris(`0,5 &minus; X = ${f4(P)}`) + baris(`X = 0,5 &minus; ${f4(P)} = ${f4(0.5 - P)}`)
+          : baris(`0,5 + X = ${f4(P)}`) + baris(`X = ${f4(P)} &minus; 0,5 = ${f4(P - 0.5)}`);
+      }else if(pola === 'absKurang'){
+        z = zDariLuas0(P / 2);
+        daerah = [[-z, z]]; tanda = [{ z:-z, teks:f2(-z) }, { z, teks:f2(z) }];
+        langkah = baris(`X = ${f4(P)} : 2 = ${f4(P / 2)}`);
+      }else if(pola === 'absLebih'){
+        z = zDariLuas0(0.5 - P / 2);
+        daerah = [[-Z_TEPI, -z], [z, Z_TEPI]]; tanda = [{ z:-z, teks:f2(-z) }, { z, teks:f2(z) }];
+        langkah = baris(`X = 0,5 &minus; (${f4(P)} : 2) = ${f4(0.5 - P / 2)}`);
+      }else{
+        // Salah satu batas dikosongkan, dan batas itulah yang dicari.
+        const a = angka(elA.value), b = angka(elB.value);
+        if(a === null && b === null){ keliru('Isi salah satu batasnya, biarkan yang dicari tetap kosong.'); return; }
+        if(a !== null && b !== null){ keliru('Kosongkan salah satu batas, karena batas itulah yang dicari.'); return; }
+
+        if(b === null){
+          z = zDariKumulatif(kumulatif(a) + P);
+          daerah = [[a, z]]; tanda = [{ z:a, teks:f2(a) }, { z, teks:f2(z) }];
+          langkah = baris(`X = ${f4(P)} &minus; ${f4(luas0(a))} = ${f4(P - luas0(a))}`);
+        }else{
+          z = zDariKumulatif(kumulatif(b) - P);
+          daerah = [[z, b]]; tanda = [{ z, teks:f2(z) }, { z:b, teks:f2(b) }];
+          langkah = baris(`X = ${f4(luas0(b))} &minus; ${f4(P)} = ${f4(luas0(b) - P)}`);
+        }
+      }
+
+      gambarKurva(svg, daerah, tanda);
+      elHasil.innerHTML = langkah + jawab('z = ' + f2(z));
+    }
+  }
+
+  /* ===================================================================
+     Mulai
+  =================================================================== */
+  perbaruiKonsep();
+  sorotTabel(1.45, false);
+  aturKolom();
+  hitung();
+})();
+</script>
+
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
