@@ -162,11 +162,17 @@
   const TOTAL = DATA.reduce((s, d) => s + d.n, 0);
   const MAKS  = Math.max(...DATA.map(d => d.n));
 
-  // Empat orang yang diceritakan satu per satu di awal.
+  // Orang-orang yang diceritakan satu per satu di awal. Angka 170 muncul tiga
+  // kali dengan sengaja: pengulangan itulah yang membuat pembaca merasakan
+  // sendiri bahwa tinggi di sekitar rata-rata jauh lebih sering ditemui.
   const CERITA = [
-    { cm:160, idx:0 }, { cm:165, idx:0 }, { cm:140, idx:0 }, { cm:190, idx:0 }
+    { cm:170, idx:0 }, { cm:165, idx:0 }, { cm:160, idx:0 },
+    { cm:140, idx:0 }, { cm:190, idx:0 },
+    { cm:170, idx:1 }, { cm:170, idx:2 }
   ];
   const dipakaiCerita = (cm, i) => CERITA.some(c => c.cm === cm && c.idx === i);
+  const idTitik = (cm, i) => `t-${cm}-${i}`;
+  const idLabel = (cm, i) => `l-${cm}-${i}`;
 
   const BAB = {
     ukur:  'Bagian: Mengukur satu per satu',
@@ -174,26 +180,38 @@
     kurva: 'Bagian: Kurva normal'
   };
 
+  /*
+    tampil : muncul di langkah ini dan tetap terlihat sesudahnya
+    sorot  : hanya terlihat pada langkah ini saja
+
+    Label tinggi badan masuk ke "sorot", bukan "tampil". Kalau semuanya
+    dibiarkan menumpuk, label 160 dan 165 saling menimpa karena titiknya
+    bersebelahan dan sama-sama di baris terbawah.
+  */
   const LANGKAH = [
-    { bab:'ukur', tampil:[],
+    { bab:'ukur', tampil:[], sorot:[],
       teks:'Coba ukur tinggi badan orang-orang di sekitarmu. Garis mendatar di sebelah ini adalah tinggi badan, dalam sentimeter.' },
-    { bab:'ukur', tampil:['t-160-0','l160'],
-      teks:'Orang pertama tingginya <strong>160 cm</strong>. Kita taruh satu titik tepat di angka itu.' },
-    { bab:'ukur', tampil:['t-165-0','l165'],
-      teks:'Orang kedua <strong>165 cm</strong>, jadi titiknya sedikit ke kanan.' },
-    { bab:'ukur', tampil:['t-140-0','l140'],
+    { bab:'ukur', tampil:[idTitik(170,0)], sorot:[idLabel(170,0)],
+      teks:'Orang pertama tingginya <strong>170 cm</strong>. Kita taruh satu titik tepat di angka itu.' },
+    { bab:'ukur', tampil:[idTitik(165,0)], sorot:[idLabel(165,0)],
+      teks:'Orang kedua <strong>165 cm</strong>, sedikit lebih pendek, jadi titiknya bergeser ke kiri.' },
+    { bab:'ukur', tampil:[idTitik(160,0)], sorot:[idLabel(160,0)],
+      teks:'Orang ketiga <strong>160 cm</strong>. Titik baru lagi, bergeser sedikit lagi ke kiri.' },
+    { bab:'ukur', tampil:[idTitik(140,0)], sorot:[idLabel(140,0)],
       teks:'Ada juga yang jauh lebih pendek, <strong>140 cm</strong>. Titiknya sendirian di ujung kiri.' },
-    { bab:'ukur', tampil:['t-190-0','l190'],
+    { bab:'ukur', tampil:[idTitik(190,0)], sorot:[idLabel(190,0)],
       teks:'Dan ada yang jauh lebih tinggi, <strong>190 cm</strong>. Sendirian juga di ujung kanan.' },
-    { bab:'banyak', tampil:['sisa'],
-      teks:`Sekarang ukur ${TOTAL} orang. Tiap orang jadi satu titik, dan yang tingginya sama menumpuk ke atas.` },
-    { bab:'banyak', tampil:['pusat','pusatLbl'],
+    { bab:'ukur', tampil:[idTitik(170,1), idTitik(170,2)], sorot:[idLabel(170,1)],
+      teks:'Orang berikutnya <strong>170 cm</strong> lagi. Begitu juga yang sesudahnya. Titiknya tidak bergeser ke mana-mana, malah menumpuk di atas yang tadi, karena tinggi segini memang paling sering ditemui.' },
+    { bab:'banyak', tampil:['sisa'], sorot:[],
+      teks:`Sekarang ukur ${TOTAL} orang. Tiap orang tetap satu titik, dan yang tingginya sama menumpuk ke atas.` },
+    { bab:'banyak', tampil:['pusat','pusatLbl'], sorot:[],
       teks:'Tumpukannya paling tebal di sekitar <strong>170 cm</strong>. Di sinilah kebanyakan orang berkumpul.' },
-    { bab:'banyak', tampil:['ekorKiri','ekorKanan','ekorLbl'],
+    { bab:'banyak', tampil:['ekorKiri','ekorKanan','ekorLblKiri','ekorLblKanan'], sorot:[],
       teks:'Yang sangat pendek dan yang sangat tinggi sama-sama sedikit. Kedua ujungnya tipis, cuma satu dua titik.' },
-    { bab:'kurva', tampil:['kurva','kurvaLbl'],
+    { bab:'kurva', tampil:['kurva','kurvaLbl'], sorot:[],
       teks:'Kalau puncak tiap tumpukan kita ikuti, garisnya melengkung: menggunung di tengah, melandai ke kiri dan ke kanan. Inilah <strong>kurva normal</strong>.' },
-    { bab:'kurva', tampil:['ringkas'],
+    { bab:'kurva', tampil:['ringkas'], sorot:[],
       teks:'Kurva ini tidak dikarang, melainkan muncul sendiri dari data nyata. Pola yang sama terlihat pada berat badan, nilai ujian, dan ukuran sepatu. Itu sebabnya <strong>distribusi normal</strong> dipakai di mana-mana.' }
   ];
 
@@ -249,23 +267,41 @@
            fill="var(--ink-soft)" transform="rotate(-90 14 ${tepi.atas + 90})"
            text-anchor="middle">Banyaknya orang</text>`;
 
-    // Sorotan pusat dan kedua ekor, digambar lebih dulu supaya ada di belakang titik
-    const kiriPusat = sx(162.5), kananPusat = sx(177.5);
-    s += `<rect id="pusat" class="viz-hide" x="${kiriPusat}" y="${tepi.atas}"
-           width="${kananPusat - kiriPusat}" height="${tinggiPlot}"
-           fill="var(--gold)" opacity="0.16" rx="10"/>`;
-    s += `<text id="pusatLbl" class="viz-hide" x="${sx(170)}" y="${tepi.atas + 16}"
-           text-anchor="middle" font-size="13" font-weight="800"
-           fill="var(--gold-deep)">paling banyak di sini</text>`;
+    /*
+      Sorotan sengaja hanya setinggi tumpukan di daerahnya, bukan setinggi
+      seluruh bidang gambar. Kotak setinggi penuh menutupi titik-titiknya dan
+      malah terbaca sebagai batang histogram, padahal yang sedang diceritakan
+      justru titik-titik itu sendiri.
 
-    s += `<rect id="ekorKiri" class="viz-hide" x="${sx(CM_MIN)}" y="${tepi.atas}"
-           width="${sx(152.5) - sx(CM_MIN)}" height="${tinggiPlot}"
-           fill="var(--owl-mid)" opacity="0.16" rx="10"/>`;
-    s += `<rect id="ekorKanan" class="viz-hide" x="${sx(187.5)}" y="${tepi.atas}"
-           width="${sx(CM_MAKS) - sx(187.5)}" height="${tinggiPlot}"
-           fill="var(--owl-mid)" opacity="0.16" rx="10"/>`;
-    s += `<text id="ekorLbl" class="viz-hide" x="${sx(145)}" y="${dasarY - 60}"
-           text-anchor="middle" font-size="12" font-weight="700"
+      Tulisannya ditaruh di atas kotak, bukan di dalamnya, dan warnanya gelap
+      supaya tetap terbaca.
+    */
+    const tinggiTumpukan = (nMaks) => 9 + (nMaks - 1) * JARAK + R + 8;
+
+    function sorotan(id, dariCm, sampaiCm, warna, nMaks){
+      const x1 = sx(dariCm), x2 = sx(sampaiCm);
+      const t = tinggiTumpukan(nMaks);
+      return `<rect id="${id}" class="viz-hide" x="${x1}" y="${dasarY - t}"
+               width="${x2 - x1}" height="${t}"
+               fill="${warna}" opacity="0.18" rx="8"/>`;
+    }
+
+    const maksPusat = Math.max(...DATA.filter(d => d.cm >= 165 && d.cm <= 175).map(d => d.n));
+    const maksEkor  = Math.max(...DATA.filter(d => d.cm <= 150 || d.cm >= 190).map(d => d.n));
+
+    s += sorotan('pusat', 162.5, 177.5, 'var(--gold)', maksPusat);
+    s += `<text id="pusatLbl" class="viz-hide" x="${sx(170)}"
+           y="${dasarY - tinggiTumpukan(maksPusat) - 10}" text-anchor="middle"
+           font-size="13" font-weight="800" fill="var(--owl-dark2)">paling banyak di sini</text>`;
+
+    s += sorotan('ekorKiri', CM_MIN + 2, 152.5, 'var(--owl-mid)', maksEkor);
+    s += sorotan('ekorKanan', 187.5, CM_MAKS - 2, 'var(--owl-mid)', maksEkor);
+    const yEkorLbl = dasarY - tinggiTumpukan(maksEkor) - 10;
+    s += `<text id="ekorLblKiri" class="viz-hide" x="${sx(144)}" y="${yEkorLbl}"
+           text-anchor="middle" font-size="12" font-weight="800"
+           fill="var(--owl-dark)">sedikit</text>`;
+    s += `<text id="ekorLblKanan" class="viz-hide" x="${sx(196)}" y="${yEkorLbl}"
+           text-anchor="middle" font-size="12" font-weight="800"
            fill="var(--owl-dark)">sedikit</text>`;
 
     // Titik-titik. Yang bukan bagian cerita awal dikumpulkan dalam satu grup
@@ -276,7 +312,7 @@
         const bulat = `<circle cx="${sx(d.cm)}" cy="${cyTitik(i)}" r="${R}"
                         fill="var(--owl-mid)" stroke="var(--surface)" stroke-width="1.5"/>`;
         if(dipakaiCerita(d.cm, i)){
-          s += `<g id="t-${d.cm}-${i}" class="orang">
+          s += `<g id="${idTitik(d.cm, i)}" class="orang">
                   <circle cx="${sx(d.cm)}" cy="${cyTitik(i)}" r="${R + 2}"
                    fill="var(--gold)" opacity="0.45"/>${bulat}</g>`;
         }else{
@@ -286,11 +322,16 @@
     }
     s += `<g id="sisa">${sisa}</g>`;
 
-    // Label untuk empat orang yang diceritakan
+    // Label tinggi badan, satu untuk tiap orang yang diceritakan. Diberi latar
+    // agar tetap terbaca kalau kebetulan jatuh di atas sorotan.
     for(const c of CERITA){
-      s += `<text id="l${c.cm}" class="viz-hide" x="${sx(c.cm)}" y="${cyTitik(c.idx) - 14}"
-             text-anchor="middle" font-size="12" font-weight="800"
-             fill="var(--owl-dark2)">${c.cm} cm</text>`;
+      const x = sx(c.cm), y = cyTitik(c.idx) - 15;
+      s += `<g id="${idLabel(c.cm, c.idx)}" class="viz-hide">
+              <rect x="${x - 30}" y="${y - 13}" width="60" height="19" rx="9"
+               fill="var(--surface)" opacity="0.92"/>
+              <text x="${x}" y="${y}" text-anchor="middle" font-size="12"
+               font-weight="800" fill="var(--owl-dark2)">${c.cm} cm</text>
+            </g>`;
     }
 
     // Kurva normal
@@ -328,12 +369,14 @@
   function tampilkan(){
     const langkah = LANGKAH[ke];
 
-    // Semua yang seharusnya sudah muncul sampai langkah ini.
+    // Semua yang seharusnya sudah muncul sampai langkah ini, ditambah yang
+    // hanya berlaku pada langkah yang sedang dibuka.
     const munculkan = new Set();
     for(let i = 0; i <= ke; i++) LANGKAH[i].tampil.forEach(id => munculkan.add(id));
+    langkah.sorot.forEach(id => munculkan.add(id));
 
     for(const l of LANGKAH){
-      for(const id of l.tampil){
+      for(const id of l.tampil.concat(l.sorot)){
         const el = document.getElementById(id);
         if(!el) continue;
         if(id === 'sisa'){
