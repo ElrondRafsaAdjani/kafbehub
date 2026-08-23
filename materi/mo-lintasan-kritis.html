@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lintasan Kritis - Manajemen Operasi - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .story-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:28px; box-shadow:var(--shadow); margin-top:24px;
+  }
+  @media (max-width:600px){ .story-card{padding:18px;} }
+
+  .chapter-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .chapter-badge{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
+    background:var(--bg-deep); color:var(--owl-dark2);
+  }
+  .progress-dots{display:flex; gap:6px; flex-wrap:wrap;}
+  .progress-dots .dot{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s, transform .2s;}
+  .progress-dots .dot.active{background:var(--gold); transform:scale(1.3);}
+  .progress-dots .dot.done{background:var(--owl-mid);}
+
+  .story-layout{display:grid; grid-template-columns:300px 1fr; gap:26px; align-items:start;}
+  @media (max-width:900px){ .story-layout{display:flex; flex-direction:column; gap:18px;} }
+
+  .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .owl-panel svg{width:150px;}
+  .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
+  @media (max-width:900px){ .owl-panel svg{width:84px;} .owl-panel{gap:8px;} }
+
+  .bubble{
+    position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
+    font-size:0.94rem; line-height:1.62; color:var(--ink); min-height:150px;
+  }
+  .bubble b{color:var(--owl-dark2);}
+  .bubble::before{
+    content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:9px solid var(--bg-deep);
+  }
+  @media (min-width:901px){
+    .bubble::before{ top:26px; left:-9px; transform:none; border-left:none; border-bottom:9px solid transparent; border-top:9px solid transparent; border-right:9px solid var(--bg-deep); }
+  }
+
+  /* Jaringannya lebar dan tidak bisa dipersempit tanpa membuat angkanya
+     bertumpuk, jadi di layar sempit digulirkan di dalam kotaknya sendiri.
+     Yang bergeser cuma gambarnya, bukan seluruh halaman. */
+  .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:14px; overflow-x:auto;}
+  #jaringSvg{display:block; width:100%; min-width:660px; height:auto; aspect-ratio:720/470;}
+
+  /* min-width:0 WAJIB di sini, jangan dihapus.
+
+     Anak sebuah flexbox maupun grid punya min-width:auto secara bawaan, yang
+     artinya ia menolak menyusut lebih kecil daripada isinya. Karena gambar di
+     dalamnya punya min-width 660 piksel, .chart-wrap ikut melebar 660 piksel
+     dan mendorong SELURUH halaman ke samping di layar ponsel, sementara
+     overflow-x:auto miliknya sendiri tidak pernah terpakai.
+
+     min-width:0 saja ternyata belum cukup. Pada flexbox arah kolom, lebar
+     barisnya diambil dari isi yang paling lebar, sehingga kotaknya tetap melar
+     melewati induknya. max-width:100% yang benar-benar mengurungnya, dan
+     barulah overflow-x:auto miliknya terpakai. */
+  .story-layout > *{min-width:0; max-width:100%;}
+
+  .viz-hide{opacity:0; transition:opacity .45s ease;}
+  .viz-hide.revealed{opacity:1;}
+  .kotak-aktivitas rect.badan{transition:fill .35s ease, stroke .35s ease;}
+  .panah{transition:stroke .35s ease;}
+
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
+  .nav-row .spacer{flex:1;}
+
+  .kotak-materi{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:26px; margin-top:22px;
+  }
+  @media (max-width:600px){ .kotak-materi{padding:18px;} }
+  .kotak-materi h3{font-size:1.2rem; margin-bottom:6px;}
+  .kotak-materi > p{color:var(--ink-soft); font-size:0.94rem; line-height:1.65; margin:0 0 16px; max-width:74ch;}
+  .kotak-materi h4{font-size:0.98rem; margin:22px 0 8px; color:var(--owl-dark2);}
+
+  .rumus{
+    display:inline-block; background:var(--bg-deep); border-radius:14px;
+    padding:13px 20px; font-size:1.05rem; color:var(--owl-dark2);
+    font-family:'Baloo 2', serif; margin:4px 8px 8px 0;
+  }
+
+  .dua{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;}
+  @media (max-width:760px){ .dua{grid-template-columns:1fr;} }
+  .dua > div{
+    background:var(--bg-deep); border-radius:16px; padding:16px 18px;
+    font-size:0.9rem; line-height:1.65; color:var(--ink-soft);
+  }
+  .dua b{display:block; color:var(--owl-dark2); font-size:1rem; margin-bottom:4px;}
+
+  /* Contoh kotak aktivitas yang dipakai di bagian keterangan. */
+  .kotak-contoh{
+    display:inline-grid; grid-template-columns:auto auto; gap:0;
+    border:2px solid var(--owl-dark2); border-radius:10px; overflow:hidden;
+    font-family:'Baloo 2', serif; font-size:1rem; margin:6px 0 2px;
+  }
+  .kotak-contoh span{padding:8px 20px; text-align:center; color:var(--owl-dark2); font-weight:700;}
+  .kotak-contoh span:nth-child(1){border-right:2px solid var(--owl-dark2); border-bottom:2px solid var(--owl-dark2);}
+  .kotak-contoh span:nth-child(2){border-bottom:2px solid var(--owl-dark2);}
+  .kotak-contoh span:nth-child(3){border-right:2px solid var(--owl-dark2);}
+
+  .langkah-kerja{counter-reset:lk; margin-top:12px; padding:0; list-style:none;}
+  .langkah-kerja li{
+    counter-increment:lk; position:relative; padding:0 0 14px 42px;
+    font-size:0.93rem; line-height:1.65; color:var(--ink-soft);
+  }
+  .langkah-kerja li::before{
+    content:counter(lk); position:absolute; left:0; top:0;
+    width:28px; height:28px; border-radius:50%;
+    background:var(--owl-dark2); color:#fff;
+    font-family:'Baloo 2', serif; font-weight:700; font-size:0.9rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .langkah-kerja b{color:var(--owl-dark2);}
+
+  .tabel-gulir{overflow-x:auto; margin-top:14px;}
+  table.ringkas{width:100%; border-collapse:collapse; font-size:0.9rem; min-width:520px;}
+  table.ringkas th, table.ringkas td{padding:9px 11px; border-bottom:1px solid var(--line); text-align:left;}
+  table.ringkas th{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold-deep); white-space:nowrap;}
+  table.ringkas td{font-variant-numeric:tabular-nums;}
+  table.ringkas td:first-child{font-weight:800; color:var(--owl-dark2);}
+  table.ringkas tr.kritis td{background:#FDF3DE; font-weight:600;}
+  .tanda-kritis{
+    display:inline-block; font-size:0.7rem; font-weight:800; letter-spacing:0.04em;
+    text-transform:uppercase; background:var(--gold); color:var(--owl-dark2);
+    padding:2px 9px; border-radius:100px; margin-left:6px;
+  }
+</style>
+
+<!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
+     <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
+     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body data-fitur-halaman="materi-mo">
+
+<div id="kafbeNav"></div>
+<script src="/shared/bahasa.js"></script>
+<script src="/shared/nav.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/><path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/><path d="M142 192 q8 10 16 0"/><path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/><path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="mo.html">← Kembali ke Manajemen Operasi</a>
+
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Manajemen Operasi</span>
+    <h2>Lintasan Kritis</h2>
+    <p>Menghitung maju, menghitung mundur, lalu menemukan rangkaian aktivitas yang menentukan lama seluruh proyek.</p>
+  </div>
+
+  <p class="catatan-layar">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
+
+  <div class="story-card">
+    <div class="chapter-row">
+      <span class="chapter-badge" id="chapterBadge"></span>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <div class="story-layout">
+      <div class="owl-panel">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <div class="bubble" id="bubbleText"></div>
+      </div>
+
+      <div class="chart-wrap">
+        <svg id="jaringSvg" viewBox="0 0 720 470" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
+    </div>
+  </div>
+
+  <!-- ============ KETERANGAN ISTILAH ============ -->
+  <div class="kotak-materi">
+    <h3>Arti tiap istilah</h3>
+    <p>Empat angka pada setiap aktivitas selalu ditulis pada posisi yang sama, sehingga bisa dibaca sekilas tanpa perlu dilabeli satu per satu.</p>
+
+    <div class="kotak-contoh">
+      <span>ES</span><span>EF</span>
+      <span>LS</span><span>LF</span>
+    </div>
+
+    <div class="tabel-gulir">
+      <table class="ringkas">
+        <thead><tr><th>Istilah</th><th>Kepanjangan</th><th>Artinya</th></tr></thead>
+        <tbody>
+          <tr><td>ES</td><td>Earliest Start</td><td>Waktu paling cepat sebuah aktivitas bisa dimulai</td></tr>
+          <tr><td>EF</td><td>Earliest Finish</td><td>Waktu paling cepat sebuah aktivitas bisa selesai</td></tr>
+          <tr><td>LS</td><td>Latest Start</td><td>Waktu paling lambat aktivitas boleh dimulai tanpa memperlambat seluruh proyek</td></tr>
+          <tr><td>LF</td><td>Latest Finish</td><td>Waktu paling lambat aktivitas boleh selesai tanpa memperlambat seluruh proyek</td></tr>
+          <tr><td>Slack</td><td>Slack Time</td><td>Berapa lama aktivitas boleh tertunda tanpa memperlambat seluruh proyek</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Rumus yang dipakai</h4>
+    <div class="rumus">EF = ES + waktu aktivitas</div>
+    <div class="rumus">LS = LF − waktu aktivitas</div>
+    <div class="rumus">Slack = LS − ES = LF − EF</div>
+
+    <p style="margin-top:14px;">Slack bisa dihitung dengan dua cara itu dan hasilnya selalu sama. Kalau keduanya berbeda, berarti ada salah hitung di langkah sebelumnya, jadi ini sekaligus cara memeriksa pekerjaan sendiri.</p>
+
+    <div class="dua">
+      <div><b>Lintasan kritis</b>
+        Rangkaian aktivitas dari awal sampai akhir yang seluruh slack-nya nol.
+        Rangkaian ini yang menentukan lama proyek, dan selalu merupakan lintasan terpanjang.</div>
+      <div><b>Kenapa lintasan terpanjang</b>
+        Proyek baru selesai kalau semua jalur sudah selesai. Jalur yang paling lama
+        adalah yang terakhir rampung, jadi jalur itulah yang menahan tanggal selesainya.</div>
+    </div>
+  </div>
+
+  <!-- ============ CARA MENGERJAKAN ============ -->
+  <div class="kotak-materi">
+    <h3>Cara mengerjakan</h3>
+    <p>Urutan ini berlaku untuk soal lintasan kritis mana pun, berapa pun jumlah aktivitasnya.</p>
+
+    <ol class="langkah-kerja">
+      <li><b>Gambar jaringannya.</b> Tiap aktivitas jadi satu kotak, lalu tarik panah dari setiap aktivitas pendahulu ke aktivitas yang mengikutinya. Aktivitas tanpa pendahulu ditarik dari Start, aktivitas yang tidak menjadi pendahulu siapa pun ditarik ke Finish.</li>
+      <li><b>Hitung maju, dari kiri ke kanan.</b> Aktivitas yang langsung dari Start punya ES = 0. Untuk yang lain, <b>ES = EF terbesar di antara para pendahulunya</b>. Lalu EF = ES + waktu aktivitas.</li>
+      <li><b>Catat lama proyek.</b> EF terbesar di ujung kanan adalah waktu penyelesaian normal proyek.</li>
+      <li><b>Hitung mundur, dari kanan ke kiri.</b> Aktivitas terakhir diberi LF = lama proyek. Untuk yang lain, <b>LF = LS terkecil di antara para penerusnya</b>. Lalu LS = LF − waktu aktivitas.</li>
+      <li><b>Hitung slack tiap aktivitas.</b> Slack = LS − ES. Periksa dengan LF − EF, hasilnya harus sama.</li>
+      <li><b>Tandai yang slack-nya nol.</b> Rangkaian aktivitas itulah lintasan kritisnya. Tulis sebagai Start - ... - Finish.</li>
+    </ol>
+
+    <h4>Dua hal yang paling sering keliru</h4>
+    <div class="dua">
+      <div><b>Hitung maju memakai yang TERBESAR</b>
+        Sebuah aktivitas baru bisa mulai kalau semua pendahulunya sudah selesai, jadi
+        yang dipakai EF paling besar, bukan yang paling kecil.</div>
+      <div><b>Hitung mundur memakai yang TERKECIL</b>
+        Sebuah aktivitas harus sudah selesai sebelum penerus mana pun dimulai, jadi
+        yang dipakai LS paling kecil, bukan yang paling besar.</div>
+    </div>
+  </div>
+
+  <!-- ============ TABEL RINGKASAN ============ -->
+  <div class="kotak-materi">
+    <h3>Ringkasan contoh di atas</h3>
+    <p>Seluruh angka pada tabel ini dihitung ulang oleh halaman, bukan diketik satu per satu, jadi tidak mungkin berbeda dengan yang tergambar pada jaringan.</p>
+    <div class="tabel-gulir">
+      <table class="ringkas" id="tabelRingkas"></table>
+    </div>
+    <p id="ringkasKesimpulan" style="margin-top:14px;"></p>
+  </div>
+</section>
+
+<footer class="wrap" data-bagian="Penutup">
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
+</footer>
+
+<script src="../main.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ================================================================
+     DATA SOAL
+
+     Urutan daftar ini penting. Hitung maju membaca dari atas ke bawah dan
+     mengandalkan pendahulunya sudah terhitung lebih dulu, sedangkan hitung
+     mundur membaca daftar yang sama secara terbalik. Jadi aktivitas harus
+     ditulis dengan pendahulu selalu berada di atas penerusnya.
+
+     Mengubah angka waktu di sini otomatis mengubah seluruh gambar, tabel, dan
+     kesimpulan lintasan kritisnya. Tidak ada angka hasil yang diketik manual
+     di berkas ini, sehingga gambar dan tabel tidak mungkin saling berbeda.
+     ================================================================ */
+  var AKTIVITAS = [
+    { id:'A', waktu:5, pendahulu:[],              x:150, y:52  },
+    { id:'B', waktu:3, pendahulu:[],              x:150, y:177 },
+    { id:'C', waktu:6, pendahulu:[],              x:150, y:302 },
+    { id:'D', waktu:8, pendahulu:['A'],           x:330, y:52  },
+    { id:'E', waktu:7, pendahulu:['B'],           x:330, y:177 },
+    { id:'F', waktu:4, pendahulu:['C'],           x:330, y:302 },
+    { id:'G', waktu:5, pendahulu:['D','E','F'],   x:500, y:177 }
+  ];
+
+  var LEBAR_KOTAK = 116, TINGGI_KOTAK = 76;
+
+  /* ---------- Perhitungan ---------- */
+
+  function penerusDari(id){
+    return AKTIVITAS.filter(function(a){ return a.pendahulu.indexOf(id) >= 0; });
+  }
+
+  function hitung(){
+    var m = {};
+    AKTIVITAS.forEach(function(a){ m[a.id] = { id:a.id, waktu:a.waktu, pendahulu:a.pendahulu }; });
+
+    // Maju: ES = EF TERBESAR di antara pendahulu, sebab aktivitas baru bisa
+    // mulai setelah pendahulu yang paling akhir selesai.
+    AKTIVITAS.forEach(function(a){
+      var ef = a.pendahulu.map(function(k){ return m[k].ef; });
+      m[a.id].es = ef.length ? Math.max.apply(null, ef) : 0;
+      m[a.id].ef = m[a.id].es + a.waktu;
+    });
+
+    var total = Math.max.apply(null, AKTIVITAS.map(function(a){ return m[a.id].ef; }));
+
+    // Mundur: LF = LS TERKECIL di antara penerus, sebab aktivitas harus sudah
+    // selesai sebelum penerus mana pun boleh dimulai.
+    AKTIVITAS.slice().reverse().forEach(function(a){
+      var pn = penerusDari(a.id);
+      m[a.id].lf = pn.length
+        ? Math.min.apply(null, pn.map(function(x){ return m[x.id].ls; }))
+        : total;
+      m[a.id].ls = m[a.id].lf - a.waktu;
+    });
+
+    AKTIVITAS.forEach(function(a){
+      m[a.id].slack = m[a.id].ls - m[a.id].es;
+      m[a.id].kritis = m[a.id].slack === 0;
+    });
+
+    return { m:m, total:total };
+  }
+
+  var H = hitung();
+  var m = H.m, TOTAL = H.total;
+
+  // Lintasan kritis dirunut dari Start: selalu ambil penerus yang slack-nya nol.
+  function lintasanKritis(){
+    var jalur = [];
+    var kandidat = AKTIVITAS.filter(function(a){
+      return a.pendahulu.length === 0 && m[a.id].kritis;
+    });
+    var kini = kandidat[0];
+    while(kini){
+      jalur.push(kini.id);
+      var lanjut = penerusDari(kini.id).filter(function(x){ return m[x.id].kritis; });
+      kini = lanjut[0];
+    }
+    return jalur;
+  }
+  var JALUR = lintasanKritis();
+
+  /* ---------- Gambar jaringan ---------- */
+
+  var svg = document.getElementById('jaringSvg');
+
+  function kotakAktivitas(a){
+    var x = a.x, y = a.y, w = LEBAR_KOTAK, h = TINGGI_KOTAK;
+    var d = m[a.id];
+    var barisAtas = y + 24, barisBawah = y + h - 24;
+    var tengahX = x + w / 2;
+
+    return '<g class="kotak-aktivitas" id="kotak' + a.id + '">'
+      + '<rect class="badan" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="12" '
+        + 'fill="var(--surface)" stroke="var(--owl-dark2)" stroke-width="2"/>'
+      + '<line x1="' + x + '" y1="' + barisAtas + '" x2="' + (x+w) + '" y2="' + barisAtas + '" stroke="var(--line)" stroke-width="1.5"/>'
+      + '<line x1="' + x + '" y1="' + barisBawah + '" x2="' + (x+w) + '" y2="' + barisBawah + '" stroke="var(--line)" stroke-width="1.5"/>'
+      + '<line x1="' + tengahX + '" y1="' + y + '" x2="' + tengahX + '" y2="' + barisAtas + '" stroke="var(--line)" stroke-width="1.5"/>'
+      + '<line x1="' + tengahX + '" y1="' + barisBawah + '" x2="' + tengahX + '" y2="' + (y+h) + '" stroke="var(--line)" stroke-width="1.5"/>'
+      // Nama dan lama aktivitas, selalu terlihat sejak langkah pertama.
+      + '<text x="' + tengahX + '" y="' + (y + h/2 + 6) + '" text-anchor="middle" '
+        + 'font-family="Baloo 2" font-weight="800" font-size="17" fill="var(--owl-dark2)">'
+        + a.id + '<tspan font-size="12" font-weight="600" fill="var(--ink-soft)"> · ' + a.waktu + ' mgg</tspan></text>'
+      // Empat angka, dimunculkan langkah demi langkah.
+      + '<text id="es' + a.id + '" class="viz-hide" x="' + (x + w/4) + '" y="' + (y + 17) + '" text-anchor="middle" '
+        + 'font-family="Baloo 2" font-weight="700" font-size="14" fill="var(--owl-dark)">' + d.es + '</text>'
+      + '<text id="ef' + a.id + '" class="viz-hide" x="' + (x + 3*w/4) + '" y="' + (y + 17) + '" text-anchor="middle" '
+        + 'font-family="Baloo 2" font-weight="700" font-size="14" fill="var(--owl-dark)">' + d.ef + '</text>'
+      + '<text id="ls' + a.id + '" class="viz-hide" x="' + (x + w/4) + '" y="' + (y + h - 7) + '" text-anchor="middle" '
+        + 'font-family="Baloo 2" font-weight="700" font-size="14" fill="var(--gold-deep)">' + d.ls + '</text>'
+      + '<text id="lf' + a.id + '" class="viz-hide" x="' + (x + 3*w/4) + '" y="' + (y + h - 7) + '" text-anchor="middle" '
+        + 'font-family="Baloo 2" font-weight="700" font-size="14" fill="var(--gold-deep)">' + d.lf + '</text>'
+      // Slack ditulis di bawah kotak.
+      + '<text id="slack' + a.id + '" class="viz-hide" x="' + tengahX + '" y="' + (y + h + 17) + '" text-anchor="middle" '
+        + 'font-size="11.5" font-weight="700" fill="' + (d.kritis ? 'var(--gold-deep)' : 'var(--ink-soft)') + '">'
+        + 'slack ' + d.slack + '</text>'
+      + '</g>';
+  }
+
+  function panah(x1, y1, x2, y2, id){
+    return '<path class="panah" id="' + id + '" d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" '
+      + 'stroke="var(--owl-mid)" stroke-width="2.2" fill="none" marker-end="url(#ujung)"/>';
+  }
+
+  function gambarJaringan(){
+    var s = '<defs>'
+      + '<marker id="ujung" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
+      + '<path d="M0 0 L10 5 L0 10 z" fill="var(--owl-mid)"/></marker>'
+      + '<marker id="ujungKritis" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
+      + '<path d="M0 0 L10 5 L0 10 z" fill="var(--gold-deep)"/></marker>'
+      + '</defs>';
+
+    // Simpul Start dan Finish
+    s += '<circle cx="70" cy="215" r="26" fill="var(--owl-dark2)"/>'
+       + '<text x="70" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="700" font-size="13" fill="#fff">Start</text>';
+    s += '<circle cx="665" cy="215" r="26" fill="var(--owl-dark2)"/>'
+       + '<text x="665" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="700" font-size="12" fill="#fff">Finish</text>';
+
+    // Panah dari Start ke aktivitas tanpa pendahulu
+    AKTIVITAS.filter(function(a){ return a.pendahulu.length === 0; }).forEach(function(a){
+      s += panah(98, 215, a.x - 6, a.y + TINGGI_KOTAK/2, 'panahStart' + a.id);
+    });
+
+    // Panah antar aktivitas
+    AKTIVITAS.forEach(function(a){
+      a.pendahulu.forEach(function(k){
+        var p = AKTIVITAS.filter(function(z){ return z.id === k; })[0];
+        s += panah(p.x + LEBAR_KOTAK, p.y + TINGGI_KOTAK/2,
+                   a.x - 6, a.y + TINGGI_KOTAK/2, 'panah' + k + a.id);
+      });
+    });
+
+    // Panah ke Finish dari aktivitas yang tidak punya penerus
+    AKTIVITAS.filter(function(a){ return penerusDari(a.id).length === 0; }).forEach(function(a){
+      s += panah(a.x + LEBAR_KOTAK, a.y + TINGGI_KOTAK/2, 637, 215, 'panah' + a.id + 'Finish');
+    });
+
+    AKTIVITAS.forEach(function(a){ s += kotakAktivitas(a); });
+
+    // Papan lama proyek
+    s += '<g id="papanTotal" class="viz-hide">'
+       + '<rect x="466" y="402" width="234" height="58" rx="14" fill="var(--owl-dark2)"/>'
+       + '<text x="583" y="424" text-anchor="middle" font-size="11.5" font-weight="700" fill="#B7DAE8">WAKTU PENYELESAIAN NORMAL</text>'
+       + '<text x="583" y="448" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="20" fill="#fff">'
+       + TOTAL + ' minggu</text></g>';
+
+    // Papan lintasan kritis
+    s += '<g id="papanJalur" class="viz-hide">'
+       + '<rect x="20" y="402" width="330" height="58" rx="14" fill="var(--gold)"/>'
+       + '<text x="185" y="424" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--owl-dark2)">LINTASAN KRITIS</text>'
+       + '<text x="185" y="448" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="16" fill="var(--owl-dark2)">'
+       + 'Start - ' + JALUR.join(' - ') + ' - Finish</text></g>';
+
+    svg.innerHTML = s;
+  }
+
+  gambarJaringan();
+
+  /* ---------- Langkah cerita ---------- */
+
+  function idMaju(daftar){
+    var out = [];
+    daftar.forEach(function(k){ out.push('es' + k, 'ef' + k); });
+    return out;
+  }
+  function idMundur(daftar){
+    var out = [];
+    daftar.forEach(function(k){ out.push('ls' + k, 'lf' + k); });
+    return out;
+  }
+
+  var LANGKAH = [
+    { bab:'Membaca soal',
+      teks:'Ada tujuh aktivitas, masing-masing punya lama pengerjaan dan daftar aktivitas pendahulu. '
+         + 'Aktivitas <b>A</b>, <b>B</b>, dan <b>C</b> tidak punya pendahulu, jadi ketiganya bisa dimulai bersamaan sejak hari pertama.',
+      tampil:[] },
+
+    { bab:'Membaca kotaknya',
+      teks:'Tiap kotak punya empat sudut angka. Dua di atas diisi saat menghitung maju, '
+         + 'dua di bawah diisi saat menghitung mundur. Sekarang semuanya masih kosong.',
+      tampil:[] },
+
+    { bab:'Hitung maju',
+      teks:'Mulai dari kiri. <b>A</b>, <b>B</b>, dan <b>C</b> berangkat dari Start, jadi ES ketiganya <b>0</b>. '
+         + 'EF didapat dari ES ditambah lama aktivitas: A jadi 5, B jadi 3, C jadi 6.',
+      tampil: idMaju(['A','B','C']) },
+
+    { bab:'Hitung maju',
+      teks:'Lanjut ke kanan. <b>D</b> menunggu A, jadi ES-nya 5 dan EF-nya 13. '
+         + '<b>E</b> menunggu B, jadi 3 sampai 10. <b>F</b> menunggu C, jadi 6 sampai 10.',
+      tampil: idMaju(['D','E','F']) },
+
+    { bab:'Hitung maju',
+      teks:'<b>G</b> menunggu D, E, dan F sekaligus. EF ketiganya 13, 10, dan 10, dan yang dipakai '
+         + 'yang <b>paling besar</b>, yaitu 13. Kalau memakai yang kecil, G seolah bisa mulai padahal D belum selesai.',
+      tampil: idMaju(['G']) },
+
+    { bab:'Lama proyek',
+      teks:'EF di ujung kanan adalah <b>' + TOTAL + '</b>. Itulah waktu penyelesaian normal proyek ini. '
+         + 'Angka ini juga menjadi titik awal hitung mundur.',
+      tampil:['papanTotal'] },
+
+    { bab:'Hitung mundur',
+      teks:'Sekarang berbalik dari kanan. <b>G</b> aktivitas terakhir, jadi LF-nya sama dengan lama proyek, '
+         + '<b>' + TOTAL + '</b>. LS didapat dari LF dikurangi lama aktivitas, jadi ' + m.G.ls + '.',
+      tampil: idMundur(['G']) },
+
+    { bab:'Hitung mundur',
+      teks:'<b>D</b>, <b>E</b>, dan <b>F</b> semuanya harus selesai sebelum G dimulai, jadi LF ketiganya '
+         + '<b>' + m.D.lf + '</b>. Dikurangi lama masing-masing, LS-nya jadi ' + m.D.ls + ', ' + m.E.ls + ', dan ' + m.F.ls + '.',
+      tampil: idMundur(['D','E','F']) },
+
+    { bab:'Hitung mundur',
+      teks:'Terakhir <b>A</b>, <b>B</b>, dan <b>C</b>. LF tiap aktivitas sama dengan LS penerusnya: '
+         + 'A ikut D jadi ' + m.A.lf + ', B ikut E jadi ' + m.B.lf + ', C ikut F jadi ' + m.C.lf + '.',
+      tampil: idMundur(['A','B','C']) },
+
+    { bab:'Slack',
+      teks:'Slack tiap aktivitas adalah LS dikurangi ES. Hasilnya: '
+         + AKTIVITAS.map(function(a){ return a.id + ' = ' + m[a.id].slack; }).join(', ') + '. '
+         + 'Silakan periksa juga dengan LF dikurangi EF, angkanya pasti sama.',
+      tampil: AKTIVITAS.map(function(a){ return 'slack' + a.id; }) },
+
+    { bab:'Lintasan kritis',
+      teks:'Aktivitas yang slack-nya <b>nol</b> adalah ' + JALUR.join(', ') + '. '
+         + 'Ketiganya tersambung dari Start sampai Finish, dan itulah lintasan kritisnya. '
+         + 'Panjangnya ' + JALUR.map(function(k){ return m[k].waktu; }).join(' + ') + ' = <b>' + TOTAL + ' minggu</b>.',
+      tampil:['papanJalur'], soroti:true },
+
+    { bab:'Artinya',
+      teks:'Menunda <b>' + JALUR.join('</b>, <b>') + '</b> satu minggu saja membuat seluruh proyek mundur satu minggu. '
+         + 'Aktivitas lain masih punya kelonggaran, jadi menambah tenaga di situ tidak mempercepat apa pun.',
+      tampil:['papanJalur'], soroti:true }
+  ];
+
+  var ke = 0;
+  var gelembung = document.getElementById('bubbleText');
+  var badge = document.getElementById('chapterBadge');
+  var titik = document.getElementById('progressDots');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var btnUlang = document.getElementById('btnRestart');
+
+  function tampilkan(){
+    var l = LANGKAH[ke];
+
+    var munculkan = {};
+    for(var i = 0; i <= ke; i++){
+      LANGKAH[i].tampil.forEach(function(id){ munculkan[id] = true; });
+    }
+
+    // Semua elemen yang bisa disembunyikan diperiksa tiap langkah, sehingga
+    // menekan "Sebelumnya" benar-benar mengembalikan keadaan, bukan sekadar
+    // berhenti menambah.
+    LANGKAH.forEach(function(x){
+      x.tampil.forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.classList.toggle('revealed', !!munculkan[id]);
+      });
+    });
+
+    // Sorotan lintasan kritis
+    var soroti = false;
+    for(var j = 0; j <= ke; j++){ if(LANGKAH[j].soroti) soroti = true; }
+
+    AKTIVITAS.forEach(function(a){
+      var g = document.getElementById('kotak' + a.id);
+      if(!g) return;
+      var badan = g.querySelector('rect.badan');
+      var kritis = soroti && m[a.id].kritis;
+      badan.setAttribute('fill', kritis ? '#FDF3DE' : 'var(--surface)');
+      badan.setAttribute('stroke', kritis ? 'var(--gold-deep)' : 'var(--owl-dark2)');
+      badan.setAttribute('stroke-width', kritis ? '3' : '2');
+    });
+
+    svg.querySelectorAll('.panah').forEach(function(p){
+      var id = p.id.replace('panah', '');
+      var kritis = false;
+      if(soroti){
+        for(var k = 0; k < JALUR.length; k++){
+          var a = JALUR[k];
+          if(id === 'Start' + a && k === 0) kritis = true;
+          if(k < JALUR.length - 1 && id === a + JALUR[k+1]) kritis = true;
+          if(k === JALUR.length - 1 && id === a + 'Finish') kritis = true;
+        }
+      }
+      p.setAttribute('stroke', kritis ? 'var(--gold-deep)' : 'var(--owl-mid)');
+      p.setAttribute('stroke-width', kritis ? '3.4' : '2.2');
+      p.setAttribute('marker-end', kritis ? 'url(#ujungKritis)' : 'url(#ujung)');
+    });
+
+    badge.textContent = 'Bagian: ' + l.bab;
+    gelembung.innerHTML = l.teks;
+
+    titik.innerHTML = LANGKAH.map(function(_, i){
+      return '<span class="dot ' + (i === ke ? 'active' : (i < ke ? 'done' : '')) + '"></span>';
+    }).join('');
+
+    btnPrev.disabled = (ke === 0);
+    var terakhir = (ke === LANGKAH.length - 1);
+    btnNext.disabled = terakhir;
+    btnNext.textContent = terakhir ? 'Selesai' : 'Lanjut →';
+  }
+
+  btnNext.addEventListener('click', function(){ if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
+  btnPrev.addEventListener('click', function(){ if(ke > 0){ ke--; tampilkan(); } });
+  btnUlang.addEventListener('click', function(){ ke = 0; tampilkan(); });
+
+  tampilkan();
+
+  /* ---------- Tabel ringkasan ---------- */
+
+  (function(){
+    var t = document.getElementById('tabelRingkas');
+    t.innerHTML =
+      '<thead><tr><th>Aktivitas</th><th>Pendahulu</th><th>Waktu</th>'
+      + '<th>ES</th><th>EF</th><th>LS</th><th>LF</th><th>Slack</th></tr></thead><tbody>'
+      + AKTIVITAS.map(function(a){
+          var d = m[a.id];
+          return '<tr class="' + (d.kritis ? 'kritis' : '') + '">'
+            + '<td>' + a.id + (d.kritis ? '<span class="tanda-kritis">kritis</span>' : '') + '</td>'
+            + '<td>' + (a.pendahulu.length ? a.pendahulu.join(', ') : '-') + '</td>'
+            + '<td>' + a.waktu + '</td><td>' + d.es + '</td><td>' + d.ef + '</td>'
+            + '<td>' + d.ls + '</td><td>' + d.lf + '</td><td>' + d.slack + '</td></tr>';
+        }).join('')
+      + '</tbody>';
+
+    document.getElementById('ringkasKesimpulan').innerHTML =
+      'Lintasan kritisnya <b>Start - ' + JALUR.join(' - ') + ' - Finish</b>, '
+      + 'dengan waktu penyelesaian normal <b>' + TOTAL + ' minggu</b>.';
+  })();
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/shared/kunjungan.js"></script>
+</body>
+</html>

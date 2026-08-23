@@ -56,6 +56,7 @@ const DAFTAR_HALAMAN = [
   { nama: 'Pengantar Mikroekonomi',         berkas: '/materi/pemi.html' },
   { nama: 'Sistem Informasi',               berkas: '/materi/si.html' },
   { nama: 'Statistika 2',                   berkas: '/materi/stat2.html' },
+  { nama: 'Manajemen Operasi',              berkas: '/materi/mo.html' },
   { nama: 'Manajemen Keuangan & Investasi', berkas: '/materi/mki.html' },
   { nama: 'Flappy Owl',                     berkas: '/game-santai/flappy-owl.html' },
 ];
