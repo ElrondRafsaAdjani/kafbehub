@@ -75,6 +75,32 @@
     font-size:0.9rem; line-height:1.65; color:var(--ink-soft);
   }
   .dua b{display:block; color:var(--owl-dark2); font-size:1rem; margin-bottom:4px;}
+  /* Contoh terurai: keadaan soal, lalu dua pertanyaan yang arah pandangnya
+     berlawanan, lalu satu tabel yang memuat keduanya berdampingan. */
+  .soal{
+    background:var(--owl-dark2); color:#DCEAF2; border-radius:16px;
+    padding:16px 20px; margin-top:14px; font-size:0.94rem; line-height:1.7;
+  }
+  .soal b{color:#fff;}
+  .tanya{
+    margin-top:20px; padding-left:16px; border-left:4px solid var(--gold);
+  }
+  .tanya .cap{
+    display:block; font-size:0.72rem; font-weight:800; letter-spacing:0.07em;
+    text-transform:uppercase; color:var(--gold-deep); margin-bottom:3px;
+  }
+  .tanya b{display:block; color:var(--owl-dark2); font-size:1rem; line-height:1.5;}
+  table.ringkas td.angka{
+    font-variant-numeric:tabular-nums; white-space:nowrap;
+    font-weight:600; color:var(--owl-dark2);
+  }
+  table.ringkas tr.tekan td{background:#FDF3DE;}
+  /* Angka rupiah tidak boleh dipenggal di tengah, jadi tabel ini punya lebar
+     minimum sekitar 390 piksel dan tidak muat di ponsel 360 piksel. Digulirkan
+     di dalam kotaknya sendiri, supaya yang bergeser cuma tabelnya dan bukan
+     seluruh halaman. */
+  .tabel-gulir{overflow-x:auto; margin-top:14px;}
+  .tabel-gulir table.ringkas{margin-top:0; min-width:360px;}
   .dua.sorot-kiri > div:first-child, .dua.sorot-kanan > div:last-child{
     background:#FDF3DE; box-shadow:inset 0 0 0 2px var(--gold);
   }
@@ -175,22 +201,75 @@
       <div><b>Discounting</b>Dari nilai nanti menuju nilai sekarang. Uangnya dibagi (1 + r) tiap tahun, jadi menyusut.</div>
     </div>
 
-    <h4>Contoh yang sering ditemui</h4>
-    <div class="dua">
-      <div><b>Menabung untuk laptop</b>
-        Punya Rp1.000.000 sekarang, ditaruh di tabungan berbunga 6% setahun. Empat tahun lagi
-        jumlahnya jadi Rp1.262.477. Selisih Rp262.477 itu upah karena uangnya tidak dipakai dulu.</div>
-      <div><b>Uang yang baru cair nanti</b>
-        Dijanjikan Rp20.000.000 lima tahun lagi. Kalau uang bisa dibungakan 8% setahun, janji itu
-        setara Rp13.611.664 hari ini. Karena itu menerima Rp15.000.000 sekarang lebih untung
-        daripada menunggu Rp20.000.000.</div>
-      <div><b>Beli tunai atau dicicil</b>
-        Harga tunai selalu lebih murah daripada jumlah seluruh cicilan. Selisihnya bukan penipuan,
-        melainkan harga dari kesempatan membayar belakangan.</div>
-      <div><b>Kenapa THR terasa lebih berharga</b>
-        Uang yang diterima lebih awal bisa langsung dipakai atau dibungakan, sedangkan uang yang
-        sama besarnya di tahun depan tidak sempat melakukan keduanya.</div>
+    <h4>Contoh: menabung untuk laptop</h4>
+
+    <div class="soal">
+      Laptop yang diincar harganya <b>Rp10.000.000</b> hari ini. Tabungan memberi bunga
+      <b>6% setahun</b>. Laptopnya baru akan dibeli <b>lima tahun lagi</b>.
     </div>
+
+    <p style="margin-top:12px;">Dari satu keadaan ini muncul dua pertanyaan yang arah pandangnya
+      berlawanan. Keduanya dijawab rumus yang sama, hanya dibalik.</p>
+
+    <div class="tanya">
+      <span class="cap">Pertanyaan pertama, arah mundur</span>
+      <b>Berapa yang harus disisihkan hari ini supaya lima tahun lagi terkumpul Rp10.000.000?</b>
+    </div>
+
+    <div class="rumus">PV =
+      <span class="pecahan"><span class="atas">Rp10.000.000</span><span class="bawah">(1 + 0,06)<sup>5</sup></span></span>
+      =
+      <span class="pecahan"><span class="atas">Rp10.000.000</span><span class="bawah">1,3382256</span></span>
+      = Rp7.472.582
+    </div>
+
+    <div class="tanya">
+      <span class="cap">Pertanyaan kedua, arah maju</span>
+      <b>Kalau Rp10.000.000 itu tidak dipakai membeli laptop sekarang melainkan ditabung, jadi berapa lima tahun lagi?</b>
+    </div>
+
+    <div class="rumus">FV = Rp10.000.000 × (1 + 0,06)<sup>5</sup> = Rp10.000.000 × 1,3382256 = Rp13.382.256</div>
+
+    <h4>Saldo tabungan tahun demi tahun</h4>
+    <p>Dua kolom di bawah tumbuh dengan bunga yang sama, 6% setahun. Yang membedakan hanya
+      jumlah yang ditaruh di awal.</p>
+
+    <div class="tabel-gulir">
+      <table class="ringkas">
+        <thead>
+          <tr>
+            <th>Tahun</th>
+            <th>Menyisihkan Rp7.472.582</th>
+            <th>Menabung Rp10.000.000</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Ke-0</td><td class="angka">Rp7.472.582</td><td class="angka">Rp10.000.000</td></tr>
+          <tr><td>Ke-1</td><td class="angka">Rp7.920.937</td><td class="angka">Rp10.600.000</td></tr>
+          <tr><td>Ke-2</td><td class="angka">Rp8.396.193</td><td class="angka">Rp11.236.000</td></tr>
+          <tr><td>Ke-3</td><td class="angka">Rp8.899.964</td><td class="angka">Rp11.910.160</td></tr>
+          <tr><td>Ke-4</td><td class="angka">Rp9.433.962</td><td class="angka">Rp12.624.770</td></tr>
+          <tr class="tekan"><td>Ke-5</td><td class="angka">Rp10.000.000</td><td class="angka">Rp13.382.256</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:10px;">Tiap baris didapat dari baris di atasnya dikalikan 1,06. Contohnya
+      Rp7.472.582 × 1,06 = Rp7.920.937, lalu Rp7.920.937 × 1,06 = Rp8.396.193, dan seterusnya
+      sampai tahun kelima.</p>
+
+    <h4>Apa yang sebenarnya ditunjukkan angka-angka itu</h4>
+    <div class="dua">
+      <div><b>Tidak perlu Rp10.000.000 hari ini</b>
+        Menyisihkan Rp7.472.582 sekarang sudah cukup untuk membeli laptop Rp10.000.000 lima tahun
+        lagi. Sisanya sebesar Rp2.527.418 dikerjakan bunga, bukan oleh penabungnya.</div>
+      <div><b>Membeli sekarang tidak berharga Rp10.000.000</b>
+        Uang Rp10.000.000 yang dipakai hari ini berarti melepas Rp13.382.256 di tahun kelima.
+        Selisih Rp3.382.256 itulah harga dari memiliki laptop lima tahun lebih awal.</div>
+    </div>
+
+    <p style="margin-top:14px;">Perhitungan ini menganggap harga laptopnya tetap Rp10.000.000
+      selama lima tahun. Kalau harganya ikut naik, jumlah yang perlu disisihkan hari ini ikut naik.</p>
 
     <h4>Rumusnya saling kebalikan</h4>
     <div class="rumus">FV = PV × (1 + r)<sup>n</sup></div>
@@ -218,29 +297,31 @@
     </div>
 
     <h4>Ringkasnya</h4>
-    <table class="ringkas">
-      <thead><tr><th>Istilah</th><th>Dipakai oleh</th><th>Artinya</th><th>Arah</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Interest rate</td>
-          <td>Penerima modal</td>
-          <td>Bunga yang harus dibayarkan atas uang yang dipakai</td>
-          <td>Maju, uang tumbuh ke depan</td>
-        </tr>
-        <tr>
-          <td>Discount rate</td>
-          <td>Pemberi modal</td>
-          <td>Imbal hasil yang diminta sebelum bersedia menyerahkan uangnya</td>
-          <td>Mundur, nilai nanti ditarik ke hari ini</td>
-        </tr>
-        <tr>
-          <td>Cost of capital</td>
-          <td>Perusahaan</td>
-          <td>Nama lain dari imbal hasil yang diminta pemodal, dilihat sebagai beban</td>
-          <td>Dipakai sebagai discount rate saat menilai proyek</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="tabel-gulir">
+      <table class="ringkas">
+        <thead><tr><th>Istilah</th><th>Dipakai oleh</th><th>Artinya</th><th>Arah</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Interest rate</td>
+            <td>Penerima modal</td>
+            <td>Bunga yang harus dibayarkan atas uang yang dipakai</td>
+            <td>Maju, uang tumbuh ke depan</td>
+          </tr>
+          <tr>
+            <td>Discount rate</td>
+            <td>Pemberi modal</td>
+            <td>Imbal hasil yang diminta sebelum bersedia menyerahkan uangnya</td>
+            <td>Mundur, nilai nanti ditarik ke hari ini</td>
+          </tr>
+          <tr>
+            <td>Cost of capital</td>
+            <td>Perusahaan</td>
+            <td>Nama lain dari imbal hasil yang diminta pemodal, dilihat sebagai beban</td>
+            <td>Dipakai sebagai discount rate saat menilai proyek</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <p style="margin-top:16px;">Satu angka yang sama bisa disebut biaya oleh yang memakai uang, dan disebut imbal hasil oleh yang menyerahkan uang. Karena itu ketika perusahaan menilai proyek, angka yang dipakai untuk mendiskonto adalah biaya modalnya sendiri.</p>
   </div>
