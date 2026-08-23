@@ -389,7 +389,20 @@ const labelTeks  = new Map();
   mahasiswa, dan yang diubah ditunjuk langsung di gambarnya.
 */
 async function bacaHalaman(h){
-  const res = await fetch(h.berkas, { cache: 'no-cache' });
+  /*
+    Alamatnya diberi angka waktu yang selalu berbeda, bukan sekadar
+    cache:'no-cache'.
+
+    Cache-nya pernah tetap terlayani meski sudah diminta memvalidasi ulang,
+    sehingga panel ini menggambar beranda versi lama: kartu Manajemen Operasi
+    masih berlencana "Dalam Pengembangan" padahal di situs sudah aktif. Cermin
+    yang menampilkan keadaan usang lebih berbahaya daripada cermin yang lambat,
+    sebab pengurus lalu menyunting berdasarkan gambaran yang salah.
+
+    Alamat yang selalu unik tidak mungkin punya salinan simpanan, jadi jawaban
+    yang datang pasti yang terbaru.
+  */
+  const res = await fetch(h.berkas + '?panel=' + Date.now(), { cache: 'no-store' });
   if(!res.ok) throw new Error(`${h.berkas} tidak terbaca (HTTP ${res.status})`);
   const dok = new DOMParser().parseFromString(await res.text(), 'text/html');
 
@@ -498,13 +511,15 @@ async function muatSemua(){
 }
 
 function gambarSemua(){
+  // Capnya disetel PALING DULU. Apa yang baru saja dimuat adalah keadaan
+  // tersimpan, dan gambarCermin() membandingkan dirinya dengan cap itu untuk
+  // menandai kartu mana yang belum tersimpan. Kalau urutannya dibalik, seluruh
+  // kartu akan tertandai "belum disimpan" tepat setelah halaman dimuat.
+  segarkanCap();
   gambarGembok();
   gambarCermin();
   gambarFormStatus();
   gambarCatatan();
-  // Apa yang baru saja dimuat ADALAH keadaan tersimpan, jadi capnya disetel di
-  // sini. Tanpa ini palang peringatan akan menyala tepat setelah memuat.
-  segarkanCap();
 }
 
 /* ============================================================
@@ -626,6 +641,32 @@ function adaTimpaan(wadah){
 }
 
 /*
+  Membedakan "sudah tersimpan dan sedang tayang" dari "baru diubah di layar".
+
+  Ini yang dulu tidak terlihat. Kartu yang statusnya baru diubah tampak persis
+  sama dengan kartu yang perubahannya sudah tayang, jadi pengurus wajar mengira
+  penguncian sudah berlaku padahal belum pernah sampai ke server. Palang kuning
+  di atas halaman menyebut jumlahnya, tapi tidak menunjuk kartu yang mana.
+
+  Sekarang kartunya sendiri yang menyatakannya.
+*/
+function tersimpanObjek(){
+  try{ return JSON.parse(capTersimpan || '{}'); }
+  catch(err){ return {}; }
+}
+
+function belumTersimpan(kelompok, kunci){
+  const lama = tersimpanObjek()[kelompok] || {};
+  return JSON.stringify(lama[kunci]) !== JSON.stringify(simpanan[kelompok][kunci]);
+}
+
+function adaBelumSimpan(wadah){
+  return [...wadah.querySelectorAll('[data-teks]')].some(x => belumTersimpan('teks', x.dataset.teks))
+      || [...wadah.querySelectorAll('[data-fitur]')].some(x => belumTersimpan('fitur', x.dataset.fitur))
+      || [...wadah.querySelectorAll('[data-urutan]')].some(x => belumTersimpan('urutan', x.dataset.urutan));
+}
+
+/*
   Tombol di dalam salinan ini mengarah ke halaman publik. Kalau dibiarkan,
   sekali salah klik pengurus terlempar keluar dari panel dan pekerjaan yang
   belum disimpan hilang. Semua klik di dalam cermin ditahan di sini, kecuali
@@ -675,6 +716,7 @@ function gambarCermin(){
         + `<span class="ak-bingkai-halaman">${esc(h.nama)}</span>`
         + `<span class="ak-bingkai-bagian">${esc(g.nama)}</span>`
         + (adaTimpaan(sec) ? '<span class="ak-diubah">Diubah</span>' : '')
+        + (adaBelumSimpan(sec) ? '<span class="ak-belum-tanda">Belum disimpan</span>' : '')
         + '<span class="ak-bingkai-alat">'
           + `<button type="button" class="btn btn-ghost op-mini ak-alat" data-ubah-bagian="${esc(h.berkas)}|${iBagian}">Ubah teks bagian</button>`
           + `<a class="op-tautan-luar ak-alat" href="${esc(h.berkas)}" target="_blank" rel="noopener">Buka halaman</a>`
@@ -708,6 +750,18 @@ function gambarCermin(){
 function pasangAlatKartu(sec){
   sec.querySelectorAll('[data-fitur]').forEach(kartu => {
     kartu.classList.add('ak-kartu');
+
+    // Kartu yang perubahannya belum sampai ke server diberi tanda sendiri,
+    // supaya jelas kartu MANA yang belum tayang, bukan cuma berapa banyak.
+    const menunggu = belumTersimpan('fitur', kartu.dataset.fitur)
+      || [...kartu.querySelectorAll('[data-teks]')].some(x => belumTersimpan('teks', x.dataset.teks));
+    kartu.classList.toggle('ak-kartu-belum', menunggu);
+    if(menunggu){
+      const pita = document.createElement('span');
+      pita.className = 'ak-pita-belum';
+      pita.textContent = 'Belum disimpan';
+      kartu.appendChild(pita);
+    }
 
     const bisaGeser = !!kartu.closest('[data-urutan]');
     const alat = document.createElement('div');

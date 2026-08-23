@@ -306,6 +306,21 @@ situs ditutup untuk pemeliharaan sekali lagi, sebab saat aktif isinya terkunci.
 Mengubah sesuatu lalu mengembalikannya seperti semula membuat palang itu hilang
 sendiri. Yang dibandingkan isinya, bukan sekadar apakah sesuatu pernah disentuh.
 
+#### Dua tanda pada kartu, dan bedanya
+
+| Tanda | Warna | Artinya |
+|---|---|---|
+| **Diubah** | kuning | Sudah tersimpan dan sedang tayang untuk pengunjung |
+| **Belum disimpan** | merah, dengan garis putus-putus di sekeliling kartu | Baru ada di layar ini. Pengunjung masih melihat yang lama |
+
+Tanda merah menunjuk kartu yang mana, bukan cuma menyebut jumlahnya. Selama
+tanda itu masih ada, apa pun yang Anda ubah **belum berlaku di situs publik**.
+
+> **Kalau sebuah fitur sudah dikunci tapi masih bisa dibuka pengunjung**,
+> hampir pasti perubahannya belum tersimpan. Buka tab Tampilan Situs dan cari
+> tanda merah. Kalau ada, situsnya harus ditutup untuk pemeliharaan dulu, lalu
+> tekan **Simpan perubahan**.
+
 #### Memindahkan urutan kartu
 
 Seret kartu ke kiri atau ke kanan untuk menukar posisinya dengan kartu lain.

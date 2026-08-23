@@ -200,6 +200,20 @@
    dan celah yang ditinggalkannya tetap terbaca. */
 .ak-sedang-diseret{opacity:0.4; outline:2px dashed var(--owl-mid); outline-offset:3px;}
 
+/* Kartu yang perubahannya belum sampai ke server. Warnanya sengaja berbeda
+   dari lencana "Diubah" yang berwarna kuning: kuning berarti sudah tayang,
+   merah berarti baru ada di layar ini saja. */
+.ak-kartu-belum{outline:2px dashed #9B2C2C; outline-offset:3px;}
+.ak-pita-belum{
+  position:absolute; left:12px; bottom:12px; z-index:2;
+  font-size:0.68rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
+  background:#9B2C2C; color:#fff; padding:3px 10px; border-radius:100px;
+}
+.ak-belum-tanda{
+  font-size:0.7rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
+  background:#FADDDD; color:#9B2C2C; padding:3px 9px; border-radius:100px;
+}
+
 /* Saat situs masih aktif seluruh cermin hanya boleh dilihat. Pegangan seretnya
    ikut dimatikan supaya tidak ada yang mengira urutannya bisa diubah lalu
    kehilangan pekerjaannya saat penyimpanan ditolak. */
