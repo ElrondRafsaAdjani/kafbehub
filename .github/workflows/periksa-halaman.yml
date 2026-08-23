@@ -1,0 +1,31 @@
+name: Periksa susunan halaman
+
+# Berjalan tiap kali ada perubahan yang dikirim ke GitHub, sebelum Vercel
+# sempat menayangkannya. Kalau susunan HTML-nya rusak, commit-nya ditandai
+# gagal dengan tanda silang merah dan penyebabnya tertulis di catatan
+# jalannya, sehingga ketahuan tanpa perlu membuka situsnya satu per satu.
+#
+# Yang diperiksa dijelaskan di scripts/periksa-halaman.mjs.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.html'
+      - 'scripts/periksa-halaman.mjs'
+      - '.github/workflows/periksa-halaman.yml'
+  pull_request:
+    paths:
+      - '**.html'
+  workflow_dispatch:
+
+jobs:
+  periksa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Periksa susunan halaman HTML
+        run: node scripts/periksa-halaman.mjs
