@@ -84,6 +84,28 @@ function samakanRuang(r){
   return String(r || '').trim().toUpperCase().replace(/\s+/g, ' ');
 }
 
+/*
+  Sebagian "ruang" sebenarnya bukan tempat, melainkan keterangan bahwa kelasnya
+  tidak menempati ruangan sama sekali.
+
+  Dua kelas daring pada jam yang sama sama sekali tidak berebut apa pun, tapi
+  pemeriksa bentrok ruangan dulu memperlakukan tulisan ONLINE seperti nama
+  ruangan biasa. Akibatnya memindahkan kelas ke hari lain sekaligus menjadikannya
+  daring selalu ditolak dengan alasan ruangnya sudah dipakai kelas pengganti
+  lain, padahal keduanya memang daring.
+
+  Fungsi ini mengembalikan nama ruang hanya kalau ruangnya benar-benar ada.
+  Untuk kelas daring, ruang kosong, atau tanda hubung, hasilnya kosong sehingga
+  pemeriksaan bentroknya dilewati.
+*/
+const RUANG_TANPA_TEMPAT = /^(ONLINE|DARING|ZOOM|GMEET|GOOGLE MEET|MS TEAMS|TEAMS)\b/;
+
+function ruangFisik(r){
+  const n = samakanRuang(r);
+  if(!n || n === '-') return '';
+  return RUANG_TANPA_TEMPAT.test(n) ? '' : n;
+}
+
 function pesan(el, teks, jenis){
   el.className = 'op-pesan tampil ' + (jenis || '');
   el.innerHTML = teks;
@@ -561,18 +583,19 @@ function periksaJadwal({ id, kode, kp, hari, mulai, selesai, ruang }){
       salah.push(`${kode} KP ${kp} sudah terdaftar pada ${kembar.hari} ${rentangJam(kembar.mulai, kembar.selesai)}.`);
     }
 
-    if(samakanRuang(ruang)){
+    const ruangIni = ruangFisik(ruang);
+    if(ruangIni){
       const bentrok = data.jadwal.filter(j =>
         j.id !== id
         && j.hari === hari
-        && samakanRuang(j.ruang) === samakanRuang(ruang)
+        && ruangFisik(j.ruang) === ruangIni
         && beririsan(m1, m2, keMenit(j.mulai), keMenit(j.selesai)));
       for(const b of bentrok){
         salah.push(
           `Ruang ${ruang} sudah dipakai ${b.kode} KP ${b.kp} pada ${b.hari} `
           + `${rentangJam(b.mulai, b.selesai)}.`);
       }
-    }else{
+    }else if(!samakanRuang(ruang)){
       hati.push('Ruang dikosongkan, jadi bentrok ruangan tidak bisa diperiksa.');
     }
 
@@ -768,13 +791,25 @@ function periksaPerubahan(isi){
 
     if(isi.tanggalBaru && m1 !== null && m2 !== null){
       const hariBaru = hariDariTanggal(isi.tanggalBaru);
-      const ruang = samakanRuang(isi.ruangBaru) || samakanRuang(j.ruang);
+
+      /*
+        Ruang yang benar-benar dipakai kelas pengganti ini: yang diisi di kotak
+        Ruang baru kalau ada, kalau kosong berarti tetap memakai ruang aslinya.
+
+        Kalau yang diisi ternyata bukan ruang fisik, misalnya ONLINE, hasilnya
+        kosong dan seluruh pemeriksaan bentrok ruangan dilewati. Sengaja TIDAK
+        jatuh kembali ke ruang asli dalam keadaan itu, sebab kelas yang sudah
+        dipindah ke daring memang tidak lagi menempati ruang aslinya.
+      */
+      const ruang = samakanRuang(isi.ruangBaru)
+        ? ruangFisik(isi.ruangBaru)
+        : ruangFisik(j.ruang);
 
       // Kelas pengganti tidak boleh menabrak kelas rutin di ruangan yang sama.
       if(ruang){
         const bentrok = data.jadwal.filter(x =>
           x.hari === hariBaru
-          && samakanRuang(x.ruang) === ruang
+          && ruangFisik(x.ruang) === ruang
           && beririsan(m1, m2, keMenit(x.mulai), keMenit(x.selesai)));
         for(const b of bentrok){
           salah.push(`Ruang ${isi.ruangBaru || j.ruang} sudah dipakai ${b.kode} KP ${b.kp} setiap ${b.hari} ${rentangJam(b.mulai, b.selesai)}.`);
@@ -785,8 +820,16 @@ function periksaPerubahan(isi){
       const gantiLain = data.perubahan.filter(p =>
         p.id !== isi.id && p.tipe === 'pindah' && p.tanggalBaru === isi.tanggalBaru);
       for(const p of gantiLain){
-        const sama = ruang && samakanRuang(p.ruangBaru) === ruang;
-        if(sama && beririsan(m1, m2, keMenit(p.mulaiBaru), keMenit(p.selesaiBaru))){
+        // Ruang kelas pengganti lain dicari dengan aturan yang sama. Dulu yang
+        // dibaca hanya ruangBaru miliknya, sehingga kelas pengganti yang tetap
+        // memakai ruang aslinya luput dari pemeriksaan.
+        const asal = data.jadwal.find(x => x.id === p.jadwalId);
+        const ruangLain = samakanRuang(p.ruangBaru)
+          ? ruangFisik(p.ruangBaru)
+          : ruangFisik(asal && asal.ruang);
+
+        if(ruang && ruangLain === ruang
+           && beririsan(m1, m2, keMenit(p.mulaiBaru), keMenit(p.selesaiBaru))){
           salah.push(`Ruang itu sudah dipakai kelas pengganti ${p.kode} KP ${p.kp} pada tanggal yang sama.`);
         }
       }
