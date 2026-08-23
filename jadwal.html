@@ -197,6 +197,12 @@
     const daring = new Map();
     for(const c of perub.filter(c => c.tipe === 'daring')) daring.set(kunci(c), c);
 
+    // Kelas yang dipindah tapi jadwal penggantinya belum ditentukan. Pada
+    // tanggal ini kelasnya tidak berlangsung, sama seperti ditiadakan, hanya
+    // saja penggantinya sudah pasti akan ada.
+    const menyusul = new Map();
+    for(const c of perub.filter(c => c.tipe === 'menyusul')) menyusul.set(kunci(c), c);
+
     const hasil = dasar.map(k => {
       // Kelas yang perkuliahannya belum dimulai tidak bisa "ditiadakan".
       // status ini diperiksa lebih dulu.
@@ -206,6 +212,9 @@
       }
       const c = libur.get(kunci(k));
       if(c) return { ...k, status:'libur', catatan:c.catatan };
+
+      const s = menyusul.get(kunci(k));
+      if(s) return { ...k, status:'menyusul', catatan:s.catatan };
 
       const d = daring.get(kunci(k));
       if(d) return { ...k, ruang: 'Online', status:'daring', catatan: d.catatan };
@@ -298,6 +307,7 @@
     const KELAS_BARIS = {
       libur:'row-libur', pengganti:'row-pengganti',
       belum:'row-belum', ruang:'row-ruang', daring:'row-daring',
+      menyusul:'row-menyusul',
     };
     const LABEL = {
       libur: '<span class="tag tag-libur">Ditiadakan</span>',
@@ -305,6 +315,7 @@
       belum: '<span class="tag tag-belum">Belum dimulai</span>',
       ruang: '<span class="tag tag-ruang">Pindah ruang</span>',
       daring: '<span class="tag tag-daring">Online</span>',
+      menyusul: '<span class="tag tag-menyusul">Jadwal menyusul</span>',
     };
 
     const baris = kelas.map(k => {
@@ -331,6 +342,7 @@
       hitung('libur')     ? `${hitung('libur')} ditiadakan` : '',
       hitung('daring')    ? `${hitung('daring')} daring` : '',
       hitung('ruang')     ? `${hitung('ruang')} pindah ruang` : '',
+      hitung('menyusul')  ? `${hitung('menyusul')} jadwal menyusul` : '',
       hitung('pengganti') ? `${hitung('pengganti')} kelas pengganti` : '',
     ].filter(Boolean).join(' · ');
 

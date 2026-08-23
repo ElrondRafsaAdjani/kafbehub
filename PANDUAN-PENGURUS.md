@@ -128,7 +128,32 @@ Berlaku hanya pada satu tanggal. Tiga jenisnya:
 | Kelas ditiadakan | Tanggal merah atau acara kampus, tanpa kelas pengganti |
 | Kelas jadi daring | Jam tetap, kelas berlangsung online. Di halaman jadwal ruangnya berubah jadi label **Online** |
 | Dipindah ke tanggal lain | Kelas diganti di hari lain, sekalian atur jam dan ruangnya |
+| **Dipindah, jadwalnya menyusul** | Perpindahannya sudah pasti, tapi belum tentu kapan dan di mana |
 | Pindah ruangan saja | Jam tetap, hanya ruangnya berubah hari itu |
+
+#### Dipindah, jadwalnya menyusul
+
+Dipakai kalau sudah pasti kelasnya tidak jadi berlangsung pada tanggal itu dan
+akan diganti, tapi tanggal, jam, atau ruang penggantinya belum ditentukan.
+
+Kotak tanggal pengganti, jam, dan ruang **boleh dikosongkan**. Yang dikosongkan
+tampil ke mahasiswa sebagai **menyusul**, jadi bisa diisi sebagian:
+
+- Semua kosong: "Penggantinya tanggal dan jam menyusul, di ruang menyusul."
+- Tanggal dan jam sudah ada, ruang belum: kelas penggantinya ikut tampil pada
+  tanggal itu, dengan kolom ruang tertulis **Menyusul**.
+
+Yang tetap ditolak adalah pengisian setengah jalan, misalnya jam mulai diisi
+tapi jam selesai tidak, atau tanggal diisi tapi jamnya tidak. Keadaan seperti
+itu biasanya bukan "belum ditentukan" melainkan lupa mengisi, dan kalau
+diteruskan akan tampil ke mahasiswa sebagai jam yang tidak masuk akal.
+
+Di halaman jadwal, kelas ini diberi label kuning **Jadwal menyusul**, bukan
+merah seperti "Ditiadakan". Warnanya sengaja dibedakan karena kelasnya bukan
+hilang, hanya belum jelas kapan dan di mana.
+
+Begitu tanggal dan jamnya sudah pasti, ubah jenisnya menjadi **Dipindah ke
+tanggal lain** supaya tampil sebagai kelas pengganti yang utuh.
 
 Sistem memeriksa bahwa tanggal yang dipilih memang jatuh pada hari kelas itu
 berlangsung. Untuk kelas yang dipindah, ruang tujuannya juga diperiksa agar

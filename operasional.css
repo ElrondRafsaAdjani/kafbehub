@@ -203,6 +203,7 @@ textarea{ resize:vertical; }
 .op-lencana.libur{ background:#FBE3E2; color:#B03B37; }
 .op-lencana.pindah{ background:#E1F5E9; color:#1E7A44; }
 .op-lencana.ruang{ background:#E7EDF1; color:#5C7285; }
+.op-lencana.menyusul{ background:#FDEEDB; color:#8A5A0B; }
 .op-lencana.pin{ background:#FDEEDB; color:var(--gold-deep); }
 
 .op-samar{ color:var(--ink-soft); font-size:0.8rem; }

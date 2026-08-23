@@ -285,6 +285,11 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 .row-ruang{background:#F6FAFD;}
 .tag-daring{background:#EDE7F8; color:#5B3FA0;}
 .row-daring{background:#FAF8FE;}
+/* Dipindah, tapi jadwal penggantinya belum ditentukan. Warnanya sengaja
+   berbeda dari "Ditiadakan" yang merah: kelasnya bukan hilang, hanya belum
+   jelas kapan dan di mana. */
+.tag-menyusul{background:#FDEEDB; color:#8A5A0B;}
+.row-menyusul{background:#FFFCF5;}
 
 .row-belum{background:#FAFCFD;}
 .row-belum .matkul-nama, .row-belum .jam-pill,

@@ -187,6 +187,7 @@
               <option value="libur">Kelas ditiadakan</option>
               <option value="daring">Kelas jadi daring (online)</option>
               <option value="pindah">Dipindah ke tanggal lain</option>
+              <option value="menyusul">Dipindah, jadwalnya menyusul</option>
               <option value="ruang">Pindah ruangan saja</option>
             </select>
           </div>
@@ -199,6 +200,14 @@
             <input type="date" id="pbTanggal" required />
           </div>
         </div>
+
+        <!-- Hanya tampil untuk jenis "menyusul". Kotak-kotak di bawahnya boleh
+             dikosongkan, dan justru itu gunanya jenis ini. -->
+        <p class="op-catatan" id="catatanMenyusul" hidden>
+          Isi hanya yang sudah pasti. Yang dikosongkan tampil ke mahasiswa sebagai
+          <strong>menyusul</strong>. Begitu tanggal dan jamnya ditentukan, ubah
+          jenisnya menjadi <strong>Dipindah ke tanggal lain</strong>.
+        </p>
 
         <div class="op-baris" id="barisPindah" hidden>
           <div class="op-field">

@@ -685,10 +685,16 @@ function isiPilihanKelas(){
 
 // Jenis "daring" dan "libur" tidak butuh ruang maupun tanggal pengganti,
 // jadi kolomnya disembunyikan supaya tidak membingungkan.
+/*
+  Jenis "menyusul" memakai kotak isian yang sama dengan "pindah", bedanya
+  seluruh kotak itu boleh dikosongkan. Dipakai untuk perpindahan yang sudah
+  pasti terjadi tapi tanggal, jam, atau ruangnya belum ditentukan.
+*/
 function aturTampilanPerubahan(){
   const tipe = $('pbTipe').value;
-  $('barisPindah').hidden = tipe !== 'pindah';
-  $('barisRuang').hidden = !(tipe === 'pindah' || tipe === 'ruang');
+  $('barisPindah').hidden = !(tipe === 'pindah' || tipe === 'menyusul');
+  $('barisRuang').hidden  = !(tipe === 'pindah' || tipe === 'ruang' || tipe === 'menyusul');
+  $('catatanMenyusul').hidden = tipe !== 'menyusul';
 }
 $('pbTipe').addEventListener('change', aturTampilanPerubahan);
 aturTampilanPerubahan();
@@ -712,6 +718,15 @@ function gambarPerubahan(){
       }else if(p.tipe === 'ruang'){
         ket = `Pindah ke ruang ${esc(p.ruangBaru || '?')}`
             + (p.catatan ? `<br><span class="op-samar">${esc(p.catatan)}</span>` : '');
+      }else if(p.tipe === 'menyusul'){
+        // Yang sudah pasti ditulis apa adanya, sisanya disebut menyusul, supaya
+        // sekali lihat ketahuan bagian mana yang masih perlu ditentukan.
+        const kapan = p.tanggalBaru
+          ? `${esc(tanggalPanjang(p.tanggalBaru))} ${esc(rentangJam(p.mulaiBaru, p.selesaiBaru))}`
+          : '<strong>tanggal dan jam menyusul</strong>';
+        const tempat = p.ruangBaru ? esc(p.ruangBaru) : '<strong>ruang menyusul</strong>';
+        ket = `Ke ${kapan}, di ${tempat}`
+            + (p.catatan ? `<br><span class="op-samar">${esc(p.catatan)}</span>` : '');
       }else if(p.tipe === 'daring'){
         ket = 'Kelas berlangsung daring'
             + (p.catatan ? `<br><span class="op-samar">${esc(p.catatan)}</span>` : '');
@@ -719,7 +734,8 @@ function gambarPerubahan(){
       if(p.kelompok){
         ket += `<br><span class="op-samar">dari pembuatan massal: ${esc(p.kelompok)}</span>`;
       }
-      const label = { libur:'Ditiadakan', daring:'Online', pindah:'Dipindah', ruang:'Ganti ruang' }[p.tipe] || p.tipe;
+      const label = { libur:'Ditiadakan', daring:'Online', pindah:'Dipindah',
+                      menyusul:'Menyusul', ruang:'Ganti ruang' }[p.tipe] || p.tipe;
       return `<tr${lewat ? ' style="opacity:.55"' : ''}>
         <td>${esc(tanggalPanjang(p.tanggal))}${lewat ? '<br><span class="op-samar">sudah lewat</span>' : ''}</td>
         <td><span class="op-lencana ${esc(p.tipe)}">${esc(label)}</span></td>
@@ -779,11 +795,37 @@ function periksaPerubahan(isi){
     salah.push('Ruang baru belum diisi.');
   }
 
-  if(isi.tipe === 'pindah'){
-    if(!isi.tanggalBaru) salah.push('Tanggal pengganti belum diisi.');
+  if(isi.tipe === 'pindah' || isi.tipe === 'menyusul'){
+    const belumPasti = isi.tipe === 'menyusul';
     const m1 = keMenit(isi.mulaiBaru), m2 = keMenit(isi.selesaiBaru);
-    if(m1 === null || m2 === null) salah.push('Jam pengganti belum lengkap.');
-    else if(m2 <= m1) salah.push('Jam selesai pengganti harus lebih akhir daripada jam mulai.');
+
+    /*
+      Untuk "pindah" semuanya wajib. Untuk "menyusul" semuanya boleh kosong,
+      sebab justru ketidakpastian itulah yang sedang dicatat.
+
+      Yang tetap ditolak pada "menyusul" adalah pengisian yang setengah jalan,
+      misalnya jam mulai diisi tapi jam selesai tidak. Keadaan begitu bukan
+      "belum ditentukan", melainkan kemungkinan besar lupa mengisi, dan kalau
+      diteruskan akan tampil ke mahasiswa sebagai jam yang tidak masuk akal.
+    */
+    if(!belumPasti){
+      if(!isi.tanggalBaru) salah.push('Tanggal pengganti belum diisi.');
+      if(m1 === null || m2 === null) salah.push('Jam pengganti belum lengkap.');
+    }else{
+      if((m1 === null) !== (m2 === null)){
+        salah.push('Jam pengganti baru terisi sebagian. Isi keduanya, atau kosongkan keduanya supaya tampil sebagai menyusul.');
+      }
+      if(isi.tanggalBaru && (m1 === null || m2 === null)){
+        salah.push('Tanggal pengganti sudah diisi, jadi jam mulai dan jam selesainya juga perlu diisi.');
+      }
+      if(!isi.tanggalBaru && m1 !== null){
+        salah.push('Jam pengganti sudah diisi, jadi tanggalnya juga perlu diisi.');
+      }
+    }
+
+    if(m1 !== null && m2 !== null && m2 <= m1){
+      salah.push('Jam selesai pengganti harus lebih akhir daripada jam mulai.');
+    }
 
     if(isi.tanggalBaru && isi.tanggalBaru === isi.tanggal){
       salah.push('Tanggal pengganti sama dengan tanggal aslinya.');
@@ -817,8 +859,12 @@ function periksaPerubahan(isi){
       }
 
       // Dan tidak boleh menabrak kelas pengganti lain di tanggal yang sama.
+      // Kelas pengganti dari jenis "menyusul" yang tanggal dan jamnya sudah
+      // terisi menempati ruang sungguhan juga, jadi ikut diperiksa.
       const gantiLain = data.perubahan.filter(p =>
-        p.id !== isi.id && p.tipe === 'pindah' && p.tanggalBaru === isi.tanggalBaru);
+        p.id !== isi.id
+        && (p.tipe === 'pindah' || p.tipe === 'menyusul')
+        && p.tanggalBaru === isi.tanggalBaru);
       for(const p of gantiLain){
         // Ruang kelas pengganti lain dicari dengan aturan yang sama. Dulu yang
         // dibaca hanya ruangBaru miliknya, sehingga kelas pengganti yang tetap
@@ -873,10 +919,10 @@ $('formPerubahan').addEventListener('submit', async (e) => {
   const muatan = {
     tipe: isi.tipe, jadwalId: isi.jadwalId, kode: j.kode, kp: j.kp,
     tanggal: isi.tanggal, catatan: isi.catatan,
-    tanggalBaru: isi.tipe === 'pindah' ? isi.tanggalBaru : '',
-    mulaiBaru: isi.tipe === 'pindah' ? isi.mulaiBaru : '',
-    selesaiBaru: isi.tipe === 'pindah' ? isi.selesaiBaru : '',
-    ruangBaru: (isi.tipe === 'pindah' || isi.tipe === 'ruang') ? isi.ruangBaru : '',
+    tanggalBaru: (isi.tipe === 'pindah' || isi.tipe === 'menyusul') ? isi.tanggalBaru : '',
+    mulaiBaru:   (isi.tipe === 'pindah' || isi.tipe === 'menyusul') ? isi.mulaiBaru : '',
+    selesaiBaru: (isi.tipe === 'pindah' || isi.tipe === 'menyusul') ? isi.selesaiBaru : '',
+    ruangBaru:   (isi.tipe === 'pindah' || isi.tipe === 'menyusul' || isi.tipe === 'ruang') ? isi.ruangBaru : '',
   };
 
   try{
@@ -1485,6 +1531,40 @@ async function terbitkan(){
           jam: rentangJam(p.mulaiBaru, p.selesaiBaru), ruang: p.ruangBaru || j.ruang || '',
           catatan: p.catatan || `Kelas pengganti dari ${tanggalPanjang(p.tanggal)}`,
         });
+      }else if(p.tipe === 'menyusul'){
+        /*
+          Perpindahan yang sudah pasti terjadi, tapi belum tentu kapan dan di
+          mana. Pada tanggal aslinya kelas ini TIDAK berlangsung, jadi tetap
+          perlu ditandai supaya mahasiswa tidak datang percuma.
+
+          Bedanya dengan "pindah": di sini tidak dijanjikan tanggal pengganti
+          yang belum tentu benar. Yang sudah pasti disebut, sisanya disebut
+          menyusul apa adanya.
+        */
+        const kapan = p.tanggalBaru
+          ? `${tanggalPanjang(p.tanggalBaru)} pukul ${rentangJam(p.mulaiBaru, p.selesaiBaru)}`
+          : 'tanggal dan jam menyusul';
+        const tempat = p.ruangBaru || 'ruang menyusul';
+
+        changes.push({
+          tanggal: p.tanggal, tipe: 'menyusul', kode: j.kode, kp: j.kp, nama,
+          jam: rentangJam(j.mulai, j.selesai), ruang: j.ruang || '',
+          catatan: p.catatan
+            || `Kelas dipindah. Penggantinya ${kapan}, di ${tempat}.`,
+        });
+
+        // Kalau tanggal dan jamnya ternyata sudah ditentukan, kelas
+        // penggantinya ikut ditayangkan pada tanggal itu. Ruang yang belum
+        // ditentukan ditulis "Menyusul", bukan dikosongkan, supaya kolom
+        // ruangnya tidak terbaca seolah lupa diisi.
+        if(p.tanggalBaru && p.mulaiBaru && p.selesaiBaru){
+          changes.push({
+            tanggal: p.tanggalBaru, tipe: 'pengganti', kode: j.kode, kp: j.kp, nama,
+            jam: rentangJam(p.mulaiBaru, p.selesaiBaru),
+            ruang: p.ruangBaru || 'Menyusul',
+            catatan: p.catatan || `Kelas pengganti dari ${tanggalPanjang(p.tanggal)}`,
+          });
+        }
       }else if(p.tipe === 'ruang'){
         changes.push({
           tanggal: p.tanggal, tipe: 'ruang', kode: j.kode, kp: j.kp, nama,
