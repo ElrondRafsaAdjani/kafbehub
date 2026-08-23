@@ -238,6 +238,38 @@ Urutan kerjanya:
 Palang berwarna di bagian atas halaman selalu menunjukkan keadaan yang sedang
 berlaku, lengkap dengan tombol pintas untuk berpindah status.
 
+### Tab Dasbor
+
+Catatan kunjungan halaman publik. Halaman `/adminkafbe` dan `/operasional`
+sengaja tidak ikut dihitung, supaya angkanya tidak naik sendiri tiap kali
+dasbornya dibuka.
+
+Rentangnya dipilih lewat tombol **1 hari, 1 minggu, 1 bulan, 3 bulan, 6 bulan**.
+Pada rentang 1 hari grafiknya berisi 24 batang per jam, selebihnya satu batang
+per hari. Arahkan tetikus ke sebuah batang untuk melihat angka persisnya.
+
+Yang ditampilkan: halaman dibuka hari ini, bulan ini, dan pada rentang terpilih;
+jumlah perangkat berbeda; rata-rata lama membuka halaman; jam paling ramai;
+serta daftar halaman yang paling sering dibuka.
+
+> **Pencatatan dimulai sejak fitur ini dipasang.** Hari-hari sebelumnya tidak
+> punya data dan memang akan kosong. Grafik enam bulan baru benar-benar penuh
+> setelah situs berjalan enam bulan.
+
+**Tiga hal yang perlu diingat saat membaca angkanya:**
+
+Lama kunjungan dicatat pada saat halaman ditinggalkan, dan peramban tidak
+menjamin ada waktu untuk mengirimnya. Kunjungan yang sangat singkat atau tab
+yang ditutup paksa bisa tidak terhitung, jadi rata-ratanya perkiraan.
+
+Perangkat dihitung dari penanda acak yang disimpan peramban. Satu orang yang
+memakai ponsel dan laptop terhitung dua, dan orang yang membersihkan data
+perambannya akan terhitung sebagai perangkat baru.
+
+Angkanya ditulis langsung dari peramban pengunjung, jadi secara teknis bisa
+dinaikkan orang yang memang berniat begitu. Bacalah sebagai gambaran ramai
+sepinya kunjungan, bukan hitungan yang bisa dipertanggungjawabkan.
+
 ### Tab Tampilan Situs
 
 Isinya **halaman publik yang digambar ulang apa adanya**, bukan daftar kotak
@@ -256,6 +288,23 @@ diubah lewat tombol **Ubah teks bagian** di kepala tiap bingkai.
 
 Semua perubahan baru tercatat di layar. Yang membuatnya berlaku di situs publik
 tetap tombol **Simpan perubahan** di atas.
+
+#### Palang perubahan yang belum disimpan
+
+Naskah, status fitur, dan urutan kartu diubah dulu di layar lalu baru ditulis
+saat Simpan ditekan. Status situs bekerja sebaliknya: begitu diterapkan, saat
+itu juga tersimpan.
+
+Perbedaan itu mudah menjebak. Karena itu, begitu ada yang belum disimpan,
+muncul palang kuning di atas halaman yang menyebutkan berapa banyak yang
+menunggu. Palang itu terlihat dari tab mana pun, termasuk dari tab Status Situs.
+
+Menyalakan situs sambil membawa perubahan yang belum disimpan akan ditanya
+lebih dulu. Kalau diteruskan, perubahan itu **tidak bisa disimpan lagi** sampai
+situs ditutup untuk pemeliharaan sekali lagi, sebab saat aktif isinya terkunci.
+
+Mengubah sesuatu lalu mengembalikannya seperti semula membuat palang itu hilang
+sendiri. Yang dibandingkan isinya, bukan sekadar apakah sesuatu pernah disentuh.
 
 #### Memindahkan urutan kartu
 

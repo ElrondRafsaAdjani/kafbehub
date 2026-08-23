@@ -40,6 +40,8 @@ const {
   addDoc, setDoc, updateDoc, deleteDoc,
 } = await import(`${SDK}/firebase-firestore.js`);
 
+const { pasangDasbor } = await import('./dasbor.js');
+
 const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
 const auth = getAuth(app);
 const db   = getFirestore(app);
@@ -232,6 +234,16 @@ onAuthStateChanged(auth, async (user) => {
   $('cvTanggal').value = hariIniISO();
 
   await muatSemua();
+
+  // Dasbor dipasang setelah sisanya siap dan kegagalannya ditangkap sendiri,
+  // supaya catatan kunjungan yang bermasalah tidak ikut menjatuhkan pengaturan
+  // tampilan dan status situs yang jauh lebih penting.
+  try{
+    await pasangDasbor(db);
+  }catch(err){
+    console.error('Dasbor gagal dipasang', err);
+    pesan($('dasborPesan'), 'Dasbor gagal dimuat: ' + esc(err.message || 'tidak diketahui'), 'salah');
+  }
 });
 
 /* ============================================================
@@ -254,6 +266,93 @@ let   dokumenAda = false;
 function sedangDipelihara(){
   return simpanan.statusSitus === 'maintenance';
 }
+
+/* ------------------------------------------------------------------
+   Perubahan yang belum disimpan
+
+   Naskah, status fitur, dan urutan kartu diubah dulu di layar, lalu baru
+   ditulis ke Firestore saat tombol Simpan ditekan. Status situs bekerja
+   sebaliknya: begitu diterapkan, saat itu juga ditulis.
+
+   Perbedaan itu pernah menjebak: naskah diubah, lalu situs dinyalakan kembali
+   lewat tab Status Situs, dan naskahnya ikut hilang tanpa satu pun peringatan.
+   Yang terlihat cuma tombol Simpan yang seolah tidak berpengaruh apa-apa.
+
+   Sekarang keadaan tersimpan direkam sebagai cap. Apa pun yang membuat isi
+   layar berbeda dari cap itu memunculkan palang peringatan, dan menyalakan
+   situs dalam keadaan begitu akan ditanya lebih dulu.
+
+   Capnya berupa perbandingan isi, bukan sekadar penanda "sudah disentuh".
+   Jadi mengubah sesuatu lalu mengembalikannya seperti semula membuat
+   peringatannya hilang sendiri, sebagaimana mestinya.
+*/
+let capTersimpan = '';
+
+function capSekarang(){
+  return JSON.stringify({
+    fitur: simpanan.fitur,
+    teks: simpanan.teks,
+    urutan: simpanan.urutan,
+  });
+}
+
+function segarkanCap(){
+  capTersimpan = capSekarang();
+  gambarTandaSimpan();
+}
+
+function adaPerubahan(){
+  return capSekarang() !== capTersimpan;
+}
+
+function rincianPerubahan(){
+  const lama = JSON.parse(capTersimpan || '{"fitur":{},"teks":{},"urutan":{}}');
+  const beda = (a, b) => {
+    const kunci = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
+    return [...kunci].filter(k => JSON.stringify(a?.[k]) !== JSON.stringify(b?.[k])).length;
+  };
+  const bagian = [];
+  const t = beda(lama.teks, simpanan.teks);
+  const f = beda(lama.fitur, simpanan.fitur);
+  const u = beda(lama.urutan, simpanan.urutan);
+  if(t) bagian.push(`${t} naskah`);
+  if(f) bagian.push(`${f} status fitur`);
+  if(u) bagian.push(`${u} urutan kartu`);
+  return bagian.length ? bagian.join(', ') : 'belum ada rinciannya';
+}
+
+function gambarTandaSimpan(){
+  const ada = adaPerubahan();
+  const palang = $('belumSimpan');
+  palang.hidden = !ada;
+  if(ada) $('belumSimpanRincian').textContent =
+    `Yang menunggu: ${rincianPerubahan()}. Perubahan ini belum terlihat oleh pengunjung.`;
+
+  // Tombol simpan hanya menonjol saat memang ada yang perlu disimpan, supaya
+  // tombol yang menyala berarti sesuatu.
+  const tombol = $('tombolSimpanTampilan');
+  tombol.classList.toggle('btn-primary', ada);
+  tombol.classList.toggle('btn-ghost', !ada);
+}
+
+$('belumSimpanTombol').addEventListener('click', () => $('tombolSimpanTampilan').click());
+
+$('belumBuang').addEventListener('click', async () => {
+  if(!confirm('Buang semua perubahan yang belum disimpan dan kembali ke keadaan terakhir yang tersimpan?')) return;
+  await muatSemua();
+  status('Perubahan yang belum disimpan dibuang.', 'benar');
+});
+
+/*
+  Penjaga terakhir. Menutup tab atau menyegarkan halaman saat masih ada
+  perubahan tertunda akan membuangnya tanpa bisa dikembalikan, jadi peramban
+  diminta bertanya lebih dulu.
+*/
+window.addEventListener('beforeunload', (e) => {
+  if(!akun || !adaPerubahan()) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
 
 /* ============================================================
    5. Membaca susunan situs dari halaman publiknya
@@ -402,6 +501,9 @@ function gambarSemua(){
   gambarCermin();
   gambarFormStatus();
   gambarCatatan();
+  // Apa yang baru saja dimuat ADALAH keadaan tersimpan, jadi capnya disetel di
+  // sini. Tanpa ini palang peringatan akan menyala tepat setelah memuat.
+  segarkanCap();
 }
 
 /* ============================================================
@@ -677,6 +779,7 @@ function simpanUrutanKisi(kisi){
   if(baru.join('|') === asal.join('|')) delete simpanan.urutan[kunci];
   else simpanan.urutan[kunci] = baru;
 
+  gambarTandaSimpan();
   pesan($('pesanTampilan'),
     'Urutan diubah. Tekan <strong>Simpan perubahan</strong> supaya berlaku di situs publik.', 'benar');
 }
@@ -802,6 +905,7 @@ function simpanPenyunting(){
 
   tutupPenyunting();
   gambarCermin();
+  gambarTandaSimpan();
   pesan($('pesanTampilan'),
     'Perubahan tercatat. Tekan <strong>Simpan perubahan</strong> supaya berlaku di situs publik.', 'benar');
 }
@@ -812,6 +916,7 @@ function kembalikanBawaan(){
   sedangDisunting.kunciTeks.forEach(k => { delete simpanan.teks[k]; });
   tutupPenyunting();
   gambarCermin();
+  gambarTandaSimpan();
   pesan($('pesanTampilan'),
     'Dikembalikan ke naskah bawaan halaman. Tekan <strong>Simpan perubahan</strong> supaya berlaku di situs publik.', 'benar');
 }
@@ -861,6 +966,7 @@ $('tombolUrutanBawaan').addEventListener('click', () => {
   }
   simpanan.urutan = {};
   gambarCermin();
+  gambarTandaSimpan();
   pesan($('pesanTampilan'),
     'Urutan kartu dikembalikan seperti bawaan halaman. Tekan <strong>Simpan perubahan</strong> supaya berlaku.', 'benar');
 });
@@ -912,6 +1018,7 @@ $('tombolSimpanTampilan').addEventListener('click', async () => {
       diperbaruiPada: new Date().toISOString(),
       diperbaruiOleh: akun ? akun.email : '',
     });
+    segarkanCap();
     gambarCermin();
 
     const jumlah = Object.keys(simpanan.fitur).length
@@ -954,6 +1061,21 @@ async function ubahStatus(baru){
   if(baru === 'maintenance'
      && !confirm('Tutup situs untuk pemeliharaan? Semua pengunjung akan melihat layar pemberitahuan sampai dinyalakan kembali.')){
     return;
+  }
+
+  /*
+    Menyalakan situs sambil membawa perubahan yang belum disimpan adalah
+    perangkap yang sesungguhnya. Begitu situs aktif, naskah dan status fitur
+    terkunci, jadi perubahan tadi TIDAK BISA lagi disimpan tanpa menutup situs
+    sekali lagi. Karena itu ditanya di sini, bukan sekadar diberi tanda.
+  */
+  if(baru === 'aktif' && adaPerubahan()){
+    const lanjut = confirm(
+      'Masih ada perubahan yang belum disimpan: ' + rincianPerubahan() + '.\n\n'
+      + 'Kalau situs dinyalakan sekarang, perubahan itu tidak ikut tayang, dan '
+      + 'tidak bisa disimpan lagi sampai situs ditutup untuk pemeliharaan sekali lagi.\n\n'
+      + 'Tekan Batal untuk kembali dan menyimpannya dulu.');
+    if(!lanjut) return;
   }
 
   try{

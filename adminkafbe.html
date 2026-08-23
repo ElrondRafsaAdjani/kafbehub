@@ -73,14 +73,66 @@
          menentukan apakah tombol simpan mana pun akan bekerja. -->
     <div class="ak-gembok" id="gembok" role="status" aria-live="polite"></div>
 
+    <!-- Peringatan perubahan yang belum disimpan. Sengaja ditaruh di luar
+         panel mana pun supaya tetap terlihat dari tab Status Situs, sebab di
+         tab itulah perubahan yang belum disimpan paling mudah tertinggal. -->
+    <div class="ak-belum" id="belumSimpan" role="alert" hidden>
+      <div>
+        <strong>Ada perubahan yang belum disimpan.</strong>
+        <span id="belumSimpanRincian"></span>
+      </div>
+      <span class="ak-belum-alat">
+        <button type="button" class="btn btn-ghost op-kecil" id="belumBuang">Buang perubahan</button>
+        <button type="button" class="btn btn-primary op-kecil" id="belumSimpanTombol">Simpan sekarang</button>
+      </span>
+    </div>
+
     <nav class="op-tab" role="tablist">
-      <button class="op-tab-btn active" data-tab="tampilan" role="tab">Tampilan Situs</button>
+      <button class="op-tab-btn active" data-tab="dasbor" role="tab">Dasbor</button>
+      <button class="op-tab-btn" data-tab="tampilan" role="tab">Tampilan Situs</button>
       <button class="op-tab-btn" data-tab="status" role="tab">Status Situs</button>
       <button class="op-tab-btn" data-tab="catatan" role="tab">Catatan Versi</button>
     </nav>
 
+    <!-- ---------- DASBOR ---------- -->
+    <section class="op-panel" id="panel-dasbor">
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Dasbor Kunjungan</h2>
+          <p>Catatan kunjungan halaman publik. Halaman pengurus tidak ikut dihitung.</p>
+        </div>
+        <div class="op-tombol-baris">
+          <button type="button" class="btn btn-ghost op-kecil" id="dasborMuatUlang">Muat ulang</button>
+        </div>
+      </div>
+
+      <div class="ak-saring-waktu" id="dasborSaringan" role="group" aria-label="Pilih rentang waktu"></div>
+
+      <p class="op-pesan" id="dasborPesan" role="status"></p>
+
+      <div class="ak-belum-data" id="dasborKosong" hidden>
+        <strong>Belum ada catatan kunjungan.</strong>
+        Pencatatan dimulai sejak fitur ini dipasang, jadi hari-hari sebelumnya memang kosong.
+        Angka akan muncul setelah ada yang membuka halaman publik.
+      </div>
+
+      <div class="ak-angka-kisi" id="dasborAngka"></div>
+
+      <h3 class="ak-judul-kecil">Halaman dibuka per hari</h3>
+      <div class="ak-grafik-bungkus">
+        <svg id="dasborGrafik" role="img" aria-label="Grafik jumlah halaman dibuka"></svg>
+        <div class="ak-balon" id="dasborBalon" hidden></div>
+      </div>
+
+      <h3 class="ak-judul-kecil">Halaman paling sering dibuka</h3>
+      <div class="op-tabel-bungkus" id="dasborHalaman"></div>
+
+      <h3 class="ak-judul-kecil">Jam paling ramai</h3>
+      <div class="ak-jam-kisi" id="dasborJam"></div>
+    </section>
+
     <!-- ---------- TAMPILAN SITUS ---------- -->
-    <section class="op-panel" id="panel-tampilan">
+    <section class="op-panel" id="panel-tampilan" hidden>
       <div class="op-panel-kepala">
         <div>
           <h2>Tampilan Situs</h2>

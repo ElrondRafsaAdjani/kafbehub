@@ -134,6 +134,35 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ---------- Catatan kunjungan ----------
+    /*
+      Satu dokumen per hari, ditambah oleh pengunjung anonim lewat
+      shared/kunjungan.js, dan hanya dibaca admin utama di dasbor.
+
+      APA YANG BISA DAN TIDAK BISA DIJAMIN DI SINI
+
+      Bentuk datanya dibatasi: nama dokumen harus berupa tanggal, dan hanya
+      tujuh kolom di bawah yang boleh ditulis. Jadi koleksi ini tidak bisa
+      dipakai orang lain sebagai tempat menitipkan data sembarangan.
+
+      Yang TIDAK bisa dicegah tanpa server sendiri adalah orang menaikkan
+      angkanya dengan memanggil Firestore berulang kali. Angka di dasbor
+      karena itu perlu dibaca sebagai gambaran ramai sepinya kunjungan, bukan
+      sebagai hitungan yang bisa dipertanggungjawabkan.
+
+      Menghapus ditutup rapat, sehingga catatan yang sudah masuk tidak bisa
+      dihilangkan lewat web oleh siapa pun.
+    */
+    match /statistik/{hari} {
+      allow read: if adminUtama();
+      allow create, update: if hari.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && request.resource.data.keys().hasOnly([
+             'tanggal', 'tampilan', 'perangkat', 'jam',
+             'halaman', 'durasiTotal', 'durasiJumlah'
+           ]);
+      allow delete: if false;
+    }
+
     // ---------- Catatan versi ----------
     // Catatan perubahan yang ditulis admin utama. Tidak dibuka untuk publik
     // karena isinya catatan kerja internal, termasuk siapa yang menulisnya.

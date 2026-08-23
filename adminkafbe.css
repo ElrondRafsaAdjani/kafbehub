@@ -39,6 +39,96 @@
 .ak-lampu-aktif{background:#E1F5E9; color:#1E7A44;}
 .ak-lampu-tutup{background:#FADDDD; color:#9B2C2C;}
 
+/* ---------- Palang perubahan yang belum disimpan ----------
+   Warnanya sengaja lebih keras daripada palang pengunci di atasnya, karena
+   ini satu-satunya hal di halaman yang bisa membuat pekerjaan hilang. */
+.ak-belum{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  background:#FDF3DE; border:1px solid var(--gold);
+  border-left:5px solid var(--gold-deep);
+  border-radius:var(--radius-md); padding:13px 18px; margin-bottom:20px;
+  font-size:0.9rem; line-height:1.6; color:#7A5410;
+}
+.ak-belum strong{display:block; font-size:0.96rem; color:#5C3E0C;}
+.ak-belum-alat{display:flex; gap:9px; margin-left:auto; flex:none;}
+
+/* ---------- Dasbor kunjungan ---------- */
+.ak-judul-kecil{font-size:1rem; margin:26px 0 10px; color:var(--owl-dark2);}
+
+.ak-saring-waktu{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;}
+.ak-saring-waktu button{
+  font:inherit; font-weight:700; font-size:0.86rem;
+  padding:9px 17px; border-radius:100px; cursor:pointer;
+  background:var(--surface); border:1px solid var(--line); color:var(--ink-soft);
+}
+.ak-saring-waktu button:hover{border-color:var(--owl-mid); color:var(--owl-dark2);}
+.ak-saring-waktu button.aktif{background:var(--owl-dark2); color:#fff; border-color:var(--owl-dark2);}
+
+.ak-belum-data{
+  background:var(--bg-deep); border-radius:var(--radius-md);
+  padding:16px 20px; margin-bottom:18px;
+  font-size:0.9rem; line-height:1.65; color:var(--ink-soft);
+}
+.ak-belum-data strong{display:block; color:var(--owl-dark2); font-size:0.98rem; margin-bottom:3px;}
+
+.ak-angka-kisi{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:14px; margin-bottom:8px;
+}
+.ak-angka{
+  background:var(--bg-deep); border-radius:16px; padding:16px 18px;
+  display:flex; flex-direction:column; gap:3px;
+}
+.ak-angka-label{
+  font-size:0.74rem; font-weight:800; letter-spacing:0.05em;
+  text-transform:uppercase; color:var(--ink-soft); line-height:1.4;
+}
+.ak-angka-nilai{
+  font-family:'Baloo 2', system-ui, sans-serif; font-weight:800;
+  font-size:1.7rem; color:var(--owl-dark); line-height:1.15;
+}
+.ak-angka-catatan{font-size:0.78rem; color:var(--ink-soft); line-height:1.45;}
+
+/* Grafik digambar sendiri sebagai SVG. Bungkusnya position:relative karena
+   balon keterangan dipasang mengikuti tetikus di dalamnya. */
+.ak-grafik-bungkus{
+  position:relative; background:var(--surface);
+  border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:12px 14px;
+}
+#dasborGrafik{width:100%; height:auto; display:block;}
+.dasbor-batang{cursor:pointer;}
+.dasbor-batang .isi{transition:fill .12s;}
+
+.ak-balon{
+  position:absolute; z-index:5; pointer-events:none;
+  background:var(--owl-dark2); color:#fff;
+  border-radius:10px; padding:8px 12px; font-size:0.82rem; line-height:1.5;
+  box-shadow:0 10px 24px -12px rgba(15,37,64,0.8); max-width:16rem;
+}
+.ak-balon b{display:block; font-size:0.86rem;}
+.ak-balon span{color:#B7DAE8;}
+
+.ak-bilah{
+  display:inline-block; vertical-align:middle;
+  width:90px; height:8px; border-radius:100px;
+  background:var(--bg-deep); overflow:hidden; margin-right:7px;
+}
+.ak-bilah > span{display:block; height:100%; background:var(--owl-mid);}
+
+.ak-jam-kisi{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px;
+}
+.ak-jam{
+  background:var(--bg-deep); border-radius:14px; padding:13px 16px;
+  display:flex; flex-direction:column; gap:2px;
+}
+.ak-jam b{
+  font-family:'Baloo 2', system-ui, sans-serif;
+  font-size:1.25rem; color:var(--owl-dark);
+}
+.ak-jam span{font-size:0.8rem; color:var(--ink-soft);}
+
 /* ---------- Cermin situs ---------- */
 .ak-cermin{display:flex; flex-direction:column; gap:22px; margin-top:14px;}
 
