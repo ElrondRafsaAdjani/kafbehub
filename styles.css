@@ -290,6 +290,12 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
    jelas kapan dan di mana. */
 .tag-menyusul{background:#FDEEDB; color:#8A5A0B;}
 .row-menyusul{background:#FFFCF5;}
+/* Ditiadakan pada tanggal ini KARENA dipindah, dan penggantinya sudah
+   ditentukan. Sengaja biru, bukan merah seperti "Ditiadakan", sebab kelasnya
+   tidak hilang melainkan berpindah, dan mahasiswa perlu melihat bedanya
+   sebelum membaca keterangannya. */
+.tag-diganti{background:#E4EEF6; color:#2C5C86;}
+.row-diganti{background:#F7FBFD;}
 
 .row-belum{background:#FAFCFD;}
 .row-belum .matkul-nama, .row-belum .jam-pill,
@@ -344,6 +350,15 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 .perub-butir b{
   font-weight:800; font-size:0.68rem; letter-spacing:0.06em;
   text-transform:uppercase; color:var(--ink-soft); margin-right:5px;
+}
+
+/* Kalimat "Diganti pada ... di ruang ..." pada daftar perubahan terdekat.
+   Ditaruh sebagai baris tersendiri di bawah kepingan KP, jam, dan ruang,
+   supaya jelas ia menerangkan seluruh baris dan bukan salah satu keping. */
+.perub-ganti{
+  margin-top:2px; font-size:0.86rem; line-height:1.5;
+  color:var(--owl-dark); border-left:3px solid var(--owl-light);
+  padding-left:10px;
 }
 
 /* Kotak "sebagian perkuliahan belum dimulai". Bentuknya memang mendatar,

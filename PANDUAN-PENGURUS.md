@@ -155,8 +155,28 @@ hilang, hanya belum jelas kapan dan di mana.
 Begitu tanggal dan jamnya sudah pasti, ubah jenisnya menjadi **Dipindah ke
 tanggal lain** supaya tampil sebagai kelas pengganti yang utuh.
 
+#### Ditiadakan dan diganti bukan hal yang sama
+
+Di halaman jadwal, kelas yang tidak berlangsung dibedakan menjadi tiga label
+dengan warna berbeda:
+
+| Label | Warna | Artinya |
+|---|---|---|
+| **Ditiadakan** | merah | Tidak ada kelas penggantinya |
+| **Diganti** | biru | Ada penggantinya, dan sudah ditentukan kapan serta di mana |
+| **Jadwal menyusul** | kuning | Ada penggantinya, tapi belum ditentukan |
+
+Untuk yang **Diganti** dan **Jadwal menyusul**, mahasiswa langsung membaca
+keterangan seperti *"Diganti pada Rabu, 26 Agustus 2026, pukul 18.30 - 20.10,
+di ruang EA 02.05."* Bagian yang belum ditentukan tertulis *menyusul*, bukan
+dikosongkan.
+
+Perbedaan ini muncul sendiri dari jenis perubahan yang dipilih, jadi tidak ada
+yang perlu diatur khusus.
+
 Sistem memeriksa bahwa tanggal yang dipilih memang jatuh pada hari kelas itu
-berlangsung. Untuk kelas yang dipindah, ruang tujuannya juga diperiksa agar
+berlangsung. Pemeriksaan ini berjalan **seketika** begitu kelas dan tanggalnya
+terisi, jadi tidak perlu menunggu tombol Simpan ditekan. Untuk kelas yang dipindah, ruang tujuannya juga diperiksa agar
 tidak menabrak kelas rutin maupun kelas pengganti lain.
 
 Perubahan yang tanggalnya sudah lewat tidak mengganggu tampilan dan otomatis

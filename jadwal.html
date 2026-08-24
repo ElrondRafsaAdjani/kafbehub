@@ -161,6 +161,25 @@
 
   function tglPendek(d){ return `${d.getDate()} ${BULAN_SINGKAT[d.getMonth()]}`; }
 
+  /*
+    Kalimat "diganti pada ... di ruang ..." dirakit di sini, dari kolom
+    gantiTanggal, gantiJam, dan gantiRuang.
+
+    Kelas yang ditiadakan dan kelas yang diganti adalah dua hal berbeda, dan
+    dulu keduanya tampil sama persis sebagai "Ditiadakan". Mahasiswa jadi tidak
+    punya cara tahu bahwa ada kelas penggantinya, apalagi kapan dan di mana.
+
+    Bagian yang belum ditentukan disebut "menyusul", bukan dikosongkan, supaya
+    tidak terbaca seolah datanya lupa diisi.
+  */
+  function kalimatGanti(c){
+    const bagian = [];
+    bagian.push(c.gantiTanggal ? `pada ${tglPanjang(c.gantiTanggal)}` : 'pada tanggal yang menyusul');
+    if(c.gantiJam) bagian.push(`pukul ${c.gantiJam}`);
+    bagian.push(c.gantiRuang ? `di ruang ${c.gantiRuang}` : 'di ruang yang menyusul');
+    return 'Diganti ' + bagian.join(', ') + '.';
+  }
+
   function menitMulai(jam){
     const m = String(jam).match(/(\d{1,2})[.:](\d{2})/);
     return m ? (+m[1]*60 + +m[2]) : 0;
@@ -189,6 +208,10 @@
     const libur = new Map();
     for(const c of perub.filter(c => c.tipe === 'libur')) libur.set(kunci(c), c);
 
+    // Ditiadakan karena dipindah, dan penggantinya sudah ditentukan.
+    const diganti = new Map();
+    for(const c of perub.filter(c => c.tipe === 'diganti')) diganti.set(kunci(c), c);
+
     // Pindah ruang dan daring sama-sama hanya mengubah TEMPAT, jamnya tetap,
     // jadi keduanya ditangani lewat jalur yang sama.
     const gantiRuang = new Map();
@@ -213,8 +236,13 @@
       const c = libur.get(kunci(k));
       if(c) return { ...k, status:'libur', catatan:c.catatan };
 
+      const g2 = diganti.get(kunci(k));
+      if(g2) return { ...k, status:'diganti',
+        catatan: [kalimatGanti(g2), g2.catatan].filter(Boolean).join(' ') };
+
       const s = menyusul.get(kunci(k));
-      if(s) return { ...k, status:'menyusul', catatan:s.catatan };
+      if(s) return { ...k, status:'menyusul',
+        catatan: [kalimatGanti(s), s.catatan].filter(Boolean).join(' ') };
 
       const d = daring.get(kunci(k));
       if(d) return { ...k, ruang: 'Online', status:'daring', catatan: d.catatan };
@@ -307,7 +335,7 @@
     const KELAS_BARIS = {
       libur:'row-libur', pengganti:'row-pengganti',
       belum:'row-belum', ruang:'row-ruang', daring:'row-daring',
-      menyusul:'row-menyusul',
+      menyusul:'row-menyusul', diganti:'row-diganti',
     };
     const LABEL = {
       libur: '<span class="tag tag-libur">Ditiadakan</span>',
@@ -316,6 +344,7 @@
       ruang: '<span class="tag tag-ruang">Pindah ruang</span>',
       daring: '<span class="tag tag-daring">Online</span>',
       menyusul: '<span class="tag tag-menyusul">Jadwal menyusul</span>',
+      diganti: '<span class="tag tag-diganti">Diganti</span>',
     };
 
     const baris = kelas.map(k => {
@@ -342,6 +371,7 @@
       hitung('libur')     ? `${hitung('libur')} ditiadakan` : '',
       hitung('daring')    ? `${hitung('daring')} daring` : '',
       hitung('ruang')     ? `${hitung('ruang')} pindah ruang` : '',
+      hitung('diganti')   ? `${hitung('diganti')} diganti` : '',
       hitung('menyusul')  ? `${hitung('menyusul')} jadwal menyusul` : '',
       hitung('pengganti') ? `${hitung('pengganti')} kelas pengganti` : '',
     ].filter(Boolean).join(' · ');
@@ -425,7 +455,7 @@
     */
     const LABEL_PERUB = {
       libur: 'Ditiadakan', pengganti: 'Kelas pengganti', ruang: 'Pindah ruang',
-      daring: 'Online', menyusul: 'Jadwal menyusul',
+      daring: 'Online', menyusul: 'Jadwal menyusul', diganti: 'Diganti',
     };
 
     const item = mendatang.map(c => `
@@ -440,6 +470,8 @@
           <span class="perub-butir"><b>Jam</b> ${esc(c.jam)}</span>
           ${c.ruang ? `<span class="perub-butir"><b>Ruang</b> ${esc(c.ruang)}</span>` : ''}
         </div>
+        ${(c.tipe === 'diganti' || c.tipe === 'menyusul')
+            ? `<div class="perub-ganti">${esc(kalimatGanti(c))}</div>` : ''}
       </li>`).join('');
 
     elPerub.innerHTML = `

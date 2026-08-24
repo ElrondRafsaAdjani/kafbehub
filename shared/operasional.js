@@ -1611,11 +1611,23 @@ async function terbitkan(){
           catatan: p.catatan || 'Kelas ditiadakan',
         });
       }else if(p.tipe === 'pindah'){
+        /*
+          Pada tanggal aslinya kelas ini tidak berlangsung, TAPI ada
+          penggantinya. Itu keadaan yang berbeda dari benar-benar ditiadakan,
+          jadi jenisnya "diganti", bukan "libur".
+
+          Keterangan penggantinya dikirim sebagai kolom terpisah, bukan
+          dirangkai jadi satu kalimat di sini. Halaman jadwal yang menyusun
+          kalimatnya sendiri, sehingga bisa menampilkannya sebagai kepingan
+          yang rapi dan bukan seuntai teks panjang.
+        */
         changes.push({
-          tanggal: p.tanggal, tipe: 'libur', kode: j.kode, kp: j.kp, nama,
+          tanggal: p.tanggal, tipe: 'diganti', kode: j.kode, kp: j.kp, nama,
           jam: rentangJam(j.mulai, j.selesai), ruang: j.ruang || '',
-          catatan: `Diganti ke ${tanggalPanjang(p.tanggalBaru)} pukul ${rentangJam(p.mulaiBaru, p.selesaiBaru)}`
-            + ` di ${p.ruangBaru || j.ruang || '(ruang belum ditentukan)'}`,
+          gantiTanggal: p.tanggalBaru,
+          gantiJam: rentangJam(p.mulaiBaru, p.selesaiBaru),
+          gantiRuang: p.ruangBaru || j.ruang || '',
+          catatan: p.catatan || '',
         });
         changes.push({
           tanggal: p.tanggalBaru, tipe: 'pengganti', kode: j.kode, kp: j.kp, nama,
@@ -1632,16 +1644,15 @@ async function terbitkan(){
           yang belum tentu benar. Yang sudah pasti disebut, sisanya disebut
           menyusul apa adanya.
         */
-        const kapan = p.tanggalBaru
-          ? `${tanggalPanjang(p.tanggalBaru)} pukul ${rentangJam(p.mulaiBaru, p.selesaiBaru)}`
-          : 'tanggal dan jam menyusul';
-        const tempat = p.ruangBaru || 'ruang menyusul';
-
         changes.push({
           tanggal: p.tanggal, tipe: 'menyusul', kode: j.kode, kp: j.kp, nama,
           jam: rentangJam(j.mulai, j.selesai), ruang: j.ruang || '',
-          catatan: p.catatan
-            || `Kelas dipindah. Penggantinya ${kapan}, di ${tempat}.`,
+          // Kolom yang kosong berarti bagian itu memang belum ditentukan.
+          // Halaman jadwal yang menuliskannya sebagai "menyusul".
+          gantiTanggal: p.tanggalBaru || '',
+          gantiJam: (p.mulaiBaru && p.selesaiBaru) ? rentangJam(p.mulaiBaru, p.selesaiBaru) : '',
+          gantiRuang: p.ruangBaru || '',
+          catatan: p.catatan || '',
         });
 
         // Kalau tanggal dan jamnya ternyata sudah ditentukan, kelas
