@@ -316,17 +316,50 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 .kotak-warn{border-left:4px solid #D9534F; background:#FDF6F6;}
 
 .perub-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
+/* Tiap perubahan disusun bertingkat: tanggal dan labelnya di atas, nama mata
+   kuliah sebagai judul, lalu KP, jam, dan ruang sebagai keterangan berlabel.
+   Sebelumnya semuanya disambung dalam satu baris teks dan tidak terbaca. */
 .perub-item{
+  display:flex; flex-direction:column; gap:5px;
+  font-size:0.9rem; color:var(--ink-soft); line-height:1.5;
+  padding-bottom:14px; margin-bottom:2px; border-bottom:1px solid var(--line);
+}
+.perub-item:last-child{border-bottom:none; padding-bottom:0;}
+
+.perub-atas{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+.perub-tanggal{font-weight:700; color:var(--owl-dark2); font-size:0.86rem;}
+.perub-atas .tag{margin-top:0;}
+
+.perub-mk{
+  font-family:'Baloo 2', system-ui, sans-serif; font-weight:700;
+  font-size:1.02rem; color:var(--owl-dark2); line-height:1.3;
+}
+
+.perub-rinci{display:flex; flex-wrap:wrap; gap:8px 10px;}
+.perub-butir{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:100px; padding:3px 12px;
+  font-size:0.84rem; color:var(--ink); white-space:nowrap;
+}
+.perub-butir b{
+  font-weight:800; font-size:0.68rem; letter-spacing:0.06em;
+  text-transform:uppercase; color:var(--ink-soft); margin-right:5px;
+}
+
+/* Kotak "sebagian perkuliahan belum dimulai". Bentuknya memang mendatar,
+   satu baris satu tanggal, jadi gayanya berdiri sendiri dan tidak lagi
+   menumpang kelas .perub-* yang kini bertingkat. */
+.mulai-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
+.mulai-item{
   display:flex; gap:14px; flex-wrap:wrap; align-items:baseline;
   font-size:0.9rem; color:var(--ink-soft); line-height:1.5;
   padding-bottom:12px; border-bottom:1px solid var(--line);
 }
-.perub-item:last-child{border-bottom:none; padding-bottom:0;}
-.perub-tanggal{font-weight:700; color:var(--owl-dark2); min-width:190px;}
-.perub-teks .tag{margin-top:0; margin-right:6px; vertical-align:middle;}
-.perub-teks strong{color:var(--owl-dark2);}
+.mulai-item:last-child{border-bottom:none; padding-bottom:0;}
+.mulai-tanggal{font-weight:700; color:var(--owl-dark2); min-width:190px;}
+.mulai-teks{flex:1;}
 @media (max-width:620px){
-  .perub-tanggal{min-width:0; width:100%;}
+  .mulai-tanggal{min-width:0; width:100%;}
 }
 
 .jadwal-toolbar{

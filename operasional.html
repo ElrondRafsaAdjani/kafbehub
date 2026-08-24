@@ -180,6 +180,32 @@
 
       <form class="op-form" id="formPerubahan">
         <input type="hidden" id="pbId" />
+
+        <!-- Penyaring daftar kelas. Tidak ikut tersimpan, hanya memperpendek
+             daftar pilihan yang isinya puluhan kelas. -->
+        <div class="op-baris op-saring-kelas">
+          <div class="op-field">
+            <label for="pbSaringHari">Saring: hari</label>
+            <select id="pbSaringHari">
+              <option value="">Semua hari</option>
+              <option value="Senin">Senin</option>
+              <option value="Selasa">Selasa</option>
+              <option value="Rabu">Rabu</option>
+              <option value="Kamis">Kamis</option>
+              <option value="Jumat">Jumat</option>
+              <option value="Sabtu">Sabtu</option>
+            </select>
+          </div>
+          <div class="op-field">
+            <label for="pbSaringKampus">Saring: kampus</label>
+            <select id="pbSaringKampus">
+              <option value="">Semua kampus</option>
+              <option value="utama">Kampus utama</option>
+              <option value="west">West campus (KP WA dan WZ)</option>
+            </select>
+          </div>
+        </div>
+
         <div class="op-baris">
           <div class="op-field">
             <label for="pbTipe">Jenis perubahan</label>
@@ -192,7 +218,10 @@
             </select>
           </div>
           <div class="op-field op-lebar">
-            <label for="pbKelas">Kelas yang terdampak</label>
+            <label for="pbKelas">
+              Kelas yang terdampak
+              <span class="op-samar" id="pbJumlahKelas"></span>
+            </label>
             <select id="pbKelas" required></select>
           </div>
           <div class="op-field">
@@ -200,6 +229,10 @@
             <input type="date" id="pbTanggal" required />
           </div>
         </div>
+
+        <!-- Kabar cepat kalau tanggalnya tidak jatuh pada hari kelas itu.
+             Pemeriksaan yang sama tetap dijalankan lagi saat menyimpan. -->
+        <p class="op-pesan" id="pesanHari" role="status"></p>
 
         <!-- Hanya tampil untuk jenis "menyusul". Kotak-kotak di bawahnya boleh
              dikosongkan, dan justru itu gunanya jenis ini. -->

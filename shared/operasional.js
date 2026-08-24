@@ -673,14 +673,66 @@ async function hapusJadwal(id){
    7. Perubahan sementara
    ============================================================ */
 
+/*
+  Kelas kampus West dikenali dari KP-nya, yang selalu diawali huruf W: WA, WZ,
+  dan turunannya. Sisanya kampus utama.
+*/
+function kampusDari(kp){
+  return /^W/i.test(String(kp || '').trim()) ? 'west' : 'utama';
+}
+
+/*
+  Daftar pilihan kelas memakai NAMA mata kuliah, bukan kodenya.
+
+  Kode seperti 1303MW24 tidak dihafal siapa pun, jadi memilih kelas berarti
+  mencocokkan kode satu per satu dengan daftar di tab Mata Kuliah. Nama mata
+  kuliahnya yang dikenal, jadi itu yang ditaruh paling depan. Kodenya sengaja
+  tidak dibuang sama sekali, hanya dipindah ke belakang sebagai penegas kalau
+  ada dua mata kuliah bernama mirip.
+
+  Pilihannya juga dikelompokkan per hari. Dengan puluhan kelas dalam satu
+  daftar, pengelompokan itu yang membuat gulirannya masih bisa diikuti mata.
+*/
 function isiPilihanKelas(){
-  const opsi = [...data.jadwal].sort(urutJadwal).map(j =>
-    `<option value="${esc(j.id)}">${esc(j.kode)} KP ${esc(j.kp)} · ${esc(j.hari)} ${esc(rentangJam(j.mulai, j.selesai))} · ${esc(j.ruang || 'tanpa ruang')}</option>`
-  ).join('');
   const el = $('pbKelas');
   const terpilih = el.value;
+
+  const saringHari   = $('pbSaringHari') ? $('pbSaringHari').value : '';
+  const saringKampus = $('pbSaringKampus') ? $('pbSaringKampus').value : '';
+
+  const cocok = data.jadwal.filter(j =>
+    (!saringHari   || j.hari === saringHari) &&
+    (!saringKampus || kampusDari(j.kp) === saringKampus));
+
+  const perHari = new Map();
+  for(const j of [...cocok].sort(urutJadwal)){
+    if(!perHari.has(j.hari)) perHari.set(j.hari, []);
+    perHari.get(j.hari).push(j);
+  }
+
+  let opsi = '';
+  for(const [hari, daftar] of perHari){
+    opsi += `<optgroup label="${esc(hari)}">` + daftar.map(j => {
+      const nama = namaMatkul(j.kode) || j.kode;
+      return `<option value="${esc(j.id)}">`
+        + `${esc(nama)} · KP ${esc(j.kp)} · ${esc(rentangJam(j.mulai, j.selesai))}`
+        + ` · ${esc(j.ruang || 'tanpa ruang')} · ${esc(j.kode)}</option>`;
+    }).join('') + '</optgroup>';
+  }
+
   el.innerHTML = '<option value="">— pilih —</option>' + opsi;
-  if(terpilih) el.value = terpilih;
+
+  // Kelas yang sedang dipilih dipertahankan kalau masih lolos saringan. Kalau
+  // tersaring keluar, pilihannya dikosongkan supaya tidak ada kelas tersembunyi
+  // yang diam-diam masih terpilih.
+  el.value = terpilih;
+  if(el.value !== terpilih) el.value = '';
+
+  if($('pbJumlahKelas')){
+    $('pbJumlahKelas').textContent = cocok.length === data.jadwal.length
+      ? `${data.jadwal.length} kelas`
+      : `${cocok.length} dari ${data.jadwal.length} kelas`;
+  }
 }
 
 // Jenis "daring" dan "libur" tidak butuh ruang maupun tanggal pengganti,
@@ -698,6 +750,45 @@ function aturTampilanPerubahan(){
 }
 $('pbTipe').addEventListener('change', aturTampilanPerubahan);
 aturTampilanPerubahan();
+
+['pbSaringHari', 'pbSaringKampus'].forEach(id => {
+  $(id).addEventListener('change', () => { isiPilihanKelas(); periksaHariLangsung(); });
+});
+
+/*
+  Tanggal terdampak yang tidak jatuh pada hari kelasnya memang sudah ditolak
+  saat menyimpan. Tapi menunggu sampai tombol Simpan ditekan berarti pengurus
+  sudah terlanjur mengisi seluruh formulir sebelum tahu tanggalnya keliru.
+
+  Pemeriksaan yang sama dijalankan lagi di sini begitu kelas dan tanggalnya
+  terisi, jadi ketahuannya di detik itu juga. Ini hanya mendahulukan kabar,
+  bukan menggantikan pemeriksaan saat menyimpan.
+*/
+function periksaHariLangsung(){
+  const el = $('pesanHari');
+  const j = data.jadwal.find(x => x.id === $('pbKelas').value);
+  const tgl = $('pbTanggal').value;
+
+  if(!j || !tgl){ bersihkanPesan(el); return; }
+
+  // tanggalPanjang() sudah memuat nama harinya, jadi harinya tidak perlu
+  // disebut dua kali. Yang justru perlu ditegaskan adalah hari kelasnya,
+  // sebab itu yang tidak terlihat dari kotak tanggal.
+  const hari = hariDariTanggal(tgl);
+  if(hari === j.hari){
+    pesan(el, `Tanggalnya cocok, kelas ini memang berlangsung hari ${esc(hari)}.`, 'benar');
+  }else{
+    pesan(el,
+      `${esc(tanggalPanjang(tgl))} bukan hari kelas ini. `
+      + `${esc(namaMatkul(j.kode) || j.kode)} KP ${esc(j.kp)} berlangsung hari `
+      + `<strong>${esc(j.hari)}</strong>. Perbaiki tanggalnya, atau pilih kelas yang lain.`,
+      'salah');
+  }
+}
+
+$('pbKelas').addEventListener('change', periksaHariLangsung);
+$('pbTanggal').addEventListener('change', periksaHariLangsung);
+$('pbTanggal').addEventListener('input', periksaHariLangsung);
 
 function gambarPerubahan(){
   const t = $('tabelPerubahan');

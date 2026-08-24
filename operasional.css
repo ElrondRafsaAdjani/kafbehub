@@ -102,6 +102,14 @@ textarea{ resize:vertical; }
 .op-aksi{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
 .op-saring{ margin-bottom:14px; max-width:340px; }
 
+/* Penyaring daftar kelas. Dipisahkan dari baris isian yang sesungguhnya lewat
+   latar dan garis, supaya jelas bahwa isinya tidak ikut tersimpan. */
+.op-saring-kelas{
+  background:var(--bg); border:1px dashed var(--line);
+  border-radius:14px; padding:12px 14px; margin-bottom:4px;
+}
+.op-saring-kelas label{ color:var(--ink-soft); }
+
 /* ---------- Pesan ---------- */
 .op-pesan{ margin:12px 0 0; font-size:0.86rem; line-height:1.55; display:none; }
 .op-pesan.tampil{ display:block; }
