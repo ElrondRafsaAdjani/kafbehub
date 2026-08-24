@@ -458,6 +458,26 @@
       daring: 'Online', menyusul: 'Jadwal menyusul', diganti: 'Diganti',
     };
 
+    /*
+      Keterangan tiap perubahan.
+
+      Daftar ini SAMA SEKALI tidak pernah menampilkan catatan, untuk jenis apa
+      pun. Jadi alasan kelas ditiadakan, dan keterangan ke mana kelasnya
+      dipindah, hanya terbaca di tabel mingguan di bawah. Padahal kotak inilah
+      yang paling dulu dilihat orang yang membuka halaman jadwal.
+
+      Untuk jenis yang punya pengganti, kalimatnya dirakit dari kolom
+      gantiTanggal, gantiJam, dan gantiRuang. Untuk jenis lain, catatan yang
+      ditulis pengurus ditampilkan apa adanya. Data lama yang keterangannya
+      terlanjur tersimpan sebagai catatan biasa pun ikut terbaca lewat jalur
+      kedua ini, tanpa perlu diterbitkan ulang lebih dulu.
+    */
+    const keterangan = (c) => {
+      const punyaGanti = (c.tipe === 'diganti' || c.tipe === 'menyusul');
+      return [punyaGanti ? kalimatGanti(c) : '', c.catatan]
+        .filter(Boolean).join(' ');
+    };
+
     const item = mendatang.map(c => `
       <li class="perub-item">
         <div class="perub-atas">
@@ -470,8 +490,7 @@
           <span class="perub-butir"><b>Jam</b> ${esc(c.jam)}</span>
           ${c.ruang ? `<span class="perub-butir"><b>Ruang</b> ${esc(c.ruang)}</span>` : ''}
         </div>
-        ${(c.tipe === 'diganti' || c.tipe === 'menyusul')
-            ? `<div class="perub-ganti">${esc(kalimatGanti(c))}</div>` : ''}
+        ${keterangan(c) ? `<div class="perub-ganti">${esc(keterangan(c))}</div>` : ''}
       </li>`).join('');
 
     elPerub.innerHTML = `
