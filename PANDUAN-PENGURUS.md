@@ -498,6 +498,43 @@ periksa lagi warna palang di atas halaman.
 Buka `/adminkafbe`, masuk, lalu tekan **Nyalakan situs** di palang atas.
 Halaman `/adminkafbe` dan `/operasional` tidak pernah ikut tertutup.
 
+**Situs tidak bisa dibuka dari wifi kampus, tapi bisa dari koneksi lain**
+
+Pesannya `ERR_CONNECTION_RESET` atau "This site can't be reached". Kalau di
+tempat yang sama situsnya bisa dibuka lewat koneksi lain, berarti situsnya
+sehat dan yang memutus sambungannya adalah jaringan kampus.
+
+Penyebab yang paling mungkin: jaringan kampus memblokir seluruh domain
+`vercel.app`, bukan situs ini secara khusus. Domain itu dipakai bersama oleh
+siapa pun yang menumpang layanan gratis Vercel, jadi sering masuk daftar
+blokir lembaga secara borongan.
+
+Cara memastikannya, dari wifi kampus:
+
+1. Buka situs `*.vercel.app` lain, misalnya <https://vercel.app>. Kalau ikut
+   gagal, berarti yang diblokir seluruh domainnya.
+2. Buka <https://vercel.com>. Kalau ini berhasil, dugaan di atas menguat,
+   sebab domainnya berbeda meski perusahaannya sama.
+3. Buka `chrome://flags/#enable-quic`, setel **Disabled**, mulai ulang
+   peramban, lalu coba lagi. Kalau tiba-tiba bisa, penyebabnya bukan blokir
+   domain melainkan penyaringan protokol QUIC.
+
+Jalan keluarnya, berurutan dari yang paling menyelesaikan masalah:
+
+| Cara | Biaya | Catatan |
+|---|---|---|
+| Minta subdomain resmi UBAYA, misalnya `kafbehub.ubaya.ac.id` | gratis | Paling ideal. Jaringan kampus tidak memblokir domainnya sendiri |
+| Beli domain sendiri lalu arahkan ke Vercel | sekitar Rp150 ribu per tahun | Berlaku di jaringan mana pun, dan situs tetap bisa pindah penyedia kapan saja |
+| Minta tim TI kampus membuka blokir `kafbehub.vercel.app` | gratis | Rapuh: sekali daftar blokirnya diperbarui, bisa tertutup lagi |
+
+Menyuruh mahasiswa memakai kuota atau VPN bukan jalan keluar. Situs ini justru
+paling dibutuhkan saat sedang di kampus.
+
+**Cara memasang domain sendiri di Vercel:** buka proyek di Vercel, masuk
+**Settings** lalu **Domains**, tambahkan nama domainnya, lalu salin data DNS
+yang ditampilkan Vercel ke tempat domain itu dibeli. Sertifikat HTTPS-nya
+diurus Vercel sendiri.
+
 **Semua halaman publik menampilkan layar pemeliharaan padahal statusnya aktif**
 Peramban menyimpan status kunjungan sebelumnya untuk menghindari kedipan.
 Muat ulang dengan Ctrl+F5. Status tersimpan itu selalu ditimpa jawaban dari
