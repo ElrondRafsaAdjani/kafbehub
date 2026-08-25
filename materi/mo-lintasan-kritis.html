@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Lintasan Kritis - Manajemen Operasi - KAFBE Hub</title>
+<title>Critical Path - Manajemen Operasi - KAFBE Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
 
   .story-card{
     background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
-    padding:28px; box-shadow:var(--shadow); margin-top:24px;
+    padding:28px; box-shadow:var(--shadow); margin-top:22px;
   }
   @media (max-width:600px){ .story-card{padding:18px;} }
 
@@ -34,22 +34,41 @@
   @media (max-width:900px){ .story-layout{display:flex; flex-direction:column; gap:18px;} }
 
   .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
-  .owl-panel svg{width:150px;}
+  .owl-panel svg.maskot{width:118px;}
   .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
-  @media (max-width:900px){ .owl-panel svg{width:84px;} .owl-panel{gap:8px;} }
+  @media (max-width:900px){ .owl-panel svg.maskot{width:84px;} .owl-panel{gap:10px;} }
 
   .bubble{
     position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
-    font-size:0.94rem; line-height:1.62; color:var(--ink); min-height:150px;
+    font-size:0.94rem; line-height:1.62; color:var(--ink); min-height:132px; width:100%;
   }
   .bubble b{color:var(--owl-dark2);}
   .bubble::before{
     content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
     border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:9px solid var(--bg-deep);
   }
-  @media (min-width:901px){
-    .bubble::before{ top:26px; left:-9px; transform:none; border-left:none; border-bottom:9px solid transparent; border-top:9px solid transparent; border-right:9px solid var(--bg-deep); }
+
+  /* Data soal ikut menyala mengikuti aktivitas yang sedang digambar, jadi
+     letaknya sengaja berdampingan dengan gambarnya dan bukan di bagian lain
+     halaman. */
+  .panel-soal{width:100%; margin-top:2px;}
+  .panel-soal h4{
+    font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--gold-deep); margin:0 0 6px;
   }
+  table.soal{width:100%; border-collapse:collapse; font-size:0.84rem;}
+  table.soal th{
+    font-size:0.66rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft);
+    text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); font-weight:800;
+  }
+  table.soal td{
+    padding:6px 8px; border-bottom:1px solid var(--line); color:var(--ink-soft);
+    font-variant-numeric:tabular-nums; transition:background .3s ease, color .3s ease;
+  }
+  table.soal td:first-child{font-weight:800; color:var(--owl-dark2);}
+  table.soal tr.sudah td{color:var(--ink);}
+  table.soal tr.aktif td{background:#FDF3DE; color:var(--owl-dark2); font-weight:700;}
+  table.soal tr.aktif td:first-child{color:var(--gold-deep);}
 
   /* Jaringannya lebar dan tidak bisa dipersempit tanpa membuat angkanya
      bertumpuk, jadi di layar sempit digulirkan di dalam kotaknya sendiri.
@@ -73,8 +92,8 @@
 
   .viz-hide{opacity:0; transition:opacity .45s ease;}
   .viz-hide.revealed{opacity:1;}
-  .kotak-aktivitas rect.badan{transition:fill .35s ease, stroke .35s ease;}
-  .panah{transition:stroke .35s ease;}
+  .kotak-aktivitas rect.badan{transition:fill .35s ease, stroke .35s ease, stroke-width .35s ease;}
+  .panah{transition:stroke .35s ease, stroke-width .35s ease;}
 
   .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
   .nav-row .spacer{flex:1;}
@@ -187,40 +206,31 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Manajemen Operasi</span>
-    <h2>Lintasan Kritis</h2>
-    <p>Menghitung maju, menghitung mundur, lalu menemukan rangkaian aktivitas yang menentukan lama seluruh proyek.</p>
+    <h2>Critical Path</h2>
+    <p>Mengenal konsepnya lebih dulu, lalu cara mengerjakannya, baru masuk ke contoh soal yang digambar langkah demi langkah.</p>
   </div>
 
   <p class="catatan-layar">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
 
-  <div class="story-card">
-    <div class="chapter-row">
-      <span class="chapter-badge" id="chapterBadge"></span>
-      <div class="progress-dots" id="progressDots"></div>
-    </div>
-
-    <div class="story-layout">
-      <div class="owl-panel">
-        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
-        <div class="bubble" id="bubbleText"></div>
-      </div>
-
-      <div class="chart-wrap">
-        <svg id="jaringSvg" viewBox="0 0 720 470" xmlns="http://www.w3.org/2000/svg"></svg>
-      </div>
-    </div>
-
-    <div class="nav-row">
-      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
-      <div class="spacer"></div>
-      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
-      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
-    </div>
-  </div>
-
-  <!-- ============ KETERANGAN ISTILAH ============ -->
+  <!-- ============ 1. KONSEP ============ -->
   <div class="kotak-materi">
-    <h3>Arti tiap istilah</h3>
+    <h3>Konsep critical path</h3>
+    <p>Sebuah proyek hampir tidak pernah berjalan lurus dari satu aktivitas ke aktivitas berikutnya. Ada aktivitas yang bisa dikerjakan bersamaan, ada pula yang baru boleh dimulai setelah aktivitas lain selesai. Karena bercabang seperti itu, proyek punya beberapa jalur dari awal sampai akhir.</p>
+    <p><b>Critical path</b> adalah jalur yang tidak punya kelonggaran waktu sama sekali. Semua aktivitas di jalur itu harus berjalan tepat waktu, sebab keterlambatan satu hari saja langsung menggeser tanggal selesainya proyek. Jalur inilah yang menentukan lama seluruh proyek.</p>
+
+    <div class="dua">
+      <div><b>Kenapa disebut kritis</b>
+        Aktivitas di jalur ini tidak punya waktu cadangan. Menunda salah satunya berarti menunda proyeknya, sehingga jalur ini yang paling perlu dijaga.</div>
+      <div><b>Kenapa selalu jalur terpanjang</b>
+        Proyek baru selesai kalau semua jalur sudah selesai. Jalur yang paling lama adalah yang terakhir rampung, jadi jalur itulah yang menahan tanggal selesainya.</div>
+    </div>
+
+    <h4>Critical Path Method (CPM)</h4>
+    <p>Critical Path Method adalah cara terstruktur untuk menemukan jalur tersebut. Caranya dengan menggambar aktivitas beserta urutannya menjadi sebuah jaringan, menghitung waktu paling cepat dan paling lambat tiap aktivitas, lalu melihat aktivitas mana yang sama sekali tidak punya kelonggaran.</p>
+    <p>Dari CPM didapat tiga jawaban sekaligus. Pertama, berapa lama proyek selesai kalau berjalan normal. Kedua, aktivitas mana yang tidak boleh terlambat. Ketiga, aktivitas mana yang masih punya kelonggaran, sehingga tenaga dan biaya tidak perlu ditumpuk di situ.</p>
+    <p>CPM menganggap lama tiap aktivitas sudah diketahui dan bersifat pasti. Kalau lama aktivitas masih berupa perkiraan yang bisa meleset, metode yang lebih cocok adalah PERT.</p>
+
+    <h4>Arti tiap istilah</h4>
     <p>Empat angka pada setiap aktivitas selalu ditulis pada posisi yang sama, sehingga bisa dibaca sekilas tanpa perlu dilabeli satu per satu.</p>
 
     <div class="kotak-contoh">
@@ -247,21 +257,12 @@
     <div class="rumus">Slack = LS − ES = LF − EF</div>
 
     <p style="margin-top:14px;">Slack bisa dihitung dengan dua cara itu dan hasilnya selalu sama. Kalau keduanya berbeda, berarti ada salah hitung di langkah sebelumnya, jadi ini sekaligus cara memeriksa pekerjaan sendiri.</p>
-
-    <div class="dua">
-      <div><b>Lintasan kritis</b>
-        Rangkaian aktivitas dari awal sampai akhir yang seluruh slack-nya nol.
-        Rangkaian ini yang menentukan lama proyek, dan selalu merupakan lintasan terpanjang.</div>
-      <div><b>Kenapa lintasan terpanjang</b>
-        Proyek baru selesai kalau semua jalur sudah selesai. Jalur yang paling lama
-        adalah yang terakhir rampung, jadi jalur itulah yang menahan tanggal selesainya.</div>
-    </div>
   </div>
 
-  <!-- ============ CARA MENGERJAKAN ============ -->
+  <!-- ============ 2. CARA MENGERJAKAN ============ -->
   <div class="kotak-materi">
     <h3>Cara mengerjakan</h3>
-    <p>Urutan ini berlaku untuk soal lintasan kritis mana pun, berapa pun jumlah aktivitasnya.</p>
+    <p>Urutan ini berlaku untuk soal critical path mana pun, berapa pun jumlah aktivitasnya.</p>
 
     <ol class="langkah-kerja">
       <li><b>Gambar jaringannya.</b> Tiap aktivitas jadi satu kotak, lalu tarik panah dari setiap aktivitas pendahulu ke aktivitas yang mengikutinya. Aktivitas tanpa pendahulu ditarik dari Start, aktivitas yang tidak menjadi pendahulu siapa pun ditarik ke Finish.</li>
@@ -269,7 +270,7 @@
       <li><b>Catat lama proyek.</b> EF terbesar di ujung kanan adalah waktu penyelesaian normal proyek.</li>
       <li><b>Hitung mundur, dari kanan ke kiri.</b> Aktivitas terakhir diberi LF = lama proyek. Untuk yang lain, <b>LF = LS terkecil di antara para penerusnya</b>. Lalu LS = LF − waktu aktivitas.</li>
       <li><b>Hitung slack tiap aktivitas.</b> Slack = LS − ES. Periksa dengan LF − EF, hasilnya harus sama.</li>
-      <li><b>Tandai yang slack-nya nol.</b> Rangkaian aktivitas itulah lintasan kritisnya. Tulis sebagai Start - ... - Finish.</li>
+      <li><b>Tandai yang slack-nya nol.</b> Rangkaian aktivitas itulah critical path-nya. Tulis sebagai Start - ... - Finish.</li>
     </ol>
 
     <h4>Dua hal yang paling sering keliru</h4>
@@ -283,7 +284,43 @@
     </div>
   </div>
 
-  <!-- ============ TABEL RINGKASAN ============ -->
+  <!-- ============ 3. SOAL DAN VISUALISASINYA ============ -->
+  <div class="kotak-materi">
+    <h3>Soalnya</h3>
+    <p>Sebuah proyek terdiri dari tujuh aktivitas. Setiap aktivitas punya lama pengerjaan dalam satuan minggu dan daftar aktivitas pendahulu, seperti pada tabel di dalam kotak visualisasi berikut. Yang perlu dicari adalah berapa lama proyek ini selesai dan aktivitas mana saja yang berada pada critical path.</p>
+    <p style="margin-bottom:0;">Jaringannya digambar satu aktivitas per langkah, mengikuti urutan pada tabel. Aktivitas yang sedang digambar ikut disorot di tabelnya, jadi terlihat jelas kotak mana yang berasal dari baris mana.</p>
+  </div>
+
+  <div class="story-card">
+    <div class="chapter-row">
+      <span class="chapter-badge" id="chapterBadge"></span>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <div class="story-layout">
+      <div class="owl-panel">
+        <svg class="maskot" viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <div class="bubble" id="bubbleText"></div>
+        <div class="panel-soal">
+          <h4>Data soal</h4>
+          <table class="soal" id="tabelSoal"></table>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <svg id="jaringSvg" viewBox="0 0 720 470" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
+    </div>
+  </div>
+
+  <!-- ============ 4. RINGKASAN ============ -->
   <div class="kotak-materi">
     <h3>Ringkasan contoh di atas</h3>
     <p>Seluruh angka pada tabel ini dihitung ulang oleh halaman, bukan diketik satu per satu, jadi tidak mungkin berbeda dengan yang tergambar pada jaringan.</p>
@@ -312,8 +349,11 @@
      mundur membaca daftar yang sama secara terbalik. Jadi aktivitas harus
      ditulis dengan pendahulu selalu berada di atas penerusnya.
 
+     Urutan ini juga dipakai sebagai urutan menggambar, dan menjadi isi tabel
+     data soal di sebelah gambar.
+
      Mengubah angka waktu di sini otomatis mengubah seluruh gambar, tabel, dan
-     kesimpulan lintasan kritisnya. Tidak ada angka hasil yang diketik manual
+     kesimpulan critical path-nya. Tidak ada angka hasil yang diketik manual
      di berkas ini, sehingga gambar dan tabel tidak mungkin saling berbeda.
      ================================================================ */
   var AKTIVITAS = [
@@ -369,8 +409,8 @@
   var H = hitung();
   var m = H.m, TOTAL = H.total;
 
-  // Lintasan kritis dirunut dari Start: selalu ambil penerus yang slack-nya nol.
-  function lintasanKritis(){
+  // Critical path dirunut dari Start: selalu ambil penerus yang slack-nya nol.
+  function jalurKritis(){
     var jalur = [];
     var kandidat = AKTIVITAS.filter(function(a){
       return a.pendahulu.length === 0 && m[a.id].kritis;
@@ -383,9 +423,28 @@
     }
     return jalur;
   }
-  var JALUR = lintasanKritis();
+  var JALUR = jalurKritis();
 
-  /* ---------- Gambar jaringan ---------- */
+  /* ---------- Tabel data soal ---------- */
+
+  (function(){
+    var t = document.getElementById('tabelSoal');
+    t.innerHTML =
+      '<thead><tr><th>Aktivitas</th><th>Pendahulu</th><th>Waktu</th></tr></thead><tbody>'
+      + AKTIVITAS.map(function(a){
+          return '<tr id="barisSoal' + a.id + '"><td>' + a.id + '</td>'
+            + '<td>' + (a.pendahulu.length ? a.pendahulu.join(', ') : '-') + '</td>'
+            + '<td>' + a.waktu + ' mgg</td></tr>';
+        }).join('')
+      + '</tbody>';
+  })();
+
+  /* ---------- Gambar jaringan ----------
+
+     Seluruh bagian gambar diberi kelas viz-hide sejak awal, termasuk kotak,
+     panah, dan simpul Start serta Finish. Tidak ada yang tampil sebelum
+     langkahnya tiba, sehingga jaringan benar-benar terbentuk sedikit demi
+     sedikit dan bukan muncul sekaligus. */
 
   var svg = document.getElementById('jaringSvg');
 
@@ -395,14 +454,14 @@
     var barisAtas = y + 24, barisBawah = y + h - 24;
     var tengahX = x + w / 2;
 
-    return '<g class="kotak-aktivitas" id="kotak' + a.id + '">'
+    return '<g class="kotak-aktivitas viz-hide" id="kotak' + a.id + '">'
       + '<rect class="badan" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="12" '
         + 'fill="var(--surface)" stroke="var(--owl-dark2)" stroke-width="2"/>'
       + '<line x1="' + x + '" y1="' + barisAtas + '" x2="' + (x+w) + '" y2="' + barisAtas + '" stroke="var(--line)" stroke-width="1.5"/>'
       + '<line x1="' + x + '" y1="' + barisBawah + '" x2="' + (x+w) + '" y2="' + barisBawah + '" stroke="var(--line)" stroke-width="1.5"/>'
       + '<line x1="' + tengahX + '" y1="' + y + '" x2="' + tengahX + '" y2="' + barisAtas + '" stroke="var(--line)" stroke-width="1.5"/>'
       + '<line x1="' + tengahX + '" y1="' + barisBawah + '" x2="' + tengahX + '" y2="' + (y+h) + '" stroke="var(--line)" stroke-width="1.5"/>'
-      // Nama dan lama aktivitas, selalu terlihat sejak langkah pertama.
+      // Nama dan lama aktivitas, tampil bersamaan dengan kotaknya.
       + '<text x="' + tengahX + '" y="' + (y + h/2 + 6) + '" text-anchor="middle" '
         + 'font-family="Baloo 2" font-weight="800" font-size="17" fill="var(--owl-dark2)">'
         + a.id + '<tspan font-size="12" font-weight="600" fill="var(--ink-soft)"> · ' + a.waktu + ' mgg</tspan></text>'
@@ -423,7 +482,7 @@
   }
 
   function panah(x1, y1, x2, y2, id){
-    return '<path class="panah" id="' + id + '" d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" '
+    return '<path class="panah viz-hide" id="' + id + '" d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" '
       + 'stroke="var(--owl-mid)" stroke-width="2.2" fill="none" marker-end="url(#ujung)"/>';
   }
 
@@ -436,10 +495,12 @@
       + '</defs>';
 
     // Simpul Start dan Finish
-    s += '<circle cx="70" cy="215" r="26" fill="var(--owl-dark2)"/>'
-       + '<text x="70" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="700" font-size="13" fill="#fff">Start</text>';
-    s += '<circle cx="665" cy="215" r="26" fill="var(--owl-dark2)"/>'
-       + '<text x="665" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="700" font-size="12" fill="#fff">Finish</text>';
+    s += '<g class="viz-hide" id="nodeStart">'
+       + '<circle cx="70" cy="215" r="26" fill="var(--owl-dark2)"/>'
+       + '<text x="70" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="700" font-size="13" fill="#fff">Start</text></g>';
+    s += '<g class="viz-hide" id="nodeFinish">'
+       + '<circle cx="665" cy="215" r="26" fill="var(--owl-dark2)"/>'
+       + '<text x="665" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="700" font-size="12" fill="#fff">Finish</text></g>';
 
     // Panah dari Start ke aktivitas tanpa pendahulu
     AKTIVITAS.filter(function(a){ return a.pendahulu.length === 0; }).forEach(function(a){
@@ -469,10 +530,10 @@
        + '<text x="583" y="448" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="20" fill="#fff">'
        + TOTAL + ' minggu</text></g>';
 
-    // Papan lintasan kritis
+    // Papan critical path
     s += '<g id="papanJalur" class="viz-hide">'
        + '<rect x="20" y="402" width="330" height="58" rx="14" fill="var(--gold)"/>'
-       + '<text x="185" y="424" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--owl-dark2)">LINTASAN KRITIS</text>'
+       + '<text x="185" y="424" text-anchor="middle" font-size="11.5" font-weight="800" fill="var(--owl-dark2)">CRITICAL PATH</text>'
        + '<text x="185" y="448" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="16" fill="var(--owl-dark2)">'
        + 'Start - ' + JALUR.join(' - ') + ' - Finish</text></g>';
 
@@ -493,12 +554,67 @@
     daftar.forEach(function(k){ out.push('ls' + k, 'lf' + k); });
     return out;
   }
+  // Sebuah aktivitas selalu digambar bersama panah dari para pendahulunya,
+  // atau panah dari Start kalau ia memang tidak punya pendahulu.
+  function gambarAktivitas(id){
+    var a = AKTIVITAS.filter(function(z){ return z.id === id; })[0];
+    var out = ['kotak' + id];
+    if(a.pendahulu.length === 0){
+      out.push('panahStart' + id);
+    }else{
+      a.pendahulu.forEach(function(k){ out.push('panah' + k + id); });
+    }
+    return out;
+  }
 
   var LANGKAH = [
     { bab:'Membaca soal',
-      teks:'Ada tujuh aktivitas, masing-masing punya lama pengerjaan dan daftar aktivitas pendahulu. '
-         + 'Aktivitas <b>A</b>, <b>B</b>, dan <b>C</b> tidak punya pendahulu, jadi ketiganya bisa dimulai bersamaan sejak hari pertama.',
+      teks:'Tabel di bawah ini isinya tujuh aktivitas, lengkap dengan lama pengerjaan dan daftar pendahulunya. '
+         + 'Kanvas di sebelah masih kosong, sebab jaringannya akan digambar bersama, satu aktivitas untuk satu langkah.',
       tampil:[] },
+
+    { bab:'Titik mulai',
+      teks:'Setiap jaringan proyek berangkat dari satu titik <b>Start</b>. Titik ini bukan aktivitas dan tidak memakan waktu. '
+         + 'Gunanya sebagai tempat berangkat aktivitas yang tidak punya pendahulu.',
+      tampil:['nodeStart'] },
+
+    { bab:'Menggambar aktivitas A',
+      teks:'Baris pertama, aktivitas <b>A</b> dengan lama ' + m.A.waktu + ' minggu dan tanpa pendahulu. '
+         + 'Karena tidak menunggu siapa pun, panahnya ditarik langsung dari Start.',
+      tampil: gambarAktivitas('A'), gambar:['A'] },
+
+    { bab:'Menggambar aktivitas B',
+      teks:'Aktivitas <b>B</b> juga tidak punya pendahulu, jadi kotaknya diletakkan sejajar dengan A dan bukan di belakangnya. '
+         + 'Sejajar artinya keduanya boleh dikerjakan pada waktu yang bersamaan.',
+      tampil: gambarAktivitas('B'), gambar:['B'] },
+
+    { bab:'Menggambar aktivitas C',
+      teks:'Aktivitas <b>C</b> melengkapi tiga aktivitas yang bisa dimulai sejak hari pertama. '
+         + 'Sampai di sini jaringan sudah bercabang menjadi tiga jalur.',
+      tampil: gambarAktivitas('C'), gambar:['C'] },
+
+    { bab:'Menggambar aktivitas D',
+      teks:'Aktivitas <b>D</b> punya pendahulu A, jadi panahnya ditarik dari kotak A, bukan dari Start. '
+         + 'Arah panah selalu berarti yang di pangkal harus selesai lebih dulu.',
+      tampil: gambarAktivitas('D'), gambar:['D'] },
+
+    { bab:'Menggambar aktivitas E',
+      teks:'Aktivitas <b>E</b> menunggu B, jadi panahnya ditarik dari kotak B. Jalur tengah sekarang punya dua aktivitas berurutan.',
+      tampil: gambarAktivitas('E'), gambar:['E'] },
+
+    { bab:'Menggambar aktivitas F',
+      teks:'Aktivitas <b>F</b> menunggu C. Ketiga jalur kini sama panjangnya secara gambar, walaupun lama pengerjaannya berbeda.',
+      tampil: gambarAktivitas('F'), gambar:['F'] },
+
+    { bab:'Menggambar aktivitas G',
+      teks:'Aktivitas <b>G</b> punya tiga pendahulu sekaligus, yaitu D, E, dan F. '
+         + 'Tiga panah bertemu di satu kotak, dan itu tandanya G baru boleh dimulai setelah ketiganya selesai.',
+      tampil: gambarAktivitas('G'), gambar:['G'] },
+
+    { bab:'Titik selesai',
+      teks:'G tidak menjadi pendahulu aktivitas mana pun, jadi panahnya ditarik ke titik <b>Finish</b>. '
+         + 'Gambar jaringannya sudah lengkap dan siap dihitung.',
+      tampil:['nodeFinish', 'panahGFinish'] },
 
     { bab:'Membaca kotaknya',
       teks:'Tiap kotak punya empat sudut angka. Dua di atas diisi saat menghitung maju, '
@@ -507,17 +623,19 @@
 
     { bab:'Hitung maju',
       teks:'Mulai dari kiri. <b>A</b>, <b>B</b>, dan <b>C</b> berangkat dari Start, jadi ES ketiganya <b>0</b>. '
-         + 'EF didapat dari ES ditambah lama aktivitas: A jadi 5, B jadi 3, C jadi 6.',
+         + 'EF didapat dari ES ditambah lama aktivitas: A jadi ' + m.A.ef + ', B jadi ' + m.B.ef + ', C jadi ' + m.C.ef + '.',
       tampil: idMaju(['A','B','C']) },
 
     { bab:'Hitung maju',
-      teks:'Lanjut ke kanan. <b>D</b> menunggu A, jadi ES-nya 5 dan EF-nya 13. '
-         + '<b>E</b> menunggu B, jadi 3 sampai 10. <b>F</b> menunggu C, jadi 6 sampai 10.',
+      teks:'Lanjut ke kanan. <b>D</b> menunggu A, jadi ES-nya ' + m.D.es + ' dan EF-nya ' + m.D.ef + '. '
+         + '<b>E</b> menunggu B, jadi ' + m.E.es + ' sampai ' + m.E.ef + '. '
+         + '<b>F</b> menunggu C, jadi ' + m.F.es + ' sampai ' + m.F.ef + '.',
       tampil: idMaju(['D','E','F']) },
 
     { bab:'Hitung maju',
-      teks:'<b>G</b> menunggu D, E, dan F sekaligus. EF ketiganya 13, 10, dan 10, dan yang dipakai '
-         + 'yang <b>paling besar</b>, yaitu 13. Kalau memakai yang kecil, G seolah bisa mulai padahal D belum selesai.',
+      teks:'<b>G</b> menunggu D, E, dan F sekaligus. EF ketiganya ' + m.D.ef + ', ' + m.E.ef + ', dan ' + m.F.ef + ', '
+         + 'dan yang dipakai yang <b>paling besar</b>, yaitu ' + m.G.es + '. '
+         + 'Kalau memakai yang kecil, G seolah bisa mulai padahal D belum selesai.',
       tampil: idMaju(['G']) },
 
     { bab:'Lama proyek',
@@ -546,9 +664,9 @@
          + 'Silakan periksa juga dengan LF dikurangi EF, angkanya pasti sama.',
       tampil: AKTIVITAS.map(function(a){ return 'slack' + a.id; }) },
 
-    { bab:'Lintasan kritis',
+    { bab:'Critical path',
       teks:'Aktivitas yang slack-nya <b>nol</b> adalah ' + JALUR.join(', ') + '. '
-         + 'Ketiganya tersambung dari Start sampai Finish, dan itulah lintasan kritisnya. '
+         + 'Ketiganya tersambung dari Start sampai Finish, dan itulah critical path-nya. '
          + 'Panjangnya ' + JALUR.map(function(k){ return m[k].waktu; }).join(' + ') + ' = <b>' + TOTAL + ' minggu</b>.',
       tampil:['papanJalur'], soroti:true },
 
@@ -584,18 +702,34 @@
       });
     });
 
-    // Sorotan lintasan kritis
+    // Aktivitas yang sedang digambar pada langkah ini, dan yang sudah digambar
+    // pada langkah-langkah sebelumnya.
+    var sedang = {}, sudah = {};
+    (l.gambar || []).forEach(function(id){ sedang[id] = true; });
+    for(var g = 0; g < ke; g++){
+      (LANGKAH[g].gambar || []).forEach(function(id){ sudah[id] = true; });
+    }
+
+    // Sorotan critical path
     var soroti = false;
     for(var j = 0; j <= ke; j++){ if(LANGKAH[j].soroti) soroti = true; }
 
     AKTIVITAS.forEach(function(a){
-      var g = document.getElementById('kotak' + a.id);
-      if(!g) return;
-      var badan = g.querySelector('rect.badan');
-      var kritis = soroti && m[a.id].kritis;
-      badan.setAttribute('fill', kritis ? '#FDF3DE' : 'var(--surface)');
-      badan.setAttribute('stroke', kritis ? 'var(--gold-deep)' : 'var(--owl-dark2)');
-      badan.setAttribute('stroke-width', kritis ? '3' : '2');
+      var el = document.getElementById('kotak' + a.id);
+      if(el){
+        var badan = el.querySelector('rect.badan');
+        var kritis = soroti && m[a.id].kritis;
+        var baru = !soroti && sedang[a.id];
+        badan.setAttribute('fill', (kritis || baru) ? '#FDF3DE' : 'var(--surface)');
+        badan.setAttribute('stroke', (kritis || baru) ? 'var(--gold-deep)' : 'var(--owl-dark2)');
+        badan.setAttribute('stroke-width', (kritis || baru) ? '3' : '2');
+      }
+
+      var baris = document.getElementById('barisSoal' + a.id);
+      if(baris){
+        baris.classList.toggle('aktif', !!sedang[a.id]);
+        baris.classList.toggle('sudah', !sedang[a.id] && !!sudah[a.id]);
+      }
     });
 
     svg.querySelectorAll('.panah').forEach(function(p){
@@ -643,7 +777,7 @@
       + AKTIVITAS.map(function(a){
           var d = m[a.id];
           return '<tr class="' + (d.kritis ? 'kritis' : '') + '">'
-            + '<td>' + a.id + (d.kritis ? '<span class="tanda-kritis">kritis</span>' : '') + '</td>'
+            + '<td>' + a.id + (d.kritis ? '<span class="tanda-kritis">critical</span>' : '') + '</td>'
             + '<td>' + (a.pendahulu.length ? a.pendahulu.join(', ') : '-') + '</td>'
             + '<td>' + a.waktu + '</td><td>' + d.es + '</td><td>' + d.ef + '</td>'
             + '<td>' + d.ls + '</td><td>' + d.lf + '</td><td>' + d.slack + '</td></tr>';
@@ -651,7 +785,7 @@
       + '</tbody>';
 
     document.getElementById('ringkasKesimpulan').innerHTML =
-      'Lintasan kritisnya <b>Start - ' + JALUR.join(' - ') + ' - Finish</b>, '
+      'Critical path-nya <b>Start - ' + JALUR.join(' - ') + ' - Finish</b>, '
       + 'dengan waktu penyelesaian normal <b>' + TOTAL + ' minggu</b>.';
   })();
 })();
