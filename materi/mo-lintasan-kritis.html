@@ -287,8 +287,24 @@
   <!-- ============ 3. SOAL DAN VISUALISASINYA ============ -->
   <div class="kotak-materi">
     <h3>Soalnya</h3>
-    <p>Sebuah proyek terdiri dari tujuh aktivitas. Setiap aktivitas punya lama pengerjaan dalam satuan minggu dan daftar aktivitas pendahulu, seperti pada tabel di dalam kotak visualisasi berikut. Yang perlu dicari adalah berapa lama proyek ini selesai dan aktivitas mana saja yang berada pada critical path.</p>
-    <p style="margin-bottom:0;">Jaringannya digambar satu aktivitas per langkah, mengikuti urutan pada tabel. Aktivitas yang sedang digambar ikut disorot di tabelnya, jadi terlihat jelas kotak mana yang berasal dari baris mana.</p>
+    <p>Perusahaan MJ punya sebuah proyek peningkatan kualitas kemasan. Proyek itu terdiri dari tujuh proses, lengkap dengan waktu dan biayanya seperti pada tabel berikut.</p>
+
+    <div class="tabel-gulir">
+      <table class="ringkas" id="tabelSoalLengkap"></table>
+    </div>
+
+    <div class="dua">
+      <div><b>Pertanyaannya</b>
+        Pertama, tentukan critical path dan waktu penyelesaian normalnya.
+        Kedua, tentukan biaya total untuk menyelesaikan proyek ini.</div>
+      <div><b>Kenapa memakai CPM</b>
+        Soal tidak menyebut proyek ini proyek baru, jadi lama tiap aktivitas dianggap
+        sudah diketahui dari pengerjaan yang pernah berjalan. Keadaan seperti itu
+        dikerjakan dengan CPM, bukan PERT.</div>
+    </div>
+
+    <p style="margin:16px 0 0;">Kolom crashing time dan crashing cost belum dipakai untuk menjawab dua pertanyaan di atas. Dua kolom itu baru diperlukan kalau proyeknya ingin dipercepat, dan soal aslinya memang berlanjut ke sana. Bagian itu dikerjakan di halaman <a href="mo-crashing.html">Crashing</a>, memakai jawaban dari halaman ini.</p>
+    <p style="margin:12px 0 0;">Jaringannya digambar satu aktivitas per langkah, mengikuti urutan pada tabel. Aktivitas yang sedang digambar ikut disorot di tabel kecil sebelah gambar, jadi terlihat jelas kotak mana yang berasal dari baris mana.</p>
   </div>
 
   <div class="story-card">
@@ -322,12 +338,22 @@
 
   <!-- ============ 4. RINGKASAN ============ -->
   <div class="kotak-materi">
-    <h3>Ringkasan contoh di atas</h3>
+    <h3>Jawabannya</h3>
     <p>Seluruh angka pada tabel ini dihitung ulang oleh halaman, bukan diketik satu per satu, jadi tidak mungkin berbeda dengan yang tergambar pada jaringan.</p>
     <div class="tabel-gulir">
       <table class="ringkas" id="tabelRingkas"></table>
     </div>
-    <p id="ringkasKesimpulan" style="margin-top:14px;"></p>
+
+    <h4>Critical path dan waktu penyelesaian normal</h4>
+    <p id="ringkasKesimpulan" style="margin:0;"></p>
+
+    <h4>Biaya total menyelesaikan proyek</h4>
+    <p style="margin:0;">Selama proyek berjalan normal, tidak ada aktivitas yang dipercepat, jadi biaya totalnya adalah jumlah seluruh normal cost.</p>
+    <p id="ringkasBiaya" style="margin:12px 0 0;"></p>
+
+    <h4>Pertanyaan berikutnya</h4>
+    <p style="margin:0 0 16px;">Soal aslinya masih berlanjut. Perusahaan ingin proyeknya selesai dua minggu lebih cepat, dan yang ditanyakan aktivitas mana yang dipercepat beserta biaya totalnya yang baru. Itu materi crashing, memakai jawaban dari halaman ini sebagai titik berangkat.</p>
+    <a href="mo-crashing.html" class="btn btn-gold">Lanjut ke Crashing →</a>
   </div>
 </section>
 
@@ -357,14 +383,21 @@
      di berkas ini, sehingga gambar dan tabel tidak mungkin saling berbeda.
      ================================================================ */
   var AKTIVITAS = [
-    { id:'A', waktu:5, pendahulu:[],              x:150, y:52  },
-    { id:'B', waktu:3, pendahulu:[],              x:150, y:177 },
-    { id:'C', waktu:6, pendahulu:[],              x:150, y:302 },
-    { id:'D', waktu:8, pendahulu:['A'],           x:330, y:52  },
-    { id:'E', waktu:7, pendahulu:['B'],           x:330, y:177 },
-    { id:'F', waktu:4, pendahulu:['C'],           x:330, y:302 },
-    { id:'G', waktu:5, pendahulu:['D','E','F'],   x:500, y:177 }
+    { id:'A', waktu:6, biaya:600, waktuCepat:4, biayaCepat:700, pendahulu:[],            x:150, y:52  },
+    { id:'B', waktu:4, biaya:450, waktuCepat:3, biayaCepat:500, pendahulu:[],            x:150, y:177 },
+    { id:'C', waktu:7, biaya:700, waktuCepat:5, biayaCepat:760, pendahulu:[],            x:150, y:302 },
+    { id:'D', waktu:9, biaya:800, waktuCepat:5, biayaCepat:860, pendahulu:['A'],         x:330, y:52  },
+    { id:'E', waktu:8, biaya:620, waktuCepat:5, biayaCepat:680, pendahulu:['B'],         x:330, y:177 },
+    { id:'F', waktu:5, biaya:120, waktuCepat:4, biayaCepat:150, pendahulu:['C'],         x:330, y:302 },
+    { id:'G', waktu:6, biaya:250, waktuCepat:4, biayaCepat:330, pendahulu:['D','E','F'], x:500, y:177 }
   ];
+
+  // Biaya ditulis dengan titik sebagai pemisah ribuan, mengikuti kebiasaan
+  // penulisan angka dalam bahasa Indonesia.
+  function rupiahkan(n){
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+  var BIAYA_NORMAL = AKTIVITAS.reduce(function(t, a){ return t + a.biaya; }, 0);
 
   var LEBAR_KOTAK = 116, TINGGI_KOTAK = 76;
 
@@ -425,9 +458,24 @@
   }
   var JALUR = jalurKritis();
 
-  /* ---------- Tabel data soal ---------- */
+  /* ---------- Tabel soal ----------
+
+     Dua tabel, satu sumber data. Yang lengkap dipakai di bagian soal, yang
+     ringkas menemani gambar dan ikut disorot mengikuti langkahnya. */
 
   (function(){
+    var lengkap = document.getElementById('tabelSoalLengkap');
+    lengkap.innerHTML =
+      '<thead><tr><th>Aktivitas</th><th>Aktivitas pendahulu</th><th>Normal time</th>'
+      + '<th>Crashing time</th><th>Normal cost</th><th>Crashing cost</th></tr></thead><tbody>'
+      + AKTIVITAS.map(function(a){
+          return '<tr><td>' + a.id + '</td>'
+            + '<td>' + (a.pendahulu.length ? a.pendahulu.join(', ') : '-') + '</td>'
+            + '<td>' + a.waktu + ' mgg</td><td>' + a.waktuCepat + ' mgg</td>'
+            + '<td>$' + rupiahkan(a.biaya) + '</td><td>$' + rupiahkan(a.biayaCepat) + '</td></tr>';
+        }).join('')
+      + '</tbody>';
+
     var t = document.getElementById('tabelSoal');
     t.innerHTML =
       '<thead><tr><th>Aktivitas</th><th>Pendahulu</th><th>Waktu</th></tr></thead><tbody>'
@@ -569,7 +617,7 @@
 
   var LANGKAH = [
     { bab:'Membaca soal',
-      teks:'Tabel di bawah ini isinya tujuh aktivitas, lengkap dengan lama pengerjaan dan daftar pendahulunya. '
+      teks:'Proyek Perusahaan MJ punya tujuh aktivitas. Tabel di bawah ini isinya lama pengerjaan dan daftar pendahulu tiap aktivitas. '
          + 'Kanvas di sebelah masih kosong, sebab jaringannya akan digambar bersama, satu aktivitas untuk satu langkah.',
       tampil:[] },
 
@@ -670,9 +718,9 @@
          + 'Panjangnya ' + JALUR.map(function(k){ return m[k].waktu; }).join(' + ') + ' = <b>' + TOTAL + ' minggu</b>.',
       tampil:['papanJalur'], soroti:true },
 
-    { bab:'Artinya',
-      teks:'Menunda <b>' + JALUR.join('</b>, <b>') + '</b> satu minggu saja membuat seluruh proyek mundur satu minggu. '
-         + 'Aktivitas lain masih punya kelonggaran, jadi menambah tenaga di situ tidak mempercepat apa pun.',
+    { bab:'Setelah ini',
+      teks:'Sampai di sini pertanyaan a dan b sudah terjawab. Pertanyaan berikutnya pada soal ini meminta proyeknya dipercepat dua minggu, '
+         + 'dan untuk itu dipakai <b>crashing</b>. Pembahasannya ada di topik berikutnya.',
       tampil:['papanJalur'], soroti:true }
   ];
 
@@ -786,7 +834,12 @@
 
     document.getElementById('ringkasKesimpulan').innerHTML =
       'Critical path-nya <b>Start - ' + JALUR.join(' - ') + ' - Finish</b>, '
-      + 'dengan waktu penyelesaian normal <b>' + TOTAL + ' minggu</b>.';
+      + 'dengan waktu penyelesaian normal '
+      + JALUR.map(function(k){ return m[k].waktu; }).join(' + ') + ' = <b>' + TOTAL + ' minggu</b>.';
+
+    document.getElementById('ringkasBiaya').innerHTML =
+      AKTIVITAS.map(function(a){ return rupiahkan(a.biaya); }).join(' + ')
+      + ' = <b>$' + rupiahkan(BIAYA_NORMAL) + '</b>.';
   })();
 })();
 </script>

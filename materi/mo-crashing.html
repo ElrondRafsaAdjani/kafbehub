@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Crashing - Manajemen Operasi - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .story-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:28px; box-shadow:var(--shadow); margin-top:22px;
+  }
+  @media (max-width:600px){ .story-card{padding:18px;} }
+
+  .chapter-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .chapter-badge{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
+    background:var(--bg-deep); color:var(--owl-dark2);
+  }
+  .progress-dots{display:flex; gap:6px; flex-wrap:wrap;}
+  .progress-dots .dot{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s, transform .2s;}
+  .progress-dots .dot.active{background:var(--gold); transform:scale(1.3);}
+  .progress-dots .dot.done{background:var(--owl-mid);}
+
+  .story-layout{display:grid; grid-template-columns:300px 1fr; gap:26px; align-items:start;}
+  @media (max-width:900px){ .story-layout{display:flex; flex-direction:column; gap:18px;} }
+
+  .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .owl-panel svg.maskot{width:118px;}
+  .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
+  @media (max-width:900px){ .owl-panel svg.maskot{width:84px;} .owl-panel{gap:10px;} }
+
+  .bubble{
+    position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
+    font-size:0.94rem; line-height:1.62; color:var(--ink); min-height:132px; width:100%;
+  }
+  .bubble b{color:var(--owl-dark2);}
+  .bubble::before{
+    content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:9px solid var(--bg-deep);
+  }
+
+  /* Hitungan kandidat ikut terisi mengikuti langkahnya, jadi letaknya
+     berdampingan dengan gambar dan bukan di bagian lain halaman. */
+  .panel-hitung{width:100%; margin-top:2px;}
+  .panel-hitung h4{
+    font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--gold-deep); margin:0 0 6px;
+  }
+  table.kandidat{width:100%; border-collapse:collapse; font-size:0.82rem;}
+  table.kandidat th{
+    font-size:0.64rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft);
+    text-align:left; padding:5px 7px; border-bottom:1px solid var(--line); font-weight:800;
+  }
+  table.kandidat td{
+    padding:7px; border-bottom:1px solid var(--line); color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+  }
+  table.kandidat td:first-child{font-weight:800; color:var(--owl-dark2);}
+  table.kandidat tr.viz-baris{opacity:0; transition:opacity .4s ease;}
+  table.kandidat tr.viz-baris.revealed{opacity:1;}
+  table.kandidat tr.terpilih td{background:#FDF3DE; color:var(--owl-dark2); font-weight:700;}
+  .tanda-pilih{
+    display:inline-block; font-size:0.64rem; font-weight:800; letter-spacing:0.04em;
+    text-transform:uppercase; background:var(--gold); color:var(--owl-dark2);
+    padding:2px 8px; border-radius:100px; margin-left:5px;
+  }
+  .panel-hitung p.catatan{font-size:0.78rem; color:var(--ink-soft); line-height:1.5; margin:8px 0 0;}
+
+  /* Jaringannya lebar dan tidak bisa dipersempit tanpa membuat angkanya
+     bertumpuk, jadi di layar sempit digulirkan di dalam kotaknya sendiri.
+     Yang bergeser cuma gambarnya, bukan seluruh halaman. */
+  .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:14px; overflow-x:auto;}
+  #jaringSvg{display:block; width:100%; min-width:660px; height:auto; aspect-ratio:720/470;}
+
+  /* min-width:0 dan max-width:100% WAJIB di sini, jangan dihapus. Anak grid
+     maupun flex menolak menyusut lebih kecil daripada isinya, sehingga gambar
+     yang ber-min-width 660 piksel akan mendorong seluruh halaman ke samping di
+     layar ponsel kalau dua aturan ini hilang. */
+  .story-layout > *{min-width:0; max-width:100%;}
+
+  .kotak{transition:opacity .35s ease;}
+  .kotak rect.badan{transition:fill .35s ease, stroke .35s ease, stroke-width .35s ease;}
+  .panah{transition:stroke .35s ease, stroke-width .35s ease, opacity .35s ease;}
+  .viz-hide{opacity:0; transition:opacity .45s ease;}
+  .viz-hide.revealed{opacity:1;}
+
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
+  .nav-row .spacer{flex:1;}
+
+  .kotak-materi{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow); padding:26px; margin-top:22px;
+  }
+  @media (max-width:600px){ .kotak-materi{padding:18px;} }
+  .kotak-materi h3{font-size:1.2rem; margin-bottom:6px;}
+  .kotak-materi > p{color:var(--ink-soft); font-size:0.94rem; line-height:1.65; margin:0 0 16px; max-width:74ch;}
+  .kotak-materi h4{font-size:0.98rem; margin:22px 0 8px; color:var(--owl-dark2);}
+
+  .rumus{
+    display:inline-flex; align-items:center; gap:10px; background:var(--bg-deep); border-radius:14px;
+    padding:13px 20px; font-size:1rem; color:var(--owl-dark2);
+    font-family:'Baloo 2', serif; margin:4px 8px 8px 0;
+  }
+  .pecahan{display:inline-flex; flex-direction:column; text-align:center; line-height:1.35;}
+  .pecahan .atas{border-bottom:2px solid var(--owl-dark2); padding:0 10px 2px;}
+  .pecahan .bawah{padding:2px 10px 0;}
+
+  .dua{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;}
+  @media (max-width:760px){ .dua{grid-template-columns:1fr;} }
+  .dua > div{
+    background:var(--bg-deep); border-radius:16px; padding:16px 18px;
+    font-size:0.9rem; line-height:1.65; color:var(--ink-soft);
+  }
+  .dua b{display:block; color:var(--owl-dark2); font-size:1rem; margin-bottom:4px;}
+
+  .langkah-kerja{counter-reset:lk; margin-top:12px; padding:0; list-style:none;}
+  .langkah-kerja li{
+    counter-increment:lk; position:relative; padding:0 0 14px 42px;
+    font-size:0.93rem; line-height:1.65; color:var(--ink-soft);
+  }
+  .langkah-kerja li::before{
+    content:counter(lk); position:absolute; left:0; top:0;
+    width:28px; height:28px; border-radius:50%;
+    background:var(--owl-dark2); color:#fff;
+    font-family:'Baloo 2', serif; font-weight:700; font-size:0.9rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .langkah-kerja b{color:var(--owl-dark2);}
+
+  .tabel-gulir{overflow-x:auto; margin-top:14px;}
+  table.ringkas{width:100%; border-collapse:collapse; font-size:0.9rem; min-width:540px;}
+  table.ringkas th, table.ringkas td{padding:9px 11px; border-bottom:1px solid var(--line); text-align:left;}
+  table.ringkas th{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold-deep); white-space:nowrap;}
+  table.ringkas td{font-variant-numeric:tabular-nums;}
+  table.ringkas td:first-child{font-weight:800; color:var(--owl-dark2);}
+  table.ringkas tr.kritis td{background:#FDF3DE; font-weight:600;}
+  .tanda-kritis{
+    display:inline-block; font-size:0.7rem; font-weight:800; letter-spacing:0.04em;
+    text-transform:uppercase; background:var(--gold); color:var(--owl-dark2);
+    padding:2px 9px; border-radius:100px; margin-left:6px;
+  }
+  .jawaban-akhir{
+    background:var(--bg-deep); border-radius:16px; padding:18px 20px; margin-top:14px;
+    font-size:0.95rem; line-height:1.7; color:var(--ink);
+  }
+  .jawaban-akhir b{color:var(--owl-dark2);}
+</style>
+
+<!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
+     <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
+     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body data-fitur-halaman="materi-mo">
+
+<div id="kafbeNav"></div>
+<script src="/shared/bahasa.js"></script>
+<script src="/shared/nav.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/><path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/><path d="M142 192 q8 10 16 0"/><path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/><path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="mo.html">← Kembali ke Manajemen Operasi</a>
+
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Manajemen Operasi</span>
+    <h2>Crashing</h2>
+    <p>Mempercepat proyek dengan tambahan biaya paling kecil. Lanjutan langsung dari topik critical path.</p>
+  </div>
+
+  <p class="catatan-layar">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
+
+  <!-- ============ 1. KONSEP ============ -->
+  <div class="kotak-materi">
+    <h3>Konsep crashing</h3>
+    <p>Proyek kadang harus selesai lebih cepat daripada jadwal normalnya. Percepatan itu tidak gratis. Menambah tenaga kerja, menambah jam lembur, atau menyewa alat tambahan membuat biaya aktivitas naik. <b>Crashing</b> adalah cara memilih aktivitas mana yang dipercepat supaya target waktu tercapai dengan tambahan biaya sekecil mungkin.</p>
+    <p>Setiap aktivitas punya dua pasang angka. Normal time dengan normal cost adalah keadaan biasa. Crash time dengan crash cost adalah keadaan paling cepat yang masih mungkin, beserta biayanya. Crash time tidak bisa ditembus, jadi sebuah aktivitas punya batas berapa minggu ia bisa dipangkas.</p>
+
+    <div class="dua">
+      <div><b>Hanya aktivitas kritis yang berguna</b>
+        Mempercepat aktivitas yang punya slack tidak mengubah tanggal selesai proyek.
+        Uangnya keluar, waktunya tidak berkurang, jadi kandidatnya selalu aktivitas di critical path.</div>
+      <div><b>Yang termurah lebih dulu</b>
+        Dari kandidat yang ada, dipilih yang tambahan biaya per minggunya paling kecil.
+        Percepatan diambil satu minggu demi satu minggu, bukan langsung sekaligus.</div>
+    </div>
+
+    <h4>Crash cost per period</h4>
+    <p>Angka ini menunjukkan berapa tambahan biaya untuk mempercepat sebuah aktivitas selama satu minggu. Inilah alat pembanding antar kandidat.</p>
+
+    <div class="rumus">
+      <span>Crash cost per period =</span>
+      <span class="pecahan">
+        <span class="atas">crash cost − normal cost</span>
+        <span class="bawah">normal time − crash time</span>
+      </span>
+    </div>
+
+    <p style="margin-top:14px;">Penyebutnya sekaligus memberi tahu batas pangkas aktivitas tersebut. Kalau normal time dikurangi crash time hasilnya dua, artinya aktivitas itu paling banyak bisa dipercepat dua minggu.</p>
+  </div>
+
+  <!-- ============ 2. CARA MENGERJAKAN ============ -->
+  <div class="kotak-materi">
+    <h3>Cara mengerjakan</h3>
+    <p>Urutan ini dipakai setelah critical path dan waktu penyelesaian normalnya sudah ketemu.</p>
+
+    <ol class="langkah-kerja">
+      <li><b>Kumpulkan kandidatnya.</b> Hanya aktivitas yang berada di critical path yang boleh dipercepat. Aktivitas lain tidak berpengaruh pada tanggal selesai.</li>
+      <li><b>Hitung crash cost per period tiap kandidat.</b> Selisih biaya dibagi selisih waktu, hasilnya tambahan biaya untuk satu minggu percepatan.</li>
+      <li><b>Periksa batas pangkasnya.</b> Aktivitas hanya boleh dipercepat sampai crash time. Kandidat yang sisanya tidak cukup untuk memenuhi permintaan soal harus dilewati.</li>
+      <li><b>Percepat yang paling murah.</b> Ambil satu minggu lebih dulu, lalu catat tambahan biayanya.</li>
+      <li><b>Periksa ulang critical path-nya.</b> Setelah dipercepat, jalur lain bisa ikut menjadi kritis. Kalau itu terjadi, percepatan berikutnya harus mempertimbangkan jalur yang baru.</li>
+      <li><b>Ulangi sampai target tercapai.</b> Biaya total baru adalah biaya normal ditambah seluruh tambahan biaya percepatan.</li>
+    </ol>
+
+    <h4>Kekeliruan yang sering muncul</h4>
+    <div class="dua">
+      <div><b>Mempercepat aktivitas yang tidak kritis</b>
+        Biaya bertambah tanpa memajukan tanggal selesai. Periksa dulu slack-nya sebelum memilih.</div>
+      <div><b>Lupa memeriksa ulang setelah dipercepat</b>
+        Critical path bisa berpindah setelah satu aktivitas dipangkas. Kalau tidak diperiksa, percepatan berikutnya bisa salah sasaran.</div>
+    </div>
+  </div>
+
+  <!-- ============ 3. SOAL ============ -->
+  <div class="kotak-materi">
+    <h3>Soalnya</h3>
+    <p>Soal ini lanjutan dari proyek peningkatan kualitas kemasan milik Perusahaan MJ. Dari topik critical path sudah diketahui critical path-nya Start, A, D, G, Finish dengan waktu penyelesaian normal 21 minggu dan biaya total $3.540.</p>
+    <p><b>Pertanyaannya:</b> kalau perusahaan ingin mempercepat proyek selama dua minggu, aktivitas apa yang harus dipercepat dan berapa biaya total yang baru.</p>
+
+    <div class="tabel-gulir">
+      <table class="ringkas" id="tabelSoal"></table>
+    </div>
+
+    <p style="margin:16px 0 0;">Baris yang ditandai adalah aktivitas yang berada di critical path. Hanya baris itu yang perlu diperhatikan, dan kolom crashing time serta crashing cost baru terpakai di sini.</p>
+  </div>
+
+  <div class="story-card">
+    <div class="chapter-row">
+      <span class="chapter-badge" id="chapterBadge"></span>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <div class="story-layout">
+      <div class="owl-panel">
+        <svg class="maskot" viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <div class="bubble" id="bubbleText"></div>
+        <div class="panel-hitung">
+          <h4>Hitungan kandidat</h4>
+          <table class="kandidat" id="tabelKandidat"></table>
+          <p class="catatan" id="catatanKandidat">Isinya menyusul mengikuti langkahnya.</p>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <svg id="jaringSvg" viewBox="0 0 720 470" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
+    </div>
+  </div>
+
+  <!-- ============ 4. JAWABAN ============ -->
+  <div class="kotak-materi">
+    <h3>Jawabannya</h3>
+    <p>Seluruh angka di bawah ini dihitung ulang oleh halaman dari data soal, bukan diketik satu per satu.</p>
+
+    <h4>Crash cost per period tiap kandidat</h4>
+    <div class="tabel-gulir">
+      <table class="ringkas" id="tabelJawab"></table>
+    </div>
+
+    <h4>Aktivitas yang dipercepat dan biaya totalnya</h4>
+    <div class="jawaban-akhir" id="jawabanAkhir"></div>
+
+    <h4>Kembali ke topik sebelumnya</h4>
+    <p style="margin:0 0 16px;">Critical path dan waktu penyelesaian normal yang dipakai di halaman ini berasal dari topik sebelumnya, lengkap dengan cara menggambar jaringan dan menghitung slack-nya.</p>
+    <a href="mo-lintasan-kritis.html" class="btn btn-ghost">← Buka Critical Path</a>
+  </div>
+</section>
+
+<footer class="wrap" data-bagian="Penutup">
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
+</footer>
+
+<script src="../main.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  /* ================================================================
+     DATA SOAL
+
+     Sama persis dengan data di halaman critical path, ditambah pemakaian
+     kolom crashing time dan crashing cost yang di sana belum terpakai.
+
+     Tidak ada angka hasil yang diketik manual di berkas ini. Lama proyek,
+     panjang tiap jalur, biaya total, sampai pilihan aktivitas yang dipercepat
+     semuanya dihitung dari daftar ini, jadi gambar, tabel, dan kesimpulan
+     tidak mungkin saling berbeda.
+     ================================================================ */
+  var AKTIVITAS = [
+    { id:'A', waktu:6, biaya:600, waktuCepat:4, biayaCepat:700, pendahulu:[],            cx:210, cy:90  },
+    { id:'B', waktu:4, biaya:450, waktuCepat:3, biayaCepat:500, pendahulu:[],            cx:210, cy:215 },
+    { id:'C', waktu:7, biaya:700, waktuCepat:5, biayaCepat:760, pendahulu:[],            cx:210, cy:340 },
+    { id:'D', waktu:9, biaya:800, waktuCepat:5, biayaCepat:860, pendahulu:['A'],         cx:390, cy:90  },
+    { id:'E', waktu:8, biaya:620, waktuCepat:5, biayaCepat:680, pendahulu:['B'],         cx:390, cy:215 },
+    { id:'F', waktu:5, biaya:120, waktuCepat:4, biayaCepat:150, pendahulu:['C'],         cx:390, cy:340 },
+    { id:'G', waktu:6, biaya:250, waktuCepat:4, biayaCepat:330, pendahulu:['D','E','F'], cx:560, cy:215 }
+  ];
+
+  // Permintaan soal: proyek dipercepat dua minggu.
+  var TARGET_PERCEPATAN = 2;
+
+  var LEBAR_KOTAK = 120, TINGGI_KOTAK = 64;
+
+  function cari(id){
+    return AKTIVITAS.filter(function(a){ return a.id === id; })[0];
+  }
+  function penerusDari(id){
+    return AKTIVITAS.filter(function(a){ return a.pendahulu.indexOf(id) >= 0; });
+  }
+  function angka(n){
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  /* ---------- Jalur, waktu, dan biaya ---------- */
+
+  // Seluruh jalur dari Start sampai Finish, dirunut dari aktivitas yang tidak
+  // punya pendahulu lalu diteruskan ke penerusnya.
+  function semuaJalur(){
+    var hasil = [];
+    function telusuri(a, jalur){
+      var lanjutan = jalur.concat([a.id]);
+      var pn = penerusDari(a.id);
+      if(!pn.length){ hasil.push(lanjutan); return; }
+      pn.forEach(function(x){ telusuri(x, lanjutan); });
+    }
+    AKTIVITAS.filter(function(a){ return a.pendahulu.length === 0; })
+             .forEach(function(a){ telusuri(a, []); });
+    return hasil;
+  }
+  var JALUR = semuaJalur();
+
+  function maksPangkas(a){ return a.waktu - a.waktuCepat; }
+  function biayaPerMinggu(a){ return (a.biayaCepat - a.biaya) / maksPangkas(a); }
+
+  function durasi(id, pangkas){ return cari(id).waktu - (pangkas[id] || 0); }
+  function panjangJalur(jalur, pangkas){
+    return jalur.reduce(function(t, id){ return t + durasi(id, pangkas); }, 0);
+  }
+  function lamaProyek(pangkas){
+    return Math.max.apply(null, JALUR.map(function(j){ return panjangJalur(j, pangkas); }));
+  }
+  function jalurKritis(pangkas){
+    var t = lamaProyek(pangkas);
+    return JALUR.filter(function(j){ return panjangJalur(j, pangkas) === t; });
+  }
+  function aktivitasKritis(pangkas){
+    var kumpulan = {};
+    jalurKritis(pangkas).forEach(function(j){ j.forEach(function(id){ kumpulan[id] = true; }); });
+    return kumpulan;
+  }
+  function biayaTotal(pangkas){
+    return AKTIVITAS.reduce(function(t, a){
+      return t + a.biaya + (pangkas[a.id] || 0) * biayaPerMinggu(a);
+    }, 0);
+  }
+
+  var TANPA_PANGKAS = {};
+  var LAMA_NORMAL = lamaProyek(TANPA_PANGKAS);
+  var BIAYA_NORMAL = biayaTotal(TANPA_PANGKAS);
+  var KRITIS_AWAL = aktivitasKritis(TANPA_PANGKAS);
+  var KANDIDAT = AKTIVITAS.filter(function(a){ return KRITIS_AWAL[a.id]; });
+
+  // Kandidat yang sanggup memenuhi permintaan soal sendirian, lalu diambil
+  // yang tambahan biaya per minggunya paling kecil.
+  var LAYAK = KANDIDAT.filter(function(a){ return maksPangkas(a) >= TARGET_PERCEPATAN; });
+  var TERPILIH = LAYAK.slice().sort(function(x, y){
+    return biayaPerMinggu(x) - biayaPerMinggu(y);
+  })[0];
+
+  var PANGKAS_AKHIR = {};
+  PANGKAS_AKHIR[TERPILIH.id] = TARGET_PERCEPATAN;
+  var BIAYA_BARU = biayaTotal(PANGKAS_AKHIR);
+  var LAMA_BARU = lamaProyek(PANGKAS_AKHIR);
+
+  /* ---------- Tabel soal dan tabel jawaban ---------- */
+
+  (function(){
+    document.getElementById('tabelSoal').innerHTML =
+      '<thead><tr><th>Aktivitas</th><th>Aktivitas pendahulu</th><th>Normal time</th>'
+      + '<th>Crashing time</th><th>Normal cost</th><th>Crashing cost</th></tr></thead><tbody>'
+      + AKTIVITAS.map(function(a){
+          var kritis = !!KRITIS_AWAL[a.id];
+          return '<tr class="' + (kritis ? 'kritis' : '') + '">'
+            + '<td>' + a.id + (kritis ? '<span class="tanda-kritis">critical</span>' : '') + '</td>'
+            + '<td>' + (a.pendahulu.length ? a.pendahulu.join(', ') : '-') + '</td>'
+            + '<td>' + a.waktu + ' mgg</td><td>' + a.waktuCepat + ' mgg</td>'
+            + '<td>$' + angka(a.biaya) + '</td><td>$' + angka(a.biayaCepat) + '</td></tr>';
+        }).join('')
+      + '</tbody>';
+
+    document.getElementById('tabelJawab').innerHTML =
+      '<thead><tr><th>Aktivitas</th><th>Selisih biaya</th><th>Selisih waktu</th>'
+      + '<th>Crash cost per period</th><th>Keterangan</th></tr></thead><tbody>'
+      + KANDIDAT.map(function(a){
+          var pilih = (a.id === TERPILIH.id);
+          return '<tr class="' + (pilih ? 'kritis' : '') + '">'
+            + '<td>' + a.id + '</td>'
+            + '<td>' + angka(a.biayaCepat) + ' − ' + angka(a.biaya) + ' = $' + angka(a.biayaCepat - a.biaya) + '</td>'
+            + '<td>' + a.waktu + ' − ' + a.waktuCepat + ' = ' + maksPangkas(a) + ' mgg</td>'
+            + '<td>$' + angka(biayaPerMinggu(a)) + ' per minggu</td>'
+            + '<td>' + (pilih ? 'paling murah, dipilih' : 'lebih mahal') + '</td></tr>';
+        }).join('')
+      + '</tbody>';
+
+    document.getElementById('jawabanAkhir').innerHTML =
+      'Aktivitas yang dipercepat adalah <b>' + TERPILIH.id + ' sebanyak ' + TARGET_PERCEPATAN + ' kali</b>, '
+      + 'dari ' + TERPILIH.waktu + ' minggu menjadi ' + (TERPILIH.waktu - TARGET_PERCEPATAN) + ' minggu. '
+      + 'Proyek jadi selesai dalam <b>' + LAMA_BARU + ' minggu</b>.<br>'
+      + 'Biaya total baru = biaya normal ditambah crash cost = $' + angka(BIAYA_NORMAL)
+      + ' + $' + angka(biayaPerMinggu(TERPILIH)) + ' + $' + angka(biayaPerMinggu(TERPILIH))
+      + ' = <b>$' + angka(BIAYA_BARU) + '</b>.';
+  })();
+
+  /* ---------- Tabel kandidat di sebelah gambar ---------- */
+
+  (function(){
+    document.getElementById('tabelKandidat').innerHTML =
+      '<thead><tr><th>Akt.</th><th>Maks pangkas</th><th>Biaya per minggu</th></tr></thead><tbody>'
+      + KANDIDAT.map(function(a){
+          return '<tr class="viz-baris" id="hitung' + a.id + '">'
+            // Tanda "pilih" hanya dibuat untuk aktivitas yang memang terpilih,
+            // supaya baris lain tidak menyisakan ruang kosong.
+            + '<td>' + a.id + (a.id === TERPILIH.id
+                ? '<span class="tanda-pilih viz-hide" id="tanda' + a.id + '">pilih</span>' : '') + '</td>'
+            + '<td>' + maksPangkas(a) + ' mgg</td>'
+            + '<td>$' + angka(biayaPerMinggu(a)) + '</td></tr>';
+        }).join('')
+      + '</tbody>';
+  })();
+
+  /* ---------- Gambar jaringan ---------- */
+
+  var svg = document.getElementById('jaringSvg');
+
+  function kotakAktivitas(a){
+    var x = a.cx - LEBAR_KOTAK/2, y = a.cy - TINGGI_KOTAK/2;
+    return '<g class="kotak" id="kotak' + a.id + '">'
+      + '<rect class="badan" x="' + x + '" y="' + y + '" width="' + LEBAR_KOTAK + '" height="' + TINGGI_KOTAK + '" rx="14" '
+        + 'fill="var(--surface)" stroke="var(--owl-dark2)" stroke-width="2"/>'
+      + '<text x="' + a.cx + '" y="' + (a.cy - 4) + '" text-anchor="middle" '
+        + 'font-family="Baloo 2" font-weight="800" font-size="18" fill="var(--owl-dark2)">' + a.id + '</text>'
+      + '<text id="dur' + a.id + '" x="' + a.cx + '" y="' + (a.cy + 18) + '" text-anchor="middle" '
+        + 'font-size="12.5" font-weight="700" fill="var(--ink-soft)"></text>'
+      + '</g>';
+  }
+
+  function panah(x1, y1, x2, y2, id){
+    return '<path class="panah" id="' + id + '" d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" '
+      + 'stroke="var(--owl-mid)" stroke-width="2.2" fill="none" marker-end="url(#ujung)"/>';
+  }
+
+  function gambarJaringan(){
+    var s = '<defs>'
+      + '<marker id="ujung" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
+      + '<path d="M0 0 L10 5 L0 10 z" fill="var(--owl-mid)"/></marker>'
+      + '<marker id="ujungKritis" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
+      + '<path d="M0 0 L10 5 L0 10 z" fill="var(--gold-deep)"/></marker>'
+      + '</defs>';
+
+    s += '<circle cx="70" cy="215" r="26" fill="var(--owl-dark2)"/>'
+       + '<text x="70" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="700" font-size="13" fill="#fff">Start</text>';
+    s += '<circle cx="665" cy="215" r="26" fill="var(--owl-dark2)"/>'
+       + '<text x="665" y="220" text-anchor="middle" font-family="Baloo 2" font-weight="700" font-size="12" fill="#fff">Finish</text>';
+
+    AKTIVITAS.filter(function(a){ return a.pendahulu.length === 0; }).forEach(function(a){
+      s += panah(98, 215, a.cx - LEBAR_KOTAK/2 - 6, a.cy, 'panahStart' + a.id);
+    });
+    AKTIVITAS.forEach(function(a){
+      a.pendahulu.forEach(function(k){
+        var p = cari(k);
+        s += panah(p.cx + LEBAR_KOTAK/2, p.cy, a.cx - LEBAR_KOTAK/2 - 6, a.cy, 'panah' + k + a.id);
+      });
+    });
+    AKTIVITAS.filter(function(a){ return penerusDari(a.id).length === 0; }).forEach(function(a){
+      s += panah(a.cx + LEBAR_KOTAK/2, a.cy, 637, 215, 'panah' + a.id + 'Finish');
+    });
+
+    AKTIVITAS.forEach(function(a){ s += kotakAktivitas(a); });
+
+    // Papan panjang tiap jalur
+    s += '<g id="papanJalur">'
+       + '<rect x="20" y="390" width="300" height="74" rx="14" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>'
+       + '<text x="36" y="409" font-size="10.5" font-weight="800" fill="var(--ink-soft)" letter-spacing="0.6">PANJANG TIAP JALUR</text>'
+       + JALUR.map(function(j, i){
+           return '<text id="barisJalur' + i + '" x="36" y="' + (428 + i*16) + '" font-size="12" font-weight="700" '
+             + 'font-family="Baloo 2" fill="var(--ink-soft)"></text>';
+         }).join('')
+       + '</g>';
+
+    // Papan lama proyek
+    s += '<g id="papanWaktu">'
+       + '<rect x="336" y="390" width="170" height="74" rx="14" fill="var(--owl-dark2)"/>'
+       + '<text x="421" y="414" text-anchor="middle" font-size="10.5" font-weight="700" fill="#B7DAE8">LAMA PROYEK</text>'
+       + '<text id="nilaiWaktu" x="421" y="442" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="21" fill="#fff"></text>'
+       + '</g>';
+
+    // Papan biaya total
+    s += '<g id="papanBiaya">'
+       + '<rect x="522" y="390" width="178" height="74" rx="14" fill="var(--gold)"/>'
+       + '<text x="611" y="414" text-anchor="middle" font-size="10.5" font-weight="800" fill="var(--owl-dark2)">BIAYA TOTAL</text>'
+       + '<text id="nilaiBiaya" x="611" y="442" text-anchor="middle" font-family="Baloo 2" font-weight="800" font-size="21" fill="var(--owl-dark2)"></text>'
+       + '</g>';
+
+    svg.innerHTML = s;
+  }
+
+  gambarJaringan();
+
+  /* ---------- Langkah cerita ----------
+
+     Tiap langkah menyimpan sendiri keadaan pangkasnya, bukan menambah pada
+     keadaan sebelumnya. Dengan begitu tombol "Sebelumnya" benar-benar
+     mengembalikan gambar ke keadaan langkah itu. */
+
+  var satuKali = {}; satuKali[TERPILIH.id] = 1;
+  var duaKali = {}; duaKali[TERPILIH.id] = 2;
+  var perMinggu = biayaPerMinggu(TERPILIH);
+
+  var LANGKAH = [
+    { bab:'Titik berangkat',
+      teks:'Jaringan ini hasil dari topik critical path. Lama proyeknya <b>' + LAMA_NORMAL + ' minggu</b> '
+         + 'dengan biaya normal <b>$' + angka(BIAYA_NORMAL) + '</b>. '
+         + 'Perusahaan ingin proyek ini selesai ' + TARGET_PERCEPATAN + ' minggu lebih cepat, jadi targetnya ' + LAMA_BARU + ' minggu.',
+      pangkas:{}, tampil:[] },
+
+    { bab:'Memilih kandidat',
+      teks:'Yang boleh dipercepat hanya aktivitas di critical path, yaitu <b>' + KANDIDAT.map(function(a){ return a.id; }).join(', ') + '</b>. '
+         + 'Aktivitas lain masih punya kelonggaran, jadi mempercepatnya cuma menambah biaya tanpa memajukan tanggal selesai.',
+      pangkas:{}, tampil:[], soroti:true },
+
+    { bab:'Crash cost per period',
+      teks:'Aktivitas <b>A</b> naik dari $' + angka(cari('A').biaya) + ' ke $' + angka(cari('A').biayaCepat)
+         + ' untuk pemangkasan ' + maksPangkas(cari('A')) + ' minggu. '
+         + 'Jadi ($' + angka(cari('A').biayaCepat - cari('A').biaya) + ') dibagi (' + maksPangkas(cari('A')) + ') = <b>$'
+         + angka(biayaPerMinggu(cari('A'))) + '</b> per minggu.',
+      pangkas:{}, tampil:['hitungA'], soroti:true },
+
+    { bab:'Crash cost per period',
+      teks:'Aktivitas <b>D</b> naik dari $' + angka(cari('D').biaya) + ' ke $' + angka(cari('D').biayaCepat)
+         + ' untuk pemangkasan ' + maksPangkas(cari('D')) + ' minggu. '
+         + 'Hasilnya <b>$' + angka(biayaPerMinggu(cari('D'))) + '</b> per minggu, jauh lebih murah daripada A.',
+      pangkas:{}, tampil:['hitungA','hitungD'], soroti:true },
+
+    { bab:'Crash cost per period',
+      teks:'Aktivitas <b>G</b> naik dari $' + angka(cari('G').biaya) + ' ke $' + angka(cari('G').biayaCepat)
+         + ' untuk pemangkasan ' + maksPangkas(cari('G')) + ' minggu, jadi <b>$' + angka(biayaPerMinggu(cari('G')))
+         + '</b> per minggu. Ketiga kandidat sekarang sudah punya angka pembanding.',
+      pangkas:{}, tampil:['hitungA','hitungD','hitungG'], soroti:true },
+
+    { bab:'Memeriksa batas pangkas',
+      teks:'Soal meminta percepatan ' + TARGET_PERCEPATAN + ' minggu, jadi kandidatnya harus sanggup dipangkas sebanyak itu. '
+         + 'Kolom maks pangkas menunjukkan '
+         + KANDIDAT.map(function(a){ return a.id + ' ' + maksPangkas(a) + ' minggu'; }).join(', ')
+         + '. Ketiganya memenuhi syarat.',
+      pangkas:{}, tampil:['hitungA','hitungD','hitungG'], soroti:true },
+
+    { bab:'Memilih yang termurah',
+      teks:'Dari ketiganya, <b>' + TERPILIH.id + '</b> punya tambahan biaya paling kecil, yaitu $' + angka(perMinggu) + ' per minggu. '
+         + 'Aktivitas inilah yang dipercepat.',
+      pangkas:{}, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true },
+
+    { bab:'Percepatan pertama',
+      teks:'<b>' + TERPILIH.id + '</b> dipercepat satu minggu, dari ' + TERPILIH.waktu + ' menjadi ' + (TERPILIH.waktu - 1) + ' minggu. '
+         + 'Lama proyek turun menjadi ' + lamaProyek(satuKali) + ' minggu dan biaya total naik $' + angka(perMinggu)
+         + ' menjadi $' + angka(biayaTotal(satuKali)) + '.',
+      pangkas:satuKali, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true },
+
+    { bab:'Percepatan kedua',
+      teks:'<b>' + TERPILIH.id + '</b> dipercepat satu minggu lagi, menjadi ' + (TERPILIH.waktu - 2) + ' minggu. '
+         + 'Lama proyek menjadi <b>' + LAMA_BARU + ' minggu</b>, tepat ' + TARGET_PERCEPATAN + ' minggu lebih cepat seperti yang diminta.',
+      pangkas:duaKali, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true },
+
+    { bab:'Memeriksa ulang',
+      teks:'Setelah dipercepat, panjang tiap jalur perlu dilihat lagi. '
+         + JALUR.map(function(j){ return j.join(' - ') + ' = ' + panjangJalur(j, duaKali); }).join(', ') + '. '
+         + 'Jalur ' + jalurKritis(duaKali)[0].join(' - ') + ' masih yang terpanjang, jadi critical path-nya tidak berpindah.',
+      pangkas:duaKali, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true },
+
+    { bab:'Jawabannya',
+      teks:'Aktivitas yang dipercepat <b>' + TERPILIH.id + ' sebanyak ' + TARGET_PERCEPATAN + ' kali</b>. '
+         + 'Biaya total baru = $' + angka(BIAYA_NORMAL) + ' + $' + angka(perMinggu) + ' + $' + angka(perMinggu)
+         + ' = <b>$' + angka(BIAYA_BARU) + '</b>.',
+      pangkas:duaKali, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true }
+  ];
+
+  var ke = 0;
+  var gelembung = document.getElementById('bubbleText');
+  var badge = document.getElementById('chapterBadge');
+  var titik = document.getElementById('progressDots');
+  var catatan = document.getElementById('catatanKandidat');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+  var btnUlang = document.getElementById('btnRestart');
+
+  function tampilkan(){
+    var l = LANGKAH[ke];
+    var pangkas = l.pangkas || {};
+    var kritis = aktivitasKritis(pangkas);
+    var jalurTerpanjang = jalurKritis(pangkas);
+
+    // Elemen yang muncul bertahap
+    var munculkan = {};
+    l.tampil.forEach(function(id){ munculkan[id] = true; });
+    LANGKAH.forEach(function(x){
+      x.tampil.forEach(function(id){
+        var el = document.getElementById(id);
+        if(el) el.classList.toggle('revealed', !!munculkan[id]);
+      });
+    });
+
+    // Kotak aktivitas: durasi terbaru, sorotan kritis, dan redup untuk yang
+    // bukan kandidat.
+    AKTIVITAS.forEach(function(a){
+      var d = durasi(a.id, pangkas);
+      var teks = document.getElementById('dur' + a.id);
+      var dipangkas = d !== a.waktu;
+      teks.textContent = dipangkas ? (a.waktu + ' → ' + d + ' mgg') : (d + ' mgg');
+      teks.setAttribute('fill', dipangkas ? 'var(--gold-deep)' : 'var(--ink-soft)');
+
+      var g = document.getElementById('kotak' + a.id);
+      var badan = g.querySelector('rect.badan');
+      var sorot = l.soroti && kritis[a.id];
+      badan.setAttribute('fill', sorot ? '#FDF3DE' : 'var(--surface)');
+      badan.setAttribute('stroke', sorot ? 'var(--gold-deep)' : 'var(--owl-dark2)');
+      badan.setAttribute('stroke-width', sorot ? '3' : '2');
+      g.setAttribute('opacity', (l.soroti && !kritis[a.id]) ? '0.42' : '1');
+    });
+
+    // Panah ikut menyala kalau kedua ujungnya berada pada jalur terpanjang.
+    svg.querySelectorAll('.panah').forEach(function(p){
+      var nama = p.id.replace('panah', '');
+      var kritisPanah = false;
+      if(l.soroti){
+        jalurTerpanjang.forEach(function(j){
+          for(var k = 0; k < j.length; k++){
+            if(k === 0 && nama === 'Start' + j[k]) kritisPanah = true;
+            if(k < j.length - 1 && nama === j[k] + j[k+1]) kritisPanah = true;
+            if(k === j.length - 1 && nama === j[k] + 'Finish') kritisPanah = true;
+          }
+        });
+      }
+      p.setAttribute('stroke', kritisPanah ? 'var(--gold-deep)' : 'var(--owl-mid)');
+      p.setAttribute('stroke-width', kritisPanah ? '3.4' : '2.2');
+      p.setAttribute('opacity', (l.soroti && !kritisPanah) ? '0.42' : '1');
+      p.setAttribute('marker-end', kritisPanah ? 'url(#ujungKritis)' : 'url(#ujung)');
+    });
+
+    // Papan panjang jalur, lama proyek, dan biaya
+    JALUR.forEach(function(j, i){
+      var el = document.getElementById('barisJalur' + i);
+      var panjang = panjangJalur(j, pangkas);
+      var terpanjang = panjang === lamaProyek(pangkas);
+      el.textContent = j.join(' - ') + ' = ' + panjang + ' mgg';
+      el.setAttribute('fill', terpanjang ? 'var(--gold-deep)' : 'var(--ink-soft)');
+    });
+    document.getElementById('nilaiWaktu').textContent = lamaProyek(pangkas) + ' minggu';
+    document.getElementById('nilaiBiaya').textContent = '$' + angka(biayaTotal(pangkas));
+
+    // Baris kandidat yang terpilih
+    KANDIDAT.forEach(function(a){
+      var baris = document.getElementById('hitung' + a.id);
+      baris.classList.toggle('terpilih', !!l.pilih && a.id === TERPILIH.id);
+    });
+    catatan.textContent = l.pilih
+      ? 'Dipilih ' + TERPILIH.id + ' karena tambahan biayanya paling kecil.'
+      : 'Isinya menyusul mengikuti langkahnya.';
+
+    badge.textContent = 'Bagian: ' + l.bab;
+    gelembung.innerHTML = l.teks;
+
+    titik.innerHTML = LANGKAH.map(function(_, i){
+      return '<span class="dot ' + (i === ke ? 'active' : (i < ke ? 'done' : '')) + '"></span>';
+    }).join('');
+
+    btnPrev.disabled = (ke === 0);
+    var terakhir = (ke === LANGKAH.length - 1);
+    btnNext.disabled = terakhir;
+    btnNext.textContent = terakhir ? 'Selesai' : 'Lanjut →';
+  }
+
+  btnNext.addEventListener('click', function(){ if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
+  btnPrev.addEventListener('click', function(){ if(ke > 0){ ke--; tampilkan(); } });
+  btnUlang.addEventListener('click', function(){ ke = 0; tampilkan(); });
+
+  tampilkan();
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/shared/kunjungan.js"></script>
+</body>
+</html>
