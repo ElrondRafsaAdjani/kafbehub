@@ -164,7 +164,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
-<body data-fitur-halaman="materi-mo">
+<body data-fitur-halaman="materi-mo materi-mo-crashing">
 
 <div id="kafbeNav"></div>
 <script src="/shared/bahasa.js"></script>
@@ -233,7 +233,12 @@
       </span>
     </div>
 
-    <p style="margin-top:14px;">Penyebutnya sekaligus memberi tahu batas pangkas aktivitas tersebut. Kalau normal time dikurangi crash time hasilnya dua, artinya aktivitas itu paling banyak bisa dipercepat dua minggu.</p>
+    <h4>Syarat sebuah aktivitas boleh dipercepat</h4>
+    <p>Aktivitas kritis belum tentu boleh dipercepat. Sebelum biayanya dibandingkan, waktunya diperiksa dulu terhadap permintaan soal. Kalau soal meminta percepatan dua minggu, normal time harus sanggup dikurangi crash time sebanyak dua kali tanpa menjadi negatif.</p>
+
+    <div class="rumus"><span>normal time − crash time − crash time ≥ 0</span></div>
+
+    <p style="margin-top:14px;">Aktivitas yang hasil pemeriksaannya negatif langsung gugur dan tidak ikut dipertimbangkan, semurah apa pun crash cost per period-nya. Kalau semua kandidat gugur, artinya permintaan percepatan itu memang tidak bisa dipenuhi.</p>
   </div>
 
   <!-- ============ 2. CARA MENGERJAKAN ============ -->
@@ -244,18 +249,18 @@
     <ol class="langkah-kerja">
       <li><b>Kumpulkan kandidatnya.</b> Hanya aktivitas yang berada di critical path yang boleh dipercepat. Aktivitas lain tidak berpengaruh pada tanggal selesai.</li>
       <li><b>Hitung crash cost per period tiap kandidat.</b> Selisih biaya dibagi selisih waktu, hasilnya tambahan biaya untuk satu minggu percepatan.</li>
-      <li><b>Periksa batas pangkasnya.</b> Aktivitas hanya boleh dipercepat sampai crash time. Kandidat yang sisanya tidak cukup untuk memenuhi permintaan soal harus dilewati.</li>
-      <li><b>Percepat yang paling murah.</b> Ambil satu minggu lebih dulu, lalu catat tambahan biayanya.</li>
+      <li><b>Periksa syarat waktunya.</b> Normal time dikurangi crash time sebanyak permintaan soal tidak boleh negatif. Kandidat yang hasilnya negatif gugur di sini juga.</li>
+      <li><b>Percepat yang paling murah di antara yang lolos.</b> Ambil satu minggu lebih dulu, lalu catat tambahan biayanya.</li>
       <li><b>Periksa ulang critical path-nya.</b> Setelah dipercepat, jalur lain bisa ikut menjadi kritis. Kalau itu terjadi, percepatan berikutnya harus mempertimbangkan jalur yang baru.</li>
-      <li><b>Ulangi sampai target tercapai.</b> Biaya total baru adalah biaya normal ditambah seluruh tambahan biaya percepatan.</li>
+      <li><b>Ulangi sampai target tercapai.</b> Biaya total baru adalah biaya normal ditambah seluruh tambahan biaya percepatan. Kalau tidak ada kandidat yang lolos pemeriksaan, permintaan percepatannya tidak bisa dipenuhi dan biayanya tetap sebesar biaya normal.</li>
     </ol>
 
     <h4>Kekeliruan yang sering muncul</h4>
     <div class="dua">
       <div><b>Mempercepat aktivitas yang tidak kritis</b>
         Biaya bertambah tanpa memajukan tanggal selesai. Periksa dulu slack-nya sebelum memilih.</div>
-      <div><b>Lupa memeriksa ulang setelah dipercepat</b>
-        Critical path bisa berpindah setelah satu aktivitas dipangkas. Kalau tidak diperiksa, percepatan berikutnya bisa salah sasaran.</div>
+      <div><b>Langsung memilih yang termurah</b>
+        Crash cost per period baru berguna setelah syarat waktunya lolos. Kandidat termurah pun tidak terpakai kalau pemeriksaannya negatif.</div>
     </div>
   </div>
 
@@ -312,8 +317,11 @@
       <table class="ringkas" id="tabelJawab"></table>
     </div>
 
-    <h4>Aktivitas yang dipercepat dan biaya totalnya</h4>
+    <h4>Kesimpulannya</h4>
     <div class="jawaban-akhir" id="jawabanAkhir"></div>
+
+    <h4>Kalau menemukan jawaban yang berbeda</h4>
+    <p style="margin:0;">Ada kunci yang beredar dengan jawaban D dipercepat dua kali dan biaya total $3.570. Jawaban itu memakai pembacaan syarat yang berbeda dan tidak sejalan dengan syarat yang dipakai di halaman ini, sebab dengan pemeriksaan di atas D pun hasilnya negatif. Kalau di kelas Anda dipakai syarat yang lain, ikuti yang disepakati pengajarnya dan bandingkan cara pemeriksaannya.</p>
 
     <h4>Kembali ke topik sebelumnya</h4>
     <p style="margin:0 0 16px;">Critical path dan waktu penyelesaian normal yang dipakai di halaman ini berasal dari topik sebelumnya, lengkap dengan cara menggambar jaringan dan menghitung slack-nya.</p>
@@ -366,6 +374,10 @@
   function angka(n){
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
+  // Tanda minus yang dipakai sama dengan yang ada di rumus, bukan tanda hubung.
+  function angkaBertanda(n){
+    return (n < 0 ? '−' : '') + angka(Math.abs(n));
+  }
 
   /* ---------- Jalur, waktu, dan biaya ---------- */
 
@@ -416,17 +428,37 @@
   var KRITIS_AWAL = aktivitasKritis(TANPA_PANGKAS);
   var KANDIDAT = AKTIVITAS.filter(function(a){ return KRITIS_AWAL[a.id]; });
 
-  // Kandidat yang sanggup memenuhi permintaan soal sendirian, lalu diambil
-  // yang tambahan biaya per minggunya paling kecil.
-  var LAYAK = KANDIDAT.filter(function(a){ return maksPangkas(a) >= TARGET_PERCEPATAN; });
-  var TERPILIH = LAYAK.slice().sort(function(x, y){
-    return biayaPerMinggu(x) - biayaPerMinggu(y);
-  })[0];
+  /* Syarat waktu.
+
+     Normal time harus sanggup dikurangi crash time sebanyak permintaan soal
+     tanpa menjadi negatif. Untuk permintaan dua minggu, bentuknya
+     normal time − crash time − crash time. Aktivitas yang hasilnya negatif
+     gugur, berapa pun crash cost per period-nya. */
+  function sisaSyarat(a){
+    return a.waktu - TARGET_PERCEPATAN * a.waktuCepat;
+  }
+  function lolosSyarat(a){
+    return sisaSyarat(a) >= 0;
+  }
+  function tulisSyarat(a){
+    var bagian = [String(a.waktu)];
+    for(var i = 0; i < TARGET_PERCEPATAN; i++){ bagian.push(String(a.waktuCepat)); }
+    return bagian.join(' − ') + ' = ' + angkaBertanda(sisaSyarat(a));
+  }
+
+  var LAYAK = KANDIDAT.filter(lolosSyarat);
+  var ADA_LAYAK = LAYAK.length > 0;
+
+  // Dari yang lolos, diambil yang tambahan biaya per minggunya paling kecil.
+  var TERPILIH = ADA_LAYAK
+    ? LAYAK.slice().sort(function(x, y){ return biayaPerMinggu(x) - biayaPerMinggu(y); })[0]
+    : null;
 
   var PANGKAS_AKHIR = {};
-  PANGKAS_AKHIR[TERPILIH.id] = TARGET_PERCEPATAN;
+  if(TERPILIH) PANGKAS_AKHIR[TERPILIH.id] = TARGET_PERCEPATAN;
   var BIAYA_BARU = biayaTotal(PANGKAS_AKHIR);
   var LAMA_BARU = lamaProyek(PANGKAS_AKHIR);
+  var TARGET_WAKTU = LAMA_NORMAL - TARGET_PERCEPATAN;
 
   /* ---------- Tabel soal dan tabel jawaban ---------- */
 
@@ -445,41 +477,49 @@
       + '</tbody>';
 
     document.getElementById('tabelJawab').innerHTML =
-      '<thead><tr><th>Aktivitas</th><th>Selisih biaya</th><th>Selisih waktu</th>'
-      + '<th>Crash cost per period</th><th>Keterangan</th></tr></thead><tbody>'
+      '<thead><tr><th>Aktivitas</th><th>Selisih biaya</th><th>Crash cost per period</th>'
+      + '<th>Pemeriksaan syarat</th><th>Keterangan</th></tr></thead><tbody>'
       + KANDIDAT.map(function(a){
-          var pilih = (a.id === TERPILIH.id);
+          var lolos = lolosSyarat(a);
+          var pilih = TERPILIH && a.id === TERPILIH.id;
           return '<tr class="' + (pilih ? 'kritis' : '') + '">'
             + '<td>' + a.id + '</td>'
             + '<td>' + angka(a.biayaCepat) + ' − ' + angka(a.biaya) + ' = $' + angka(a.biayaCepat - a.biaya) + '</td>'
-            + '<td>' + a.waktu + ' − ' + a.waktuCepat + ' = ' + maksPangkas(a) + ' mgg</td>'
             + '<td>$' + angka(biayaPerMinggu(a)) + ' per minggu</td>'
-            + '<td>' + (pilih ? 'paling murah, dipilih' : 'lebih mahal') + '</td></tr>';
+            + '<td>' + tulisSyarat(a) + '</td>'
+            + '<td>' + (!lolos ? 'negatif, gugur' : (pilih ? 'lolos dan paling murah' : 'lolos tapi lebih mahal')) + '</td></tr>';
         }).join('')
       + '</tbody>';
 
-    document.getElementById('jawabanAkhir').innerHTML =
-      'Aktivitas yang dipercepat adalah <b>' + TERPILIH.id + ' sebanyak ' + TARGET_PERCEPATAN + ' kali</b>, '
-      + 'dari ' + TERPILIH.waktu + ' minggu menjadi ' + (TERPILIH.waktu - TARGET_PERCEPATAN) + ' minggu. '
-      + 'Proyek jadi selesai dalam <b>' + LAMA_BARU + ' minggu</b>.<br>'
-      + 'Biaya total baru = biaya normal ditambah crash cost = $' + angka(BIAYA_NORMAL)
-      + ' + $' + angka(biayaPerMinggu(TERPILIH)) + ' + $' + angka(biayaPerMinggu(TERPILIH))
-      + ' = <b>$' + angka(BIAYA_BARU) + '</b>.';
+    document.getElementById('jawabanAkhir').innerHTML = ADA_LAYAK
+      ? ('Aktivitas yang dipercepat adalah <b>' + TERPILIH.id + ' sebanyak ' + TARGET_PERCEPATAN + ' kali</b>, '
+         + 'dari ' + TERPILIH.waktu + ' minggu menjadi ' + (TERPILIH.waktu - TARGET_PERCEPATAN) + ' minggu. '
+         + 'Proyek jadi selesai dalam <b>' + LAMA_BARU + ' minggu</b>.<br>'
+         + 'Biaya total baru = $' + angka(BIAYA_NORMAL) + ' + $' + angka(biayaPerMinggu(TERPILIH))
+         + ' + $' + angka(biayaPerMinggu(TERPILIH)) + ' = <b>$' + angka(BIAYA_BARU) + '</b>.')
+      : ('Tidak ada satu pun kandidat yang lolos pemeriksaan syarat. '
+         + KANDIDAT.map(function(a){ return a.id + ' hasilnya ' + angkaBertanda(sisaSyarat(a)); }).join(', ')
+         + ', dan ketiganya negatif.<br>'
+         + 'Karena itu permintaan mempercepat proyek ' + TARGET_PERCEPATAN + ' minggu <b>tidak bisa dipenuhi</b>. '
+         + 'Proyek tetap selesai dalam <b>' + LAMA_NORMAL + ' minggu</b> dengan biaya total tetap <b>$'
+         + angka(BIAYA_NORMAL) + '</b>, sama seperti keadaan normalnya.');
   })();
 
   /* ---------- Tabel kandidat di sebelah gambar ---------- */
 
   (function(){
     document.getElementById('tabelKandidat').innerHTML =
-      '<thead><tr><th>Akt.</th><th>Maks pangkas</th><th>Biaya per minggu</th></tr></thead><tbody>'
+      '<thead><tr><th>Akt.</th><th>Biaya per minggu</th><th>Pemeriksaan</th></tr></thead><tbody>'
       + KANDIDAT.map(function(a){
+          // Tanda hanya dibuat untuk aktivitas yang memang terpilih, supaya
+          // baris lain tidak menyisakan ruang kosong.
+          var tanda = (TERPILIH && a.id === TERPILIH.id)
+            ? '<span class="tanda-pilih viz-hide" id="tanda' + a.id + '">pilih</span>' : '';
           return '<tr class="viz-baris" id="hitung' + a.id + '">'
-            // Tanda "pilih" hanya dibuat untuk aktivitas yang memang terpilih,
-            // supaya baris lain tidak menyisakan ruang kosong.
-            + '<td>' + a.id + (a.id === TERPILIH.id
-                ? '<span class="tanda-pilih viz-hide" id="tanda' + a.id + '">pilih</span>' : '') + '</td>'
-            + '<td>' + maksPangkas(a) + ' mgg</td>'
-            + '<td>$' + angka(biayaPerMinggu(a)) + '</td></tr>';
+            + '<td>' + a.id + tanda + '</td>'
+            + '<td>$' + angka(biayaPerMinggu(a)) + '</td>'
+            + '<td><span class="viz-hide" id="cek' + a.id + '">' + angkaBertanda(sisaSyarat(a))
+            + (lolosSyarat(a) ? ' lolos' : ' gugur') + '</span></td></tr>';
         }).join('')
       + '</tbody>';
   })();
@@ -533,6 +573,14 @@
 
     AKTIVITAS.forEach(function(a){ s += kotakAktivitas(a); });
 
+    // Hasil pemeriksaan syarat, ditulis di bawah kotak tiap kandidat.
+    KANDIDAT.forEach(function(a){
+      s += '<text class="viz-hide" id="cap' + a.id + '" x="' + a.cx + '" y="' + (a.cy + 50) + '" '
+        + 'text-anchor="middle" font-size="11.5" font-weight="700" '
+        + 'fill="' + (lolosSyarat(a) ? 'var(--owl-dark)' : 'var(--gold-deep)') + '">'
+        + tulisSyarat(a) + (lolosSyarat(a) ? ' · lolos' : ' · gugur') + '</text>';
+    });
+
     // Papan panjang tiap jalur
     s += '<g id="papanJalur">'
        + '<rect x="20" y="390" width="300" height="74" rx="14" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>'
@@ -568,15 +616,14 @@
      keadaan sebelumnya. Dengan begitu tombol "Sebelumnya" benar-benar
      mengembalikan gambar ke keadaan langkah itu. */
 
-  var satuKali = {}; satuKali[TERPILIH.id] = 1;
-  var duaKali = {}; duaKali[TERPILIH.id] = 2;
-  var perMinggu = biayaPerMinggu(TERPILIH);
+  var semuaBaris = KANDIDAT.map(function(a){ return 'hitung' + a.id; });
+  function barisDan(tambahan){ return semuaBaris.concat(tambahan || []); }
 
   var LANGKAH = [
     { bab:'Titik berangkat',
       teks:'Jaringan ini hasil dari topik critical path. Lama proyeknya <b>' + LAMA_NORMAL + ' minggu</b> '
          + 'dengan biaya normal <b>$' + angka(BIAYA_NORMAL) + '</b>. '
-         + 'Perusahaan ingin proyek ini selesai ' + TARGET_PERCEPATAN + ' minggu lebih cepat, jadi targetnya ' + LAMA_BARU + ' minggu.',
+         + 'Perusahaan ingin proyek ini selesai ' + TARGET_PERCEPATAN + ' minggu lebih cepat, jadi targetnya ' + TARGET_WAKTU + ' minggu.',
       pangkas:{}, tampil:[] },
 
     { bab:'Memilih kandidat',
@@ -585,59 +632,91 @@
       pangkas:{}, tampil:[], soroti:true },
 
     { bab:'Crash cost per period',
-      teks:'Aktivitas <b>A</b> naik dari $' + angka(cari('A').biaya) + ' ke $' + angka(cari('A').biayaCepat)
-         + ' untuk pemangkasan ' + maksPangkas(cari('A')) + ' minggu. '
-         + 'Jadi ($' + angka(cari('A').biayaCepat - cari('A').biaya) + ') dibagi (' + maksPangkas(cari('A')) + ') = <b>$'
+      teks:'Aktivitas <b>A</b> biayanya naik dari $' + angka(cari('A').biaya) + ' ke $' + angka(cari('A').biayaCepat)
+         + ', dengan selisih waktu ' + maksPangkas(cari('A')) + ' minggu. '
+         + 'Jadi $' + angka(cari('A').biayaCepat - cari('A').biaya) + ' dibagi ' + maksPangkas(cari('A')) + ' = <b>$'
          + angka(biayaPerMinggu(cari('A'))) + '</b> per minggu.',
       pangkas:{}, tampil:['hitungA'], soroti:true },
 
     { bab:'Crash cost per period',
-      teks:'Aktivitas <b>D</b> naik dari $' + angka(cari('D').biaya) + ' ke $' + angka(cari('D').biayaCepat)
-         + ' untuk pemangkasan ' + maksPangkas(cari('D')) + ' minggu. '
-         + 'Hasilnya <b>$' + angka(biayaPerMinggu(cari('D'))) + '</b> per minggu, jauh lebih murah daripada A.',
+      teks:'Aktivitas <b>D</b> biayanya naik dari $' + angka(cari('D').biaya) + ' ke $' + angka(cari('D').biayaCepat)
+         + ', dengan selisih waktu ' + maksPangkas(cari('D')) + ' minggu. '
+         + 'Hasilnya <b>$' + angka(biayaPerMinggu(cari('D'))) + '</b> per minggu, paling murah di antara ketiganya.',
       pangkas:{}, tampil:['hitungA','hitungD'], soroti:true },
 
     { bab:'Crash cost per period',
-      teks:'Aktivitas <b>G</b> naik dari $' + angka(cari('G').biaya) + ' ke $' + angka(cari('G').biayaCepat)
-         + ' untuk pemangkasan ' + maksPangkas(cari('G')) + ' minggu, jadi <b>$' + angka(biayaPerMinggu(cari('G')))
+      teks:'Aktivitas <b>G</b> biayanya naik dari $' + angka(cari('G').biaya) + ' ke $' + angka(cari('G').biayaCepat)
+         + ', dengan selisih waktu ' + maksPangkas(cari('G')) + ' minggu, jadi <b>$' + angka(biayaPerMinggu(cari('G')))
          + '</b> per minggu. Ketiga kandidat sekarang sudah punya angka pembanding.',
       pangkas:{}, tampil:['hitungA','hitungD','hitungG'], soroti:true },
 
-    { bab:'Memeriksa batas pangkas',
-      teks:'Soal meminta percepatan ' + TARGET_PERCEPATAN + ' minggu, jadi kandidatnya harus sanggup dipangkas sebanyak itu. '
-         + 'Kolom maks pangkas menunjukkan '
-         + KANDIDAT.map(function(a){ return a.id + ' ' + maksPangkas(a) + ' minggu'; }).join(', ')
-         + '. Ketiganya memenuhi syarat.',
-      pangkas:{}, tampil:['hitungA','hitungD','hitungG'], soroti:true },
-
-    { bab:'Memilih yang termurah',
-      teks:'Dari ketiganya, <b>' + TERPILIH.id + '</b> punya tambahan biaya paling kecil, yaitu $' + angka(perMinggu) + ' per minggu. '
-         + 'Aktivitas inilah yang dipercepat.',
-      pangkas:{}, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true },
-
-    { bab:'Percepatan pertama',
-      teks:'<b>' + TERPILIH.id + '</b> dipercepat satu minggu, dari ' + TERPILIH.waktu + ' menjadi ' + (TERPILIH.waktu - 1) + ' minggu. '
-         + 'Lama proyek turun menjadi ' + lamaProyek(satuKali) + ' minggu dan biaya total naik $' + angka(perMinggu)
-         + ' menjadi $' + angka(biayaTotal(satuKali)) + '.',
-      pangkas:satuKali, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true },
-
-    { bab:'Percepatan kedua',
-      teks:'<b>' + TERPILIH.id + '</b> dipercepat satu minggu lagi, menjadi ' + (TERPILIH.waktu - 2) + ' minggu. '
-         + 'Lama proyek menjadi <b>' + LAMA_BARU + ' minggu</b>, tepat ' + TARGET_PERCEPATAN + ' minggu lebih cepat seperti yang diminta.',
-      pangkas:duaKali, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true },
-
-    { bab:'Memeriksa ulang',
-      teks:'Setelah dipercepat, panjang tiap jalur perlu dilihat lagi. '
-         + JALUR.map(function(j){ return j.join(' - ') + ' = ' + panjangJalur(j, duaKali); }).join(', ') + '. '
-         + 'Jalur ' + jalurKritis(duaKali)[0].join(' - ') + ' masih yang terpanjang, jadi critical path-nya tidak berpindah.',
-      pangkas:duaKali, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true },
-
-    { bab:'Jawabannya',
-      teks:'Aktivitas yang dipercepat <b>' + TERPILIH.id + ' sebanyak ' + TARGET_PERCEPATAN + ' kali</b>. '
-         + 'Biaya total baru = $' + angka(BIAYA_NORMAL) + ' + $' + angka(perMinggu) + ' + $' + angka(perMinggu)
-         + ' = <b>$' + angka(BIAYA_BARU) + '</b>.',
-      pangkas:duaKali, tampil:['hitungA','hitungD','hitungG','tanda' + TERPILIH.id], soroti:true, pilih:true }
+    { bab:'Syarat waktunya',
+      teks:'Crash cost per period baru berguna setelah syarat waktunya lolos. '
+         + 'Soal meminta percepatan ' + TARGET_PERCEPATAN + ' minggu, jadi normal time tiap kandidat harus sanggup '
+         + 'dikurangi crash time sebanyak ' + TARGET_PERCEPATAN + ' kali tanpa menjadi negatif.',
+      pangkas:{}, tampil:barisDan(), soroti:true }
   ];
+
+  // Pemeriksaan syarat, satu kandidat untuk satu langkah.
+  KANDIDAT.forEach(function(a, i){
+    var sudah = KANDIDAT.slice(0, i + 1);
+    LANGKAH.push({
+      bab:'Memeriksa ' + a.id,
+      teks:'Aktivitas <b>' + a.id + '</b> punya normal time ' + a.waktu + ' minggu dan crash time ' + a.waktuCepat + ' minggu. '
+         + 'Pemeriksaannya ' + tulisSyarat(a) + ', jadi hasilnya <b>' + (lolosSyarat(a) ? 'tidak negatif dan lolos' : 'negatif dan gugur') + '</b>.',
+      pangkas:{}, soroti:true,
+      tampil:barisDan(sudah.map(function(x){ return 'cek' + x.id; })
+             .concat(sudah.map(function(x){ return 'cap' + x.id; })))
+    });
+  });
+
+  var semuaCek = KANDIDAT.map(function(a){ return 'cek' + a.id; })
+                  .concat(KANDIDAT.map(function(a){ return 'cap' + a.id; }));
+
+  if(ADA_LAYAK){
+    var perMinggu = biayaPerMinggu(TERPILIH);
+    var satuKali = {}; satuKali[TERPILIH.id] = 1;
+    var duaKali = {}; duaKali[TERPILIH.id] = TARGET_PERCEPATAN;
+    var tampilPilih = barisDan(semuaCek.concat(['tanda' + TERPILIH.id]));
+
+    LANGKAH.push(
+      { bab:'Memilih yang termurah',
+        teks:'Dari kandidat yang lolos, <b>' + TERPILIH.id + '</b> punya tambahan biaya paling kecil, yaitu $'
+           + angka(perMinggu) + ' per minggu. Aktivitas inilah yang dipercepat.',
+        pangkas:{}, tampil:tampilPilih, soroti:true, pilih:true },
+
+      { bab:'Percepatan pertama',
+        teks:'<b>' + TERPILIH.id + '</b> dipercepat satu minggu, dari ' + TERPILIH.waktu + ' menjadi ' + (TERPILIH.waktu - 1) + ' minggu. '
+           + 'Lama proyek turun menjadi ' + lamaProyek(satuKali) + ' minggu dan biaya total naik $' + angka(perMinggu)
+           + ' menjadi $' + angka(biayaTotal(satuKali)) + '.',
+        pangkas:satuKali, tampil:tampilPilih, soroti:true, pilih:true },
+
+      { bab:'Percepatan kedua',
+        teks:'<b>' + TERPILIH.id + '</b> dipercepat satu minggu lagi, menjadi ' + (TERPILIH.waktu - TARGET_PERCEPATAN) + ' minggu. '
+           + 'Lama proyek menjadi <b>' + LAMA_BARU + ' minggu</b>, tepat seperti yang diminta.',
+        pangkas:duaKali, tampil:tampilPilih, soroti:true, pilih:true },
+
+      { bab:'Jawabannya',
+        teks:'Aktivitas yang dipercepat <b>' + TERPILIH.id + ' sebanyak ' + TARGET_PERCEPATAN + ' kali</b>. '
+           + 'Biaya total baru = $' + angka(BIAYA_NORMAL) + ' + $' + angka(perMinggu) + ' + $' + angka(perMinggu)
+           + ' = <b>$' + angka(BIAYA_BARU) + '</b>.',
+        pangkas:duaKali, tampil:tampilPilih, soroti:true, pilih:true }
+    );
+  }else{
+    LANGKAH.push(
+      { bab:'Semua kandidat gugur',
+        teks:'Ketiga kandidat hasilnya negatif, yaitu '
+           + KANDIDAT.map(function(a){ return a.id + ' ' + angkaBertanda(sisaSyarat(a)); }).join(', ') + '. '
+           + 'Tidak ada satu pun aktivitas yang boleh dipercepat, jadi crash cost per period tadi tidak jadi terpakai.',
+        pangkas:{}, tampil:barisDan(semuaCek), soroti:true },
+
+      { bab:'Jawabannya',
+        teks:'Permintaan mempercepat proyek ' + TARGET_PERCEPATAN + ' minggu <b>tidak bisa dipenuhi</b>. '
+           + 'Papan di bawah gambar tidak berubah sejak awal: proyek tetap <b>' + LAMA_NORMAL + ' minggu</b> '
+           + 'dengan biaya tetap <b>$' + angka(BIAYA_NORMAL) + '</b>.',
+        pangkas:{}, tampil:barisDan(semuaCek), soroti:true }
+    );
+  }
 
   var ke = 0;
   var gelembung = document.getElementById('bubbleText');
@@ -717,9 +796,16 @@
       var baris = document.getElementById('hitung' + a.id);
       baris.classList.toggle('terpilih', !!l.pilih && a.id === TERPILIH.id);
     });
-    catatan.textContent = l.pilih
-      ? 'Dipilih ' + TERPILIH.id + ' karena tambahan biayanya paling kecil.'
-      : 'Isinya menyusul mengikuti langkahnya.';
+    var cekTampak = KANDIDAT.every(function(a){
+      return munculkan['cek' + a.id];
+    });
+    if(l.pilih){
+      catatan.textContent = 'Dipilih ' + TERPILIH.id + ' karena lolos syarat dan tambahan biayanya paling kecil.';
+    }else if(cekTampak && !ADA_LAYAK){
+      catatan.textContent = 'Semua kandidat gugur, jadi tidak ada yang bisa dipercepat.';
+    }else{
+      catatan.textContent = 'Isinya menyusul mengikuti langkahnya.';
+    }
 
     badge.textContent = 'Bagian: ' + l.bab;
     gelembung.innerHTML = l.teks;
