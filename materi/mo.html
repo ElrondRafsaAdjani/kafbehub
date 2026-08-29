@@ -100,11 +100,16 @@
         <p data-en="Shortening a project, which activity to speed up first, and the cost of doing it." data-teks="mo.crashing.teks" data-label="Crashing: keterangan">Mempercepat proyek, aktivitas mana yang lebih dulu dipercepat, dan berapa biayanya.</p>
         <a href="mo-crashing.html" class="btn btn-gold" data-en="Open Visual">Buka Visualisasi</a>
       </div>
-      <div class="feature-card" data-fitur="materi-mo-pert" data-fitur-label="Manajemen Operasi: PERT">
+      <!-- Kunci data-fitur dan data-teks sengaja tetap memakai kata "pert".
+           Kunci itu yang dipakai Firestore untuk menyimpan status kartu,
+           urutannya, dan naskah pengganti dari halaman admin. Menggantinya
+           membuat pengaturan yang sudah tersimpan tidak terbaca lagi, jadi
+           yang diganti cukup nama yang dibaca manusia dan naskah bawaannya. -->
+      <div class="feature-card" data-fitur="materi-mo-pert" data-fitur-label="Manajemen Operasi: EMV">
         <span class="badge badge-soon" data-en="In Development">Dalam Pengembangan</span>
         <div class="feature-icon">🎲</div>
-        <h3 data-en="PERT" data-teks="mo.pert.judul" data-label="PERT: judul">PERT</h3>
-        <p data-en="Expected time, variance, and the chance a project finishes before a target date." data-teks="mo.pert.teks" data-label="PERT: keterangan">Expected time, varians, dan peluang proyek selesai sebelum tanggal yang ditargetkan.</p>
+        <h3 data-en="Expected Monetary Value (EMV)" data-teks="mo.pert.judul" data-label="EMV: judul">Expected Monetary Value (EMV)</h3>
+        <p data-en="Weighing every alternative by its probability and payoff, then choosing the decision with the highest expected value." data-teks="mo.pert.teks" data-label="EMV: keterangan">Menimbang tiap pilihan dari peluang dan hasilnya, lalu memilih keputusan dengan nilai harapan paling besar.</p>
       </div>
     </div>
   </div>
