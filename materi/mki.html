@@ -79,45 +79,47 @@
   </div>
 
   <p class="catatan-layar" data-en="Visuals are more comfortable on a tablet, laptop, or desktop. They still open on a phone.">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
-  <div class="section-head" style="margin-top:40px;">
-    <span class="kicker" data-en="Visual List">Daftar Visualisasi</span>
-    <h2 data-en="Choose a topic">Pilih topik</h2>
-    <p data-en="The order matters. The first topic is the foundation for the two that follow.">Urutannya bersambung. Topik pertama menjadi dasar bagi dua topik sesudahnya.</p>
-  </div>
+  <div data-bagian="Daftar Visualisasi">
+    <div class="section-head" style="margin-top:40px;">
+      <span class="kicker" data-en="Visual List" data-teks="mki.daftar.label" data-label="Label bagian">Daftar Visualisasi</span>
+      <h2 data-en="Choose a topic" data-teks="mki.daftar.judul" data-label="Judul bagian">Pilih topik</h2>
+      <p data-en="The order matters. The first topic is the foundation for the two that follow." data-teks="mki.daftar.teks" data-label="Keterangan bagian">Urutannya bersambung. Topik pertama menjadi dasar bagi dua topik sesudahnya.</p>
+    </div>
 
-  <div class="card-grid">
-    <div class="feature-card">
-      <span class="badge badge-live" data-en="Active">Aktif</span>
-      <div class="feature-icon">⏳</div>
-      <h3 data-en="Time Value of Money">Time Value of Money</h3>
-      <p data-en="Compounding carries money forward, discounting pulls it back to today. Includes how discount rate and interest rate differ depending on which side of the deal you stand.">Compounding membawa uang maju ke depan, discounting menariknya mundur ke hari ini. Termasuk beda discount rate dan interest rate dari sisi pemberi dan penerima modal.</p>
-      <a href="mki-time-value.html" class="btn btn-gold" data-en="Open Visual">Buka Visualisasi</a>
-    </div>
-    <div class="feature-card">
-      <span class="badge badge-live" data-en="Active">Aktif</span>
-      <div class="feature-icon">📜</div>
-      <h3 data-en="Bond Valuation">Valuasi Obligasi</h3>
-      <p data-en="Yearly interest plus the principal returned at the end, all pulled back to today. Includes why a bond can trade below or above par.">Bunga tiap tahun ditambah pokok di akhir, semuanya ditarik ke hari ini. Termasuk sebab harganya bisa jatuh di bawah par atau naik di atasnya.</p>
-      <a href="mki-valuasi-obligasi.html" class="btn btn-gold" data-en="Open Visual">Buka Visualisasi</a>
-    </div>
-    <div class="feature-card">
-      <span class="badge badge-live" data-en="Active">Aktif</span>
-      <div class="feature-icon">📈</div>
-      <h3 data-en="Stock Valuation">Valuasi Saham</h3>
-      <p data-en="Three dividend models: zero growth, constant growth, and variable growth, each with its own worked example.">Tiga model penilaian dividen: zero growth, constant growth, dan variable growth, masing-masing dengan contohnya sendiri.</p>
-      <a href="mki-valuasi-saham.html" class="btn btn-gold" data-en="Open Visual">Buka Visualisasi</a>
-    </div>
-    <div class="feature-card">
-      <span class="badge badge-soon" data-en="Coming Soon">Segera Hadir</span>
-      <div class="feature-icon">📐</div>
-      <h3 data-en="Project Feasibility">Kelayakan Proyek</h3>
-      <p data-en="Payback Period, NPV, IRR, and Profitability Index, including finding IRR by trial and error through interpolation.">Payback Period, NPV, IRR, dan Profitability Index, lengkap dengan cara coba-coba mencari IRR lewat interpolasi.</p>
-    </div>
-    <div class="feature-card">
-      <span class="badge badge-soon" data-en="Coming Soon">Segera Hadir</span>
-      <div class="feature-icon">🔁</div>
-      <h3 data-en="Annuities">Anuitas</h3>
-      <p data-en="Equal payments repeated over time, and how an ordinary annuity differs from an annuity due.">Pembayaran yang berulang sama besar, beserta bedanya anuitas biasa dan anuitas jatuh tempo di awal periode.</p>
+    <div class="card-grid" data-urutan="materi-mki">
+      <div class="feature-card" data-fitur="materi-mki-time-value" data-fitur-label="Manajemen Keuangan: Time Value of Money">
+        <span class="badge badge-live" data-en="Active">Aktif</span>
+        <div class="feature-icon">⏳</div>
+        <h3 data-en="Time Value of Money" data-teks="mki.time-value.judul" data-label="Time Value of Money: judul">Time Value of Money</h3>
+        <p data-en="Compounding carries money forward, discounting pulls it back to today. Includes how discount rate and interest rate differ depending on which side of the deal you stand." data-teks="mki.time-value.teks" data-label="Time Value of Money: keterangan">Compounding membawa uang maju ke depan, discounting menariknya mundur ke hari ini. Termasuk beda discount rate dan interest rate dari sisi pemberi dan penerima modal.</p>
+        <a href="mki-time-value.html" class="btn btn-gold" data-en="Open Visual">Buka Visualisasi</a>
+      </div>
+      <div class="feature-card" data-fitur="materi-mki-valuasi-obligasi" data-fitur-label="Manajemen Keuangan: Valuasi Obligasi">
+        <span class="badge badge-live" data-en="Active">Aktif</span>
+        <div class="feature-icon">📜</div>
+        <h3 data-en="Bond Valuation" data-teks="mki.valuasi-obligasi.judul" data-label="Valuasi Obligasi: judul">Valuasi Obligasi</h3>
+        <p data-en="Yearly interest plus the principal returned at the end, all pulled back to today. Includes why a bond can trade below or above par." data-teks="mki.valuasi-obligasi.teks" data-label="Valuasi Obligasi: keterangan">Bunga tiap tahun ditambah pokok di akhir, semuanya ditarik ke hari ini. Termasuk sebab harganya bisa jatuh di bawah par atau naik di atasnya.</p>
+        <a href="mki-valuasi-obligasi.html" class="btn btn-gold" data-en="Open Visual">Buka Visualisasi</a>
+      </div>
+      <div class="feature-card" data-fitur="materi-mki-valuasi-saham" data-fitur-label="Manajemen Keuangan: Valuasi Saham">
+        <span class="badge badge-live" data-en="Active">Aktif</span>
+        <div class="feature-icon">📈</div>
+        <h3 data-en="Stock Valuation" data-teks="mki.valuasi-saham.judul" data-label="Valuasi Saham: judul">Valuasi Saham</h3>
+        <p data-en="Three dividend models: zero growth, constant growth, and variable growth, each with its own worked example." data-teks="mki.valuasi-saham.teks" data-label="Valuasi Saham: keterangan">Tiga model penilaian dividen: zero growth, constant growth, dan variable growth, masing-masing dengan contohnya sendiri.</p>
+        <a href="mki-valuasi-saham.html" class="btn btn-gold" data-en="Open Visual">Buka Visualisasi</a>
+      </div>
+      <div class="feature-card" data-fitur="materi-mki-kelayakan" data-fitur-label="Manajemen Keuangan: Kelayakan Proyek">
+        <span class="badge badge-soon" data-en="Coming Soon">Segera Hadir</span>
+        <div class="feature-icon">📐</div>
+        <h3 data-en="Project Feasibility" data-teks="mki.kelayakan.judul" data-label="Kelayakan Proyek: judul">Kelayakan Proyek</h3>
+        <p data-en="Payback Period, NPV, IRR, and Profitability Index, including finding IRR by trial and error through interpolation." data-teks="mki.kelayakan.teks" data-label="Kelayakan Proyek: keterangan">Payback Period, NPV, IRR, dan Profitability Index, lengkap dengan cara coba-coba mencari IRR lewat interpolasi.</p>
+      </div>
+      <div class="feature-card" data-fitur="materi-mki-anuitas" data-fitur-label="Manajemen Keuangan: Anuitas">
+        <span class="badge badge-soon" data-en="Coming Soon">Segera Hadir</span>
+        <div class="feature-icon">🔁</div>
+        <h3 data-en="Annuities" data-teks="mki.anuitas.judul" data-label="Anuitas: judul">Anuitas</h3>
+        <p data-en="Equal payments repeated over time, and how an ordinary annuity differs from an annuity due." data-teks="mki.anuitas.teks" data-label="Anuitas: keterangan">Pembayaran yang berulang sama besar, beserta bedanya anuitas biasa dan anuitas jatuh tempo di awal periode.</p>
+      </div>
     </div>
   </div>
 </section>

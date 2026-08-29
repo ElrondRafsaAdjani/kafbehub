@@ -13,6 +13,8 @@
        aktif. Halaman ber-atribut data-fitur-halaman ikut tertutup.
     3. Naskah pengganti. Elemen ber-atribut data-teks isinya ditimpa nilai dari
        admin, lengkap dengan versi bahasa Inggrisnya.
+    4. Elemen bersama. Kepala navigasi, penutup halaman, dan saklar bahasa bisa
+       dimatikan untuk seluruh situs sekaligus.
 
   KENAPA TEKS ASLINYA TETAP DITULIS DI HTML
 
@@ -35,6 +37,7 @@
   'use strict';
 
   var KUNCI_SIMPAN = 'kafbe_situs';
+  var KUNCI_ELEMEN = 'kafbe_elemen';
 
   /* ---------- Lencana status ---------- */
 
@@ -161,6 +164,59 @@
     return '';
   }
 
+  /* ---------- 1B. Elemen bersama ---------- */
+
+  /*
+    Tiga bagian yang dipakai semua halaman sekaligus: kepala navigasi, penutup
+    halaman, dan saklar bahasa Indonesia dan Inggris. Ketiganya dimatikan lewat
+    kelas pada elemen <html>, bukan dengan menghapus elemennya, supaya bisa
+    kembali muncul begitu dinyalakan lagi dari halaman admin.
+
+    Kelasnya dipasang sedini mungkin memakai nilai simpanan kunjungan
+    sebelumnya, sama seperti layar pemeliharaan. Tanpa itu kepala navigasi
+    sempat tergambar lalu hilang, dan kedipan itu terlihat seperti halaman yang
+    rusak.
+  */
+  var ELEMEN = [
+    { kunci: 'header', kelas: 'situs-tanpa-header' },
+    { kunci: 'footer', kelas: 'situs-tanpa-footer' },
+    { kunci: 'bahasa', kelas: 'situs-tanpa-bahasa' }
+  ];
+
+  function elemenTersimpan(){
+    try { return JSON.parse(localStorage.getItem(KUNCI_ELEMEN)) || {}; }
+    catch(e){ return {}; }
+  }
+  function simpanElemen(nilai){
+    try { localStorage.setItem(KUNCI_ELEMEN, JSON.stringify(nilai)); } catch(e){}
+  }
+
+  function terapkanElemen(el){
+    el = el || {};
+    var rekam = {};
+
+    for(var i = 0; i < ELEMEN.length; i++){
+      // Yang tidak disebut berarti menyala. Jadi situs yang belum pernah
+      // menyentuh pengaturan ini tampil utuh seperti biasa.
+      var mati = (el[ELEMEN[i].kunci] === false);
+      document.documentElement.classList.toggle(ELEMEN[i].kelas, mati);
+      rekam[ELEMEN[i].kunci] = !mati;
+    }
+
+    /*
+      Saklar bahasa yang dimatikan sementara pilihan terakhir pengunjung adalah
+      Inggris akan mengunci halamannya berbahasa Inggris tanpa satu pun tombol
+      untuk kembali. Karena itu bahasanya dikembalikan ke Indonesia.
+    */
+    if(!rekam.bahasa && window.KafbeBahasa && window.KafbeBahasa.inggris()){
+      window.KafbeBahasa.ganti('id');
+    }
+
+    return rekam;
+  }
+
+  terapkanElemen(elemenTersimpan());
+
   /* ---------- 2. Status fitur ---------- */
 
   function terapkanFitur(fitur){
@@ -198,11 +254,32 @@
     }
   }
 
+  /*
+    Sebuah halaman boleh menyebut lebih dari satu kunci, dipisah spasi:
+
+        <body data-fitur-halaman="materi-mo materi-mo-crashing">
+
+    Halaman topik memang bergantung pada dua hal sekaligus. Mematikan seluruh
+    mata kuliahnya harus ikut menutup topiknya, dan mematikan satu topik saja
+    tidak boleh menutup mata kuliahnya. Yang dipakai adalah status paling
+    membatasi di antara semuanya, sebab satu saja yang belum siap sudah cukup
+    membuat halaman itu belum layak dibuka.
+  */
+  function statusHalaman(fitur, daftar){
+    var hasil = 'aktif';
+    for(var i = 0; i < daftar.length; i++){
+      var s = statusSah(fitur[daftar[i]] && fitur[daftar[i]].status);
+      if(s === 'maintenance') return 'maintenance';
+      if(s === 'pengembangan') hasil = 'pengembangan';
+    }
+    return hasil;
+  }
+
   function tutupHalamanFitur(fitur){
     var kunci = document.body.dataset.fiturHalaman;
     if(!kunci) return false;
 
-    var s = statusSah(fitur[kunci] && fitur[kunci].status);
+    var s = statusHalaman(fitur, kunci.split(/\s+/).filter(Boolean));
     if(s === 'aktif') return false;
 
     var judul = (s === 'maintenance')
@@ -303,6 +380,8 @@
 
   function terapkanSemua(cfg){
     if(!cfg) return;
+
+    simpanElemen(terapkanElemen(cfg.elemen));
 
     if(statusSah(cfg.statusSitus) === 'maintenance'){
       simpanStatus('maintenance');

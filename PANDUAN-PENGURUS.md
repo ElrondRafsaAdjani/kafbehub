@@ -321,6 +321,34 @@ Isinya **halaman publik yang digambar ulang apa adanya**, bukan daftar kotak
 isian. Kartu yang Anda lihat di sini sama persis dengan yang dilihat mahasiswa,
 lengkap dengan warna, lencana, dan tombolnya.
 
+Tab ini terbagi dua. Di atas ada **Elemen Bersama**, yaitu tiga bagian yang
+muncul di semua halaman sekaligus. Di bawahnya ada **Isi Tiap Halaman**, yaitu
+cerminan tadi.
+
+#### Elemen Bersama
+
+| Saklar | Kalau dimatikan |
+|---|---|
+| Kepala navigasi | Bilah menu di atas halaman hilang dari seluruh situs |
+| Penutup halaman | Bagian paling bawah, berisi kalimat penutup dan nomor versi, ikut hilang |
+| Saklar bahasa ID dan EN | Tombol pengganti bahasa hilang dan situs tampil dalam bahasa Indonesia saja |
+
+Ketiganya berlaku untuk seluruh situs, bukan satu halaman saja. Sama seperti
+naskah, saklarnya hanya bisa digeser saat situs berstatus pemeliharaan, dan
+baru berlaku setelah **Simpan perubahan** ditekan.
+
+Pengunjung yang terakhir kali memilih bahasa Inggris akan dikembalikan ke
+bahasa Indonesia begitu saklar bahasa dimatikan. Tanpa itu halamannya akan
+terkunci berbahasa Inggris tanpa satu pun tombol untuk kembali.
+
+#### Memilih satu halaman
+
+Daftar **Halaman yang ditampilkan** menyaring cermin supaya hanya satu halaman
+yang tampil. Ini yang dipakai kalau Anda sedang mengerjakan satu mata kuliah
+saja. Pilih **Semua halaman** untuk melihat seluruh situs sekaligus seperti
+sebelumnya. Kotak **Cari isi** di sebelahnya tetap bekerja atas naskah yang
+sedang berlaku, bukan atas nama kuncinya saja.
+
 Tiap kartu punya dua alat di pojok kanan atas:
 
 | Alat | Gunanya |
@@ -395,6 +423,17 @@ Mematikan sebuah fitur juga menutup halamannya. Misalnya, menyetel
 **Statistika 2** ke Pemeliharaan membuat `/materi/stat2` dan seluruh halaman
 visualisasinya menampilkan pemberitahuan, bukan isinya. Menu di bilah atas
 yang menuju fitur itu ikut diredupkan.
+
+**Tiap topik materi punya statusnya sendiri.** Di dalam halaman mata kuliah,
+kartu seperti Crashing atau Valuasi Saham bisa disetel terpisah. Menyetel satu
+topik ke Dalam Pengembangan menyembunyikan tombolnya di daftar topik dan
+menutup halaman visualisasinya, sedangkan topik lain di mata kuliah yang sama
+tetap terbuka. Inilah cara menahan materi yang belum siap ditampilkan tanpa
+perlu menutup satu mata kuliah penuh.
+
+Kalau mata kuliahnya dimatikan, seluruh topik di dalamnya ikut tertutup meski
+statusnya sendiri masih Aktif. Yang dipakai selalu status yang paling
+membatasi.
 
 **Naskah** diisi dalam dua bahasa berdampingan. Kotak yang dikosongkan berarti
 "pakai naskah bawaan halaman", bukan "kosongkan tulisannya".
@@ -642,6 +681,16 @@ Lencana bawaannya menentukan status awal: `badge-live` berarti Aktif,
 Bungkus tiap kelompok dengan `data-bagian="Nama Bagian"` supaya panel admin
 mengelompokkannya. Kalau ingin seluruh halaman ikut mati saat fiturnya
 dimatikan, tambahkan `data-fitur-halaman="berita"` pada `<body>`.
+
+Sebuah halaman boleh menyebut lebih dari satu kunci, dipisah spasi. Halaman
+topik materi memakainya supaya ikut tertutup baik saat mata kuliahnya
+dimatikan maupun saat topiknya sendiri yang dimatikan:
+
+```html
+<body data-fitur-halaman="materi-mo materi-mo-crashing">
+```
+
+Yang berlaku adalah status paling membatasi di antara kunci-kunci itu.
 
 Supaya kartu di sebuah kelompok bisa ditukar urutannya, beri kisinya nama:
 

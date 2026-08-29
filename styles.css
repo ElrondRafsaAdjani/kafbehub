@@ -182,6 +182,17 @@ section{padding:64px 0;}
 .fitur-tidak-aktif .feature-icon{filter:grayscale(0.55);}
 nav.links a.nav-tidak-aktif{opacity:0.5;}
 
+/* ---------- ELEMEN BERSAMA YANG BISA DIMATIKAN ----------
+   Kepala navigasi, penutup halaman, dan saklar bahasa dimatikan dari halaman
+   /adminkafbe. Kelasnya dipasang shared/situs.js pada elemen <html> sebelum
+   halaman tergambar, jadi elemennya tidak sempat berkedip muncul lalu hilang.
+   Yang disembunyikan hanya tampilannya. Markupnya tetap ada, sehingga
+   menyalakannya kembali cukup dengan mengubah pengaturan, tanpa menyentuh
+   satu pun berkas HTML. */
+.situs-tanpa-header header.nav{display:none;}
+.situs-tanpa-footer body > footer{display:none;}
+.situs-tanpa-bahasa .saklar-bahasa{display:none;}
+
 /* ---------- LAYAR PEMELIHARAAN ----------
    .situs-menunggu dipasang pada <html> sebelum halaman tergambar, hanya kalau
    kunjungan sebelumnya menemukan situs sedang dipelihara. Gunanya menahan
@@ -321,7 +332,14 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 .kotak-info{border-left:4px solid var(--gold);}
 .kotak-warn{border-left:4px solid #D9534F; background:#FDF6F6;}
 
-.perub-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
+/* Daftarnya memuat seluruh perubahan pada dua tanggal terdekat, jadi panjangnya
+   ikut jumlah kelas yang berubah hari itu. Tingginya dibatasi dan sisanya
+   digulir di dalam kotak, supaya tabel jadwal di bawah tidak terdorong jauh. */
+.perub-list{
+  list-style:none; margin:0; padding:0 4px 0 0;
+  display:flex; flex-direction:column; gap:12px;
+  max-height:60vh; overflow-y:auto; overscroll-behavior:contain;
+}
 /* Tiap perubahan disusun bertingkat: tanggal dan labelnya di atas, nama mata
    kuliah sebagai judul, lalu KP, jam, dan ruang sebagai keterangan berlabel.
    Sebelumnya semuanya disambung dalam satu baris teks dan tidak terbaca. */
@@ -359,6 +377,12 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
   margin-top:2px; font-size:0.86rem; line-height:1.5;
   color:var(--owl-dark); border-left:3px solid var(--owl-light);
   padding-left:10px;
+}
+
+/* Baris penutup yang menyebut jumlah perubahan di luar dua tanggal terdekat.
+   Ditulis .kotak .perub-sisa supaya tidak kalah dari .kotak p di atas. */
+.kotak .perub-sisa{
+  margin:14px 0 0; font-size:0.88rem; line-height:1.6; color:var(--owl-dark);
 }
 
 /* Kotak "sebagian perkuliahan belum dimulai". Bentuknya memang mendatar,

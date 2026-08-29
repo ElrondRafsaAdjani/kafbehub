@@ -137,9 +137,11 @@
         <div>
           <h2>Tampilan Situs</h2>
           <p>
-            Cerminan halaman publik, disusun mengikuti urutan aslinya. Tiap fitur
-            bisa diberi status, dan tiap judul serta keterangan bisa ditulis ulang
-            dalam dua bahasa. Isi materi, jadwal, dan permainan tidak diatur di sini.
+            Cerminan halaman publik, disusun mengikuti urutan aslinya. Pilih satu
+            halaman untuk mengerjakannya sendirian, atau lihat semuanya sekaligus.
+            Tiap fitur dan tiap topik materi bisa diberi status, dan tiap judul
+            serta keterangan bisa ditulis ulang dalam dua bahasa. Isi materi,
+            jadwal, dan permainan tidak diatur di sini.
           </p>
         </div>
         <div class="op-tombol-baris">
@@ -157,8 +159,47 @@
         letaknya tetap rapi dari layar ponsel sampai layar lebar.
       </p>
 
-      <div class="op-saring">
-        <input type="search" id="cariTampilan" placeholder="Cari judul, keterangan, atau nama fitur…" aria-label="Cari isi situs" />
+      <h3 class="ak-judul-kecil">Elemen Bersama</h3>
+      <p class="op-catatan">
+        Tiga bagian yang muncul di semua halaman sekaligus. Mematikan salah
+        satunya berlaku untuk seluruh situs, bukan satu halaman saja.
+      </p>
+
+      <div class="ak-saklar-kisi" id="elemenBersama">
+        <label class="ak-saklar">
+          <input type="checkbox" id="elemenHeader" />
+          <span>
+            <strong>Kepala navigasi</strong>
+            Bilah menu di bagian atas halaman, berisi lambang dan tautan antar bagian situs.
+          </span>
+        </label>
+        <label class="ak-saklar">
+          <input type="checkbox" id="elemenFooter" />
+          <span>
+            <strong>Penutup halaman</strong>
+            Bagian paling bawah, berisi kalimat penutup dan nomor versi.
+          </span>
+        </label>
+        <label class="ak-saklar">
+          <input type="checkbox" id="elemenBahasa" />
+          <span>
+            <strong>Saklar bahasa ID dan EN</strong>
+            Tombol pengganti bahasa. Saat dimatikan, situs tampil dalam bahasa Indonesia saja.
+          </span>
+        </label>
+      </div>
+
+      <h3 class="ak-judul-kecil">Isi Tiap Halaman</h3>
+
+      <div class="ak-saring-cermin">
+        <div class="op-field">
+          <label for="halamanTampilan">Halaman yang ditampilkan</label>
+          <select id="halamanTampilan"></select>
+        </div>
+        <div class="op-field">
+          <label for="cariTampilan">Cari isi</label>
+          <input type="search" id="cariTampilan" placeholder="Judul, keterangan, atau nama fitur…" />
+        </div>
       </div>
 
       <p class="op-pesan" id="pesanTampilan" role="alert"></p>

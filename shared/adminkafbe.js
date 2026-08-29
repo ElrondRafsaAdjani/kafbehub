@@ -232,6 +232,7 @@ onAuthStateChanged(auth, async (user) => {
   $('aplikasi').hidden = false;
 
   isiPilihanBagian();
+  isiPilihanHalaman();
   $('cvTanggal').value = hariIniISO();
 
   await muatSemua();
@@ -259,7 +260,7 @@ onAuthStateChanged(auth, async (user) => {
             selama kolom itu belum pernah ditimpa lewat halaman ini.
 */
 const bawaan  = { fitur: new Map(), teks: new Map(), urutan: new Map() };
-let   simpanan = { statusSitus: 'aktif', pesanMaintenance: {}, fitur: {}, teks: {}, urutan: {} };
+let   simpanan = { statusSitus: 'aktif', pesanMaintenance: {}, fitur: {}, teks: {}, urutan: {}, elemen: {} };
 let   susunan  = [];      // hasil pembacaan halaman publik
 let   catatan  = [];      // isi koleksi catatanversi
 let   dokumenAda = false;
@@ -294,6 +295,7 @@ function capSekarang(){
     fitur: simpanan.fitur,
     teks: simpanan.teks,
     urutan: simpanan.urutan,
+    elemen: simpanan.elemen,
   });
 }
 
@@ -307,7 +309,7 @@ function adaPerubahan(){
 }
 
 function rincianPerubahan(){
-  const lama = JSON.parse(capTersimpan || '{"fitur":{},"teks":{},"urutan":{}}');
+  const lama = JSON.parse(capTersimpan || '{"fitur":{},"teks":{},"urutan":{},"elemen":{}}');
   const beda = (a, b) => {
     const kunci = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
     return [...kunci].filter(k => JSON.stringify(a?.[k]) !== JSON.stringify(b?.[k])).length;
@@ -316,9 +318,11 @@ function rincianPerubahan(){
   const t = beda(lama.teks, simpanan.teks);
   const f = beda(lama.fitur, simpanan.fitur);
   const u = beda(lama.urutan, simpanan.urutan);
+  const e = beda(lama.elemen, simpanan.elemen);
   if(t) bagian.push(`${t} naskah`);
   if(f) bagian.push(`${f} status fitur`);
   if(u) bagian.push(`${u} urutan kartu`);
+  if(e) bagian.push(`${e} elemen bersama`);
   return bagian.length ? bagian.join(', ') : 'belum ada rinciannya';
 }
 
@@ -479,6 +483,7 @@ async function muatSemua(){
         fitur:  d.fitur  || {},
         teks:   d.teks   || {},
         urutan: d.urutan || {},
+        elemen: d.elemen || {},
       };
     }
 
@@ -517,6 +522,7 @@ function gambarSemua(){
   // kartu akan tertandai "belum disimpan" tepat setelah halaman dimuat.
   segarkanCap();
   gambarGembok();
+  gambarElemen();
   gambarCermin();
   gambarFormStatus();
   gambarCatatan();
@@ -555,11 +561,61 @@ function gambarGembok(){
   // Semua yang menulis naskah ikut mengunci diri.
   const terkunci = !sedangDipelihara();
   document.querySelectorAll('#tombolSimpanTampilan, #tombolUrutanBawaan, '
+    + '#elemenBersama input, '
     + '#formPesanTutup input, #formPesanTutup textarea, #formPesanTutup button')
     .forEach(x => { x.disabled = terkunci; });
 
   kunciCermin();
 }
+
+/* ============================================================
+   7B. Elemen bersama
+   ============================================================ */
+
+/*
+  Kepala navigasi, penutup halaman, dan saklar bahasa muncul di semua halaman
+  sekaligus, jadi ketiganya tidak punya tempat di dalam cermin yang disusun per
+  halaman. Saklarnya diletakkan di atas cermin, dan seperti naskah, perubahannya
+  baru sampai ke pengunjung setelah tombol Simpan ditekan.
+
+  Yang dicatat hanya yang DIMATIKAN. Elemen yang menyala tidak menuliskan apa
+  pun ke Firestore, sehingga situs yang belum pernah menyentuh pengaturan ini
+  tetap tampil utuh.
+*/
+const SAKLAR_ELEMEN = [
+  { kunci: 'header', id: 'elemenHeader' },
+  { kunci: 'footer', id: 'elemenFooter' },
+  { kunci: 'bahasa', id: 'elemenBahasa' },
+];
+
+function elemenNyala(kunci){
+  return simpanan.elemen[kunci] !== false;
+}
+
+function gambarElemen(){
+  SAKLAR_ELEMEN.forEach(s => { $(s.id).checked = elemenNyala(s.kunci); });
+}
+
+SAKLAR_ELEMEN.forEach(s => {
+  $(s.id).addEventListener('change', () => {
+    // Saklarnya sudah dimatikan saat situs aktif, tapi keadaan itu bisa
+    // berubah tanpa halaman dimuat ulang, jadi keadaannya diperiksa lagi di
+    // sini dan centangnya dikembalikan kalau ternyata belum boleh.
+    if(!sedangDipelihara()){
+      $(s.id).checked = elemenNyala(s.kunci);
+      pesan($('pesanTampilan'),
+        'Situs masih aktif. Masuk ke pemeliharaan dulu lewat tab <strong>Status Situs</strong>.', 'salah');
+      return;
+    }
+
+    if($(s.id).checked) delete simpanan.elemen[s.kunci];
+    else simpanan.elemen[s.kunci] = false;
+
+    gambarTandaSimpan();
+    pesan($('pesanTampilan'),
+      'Perubahan tercatat. Tekan <strong>Simpan perubahan</strong> supaya berlaku di situs publik.', 'benar');
+  });
+});
 
 /* ============================================================
    8. Cerminan situs
@@ -680,14 +736,29 @@ function tahanKlik(wadah){
   }, true);
 }
 
+/*
+  Daftar halaman untuk penyaring di atas cermin. Satu halaman saja yang tampil
+  membuat pekerjaan per mata kuliah jauh lebih mudah diikuti daripada menggulir
+  seluruh situs, terutama sejak tiap topik materi punya saklarnya sendiri.
+*/
+function isiPilihanHalaman(){
+  $('halamanTampilan').innerHTML =
+    '<option value="">Semua halaman</option>'
+    + DAFTAR_HALAMAN.map(h =>
+        `<option value="${esc(h.berkas)}">${esc(h.nama)}</option>`).join('');
+}
+
 function gambarCermin(){
   const wadah = $('cerminSitus');
   const cari = rapikan($('cariTampilan').value).toLowerCase();
+  const halaman = $('halamanTampilan').value;
   wadah.innerHTML = '';
 
   let adaIsi = false;
 
   susunan.forEach(h => {
+    if(halaman && h.berkas !== halaman) return;
+
     h.bagian.forEach((g, iBagian) => {
       const kotak = document.createElement('div');
       kotak.innerHTML = g.html;
@@ -738,7 +809,7 @@ function gambarCermin(){
   if(!adaIsi){
     wadah.innerHTML = '<p class="ak-kosong">'
       + (cari ? 'Tidak ada yang cocok dengan pencarian itu.'
-              : 'Belum ada isi yang bisa diatur.')
+              : 'Belum ada isi yang bisa diatur pada halaman ini.')
       + '</p>';
   }
 
@@ -1008,6 +1079,7 @@ $('cerminSitus').addEventListener('click', (e) => {
 });
 
 $('cariTampilan').addEventListener('input', gambarCermin);
+$('halamanTampilan').addEventListener('change', gambarCermin);
 
 $('tombolMuatUlang').addEventListener('click', async () => {
   bersihkanPesan($('pesanTampilan'));
@@ -1040,6 +1112,7 @@ async function tulisDokumen(isi){
       fitur: {},
       teks: {},
       urutan: {},
+      elemen: {},
       ...isi,
     });
     dokumenAda = true;
@@ -1070,6 +1143,7 @@ $('tombolSimpanTampilan').addEventListener('click', async () => {
       fitur:  simpanan.fitur,
       teks:   simpanan.teks,
       urutan: simpanan.urutan,
+      elemen: simpanan.elemen,
       diperbaruiPada: new Date().toISOString(),
       diperbaruiOleh: akun ? akun.email : '',
     });
@@ -1078,7 +1152,8 @@ $('tombolSimpanTampilan').addEventListener('click', async () => {
 
     const jumlah = Object.keys(simpanan.fitur).length
                  + Object.keys(simpanan.teks).length
-                 + Object.keys(simpanan.urutan).length;
+                 + Object.keys(simpanan.urutan).length
+                 + Object.keys(simpanan.elemen).length;
     status('Tersimpan.', 'benar');
     pesan(el, jumlah === 0
       ? 'Tersimpan. Sekarang tidak ada satu pun yang menimpa bawaan halaman.'
