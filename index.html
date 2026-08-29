@@ -187,22 +187,22 @@
   </div>
   <div class="card-grid">
     <div class="feature-card">
-      <span class="badge badge-soon" data-en="Coming Soon">Segera Hadir</span>
+      <span class="badge badge-soon" data-en="In Development">Dalam Pengembangan</span>
       <div class="feature-icon">🔀</div>
-      <h3 data-en="Coming Soon">Segera Hadir</h3>
-      <p data-en="Coming soon.">Segera hadir.</p>
+      <h3 data-en="In Development">Dalam Pengembangan</h3>
+      <p data-en="In development.">Dalam pengembangan.</p>
     </div>
     <div class="feature-card">
-      <span class="badge badge-soon" data-en="Coming Soon">Segera Hadir</span>
+      <span class="badge badge-soon" data-en="In Development">Dalam Pengembangan</span>
       <div class="feature-icon">📈</div>
-      <h3 data-en="Coming Soon">Segera Hadir</h3>
-      <p data-en="Coming soon.">Segera hadir.</p>
+      <h3 data-en="In Development">Dalam Pengembangan</h3>
+      <p data-en="In development.">Dalam pengembangan.</p>
     </div>
     <div class="feature-card">
-      <span class="badge badge-soon" data-en="Coming Soon">Segera Hadir</span>
+      <span class="badge badge-soon" data-en="In Development">Dalam Pengembangan</span>
       <div class="feature-icon">🧩</div>
-      <h3 data-en="Coming Soon">Segera Hadir</h3>
-      <p data-en="Coming soon.">Segera hadir.</p>
+      <h3 data-en="In Development">Dalam Pengembangan</h3>
+      <p data-en="In development.">Dalam pengembangan.</p>
     </div>
   </div>
 </section>
@@ -246,6 +246,15 @@
     ));
   }
 
+  // Tanggal hari ini menurut zona waktu Jakarta (UTC+7), bukan zona waktu
+  // pengunjung. Dokumen publik ini hanya diperbarui saat pengurus menyimpan
+  // sesuatu di halaman operasional, jadi pengumuman yang sudah lewat batas
+  // tayangnya perlu disaring lagi di sini supaya tidak menggantung sampai
+  // ada penyimpanan berikutnya.
+  function hariIniJakarta(){
+    return new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  }
+
   (async function(){
     try{
       const c = window.KAFBE_FIREBASE_CONFIG;
@@ -258,7 +267,9 @@
       const snap = await getDoc(doc(getFirestore(initializeApp(c)), 'publik', 'terkini'));
       if(!snap.exists()) return;
 
-      const daftar = (snap.data().pengumuman || []);
+      const hariIni = hariIniJakarta();
+      const daftar = (snap.data().pengumuman || []).filter(p =>
+        (!p.mulai || p.mulai <= hariIni) && (!p.selesai || p.selesai >= hariIni));
       if(daftar.length === 0) return;
 
       isi.innerHTML = daftar.map(p => `

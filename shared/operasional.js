@@ -62,6 +62,14 @@ function rentangJam(mulai, selesai){
   return `${keJamTitik(keMenit(mulai))} - ${keJamTitik(keMenit(selesai))}`;
 }
 
+// Tanggal hari ini menurut zona waktu Jakarta (UTC+7), bukan zona waktu jam
+// komputer pemakai. Kalau pakai toISOString() biasa, pengumuman bisa dianggap
+// belum berakhir gara-gara jamnya masih dini hari menurut UTC padahal di
+// Jakarta harinya sudah berganti.
+function hariIniJakarta(){
+  return new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
 function hariDariTanggal(iso){
   const [y,m,d] = String(iso).split('-').map(Number);
   if(!y || !m || !d) return null;
@@ -796,7 +804,7 @@ function gambarPerubahan(){
     t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada perubahan sementara.</td></tr></tbody>';
     return;
   }
-  const hariIni = new Date().toISOString().slice(0,10);
+  const hariIni = hariIniJakarta();
   t.innerHTML = `
     <thead><tr><th>Tanggal</th><th>Jenis</th><th>Kelas</th><th>Keterangan</th><th></th></tr></thead>
     <tbody>${data.perubahan.map(p => {
@@ -1436,7 +1444,7 @@ function gambarPengumuman(){
     t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada pengumuman.</td></tr></tbody>';
     return;
   }
-  const hariIni = new Date().toISOString().slice(0,10);
+  const hariIni = hariIniJakarta();
   const urut = [...data.pengumuman].sort((a,b) =>
     (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || String(b.mulai||'').localeCompare(String(a.mulai||'')));
 
@@ -1687,7 +1695,7 @@ async function terbitkan(){
     }
     changes.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)) || a.jam.localeCompare(b.jam));
 
-    const hariIni = new Date().toISOString().slice(0,10);
+    const hariIni = hariIniJakarta();
     const pengumuman = data.pengumuman
       .filter(p => (!p.mulai || p.mulai <= hariIni) && (!p.selesai || p.selesai >= hariIni))
       .sort((a,b) => (b.pin ? 1 : 0) - (a.pin ? 1 : 0) || String(b.mulai||'').localeCompare(String(a.mulai||'')))
