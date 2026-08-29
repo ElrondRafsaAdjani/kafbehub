@@ -219,12 +219,30 @@
 
   /* ---------- 2. Status fitur ---------- */
 
+  /*
+    Status bawaan sebuah kartu, dibaca dari lencana yang sudah tertulis di
+    HTML. Dipakai saat Firestore tidak punya catatan untuk kunci fitur ini,
+    misalnya kartu yang baru ditambahkan dan belum pernah disentuh admin.
+
+    Tanpa ini, kartu semacam itu selalu dianggap "aktif" oleh statusSah
+    walau lencana aslinya menulis "Dalam Pengembangan", sehingga lencananya
+    berubah jadi Aktif padahal naskahnya masih menyebut belum jadi.
+  */
+  function statusBawaan(el){
+    var b = el.querySelector('.badge');
+    if(!b) return 'aktif';
+    if(b.classList.contains('badge-maint')) return 'maintenance';
+    if(b.classList.contains('badge-soon'))  return 'pengembangan';
+    return 'aktif';
+  }
+
   function terapkanFitur(fitur){
     var kartu = document.querySelectorAll('[data-fitur]');
 
     for(var i = 0; i < kartu.length; i++){
       var el = kartu[i];
-      var s = statusSah(fitur[el.dataset.fitur] && fitur[el.dataset.fitur].status);
+      var catatan = fitur[el.dataset.fitur];
+      var s = (catatan && catatan.status) ? statusSah(catatan.status) : statusBawaan(el);
       var l = LENCANA[s];
 
       var lencana = el.querySelector('.badge');
