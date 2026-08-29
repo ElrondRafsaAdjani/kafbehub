@@ -439,9 +439,26 @@
     const changes = data.changes || [];
     if(changes.length === 0) return;
 
+    /*
+      Yang ditampilkan adalah SELURUH perubahan pada dua tanggal terdekat yang
+      punya perubahan, bukan dua belas baris pertama sesuai urutan simpan.
+
+      Batas dua belas baris itu diam-diam memotong data. Urutan simpan tidak
+      selalu urut tanggal, jadi perubahan untuk besok bisa terlempar ke luar
+      batas hanya karena hari ini kebetulan banyak kelas daring. Kelas
+      pengganti yang paling perlu dibaca justru yang hilang.
+
+      Sisanya tidak dibuang tanpa kabar. Jumlahnya disebutkan di baris penutup
+      dan tetap bisa dibaca lengkap pada tabel mingguan di bawah.
+    */
     const hariIni = iso(new Date());
-    const mendatang = changes.filter(c => c.tanggal >= hariIni).slice(0, 12);
-    if(mendatang.length === 0) return;
+    const urut = changes.filter(c => c.tanggal >= hariIni)
+      .sort((a,b) => a.tanggal.localeCompare(b.tanggal) || menitMulai(a.jam) - menitMulai(b.jam));
+    if(urut.length === 0) return;
+
+    const tanggalTampil = [...new Set(urut.map(c => c.tanggal))].slice(0, 2);
+    const mendatang = urut.filter(c => tanggalTampil.includes(c.tanggal));
+    const sisa = urut.length - mendatang.length;
 
     /*
       Tiap baris dipecah menjadi bagian yang berdiri sendiri, bukan satu
@@ -493,10 +510,15 @@
         ${keterangan(c) ? `<div class="perub-ganti">${esc(keterangan(c))}</div>` : ''}
       </li>`).join('');
 
+    const penutup = sisa > 0
+      ? `<p class="perub-sisa">Masih ada ${sisa} perubahan lain setelah tanggal ini. Semuanya bisa dilihat pada tabel jadwal di bawah.</p>`
+      : '';
+
     elPerub.innerHTML = `
       <div class="kotak kotak-info">
         <h3>📌 Perubahan jadwal terdekat</h3>
         <ul class="perub-list">${item}</ul>
+        ${penutup}
       </div>`;
   }
 
