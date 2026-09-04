@@ -169,6 +169,7 @@
 <div id="kafbeNav"></div>
 <script src="/shared/bahasa.js"></script>
 <script src="/shared/nav.js"></script>
+<script src="/shared/navigasi-slide.js"></script>
 
 <svg width="0" height="0" style="position:absolute">
   <symbol id="kafbe-owl" viewBox="0 0 300 300">
@@ -822,6 +823,9 @@
 
   btnNext.addEventListener('click', function(){ if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
   btnPrev.addEventListener('click', function(){ if(ke > 0){ ke--; tampilkan(); } });
+  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // sama di semua halaman materi.
+  KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
   btnUlang.addEventListener('click', function(){ ke = 0; tampilkan(); });
 
   tampilkan();

@@ -101,6 +101,7 @@
 <div id="kafbeNav"></div>
 <script src="/shared/bahasa.js"></script>
 <script src="/shared/nav.js"></script>
+<script src="/shared/navigasi-slide.js"></script>
 
 <svg width="0" height="0" style="position:absolute">
   <symbol id="kafbe-owl" viewBox="0 0 300 300">
@@ -449,10 +450,9 @@
   btnNext.addEventListener('click', () => { if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
   btnPrev.addEventListener('click', () => { if(ke > 0){ ke--; tampilkan(); } });
   btnUlang.addEventListener('click', () => { ke = 0; tampilkan(); });
-  document.addEventListener('keydown', (e) => {
-    if(e.key === 'ArrowRight') btnNext.click();
-    if(e.key === 'ArrowLeft') btnPrev.click();
-  });
+  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // sama di semua halaman materi.
+  KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
 
   tampilkan();
 })();
