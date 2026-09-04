@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://*.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Elastisitas - Pengantar Mikroekonomi - KAFBE Hub</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  .story-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+    padding:28px; box-shadow:var(--shadow); margin-top:24px;
+  }
+
+  .chapter-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .chapter-badge{
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem; padding:6px 14px; border-radius:100px;
+    background:var(--bg-deep); color:var(--owl-dark2);
+  }
+  .progress-dots{display:flex; gap:6px; flex-wrap:wrap;}
+  .progress-dots .dot{width:8px; height:8px; border-radius:50%; background:var(--line); transition:background .2s, transform .2s;}
+  .progress-dots .dot.active{background:var(--gold); transform:scale(1.3);}
+  .progress-dots .dot.done{background:var(--owl-mid);}
+
+  .story-layout{display:grid; grid-template-columns:300px 1fr; gap:26px; align-items:start;}
+  @media (max-width:820px){ .story-layout{display:flex; flex-direction:column; gap:18px;} }
+
+  .owl-panel{display:flex; flex-direction:column; align-items:center; gap:14px;}
+  .owl-panel svg{width:150px;}
+  .owl-panel .wing-l{transform-origin:78px 150px; animation:flapL 2.6s ease-in-out infinite;}
+  .owl-panel .wing-r{transform-origin:222px 150px; animation:flapR 2.6s ease-in-out infinite;}
+  .owl-panel .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
+  @media (max-width:820px){ .owl-panel svg{width:84px;} .owl-panel{gap:8px;} }
+
+  .bubble{
+    position:relative; background:var(--bg-deep); border-radius:18px; padding:16px 18px;
+    font-size:0.94rem; line-height:1.6; color:var(--ink); min-height:96px;
+  }
+  .bubble::before{
+    content:''; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:9px solid var(--bg-deep);
+  }
+  @media (min-width:821px){
+    .bubble::before{ top:26px; left:-9px; transform:none; border-left:none; border-bottom:9px solid transparent; border-top:9px solid transparent; border-right:9px solid var(--bg-deep); }
+  }
+
+  .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:16px;}
+  #chartSvg{width:100%; height:auto; aspect-ratio:560/400; display:block;}
+
+  /* Tiap elemen gambar yang baru dibuat dimunculkan perlahan supaya
+     perpindahan antar langkah tidak terasa meloncat. */
+  .anim{animation:kurvaMuncul .5s ease both;}
+  @keyframes kurvaMuncul{ from{opacity:0;} to{opacity:1;} }
+
+  /* Kotak keterangan di bawah grafik. Isinya rumus dan aturan koefisien
+     untuk langkah yang sedang dibuka. */
+  .info-kurva{
+    margin-top:14px; background:var(--surface); border:1px solid var(--line);
+    border-left:5px solid var(--gold); border-radius:14px; padding:14px 16px;
+    font-size:0.9rem; line-height:1.6; color:var(--ink); max-width:70ch;
+  }
+  .info-kurva strong{color:var(--owl-dark2);}
+  .info-kurva .rumus{
+    display:block; font-family:'Baloo 2'; font-weight:700; font-size:1.02rem;
+    color:var(--owl-dark2); margin-top:8px; letter-spacing:0.2px;
+  }
+  .info-kurva .hasil{
+    display:inline-block; margin-top:8px; background:var(--bg-deep); border-radius:100px;
+    padding:5px 14px; font-family:'Baloo 2'; font-weight:700; color:var(--owl-dark2);
+  }
+
+  .legend{display:none; flex-wrap:wrap; gap:10px 18px; margin-top:14px; font-size:0.82rem;}
+  .legend.show{display:flex;}
+  .legend-item{display:flex; align-items:center; gap:7px; color:var(--ink-soft);}
+  .legend-swatch{width:22px; height:5px; border-radius:3px; display:inline-block; flex-shrink:0;}
+
+  .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
+  .nav-row .spacer{flex:1;}
+  #btnRestart{display:none;}
+  #btnNextMaterial{display:none;}
+</style>
+
+<!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
+     <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
+     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     tampil apa adanya. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body data-fitur-halaman="materi-pemi materi-pemi-elastisitas">
+
+<div id="kafbeNav"></div>
+<script src="/shared/bahasa.js"></script>
+<script src="/shared/nav.js"></script>
+<script src="/shared/navigasi-slide.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path class="wing-l" d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path class="wing-r" d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/>
+      <path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/>
+      <path d="M142 192 q8 10 16 0"/>
+      <path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/>
+      <path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/>
+      <circle cx="177" cy="118" r="7" fill="#fff"/>
+      <circle cx="120" cy="136" r="3" fill="#fff" opacity="0.8"/>
+      <circle cx="190" cy="136" r="3" fill="#fff" opacity="0.8"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px; padding-bottom:70px;">
+  <a class="back-link" href="pemi.html">← Kembali ke Pengantar Mikroekonomi</a>
+  <div class="section-head" style="margin-top:18px;">
+    <span class="kicker">Pengantar Mikroekonomi</span>
+    <h2>Elastisitas dan Bentuk Kurvanya</h2>
+    <p>Mulai dari arti elastisitas, cara menghitung koefisiennya, sampai gambar lima bentuk kurva permintaan dari yang sama sekali tidak peka sampai yang sangat peka.</p>
+  </div>
+
+  <div class="story-card">
+    <div class="chapter-row">
+      <span class="chapter-badge" id="chapterBadge">Bagian: Kenalan dengan Elastisitas</span>
+      <div class="progress-dots" id="progressDots"></div>
+    </div>
+
+    <div class="story-layout">
+      <div class="owl-panel">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <div class="bubble" id="bubbleText"></div>
+      </div>
+
+      <div>
+        <div class="chart-wrap">
+          <svg id="chartSvg" viewBox="0 0 560 400" width="560" height="400" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="info-kurva" id="infoBox"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
+      <a href="pemi-surplus-dwl.html" class="btn btn-gold" id="btnNextMaterial">Materi Berikutnya: Surplus dan DWL →</a>
+      <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" data-bagian="Penutup">
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
+</footer>
+
+<script src="../main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ===================================================================
+  // MODEL
+  //
+  // Kurva permintaan dasar yang dipakai di bagian perhitungan:
+  //     P = 60 - Q
+  // Titik A ada di (Q=40, P=20) dan titik B ada di (Q=30, P=30).
+  // Angkanya sengaja bulat supaya persentasenya gampang dihitung di kepala.
+  //
+  // Lima bentuk kurva di bagian terakhir semuanya dibuat melewati satu
+  // titik yang sama, yaitu (Q=30, P=30). Dengan begitu yang berbeda antar
+  // kurva murni kemiringannya, bukan letaknya.
+  // ===================================================================
+  const TITIK_UMUM = { q:30, p:30 };
+
+  const WARNA = {
+    grid:'#D3E4EC',
+    sumbu:'#16294A',
+    angka:'#4C6885',
+    demand:'#C24E33',
+    supply:'#1F3A63',
+    emas:'#B07D14',
+    sempurnaInelastis:'#7A3B8F',
+    inelastis:'#C24E33',
+    unitary:'#B07D14',
+    elastis:'#1F7A5A',
+    sempurnaElastis:'#1F3A63'
+  };
+
+  const CHAPTERS = {
+    kenalan:'Bagian: Kenalan dengan Elastisitas',
+    hitung:'Bagian: Menghitung Koefisien',
+    bentuk:'Bagian: Lima Bentuk Kurva'
+  };
+
+  const STEPS = [
+    {
+      chapter:'kenalan', chart:'polos',
+      text:'Elastisitas itu <strong>derajat kepekaan</strong>. Kalau satu hal berubah, seberapa besar hal lain ikut berubah? Itu yang diukur. Di mikroekonomi, yang paling sering dibahas adalah kepekaan jumlah barang terhadap perubahan harga.',
+      info:'<strong>Elastisitas</strong> adalah ukuran seberapa responsif suatu variabel terhadap perubahan variabel lain.'
+    },
+    {
+      chapter:'kenalan', chart:'demand-supply',
+      text:'Konsepnya dipakai di beberapa tempat. <strong>Elastisitas permintaan</strong> mengukur kecepatan tanggapan konsumen terhadap perubahan harga. <strong>Elastisitas penawaran</strong> mengukur tanggapan produsen terhadap perubahan harga. Ada juga elastisitas produksi dan elastisitas biaya yang dibahas di Ekonomika Mikro untuk Bisnis.',
+      info:'Halaman ini fokus pada <strong>elastisitas permintaan</strong> yang biasa ditulis <strong>Ed</strong>. Cara berpikirnya sama persis untuk elastisitas penawaran, tinggal ganti kurvanya.'
+    },
+    {
+      chapter:'hitung', chart:'titik-a',
+      text:'Sekarang kita hitung. Ambil satu kurva permintaan, lalu mulai dari <strong>titik A</strong>. Di harga <strong>Rp20.000</strong> ada <strong>40 unit</strong> barang yang diminta konsumen.',
+      info:'Rumus koefisien elastisitas permintaan membandingkan dua persentase.<span class="rumus">Ed = persentase perubahan Q dibagi persentase perubahan P</span>'
+    },
+    {
+      chapter:'hitung', chart:'titik-ab',
+      text:'Harganya kemudian naik menjadi <strong>Rp30.000</strong>. Konsumen bereaksi, jumlah yang diminta turun menjadi <strong>30 unit</strong>. Titik barunya kita namai <strong>titik B</strong>.',
+      info:'Titik A ada di harga 20 dengan jumlah 40. Titik B ada di harga 30 dengan jumlah 30. Sekarang kedua perpindahan itu tinggal diubah menjadi persen.'
+    },
+    {
+      chapter:'hitung', chart:'delta-q',
+      text:'Mulai dari jumlahnya. Jumlah yang diminta turun dari 40 unit menjadi 30 unit, jadi berkurang <strong>10 unit</strong>. Dibandingkan jumlah awalnya yang 40 unit, penurunan itu setara <strong>25 persen</strong>.',
+      info:'<span class="rumus">persentase perubahan Q = (30 - 40) : 40 = -0,25</span><span class="hasil">Jumlah turun 25 persen</span>'
+    },
+    {
+      chapter:'hitung', chart:'delta-qp',
+      text:'Sekarang harganya. Harga naik dari Rp20.000 menjadi Rp30.000, jadi bertambah <strong>Rp10.000</strong>. Dibandingkan harga awalnya yang Rp20.000, kenaikan itu setara <strong>50 persen</strong>.',
+      info:'<span class="rumus">persentase perubahan P = (30 - 20) : 20 = 0,50</span><span class="hasil">Harga naik 50 persen</span>'
+    },
+    {
+      chapter:'hitung', chart:'delta-qp',
+      text:'Tinggal dibagi. Turun 25 persen dibagi naik 50 persen hasilnya <strong>-0,5</strong>. Tanda minus selalu muncul karena harga dan jumlah bergerak berlawanan arah, jadi yang dibaca nilai mutlaknya. Karena <strong>0,5 lebih kecil dari 1</strong>, permintaan barang ini tergolong <strong>inelastis</strong>.',
+      info:'<span class="rumus">Ed = -0,25 : 0,50 = -0,5</span><span class="hasil">|Ed| = 0,5 sehingga permintaannya inelastis</span>'
+    },
+    {
+      chapter:'hitung', chart:'delta-qp',
+      text:'Satu catatan penting. Kalau perhitungan tadi dibalik arahnya, dari titik B ke titik A, hasilnya jadi berbeda karena pembaginya ikut berubah. Supaya hasilnya sama ke arah mana pun, dipakai <strong>metode titik tengah</strong>. Pembaginya bukan nilai awal, melainkan rata-rata nilai awal dan nilai akhir.',
+      info:'<span class="rumus">Ed = (-10 : 35) : (10 : 25) = -0,29 : 0,40 = -0,71</span>Hasilnya tetap di bawah 1, jadi kesimpulannya sama. Permintaannya inelastis.'
+    },
+    {
+      chapter:'bentuk', chart:'perfectly-inelastic',
+      text:'Sekarang lima bentuk kurvanya. Yang pertama <strong>perfectly inelastic</strong>, permintaan yang sama sekali tidak peka. Harga mau naik setinggi apa pun, jumlah yang dibeli tetap sama. Kurvanya berdiri tegak lurus. Contohnya tanah dan obat yang sangat dibutuhkan seperti insulin.',
+      info:'<strong>Perfectly Inelastic Demand</strong><span class="rumus">|Ed| = 0</span>Harga berubah, jumlah tetap. Persentase perubahan Q sama dengan nol, jadi hasil baginya juga nol.'
+    },
+    {
+      chapter:'bentuk', chart:'inelastic',
+      text:'Yang kedua <strong>inelastic</strong>. Konsumen bereaksi, tetapi reaksinya kecil. Harga naik 100 persen, jumlah yang diminta cuma turun sekitar 14 persen. Kurvanya curam. Contohnya barang kebutuhan pokok yang tidak banyak penggantinya.',
+      info:'<strong>Inelastic Demand</strong><span class="rumus">|Ed| kurang dari 1</span>Persentase perubahan harga lebih besar daripada persentase perubahan jumlah.'
+    },
+    {
+      chapter:'bentuk', chart:'unitary',
+      text:'Yang ketiga <strong>unitary</strong>. Perubahan harga dan perubahan jumlah persis sama besarnya. Harga naik 40 persen, jumlah turun 40 persen juga. Di dunia nyata bentuk ini hampir tidak pernah ketemu.',
+      info:'<strong>Unitary Elastic Demand</strong><span class="rumus">|Ed| = 1</span>Persentase perubahan harga sama dengan persentase perubahan jumlah. Kurvanya melengkung karena perbandingan itu harus terjaga di sepanjang kurva. Di slide kuliah bentuknya sering disederhanakan menjadi garis lurus.'
+    },
+    {
+      chapter:'bentuk', chart:'elastic',
+      text:'Yang keempat <strong>elastic</strong>. Konsumen gampang sekali berpindah. Harga turun sedikit saja, sekitar 12,5 persen, jumlah yang diminta langsung melonjak 100 persen. Kurvanya landai. Contohnya barang yang penggantinya banyak seperti bolpen.',
+      info:'<strong>Elastic Demand</strong><span class="rumus">|Ed| lebih dari 1</span>Persentase perubahan harga lebih kecil daripada persentase perubahan jumlah.'
+    },
+    {
+      chapter:'bentuk', chart:'perfectly-elastic',
+      text:'Yang kelima <strong>perfectly elastic</strong>. Di harga tertentu konsumen mau membeli berapa pun jumlahnya, tetapi begitu harganya dinaikkan sedikit saja pembelinya langsung hilang semua. Kurvanya mendatar.',
+      info:'<strong>Perfectly Elastic Demand</strong><span class="rumus">|Ed| tak terhingga</span>Harga tetap, jumlah berubah. Pembaginya nol, jadi hasilnya membesar tanpa batas.'
+    },
+    {
+      chapter:'bentuk', chart:'ringkasan',
+      text:'Kalau kelimanya digambar dalam satu bidang dan dibuat melewati titik yang sama, polanya langsung kelihatan. <strong>Semakin tegak kurvanya, semakin tidak peka</strong> permintaannya. <strong>Semakin mendatar kurvanya, semakin peka</strong> permintaannya.',
+      info:'Urutannya dari yang paling tidak peka sampai yang paling peka: tegak lurus dengan |Ed| = 0, curam dengan |Ed| kurang dari 1, melengkung dengan |Ed| = 1, landai dengan |Ed| lebih dari 1, lalu mendatar dengan |Ed| tak terhingga.'
+    }
+  ];
+
+  // ===================================================================
+  // SETUP GRAFIK
+  // ===================================================================
+  const W = 560, H = 400;
+  const margin = { left:56, right:26, top:24, bottom:48 };
+  const plotW = W - margin.left - margin.right;
+  const plotH = H - margin.top - margin.bottom;
+  const Q_MAX = 66, P_MAX = 66;
+
+  const sx = (q) => margin.left + (q/Q_MAX) * plotW;
+  const sy = (p) => margin.top + plotH - (p/P_MAX) * plotH;
+
+  const chartSvg = document.getElementById('chartSvg');
+  const legendBox = document.getElementById('legend');
+
+  function svgEl(tag, attrs){
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for(const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function tambah(tag, attrs, teks){
+    const el = svgEl(tag, attrs);
+    if(teks !== undefined) el.textContent = teks;
+    chartSvg.appendChild(el);
+    return el;
+  }
+
+  function gambarRangka(){
+    for(let q=0; q<=60; q+=10){
+      const x = sx(q);
+      tambah('line', { x1:x, y1:margin.top, x2:x, y2:margin.top+plotH, stroke:WARNA.grid, 'stroke-width':1 });
+      tambah('text', { x, y:margin.top+plotH+18, 'text-anchor':'middle', 'font-size':'11', fill:WARNA.angka, 'font-family':'Plus Jakarta Sans' }, q);
+    }
+    for(let p=0; p<=60; p+=10){
+      const y = sy(p);
+      tambah('line', { x1:margin.left, y1:y, x2:margin.left+plotW, y2:y, stroke:WARNA.grid, 'stroke-width':1 });
+      tambah('text', { x:margin.left-8, y:y+4, 'text-anchor':'end', 'font-size':'11', fill:WARNA.angka, 'font-family':'Plus Jakarta Sans' }, p);
+    }
+    tambah('line', { x1:margin.left, y1:margin.top, x2:margin.left, y2:margin.top+plotH, stroke:WARNA.sumbu, 'stroke-width':2 });
+    tambah('line', { x1:margin.left, y1:margin.top+plotH, x2:margin.left+plotW, y2:margin.top+plotH, stroke:WARNA.sumbu, 'stroke-width':2 });
+    tambah('text', { x:margin.left+plotW/2, y:H-6, 'text-anchor':'middle', 'font-size':'12', fill:WARNA.sumbu, 'font-weight':'700', 'font-family':'Baloo 2' }, 'Kuantitas (Q)');
+    tambah('text', { x:14, y:margin.top+plotH/2, 'text-anchor':'middle', 'font-size':'12', fill:WARNA.sumbu, 'font-weight':'700', 'font-family':'Baloo 2', transform:'rotate(-90 14 '+(margin.top+plotH/2)+')' }, 'Harga (P)');
+  }
+
+  // Garis lurus dari (q1,p1) ke (q2,p2) dalam satuan data.
+  function garisData(q1, p1, q2, p2, opsi){
+    const o = opsi || {};
+    return tambah('path', {
+      d:'M '+sx(q1)+','+sy(p1)+' L '+sx(q2)+','+sy(p2),
+      fill:'none', stroke:o.warna, 'stroke-width':o.tebal || 3.5,
+      'stroke-linecap':'round',
+      class:'anim'
+    });
+  }
+
+  // Kurva unitary berbentuk hiperbola, hasil kali P dan Q selalu tetap.
+  function hiperbola(k, qAwal, qAkhir, warna){
+    let d = '';
+    for(let q=qAwal; q<=qAkhir; q+=0.5){
+      d += (d ? ' L ' : 'M ') + sx(q) + ',' + sy(k/q);
+    }
+    return tambah('path', { d, fill:'none', stroke:warna, 'stroke-width':3.5, 'stroke-linecap':'round', class:'anim' });
+  }
+
+  function labelKurva(q, p, teks, warna, anchor, geserY){
+    return tambah('text', {
+      x:sx(q), y:sy(p) + (geserY === undefined ? -10 : geserY),
+      'text-anchor':anchor || 'start', 'font-size':'13', 'font-weight':'800',
+      fill:warna, 'font-family':'Baloo 2', class:'anim'
+    }, teks);
+  }
+
+  // Titik beserta namanya. Garis bantu putus-putus ditarik ke kedua sumbu.
+  function titik(q, p, nama, warna, opsi){
+    const o = opsi || {};
+    if(o.bantu !== false){
+      tambah('line', { x1:sx(q), y1:sy(p), x2:sx(q), y2:margin.top+plotH, stroke:WARNA.emas, 'stroke-width':1.4, 'stroke-dasharray':'4,4', class:'anim' });
+      tambah('line', { x1:margin.left, y1:sy(p), x2:sx(q), y2:sy(p), stroke:WARNA.emas, 'stroke-width':1.4, 'stroke-dasharray':'4,4', class:'anim' });
+    }
+    tambah('circle', { cx:sx(q), cy:sy(p), r:6.5, fill:warna, stroke:'#fff', 'stroke-width':2, class:'anim' });
+    if(nama){
+      tambah('text', {
+        x:sx(q) + (o.geserX === undefined ? 11 : o.geserX),
+        y:sy(p) + (o.geserY === undefined ? -11 : o.geserY),
+        'text-anchor':o.anchor || 'start', 'font-size':'13', 'font-weight':'800',
+        fill:WARNA.sumbu, 'font-family':'Baloo 2', class:'anim'
+      }, nama);
+    }
+  }
+
+  // Penanda tebal di tepi dalam sumbu harga, menunjukkan besarnya perubahan P.
+  function penandaP(pAwal, pAkhir, teks){
+    const x = margin.left + 9;
+    const y1 = sy(pAwal), y2 = sy(pAkhir);
+    tambah('line', { x1:x, y1, x2:x, y2, stroke:WARNA.emas, 'stroke-width':7, 'stroke-linecap':'round', class:'anim' });
+    tambah('text', { x:x+10, y:(y1+y2)/2 + 4, 'font-size':'12', 'font-weight':'800', fill:WARNA.emas, 'font-family':'Baloo 2', class:'anim' }, teks);
+  }
+
+  // Penanda tebal di tepi dalam sumbu kuantitas, menunjukkan besarnya perubahan Q.
+  function penandaQ(qAwal, qAkhir, teks){
+    const y = margin.top + plotH - 9;
+    const x1 = sx(qAwal), x2 = sx(qAkhir);
+    tambah('line', { x1, y1:y, x2, y2:y, stroke:WARNA.emas, 'stroke-width':7, 'stroke-linecap':'round', class:'anim' });
+    tambah('text', { x:(x1+x2)/2, y:y-15, 'text-anchor':'middle', 'font-size':'12', 'font-weight':'800', fill:WARNA.emas, 'font-family':'Baloo 2', class:'anim' }, teks);
+  }
+
+  // ---- Definisi kelima bentuk kurva ----
+  // Semuanya lewat titik (30,30), jadi yang membedakan cuma kemiringannya.
+  const BENTUK = {
+    'perfectly-inelastic':{
+      warna:WARNA.sempurnaInelastis,
+      gambar(warna, tanpaLabel){
+        garisData(TITIK_UMUM.q, 4, TITIK_UMUM.q, 60, { warna });
+        if(!tanpaLabel) labelKurva(TITIK_UMUM.q, 60, '|Ed| = 0', warna, 'middle');
+      },
+      sorot(){
+        titik(30, 18, 'A', WARNA.sempurnaInelastis, { geserX:12 });
+        titik(30, 45, 'B', WARNA.sempurnaInelastis, { geserX:12 });
+        penandaP(18, 45, 'harga naik');
+        tambah('text', { x:sx(30)+12, y:margin.top+plotH-16, 'font-size':'12', 'font-weight':'800', fill:WARNA.emas, 'font-family':'Baloo 2', class:'anim' }, 'jumlah tetap');
+      }
+    },
+    'inelastic':{
+      warna:WARNA.inelastis,
+      gambar(warna, tanpaLabel){
+        // P = 150 - 4Q, lewat (30,30). Digambar dari P=58 sampai P=6.
+        garisData(23, 58, 36, 6, { warna });
+        if(!tanpaLabel) labelKurva(23, 58, '|Ed| < 1', warna, 'start', -8);
+      },
+      sorot(){
+        titik(35, 10, 'A', WARNA.inelastis, { geserX:12, geserY:16 });
+        titik(30, 30, 'B', WARNA.inelastis, { geserX:12 });
+        penandaP(10, 30, '+100%');
+        penandaQ(30, 35, '-14%');
+      }
+    },
+    'unitary':{
+      warna:WARNA.unitary,
+      gambar(warna, tanpaLabel){
+        hiperbola(900, 15, 62, warna);
+        if(!tanpaLabel) labelKurva(62, 900/62, '|Ed| = 1', warna, 'end', -12);
+      },
+      sorot(){
+        titik(30, 30, 'A', WARNA.unitary, { geserX:12 });
+        titik(20, 45, 'B', WARNA.unitary, { geserX:12 });
+        penandaP(30, 45, '+40%');
+        penandaQ(20, 30, '-40%');
+      }
+    },
+    'elastic':{
+      warna:WARNA.elastis,
+      gambar(warna, tanpaLabel){
+        // P = 36 - 0,2Q, lewat (30,30).
+        garisData(3, 35.4, 62, 23.6, { warna });
+        if(!tanpaLabel) labelKurva(3, 35.4, '|Ed| > 1', warna, 'start', -12);
+      },
+      sorot(){
+        titik(20, 32, 'A', WARNA.elastis, { geserX:-12, anchor:'end' });
+        titik(40, 28, 'B', WARNA.elastis, { geserX:12 });
+        penandaP(28, 32, '-12,5%');
+        penandaQ(20, 40, '+100%');
+      }
+    },
+    'perfectly-elastic':{
+      warna:WARNA.sempurnaElastis,
+      gambar(warna, tanpaLabel){
+        garisData(3, TITIK_UMUM.p, 62, TITIK_UMUM.p, { warna });
+        if(!tanpaLabel) labelKurva(62, TITIK_UMUM.p, 'Ed tak terhingga', warna, 'end', -12);
+      },
+      sorot(){
+        titik(15, 30, 'A', WARNA.sempurnaElastis, { geserX:-12, geserY:22, anchor:'end' });
+        titik(50, 30, 'B', WARNA.sempurnaElastis, { geserX:12, geserY:22 });
+        penandaQ(15, 50, 'jumlah berubah');
+        tambah('text', { x:margin.left+16, y:sy(30)-12, 'font-size':'12', 'font-weight':'800', fill:WARNA.emas, 'font-family':'Baloo 2', class:'anim' }, 'harga tetap');
+      }
+    }
+  };
+
+  const URUTAN_BENTUK = ['perfectly-inelastic','inelastic','unitary','elastic','perfectly-elastic'];
+  const NAMA_BENTUK = {
+    'perfectly-inelastic':'Perfectly inelastic, |Ed| = 0',
+    'inelastic':'Inelastic, |Ed| kurang dari 1',
+    'unitary':'Unitary, |Ed| = 1',
+    'elastic':'Elastic, |Ed| lebih dari 1',
+    'perfectly-elastic':'Perfectly elastic, |Ed| tak terhingga'
+  };
+
+  function isiLegenda(){
+    legendBox.innerHTML = '';
+    URUTAN_BENTUK.forEach(kunci => {
+      const item = document.createElement('span');
+      item.className = 'legend-item';
+      const sw = document.createElement('span');
+      sw.className = 'legend-swatch';
+      sw.style.background = BENTUK[kunci].warna;
+      const teks = document.createElement('span');
+      teks.textContent = NAMA_BENTUK[kunci];
+      item.appendChild(sw);
+      item.appendChild(teks);
+      legendBox.appendChild(item);
+    });
+  }
+
+  // ===================================================================
+  // PENGGAMBAR PER LANGKAH
+  // ===================================================================
+  const demandP = (Q) => 60 - Q;
+
+  function gambar(nama){
+    chartSvg.innerHTML = '';
+    gambarRangka();
+    legendBox.classList.remove('show');
+
+    if(nama === 'polos'){
+      garisData(0, demandP(0), 60, demandP(60), { warna:WARNA.demand });
+      labelKurva(6, demandP(6), 'Demand (D)', WARNA.demand, 'start', -12);
+      return;
+    }
+
+    if(nama === 'demand-supply'){
+      garisData(0, demandP(0), 60, demandP(60), { warna:WARNA.demand });
+      labelKurva(6, demandP(6), 'Demand (D)', WARNA.demand, 'start', -12);
+      garisData(0, 6, 54, 60, { warna:WARNA.supply });
+      labelKurva(20, 26, 'Supply (S)', WARNA.supply, 'end', 20);
+      return;
+    }
+
+    if(nama === 'titik-a' || nama === 'titik-ab' || nama === 'delta-q' || nama === 'delta-qp'){
+      garisData(0, demandP(0), 60, demandP(60), { warna:WARNA.demand });
+      labelKurva(6, demandP(6), 'Demand (D)', WARNA.demand, 'start', -12);
+      titik(40, 20, 'A (40 ; 20)', WARNA.demand, { geserX:12 });
+      if(nama !== 'titik-a') titik(30, 30, 'B (30 ; 30)', WARNA.demand, { geserX:12 });
+      if(nama === 'delta-q' || nama === 'delta-qp') penandaQ(30, 40, 'jumlah turun 25%');
+      if(nama === 'delta-qp') penandaP(20, 30, 'harga naik 50%');
+      return;
+    }
+
+    if(nama === 'ringkasan'){
+      URUTAN_BENTUK.forEach(kunci => BENTUK[kunci].gambar(BENTUK[kunci].warna, true));
+      tambah('circle', { cx:sx(TITIK_UMUM.q), cy:sy(TITIK_UMUM.p), r:6, fill:'#fff', stroke:WARNA.sumbu, 'stroke-width':2.5, class:'anim' });
+      legendBox.classList.add('show');
+      return;
+    }
+
+    const bentuk = BENTUK[nama];
+    if(bentuk){
+      bentuk.gambar(bentuk.warna);
+      bentuk.sorot();
+    }
+  }
+
+  // ===================================================================
+  // NAVIGASI CERITA
+  // ===================================================================
+  let current = 0;
+  const bubbleText = document.getElementById('bubbleText');
+  const chapterBadge = document.getElementById('chapterBadge');
+  const progressDots = document.getElementById('progressDots');
+  const infoBox = document.getElementById('infoBox');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const btnRestart = document.getElementById('btnRestart');
+  const btnNextMaterial = document.getElementById('btnNextMaterial');
+
+  STEPS.forEach((s, i) => {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.dataset.index = i;
+    progressDots.appendChild(dot);
+  });
+
+  function render(){
+    const step = STEPS[current];
+    bubbleText.innerHTML = step.text;
+    infoBox.innerHTML = step.info;
+    chapterBadge.textContent = CHAPTERS[step.chapter];
+    gambar(step.chart);
+
+    Array.from(progressDots.children).forEach((dot, i) => {
+      dot.classList.toggle('active', i === current);
+      dot.classList.toggle('done', i < current);
+    });
+
+    btnPrev.disabled = current === 0;
+    const isLast = current === STEPS.length - 1;
+    btnNext.style.display = isLast ? 'none' : '';
+    btnRestart.style.display = isLast ? 'inline-flex' : 'none';
+    btnNextMaterial.style.display = isLast ? 'inline-flex' : 'none';
+  }
+
+  btnNext.addEventListener('click', () => {
+    if(current < STEPS.length - 1){ current++; render(); }
+  });
+  btnPrev.addEventListener('click', () => {
+    if(current > 0){ current--; render(); }
+  });
+  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // sama di semua halaman materi.
+  KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
+  btnRestart.addEventListener('click', () => {
+    current = 0; render();
+    document.querySelector('.story-card').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  isiLegenda();
+  render();
+})();
+</script>
+
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/shared/kunjungan.js"></script>
+</body>
+</html>
