@@ -66,23 +66,43 @@
      untuk langkah yang sedang dibuka. */
   .info-kurva{
     margin-top:14px; background:var(--surface); border:1px solid var(--line);
-    border-left:5px solid var(--gold); border-radius:14px; padding:14px 16px;
+    border-left:5px solid var(--gold); border-radius:14px; padding:14px 18px;
     font-size:0.9rem; line-height:1.6; color:var(--ink); max-width:70ch;
   }
   .info-kurva strong{color:var(--owl-dark2);}
-  .info-kurva .rumus{
-    display:block; font-family:'Baloo 2'; font-weight:700; font-size:1.02rem;
-    color:var(--owl-dark2); margin-top:8px; letter-spacing:0.2px;
-  }
   .info-kurva .hasil{
-    display:inline-block; margin-top:8px; background:var(--bg-deep); border-radius:100px;
+    display:inline-block; margin-top:10px; background:var(--bg-deep); border-radius:100px;
     padding:5px 14px; font-family:'Baloo 2'; font-weight:700; color:var(--owl-dark2);
   }
 
-  .legend{display:none; flex-wrap:wrap; gap:10px 18px; margin-top:14px; font-size:0.82rem;}
-  .legend.show{display:flex;}
-  .legend-item{display:flex; align-items:center; gap:7px; color:var(--ink-soft);}
-  .legend-swatch{width:22px; height:5px; border-radius:3px; display:inline-block; flex-shrink:0;}
+  /* RUMUS
+     Ditulis memakai HTML dan CSS biasa, bukan pustaka matematika dari CDN.
+     Alasannya dua. Jaringan kampus kadang memblokir CDN, sementara rumus
+     adalah isi inti halaman ini dan tidak boleh gagal tampil. Pemuat rumus
+     di halaman materi lain juga fontnya tertahan Content Security Policy,
+     jadi hasilnya malah tidak rapi.
+     Delta ditulis dengan lambang segitiga, sigma dengan lambang jumlah, dan
+     pecahan disusun bertumpuk atas bawah memakai garis pemisah. */
+  .rumus-blok{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+    gap:10px; margin:14px 0 2px;
+    font-family:'Times New Roman', Georgia, serif; font-size:1.24rem;
+    color:var(--owl-dark2); line-height:1.25;
+  }
+  .rumus-blok.kecil{font-size:1.08rem; margin-top:8px;}
+  .mv{font-style:italic;}
+  .msub{font-size:0.7em; font-style:normal; vertical-align:-0.28em;}
+  .pecahan{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle;}
+  .pecahan > .atas{padding:0 0.5em 0.14em; border-bottom:1.7px solid currentColor;}
+  .pecahan > .bawah{padding:0.14em 0.5em 0;}
+  .pecahan.rangkap > .atas{padding:0 0.75em 0.2em;}
+  .pecahan.rangkap > .bawah{padding:0.2em 0.75em 0;}
+  .rumus-nama{
+    display:block; text-align:center; margin-top:12px;
+    font-family:'Baloo 2'; font-weight:700; font-size:0.82rem;
+    letter-spacing:0.6px; text-transform:uppercase; color:var(--ink-soft);
+  }
+  .rumus-catatan{display:block; text-align:center; font-size:0.86rem; color:var(--ink-soft); margin-top:6px;}
 
   .nav-row{display:flex; align-items:center; justify-content:space-between; margin-top:24px; gap:12px; flex-wrap:wrap;}
   .nav-row .spacer{flex:1;}
@@ -144,7 +164,7 @@
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Pengantar Mikroekonomi</span>
     <h2>Elastisitas dan Bentuk Kurvanya</h2>
-    <p>Mulai dari arti elastisitas, cara menghitung koefisiennya, sampai gambar lima bentuk kurva permintaan dari yang sama sekali tidak peka sampai yang sangat peka.</p>
+    <p>Mulai dari arti elastisitas, rumus dan dua cara menghitung koefisiennya, sampai gambar lima bentuk kurva permintaan dari yang sama sekali tidak peka sampai yang sangat peka.</p>
   </div>
 
   <div class="story-card">
@@ -163,7 +183,6 @@
         <div class="chart-wrap">
           <svg id="chartSvg" viewBox="0 0 560 400" width="560" height="400" xmlns="http://www.w3.org/2000/svg"></svg>
         </div>
-        <div class="legend" id="legend"></div>
         <div class="info-kurva" id="infoBox"></div>
       </div>
     </div>
@@ -189,16 +208,43 @@
   "use strict";
 
   // ===================================================================
+  // PENYUSUN RUMUS
+  //
+  // Rumus dirakit dari potongan HTML kecil supaya penulisannya di daftar
+  // langkah tetap terbaca. Semua isinya naskah tetap milik halaman ini,
+  // bukan masukan pengguna.
+  // ===================================================================
+  const v   = (x) => '<span class="mv">' + x + '</span>';
+  const Ed  = '<span class="mv">E<span class="msub">d</span></span>';
+  const pec = (atas, bawah, rangkap) =>
+    '<span class="pecahan' + (rangkap ? ' rangkap' : '') + '">' +
+      '<span class="atas">' + atas + '</span>' +
+      '<span class="bawah">' + bawah + '</span>' +
+    '</span>';
+  const blok  = (isi, kecil) => '<div class="rumus-blok' + (kecil ? ' kecil' : '') + '">' + isi + '</div>';
+  const nama  = (teks) => '<span class="rumus-nama">' + teks + '</span>';
+  const catat = (teks) => '<span class="rumus-catatan">' + teks + '</span>';
+
+  const grp = (isi) => '<span>' + isi + '</span>';
+  const dQ = grp('Δ' + v('Q')), dP = grp('Δ' + v('P'));
+  const sQ = grp('Σ' + v('Q')), sP = grp('Σ' + v('P'));
+  const pct = (x) => grp('%Δ' + v(x));
+  const mutlak = grp('|' + Ed + '|');
+
+  // ===================================================================
   // MODEL
   //
-  // Kurva permintaan dasar yang dipakai di bagian perhitungan:
+  // Kurva permintaan lurus yang dipakai di bagian contoh perhitungan dan
+  // di bentuk unitary:
   //     P = 60 - Q
   // Titik A ada di (Q=40, P=20) dan titik B ada di (Q=30, P=30).
-  // Angkanya sengaja bulat supaya persentasenya gampang dihitung di kepala.
   //
-  // Lima bentuk kurva di bagian terakhir semuanya dibuat melewati satu
-  // titik yang sama, yaitu (Q=30, P=30). Dengan begitu yang berbeda antar
-  // kurva murni kemiringannya, bukan letaknya.
+  // Bagian rumus memakai kurva melengkung P dikali Q sama dengan 900.
+  // Kurva itu dipilih supaya beda antara garis singgung di satu titik
+  // dengan tali busur antara dua titik benar-benar kelihatan.
+  //
+  // Empat bentuk kurva di bagian terakhir dibuat melewati satu titik yang
+  // sama, yaitu (Q=30, P=30), jadi yang berbeda cuma kemiringannya.
   // ===================================================================
   const TITIK_UMUM = { q:30, p:30 };
 
@@ -209,6 +255,7 @@
     demand:'#C24E33',
     supply:'#1F3A63',
     emas:'#B07D14',
+    busur:'#1F7A5A',
     sempurnaInelastis:'#7A3B8F',
     inelastis:'#C24E33',
     unitary:'#B07D14',
@@ -218,7 +265,8 @@
 
   const CHAPTERS = {
     kenalan:'Bagian: Kenalan dengan Elastisitas',
-    hitung:'Bagian: Menghitung Koefisien',
+    rumus:'Bagian: Rumus dan Dua Cara Hitung',
+    hitung:'Bagian: Contoh Perhitungan',
     bentuk:'Bagian: Lima Bentuk Kurva'
   };
 
@@ -231,67 +279,101 @@
     {
       chapter:'kenalan', chart:'demand-supply',
       text:'Konsepnya dipakai di beberapa tempat. <strong>Elastisitas permintaan</strong> mengukur kecepatan tanggapan konsumen terhadap perubahan harga. <strong>Elastisitas penawaran</strong> mengukur tanggapan produsen terhadap perubahan harga. Ada juga elastisitas produksi dan elastisitas biaya yang dibahas di Ekonomika Mikro untuk Bisnis.',
-      info:'Halaman ini fokus pada <strong>elastisitas permintaan</strong> yang biasa ditulis <strong>Ed</strong>. Cara berpikirnya sama persis untuk elastisitas penawaran, tinggal ganti kurvanya.'
+      info:'Halaman ini fokus pada <strong>elastisitas permintaan harga</strong> atau <em>price elasticity of demand</em>, yang biasa ditulis <strong>Ed</strong>. Cara berpikirnya sama persis untuk elastisitas penawaran maupun elastisitas pendapatan, tinggal ganti variabel pembandingnya.'
+    },
+    {
+      chapter:'rumus', chart:'polos',
+      text:'Rumus dasarnya membandingkan dua persentase. Persentase perubahan jumlah yang diminta dibagi persentase perubahan harga. Tinggal dijabarkan sedikit, bentuknya berubah menjadi lebih enak dipakai menghitung.',
+      info: blok(Ed + '=' + pec(pct('Q'), pct('P')) + '=' + pec(pec(dQ, v('Q')), pec(dP, v('P')), true) + '=' + pec(dQ, dP) + '×' + pec(v('P'), v('Q')))
+          + catat('Lambang Δ dibaca delta, artinya selisih atau perubahan.')
+    },
+    {
+      chapter:'rumus', chart:'rumus-titik',
+      text:'Ada dua cara memakainya. Yang pertama <strong>point elasticity</strong> atau elastisitas titik. Cara ini mengukur kepekaan tepat di <strong>satu titik</strong>, jadi dipakai kalau perubahan harganya kecil sekali, mendekati nol. Di grafik, yang diukur adalah kemiringan <strong>garis singgung</strong> di titik itu.',
+      info: nama('Point Elasticity, bentuk turunan')
+          + blok(Ed + '=' + pec('d' + v('Q'), 'd' + v('P')) + '×' + pec(v('P'), v('Q')))
+          + nama('Point Elasticity, bentuk delta')
+          + blok(Ed + '=' + pec(dQ, dP) + '×' + pec(v('P'), v('Q')), true)
+          + catat('Bentuk turunan dipakai kalau fungsi permintaannya diketahui. Bentuk delta adalah pendekatannya kalau yang ada cuma dua baris data.')
+    },
+    {
+      chapter:'rumus', chart:'rumus-busur',
+      text:'Cara kedua <strong>arc elasticity</strong> atau elastisitas busur. Cara ini dipakai kalau selisih antara P1 dan P2, atau Q1 dan Q2, cukup besar. Pembaginya bukan nilai satu titik, melainkan jumlah kedua nilainya. Di grafik, yang diukur adalah kemiringan <strong>tali busur</strong> yang menghubungkan kedua titik.',
+      info: nama('Arc Elasticity')
+          + blok(Ed + '=' + pec(dQ, dP) + '×' + pec(sP, sQ))
+          + catat('Lambang Σ dibaca sigma, artinya jumlah. ΣP berarti P1 ditambah P2. Cara inilah yang menghasilkan midpoint elasticity.')
+    },
+    {
+      chapter:'rumus', chart:'rumus-banding',
+      text:'Bedanya jadi kelihatan kalau keduanya digambar bersama. <strong>Garis singgung</strong> cuma menyentuh kurva di satu titik, jadi hasilnya berlaku tepat di titik itu. <strong>Tali busur</strong> memotong kurva di dua titik, jadi hasilnya adalah rata-rata sepanjang jarak itu. Semakin jauh kedua titiknya, semakin jauh pula kedua hasilnya.',
+      info:'Ringkasnya begini. Pakai <strong>point elasticity</strong> kalau perubahannya kecil atau fungsi permintaannya diketahui sehingga bisa diturunkan. Pakai <strong>arc elasticity</strong> kalau perubahannya besar, karena hasilnya tidak berubah walau arah perhitungannya dibalik dari B ke A.'
     },
     {
       chapter:'hitung', chart:'titik-a',
-      text:'Sekarang kita hitung. Ambil satu kurva permintaan, lalu mulai dari <strong>titik A</strong>. Di harga <strong>Rp20.000</strong> ada <strong>40 unit</strong> barang yang diminta konsumen.',
-      info:'Rumus koefisien elastisitas permintaan membandingkan dua persentase.<span class="rumus">Ed = persentase perubahan Q dibagi persentase perubahan P</span>'
+      text:'Sekarang dicoba dengan angka. Ambil kurva permintaan yang lurus, lalu mulai dari <strong>titik A</strong>. Di harga <strong>Rp20.000</strong> ada <strong>40 unit</strong> barang yang diminta konsumen.',
+      info:'Titik A berada di harga 20 dengan jumlah 40. Nilai inilah yang nanti menjadi P dan Q pada rumus point elasticity.'
     },
     {
       chapter:'hitung', chart:'titik-ab',
       text:'Harganya kemudian naik menjadi <strong>Rp30.000</strong>. Konsumen bereaksi, jumlah yang diminta turun menjadi <strong>30 unit</strong>. Titik barunya kita namai <strong>titik B</strong>.',
-      info:'Titik A ada di harga 20 dengan jumlah 40. Titik B ada di harga 30 dengan jumlah 30. Sekarang kedua perpindahan itu tinggal diubah menjadi persen.'
+      info:'Titik A ada di harga 20 dengan jumlah 40. Titik B ada di harga 30 dengan jumlah 30. Sekarang kedua perpindahan itu tinggal dimasukkan ke rumus.'
     },
     {
       chapter:'hitung', chart:'delta-q',
-      text:'Mulai dari jumlahnya. Jumlah yang diminta turun dari 40 unit menjadi 30 unit, jadi berkurang <strong>10 unit</strong>. Dibandingkan jumlah awalnya yang 40 unit, penurunan itu setara <strong>25 persen</strong>.',
-      info:'<span class="rumus">persentase perubahan Q = (30 - 40) : 40 = -0,25</span><span class="hasil">Jumlah turun 25 persen</span>'
+      text:'Mulai dari jumlahnya. Jumlah yang diminta turun dari 40 unit menjadi 30 unit, jadi <strong>delta Q sama dengan -10</strong>. Dibandingkan jumlah awalnya yang 40 unit, penurunan itu setara <strong>25 persen</strong>.',
+      info: blok(dQ + '= 30 − 40 = −10', true)
+          + '<span class="hasil">Jumlah turun 25 persen</span>'
     },
     {
       chapter:'hitung', chart:'delta-qp',
-      text:'Sekarang harganya. Harga naik dari Rp20.000 menjadi Rp30.000, jadi bertambah <strong>Rp10.000</strong>. Dibandingkan harga awalnya yang Rp20.000, kenaikan itu setara <strong>50 persen</strong>.',
-      info:'<span class="rumus">persentase perubahan P = (30 - 20) : 20 = 0,50</span><span class="hasil">Harga naik 50 persen</span>'
+      text:'Sekarang harganya. Harga naik dari Rp20.000 menjadi Rp30.000, jadi <strong>delta P sama dengan +10</strong>. Dibandingkan harga awalnya yang Rp20.000, kenaikan itu setara <strong>50 persen</strong>.',
+      info: blok(dP + '= 30 − 20 = +10', true)
+          + '<span class="hasil">Harga naik 50 persen</span>'
     },
     {
       chapter:'hitung', chart:'delta-qp',
-      text:'Tinggal dibagi. Turun 25 persen dibagi naik 50 persen hasilnya <strong>-0,5</strong>. Tanda minus selalu muncul karena harga dan jumlah bergerak berlawanan arah, jadi yang dibaca nilai mutlaknya. Karena <strong>0,5 lebih kecil dari 1</strong>, permintaan barang ini tergolong <strong>inelastis</strong>.',
-      info:'<span class="rumus">Ed = -0,25 : 0,50 = -0,5</span><span class="hasil">|Ed| = 0,5 sehingga permintaannya inelastis</span>'
+      text:'Dimasukkan ke rumus <strong>point elasticity</strong> dengan titik A sebagai acuan, hasilnya <strong>-0,5</strong>. Tanda minus selalu muncul karena harga dan jumlah bergerak berlawanan arah, jadi yang dibaca nilai mutlaknya. Karena <strong>0,5 lebih kecil dari 1</strong>, permintaan barang ini tergolong <strong>inelastis</strong>.',
+      info: nama('Point Elasticity di titik A')
+          + blok(Ed + '=' + pec('−10', '+10') + '×' + pec('20', '40') + '= −1 × 0,5 = −0,5')
+          + '<span class="hasil">|Ed| = 0,5 sehingga permintaannya inelastis</span>'
     },
     {
       chapter:'hitung', chart:'delta-qp',
-      text:'Satu catatan penting. Kalau perhitungan tadi dibalik arahnya, dari titik B ke titik A, hasilnya jadi berbeda karena pembaginya ikut berubah. Supaya hasilnya sama ke arah mana pun, dipakai <strong>metode titik tengah</strong>. Pembaginya bukan nilai awal, melainkan rata-rata nilai awal dan nilai akhir.',
-      info:'<span class="rumus">Ed = (-10 : 35) : (10 : 25) = -0,29 : 0,40 = -0,71</span>Hasilnya tetap di bawah 1, jadi kesimpulannya sama. Permintaannya inelastis.'
+      text:'Perhatikan satu hal. Kalau acuannya diganti titik B, hasilnya jadi berbeda karena P dan Q pembaginya ikut berubah. Di sinilah <strong>arc elasticity</strong> berguna. Pembaginya memakai jumlah kedua nilai, jadi hasilnya sama saja mau dihitung dari A ke B atau sebaliknya.',
+      info: nama('Arc Elasticity antara A dan B')
+          + blok(Ed + '=' + pec('−10', '+10') + '×' + pec('20 + 30', '40 + 30') + '=' + '&nbsp;−1&nbsp;×' + pec('50', '70') + '= −0,71')
+          + '<span class="hasil">|Ed| = 0,71 sehingga kesimpulannya tetap inelastis</span>'
     },
     {
       chapter:'bentuk', chart:'perfectly-inelastic',
       text:'Sekarang lima bentuk kurvanya. Yang pertama <strong>perfectly inelastic</strong>, permintaan yang sama sekali tidak peka. Harga mau naik setinggi apa pun, jumlah yang dibeli tetap sama. Kurvanya berdiri tegak lurus. Contohnya tanah dan obat yang sangat dibutuhkan seperti insulin.',
-      info:'<strong>Perfectly Inelastic Demand</strong><span class="rumus">|Ed| = 0</span>Harga berubah, jumlah tetap. Persentase perubahan Q sama dengan nol, jadi hasil baginya juga nol.'
+      info:'<strong>Perfectly Inelastic Demand</strong><br>Harga berubah, jumlah tetap. Delta Q sama dengan nol, jadi pembilangnya nol dan hasil baginya juga nol.'
+          + blok(mutlak + '= 0', true)
     },
     {
       chapter:'bentuk', chart:'inelastic',
       text:'Yang kedua <strong>inelastic</strong>. Konsumen bereaksi, tetapi reaksinya kecil. Harga naik 100 persen, jumlah yang diminta cuma turun sekitar 14 persen. Kurvanya curam. Contohnya barang kebutuhan pokok yang tidak banyak penggantinya.',
-      info:'<strong>Inelastic Demand</strong><span class="rumus">|Ed| kurang dari 1</span>Persentase perubahan harga lebih besar daripada persentase perubahan jumlah.'
+      info:'<strong>Inelastic Demand</strong><br>Persentase perubahan harga lebih besar daripada persentase perubahan jumlah.'
+          + blok(mutlak + '&lt; 1' + grp('&nbsp;&nbsp;dengan&nbsp;&nbsp;') + pct('P') + '&gt;' + pct('Q'), true)
     },
     {
       chapter:'bentuk', chart:'unitary',
-      text:'Yang ketiga <strong>unitary</strong>. Perubahan harga dan perubahan jumlah persis sama besarnya. Harga naik 40 persen, jumlah turun 40 persen juga. Di dunia nyata bentuk ini hampir tidak pernah ketemu.',
-      info:'<strong>Unitary Elastic Demand</strong><span class="rumus">|Ed| = 1</span>Persentase perubahan harga sama dengan persentase perubahan jumlah. Kurvanya melengkung karena perbandingan itu harus terjaga di sepanjang kurva. Di slide kuliah bentuknya sering disederhanakan menjadi garis lurus.'
+      text:'Yang ketiga <strong>unitary</strong>. Perubahan harga dan perubahan jumlah persis sama besarnya. Harga naik 66,7 persen, jumlah turun 66,7 persen juga. Kurvanya lurus dengan kemiringan seimbang, dan di dunia nyata bentuk ini hampir tidak pernah ketemu.',
+      info:'<strong>Unitary Elastic Demand</strong><br>Persentase perubahan harga sama dengan persentase perubahan jumlah.'
+          + blok(mutlak + '= 1' + grp('&nbsp;&nbsp;dengan&nbsp;&nbsp;') + pct('P') + '=' + pct('Q'), true)
+          + catat('Titik A dan B diambil seimbang terhadap tengah garis. Di sepanjang garis lurus, koefisiennya memang tidak sama di setiap titik.')
     },
     {
       chapter:'bentuk', chart:'elastic',
       text:'Yang keempat <strong>elastic</strong>. Konsumen gampang sekali berpindah. Harga turun sedikit saja, sekitar 12,5 persen, jumlah yang diminta langsung melonjak 100 persen. Kurvanya landai. Contohnya barang yang penggantinya banyak seperti bolpen.',
-      info:'<strong>Elastic Demand</strong><span class="rumus">|Ed| lebih dari 1</span>Persentase perubahan harga lebih kecil daripada persentase perubahan jumlah.'
+      info:'<strong>Elastic Demand</strong><br>Persentase perubahan harga lebih kecil daripada persentase perubahan jumlah.'
+          + blok(mutlak + '&gt; 1' + grp('&nbsp;&nbsp;dengan&nbsp;&nbsp;') + pct('P') + '&lt;' + pct('Q'), true)
     },
     {
       chapter:'bentuk', chart:'perfectly-elastic',
       text:'Yang kelima <strong>perfectly elastic</strong>. Di harga tertentu konsumen mau membeli berapa pun jumlahnya, tetapi begitu harganya dinaikkan sedikit saja pembelinya langsung hilang semua. Kurvanya mendatar.',
-      info:'<strong>Perfectly Elastic Demand</strong><span class="rumus">|Ed| tak terhingga</span>Harga tetap, jumlah berubah. Pembaginya nol, jadi hasilnya membesar tanpa batas.'
-    },
-    {
-      chapter:'bentuk', chart:'ringkasan',
-      text:'Kalau kelimanya digambar dalam satu bidang dan dibuat melewati titik yang sama, polanya langsung kelihatan. <strong>Semakin tegak kurvanya, semakin tidak peka</strong> permintaannya. <strong>Semakin mendatar kurvanya, semakin peka</strong> permintaannya.',
-      info:'Urutannya dari yang paling tidak peka sampai yang paling peka: tegak lurus dengan |Ed| = 0, curam dengan |Ed| kurang dari 1, melengkung dengan |Ed| = 1, landai dengan |Ed| lebih dari 1, lalu mendatar dengan |Ed| tak terhingga.'
+      info:'<strong>Perfectly Elastic Demand</strong><br>Harga tetap, jumlah berubah. Delta P sama dengan nol, jadi penyebutnya nol dan hasilnya membesar tanpa batas.'
+          + blok(mutlak + '= ∞', true)
     }
   ];
 
@@ -308,7 +390,6 @@
   const sy = (p) => margin.top + plotH - (p/P_MAX) * plotH;
 
   const chartSvg = document.getElementById('chartSvg');
-  const legendBox = document.getElementById('legend');
 
   function svgEl(tag, attrs){
     const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -342,16 +423,18 @@
   // Garis lurus dari (q1,p1) ke (q2,p2) dalam satuan data.
   function garisData(q1, p1, q2, p2, opsi){
     const o = opsi || {};
-    return tambah('path', {
+    const attrs = {
       d:'M '+sx(q1)+','+sy(p1)+' L '+sx(q2)+','+sy(p2),
       fill:'none', stroke:o.warna, 'stroke-width':o.tebal || 3.5,
-      'stroke-linecap':'round',
-      class:'anim'
-    });
+      'stroke-linecap':'round', class:'anim'
+    };
+    if(o.putus) attrs['stroke-dasharray'] = o.putus;
+    return tambah('path', attrs);
   }
 
-  // Kurva unitary berbentuk hiperbola, hasil kali P dan Q selalu tetap.
-  function hiperbola(k, qAwal, qAkhir, warna){
+  // Kurva melengkung, hasil kali P dan Q selalu tetap. Dipakai di bagian
+  // rumus supaya garis singgung dan tali busur benar-benar berbeda.
+  function kurvaLengkung(k, qAwal, qAkhir, warna){
     let d = '';
     for(let q=qAwal; q<=qAkhir; q+=0.5){
       d += (d ? ' L ' : 'M ') + sx(q) + ',' + sy(k/q);
@@ -406,9 +489,9 @@
   const BENTUK = {
     'perfectly-inelastic':{
       warna:WARNA.sempurnaInelastis,
-      gambar(warna, tanpaLabel){
+      gambar(warna){
         garisData(TITIK_UMUM.q, 4, TITIK_UMUM.q, 60, { warna });
-        if(!tanpaLabel) labelKurva(TITIK_UMUM.q, 60, '|Ed| = 0', warna, 'middle');
+        labelKurva(TITIK_UMUM.q, 60, '|Ed| = 0', warna, 'middle');
       },
       sorot(){
         titik(30, 18, 'A', WARNA.sempurnaInelastis, { geserX:12 });
@@ -419,10 +502,10 @@
     },
     'inelastic':{
       warna:WARNA.inelastis,
-      gambar(warna, tanpaLabel){
+      gambar(warna){
         // P = 150 - 4Q, lewat (30,30). Digambar dari P=58 sampai P=6.
         garisData(23, 58, 36, 6, { warna });
-        if(!tanpaLabel) labelKurva(23, 58, '|Ed| < 1', warna, 'start', -8);
+        labelKurva(23, 58, '|Ed| < 1', warna, 'start', -8);
       },
       sorot(){
         titik(35, 10, 'A', WARNA.inelastis, { geserX:12, geserY:16 });
@@ -433,23 +516,24 @@
     },
     'unitary':{
       warna:WARNA.unitary,
-      gambar(warna, tanpaLabel){
-        hiperbola(900, 15, 62, warna);
-        if(!tanpaLabel) labelKurva(62, 900/62, '|Ed| = 1', warna, 'end', -12);
+      gambar(warna){
+        // Garis lurus P = 60 - Q, kemiringannya seimbang seperti garis Q = P.
+        garisData(0, 60, 60, 0, { warna });
+        labelKurva(52, 8, '|Ed| = 1', warna, 'end', 22);
       },
       sorot(){
-        titik(30, 30, 'A', WARNA.unitary, { geserX:12 });
-        titik(20, 45, 'B', WARNA.unitary, { geserX:12 });
-        penandaP(30, 45, '+40%');
-        penandaQ(20, 30, '-40%');
+        titik(40, 20, 'A', WARNA.unitary, { geserX:12 });
+        titik(20, 40, 'B', WARNA.unitary, { geserX:12 });
+        penandaP(20, 40, '+66,7%');
+        penandaQ(20, 40, '-66,7%');
       }
     },
     'elastic':{
       warna:WARNA.elastis,
-      gambar(warna, tanpaLabel){
+      gambar(warna){
         // P = 36 - 0,2Q, lewat (30,30).
         garisData(3, 35.4, 62, 23.6, { warna });
-        if(!tanpaLabel) labelKurva(3, 35.4, '|Ed| > 1', warna, 'start', -12);
+        labelKurva(3, 35.4, '|Ed| > 1', warna, 'start', -12);
       },
       sorot(){
         titik(20, 32, 'A', WARNA.elastis, { geserX:-12, anchor:'end' });
@@ -460,9 +544,9 @@
     },
     'perfectly-elastic':{
       warna:WARNA.sempurnaElastis,
-      gambar(warna, tanpaLabel){
+      gambar(warna){
         garisData(3, TITIK_UMUM.p, 62, TITIK_UMUM.p, { warna });
-        if(!tanpaLabel) labelKurva(62, TITIK_UMUM.p, 'Ed tak terhingga', warna, 'end', -12);
+        labelKurva(62, TITIK_UMUM.p, 'Ed tak terhingga', warna, 'end', -12);
       },
       sorot(){
         titik(15, 30, 'A', WARNA.sempurnaElastis, { geserX:-12, geserY:22, anchor:'end' });
@@ -473,40 +557,36 @@
     }
   };
 
-  const URUTAN_BENTUK = ['perfectly-inelastic','inelastic','unitary','elastic','perfectly-elastic'];
-  const NAMA_BENTUK = {
-    'perfectly-inelastic':'Perfectly inelastic, |Ed| = 0',
-    'inelastic':'Inelastic, |Ed| kurang dari 1',
-    'unitary':'Unitary, |Ed| = 1',
-    'elastic':'Elastic, |Ed| lebih dari 1',
-    'perfectly-elastic':'Perfectly elastic, |Ed| tak terhingga'
-  };
-
-  function isiLegenda(){
-    legendBox.innerHTML = '';
-    URUTAN_BENTUK.forEach(kunci => {
-      const item = document.createElement('span');
-      item.className = 'legend-item';
-      const sw = document.createElement('span');
-      sw.className = 'legend-swatch';
-      sw.style.background = BENTUK[kunci].warna;
-      const teks = document.createElement('span');
-      teks.textContent = NAMA_BENTUK[kunci];
-      item.appendChild(sw);
-      item.appendChild(teks);
-      legendBox.appendChild(item);
-    });
-  }
-
   // ===================================================================
   // PENGGAMBAR PER LANGKAH
   // ===================================================================
   const demandP = (Q) => 60 - Q;
+  const K_LENGKUNG = 900;
+
+  // Kurva melengkung beserta garis singgung dan tali busurnya, dipakai di
+  // bagian rumus. Garis singgung di titik (30,30) kemiringannya -1.
+  function gambarRumus(pakaiSinggung, pakaiBusur){
+    kurvaLengkung(K_LENGKUNG, 15, 62, WARNA.demand);
+    // Nama kurva ditaruh di ujung kiri atas. Ujung kanannya sengaja
+    // dikosongkan supaya label tali busur tidak berebut tempat.
+    labelKurva(15, K_LENGKUNG/15, 'Demand (D)', WARNA.demand, 'start', -12);
+
+    if(pakaiSinggung){
+      garisData(17, 43, 47, 13, { warna:WARNA.emas, tebal:2.6, putus:'7,5' });
+      labelKurva(42, 18, 'garis singgung', WARNA.emas, 'middle', 20);
+      titik(30, 30, 'T', WARNA.emas, { bantu:false, geserX:12, geserY:-12 });
+    }
+    if(pakaiBusur){
+      garisData(20, 45, 45, 20, { warna:WARNA.busur, tebal:2.6, putus:'7,5' });
+      labelKurva(26, 39, 'tali busur', WARNA.busur, 'start', -12);
+      titik(20, 45, 'A', WARNA.busur, { bantu:false, geserX:-12, anchor:'end' });
+      titik(45, 20, 'B', WARNA.busur, { bantu:false, geserX:12 });
+    }
+  }
 
   function gambar(nama){
     chartSvg.innerHTML = '';
     gambarRangka();
-    legendBox.classList.remove('show');
 
     if(nama === 'polos'){
       garisData(0, demandP(0), 60, demandP(60), { warna:WARNA.demand });
@@ -522,20 +602,17 @@
       return;
     }
 
+    if(nama === 'rumus-titik'){ gambarRumus(true, false); return; }
+    if(nama === 'rumus-busur'){ gambarRumus(false, true); return; }
+    if(nama === 'rumus-banding'){ gambarRumus(true, true); return; }
+
     if(nama === 'titik-a' || nama === 'titik-ab' || nama === 'delta-q' || nama === 'delta-qp'){
       garisData(0, demandP(0), 60, demandP(60), { warna:WARNA.demand });
       labelKurva(6, demandP(6), 'Demand (D)', WARNA.demand, 'start', -12);
       titik(40, 20, 'A (40 ; 20)', WARNA.demand, { geserX:12 });
       if(nama !== 'titik-a') titik(30, 30, 'B (30 ; 30)', WARNA.demand, { geserX:12 });
-      if(nama === 'delta-q' || nama === 'delta-qp') penandaQ(30, 40, 'jumlah turun 25%');
-      if(nama === 'delta-qp') penandaP(20, 30, 'harga naik 50%');
-      return;
-    }
-
-    if(nama === 'ringkasan'){
-      URUTAN_BENTUK.forEach(kunci => BENTUK[kunci].gambar(BENTUK[kunci].warna, true));
-      tambah('circle', { cx:sx(TITIK_UMUM.q), cy:sy(TITIK_UMUM.p), r:6, fill:'#fff', stroke:WARNA.sumbu, 'stroke-width':2.5, class:'anim' });
-      legendBox.classList.add('show');
+      if(nama === 'delta-q' || nama === 'delta-qp') penandaQ(30, 40, 'ΔQ = -10');
+      if(nama === 'delta-qp') penandaP(20, 30, 'ΔP = +10');
       return;
     }
 
@@ -599,7 +676,6 @@
     document.querySelector('.story-card').scrollIntoView({ behavior:'smooth', block:'start' });
   });
 
-  isiLegenda();
   render();
 })();
 </script>
