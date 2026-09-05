@@ -230,6 +230,97 @@ bentrok.
 > **Data ini tidak tampil ke mahasiswa.** Hanya halaman operasional yang
 > memakainya, dan isinya tidak ikut ditulis ke dokumen yang dibaca pengunjung.
 
+### Excel
+
+Tab ini menjembatani berkas **Informasi Kelas Asistensi** yang tiap semester
+disusun pengurus dengan data yang dipakai situs.
+
+**Unduh.** Menyusun berkas Excel dari data yang sedang tersimpan. Karena
+berkasnya dibuat ulang tiap kali diunduh, Excel lama tidak perlu ikut disunting
+setiap ada perubahan jadwal. Ubah di halaman ini, lalu unduh ketika berkasnya
+dibutuhkan untuk dibagikan.
+
+**Unggah.** Membaca berkas Excel dan memasukkan isinya ke basis data. Empat
+lembar dibaca:
+
+| Lembar | Mengisi |
+| --- | --- |
+| Jadwal + Ruang Kelas | Mata Kuliah dan Jadwal Permanen |
+| Tim Pengajar | Pengajar |
+| google classroom | Kode Google Classroom |
+| Contact Koor | Koordinator Mata Kuliah |
+
+Lembar **Rekap Jumlah Ngajar** sengaja tidak dibaca dan tidak ikut ditulis,
+karena isinya hitungan yang bisa diturunkan sendiri dari lembar Tim Pengajar.
+
+Berkas tidak langsung disimpan. Tombol **Bandingkan dengan data di web**
+membaca berkasnya, lalu menampilkan perbedaannya baris per baris. Tidak ada
+satu pun mata kuliah, jadwal, ruang, atau pengajar yang berubah sampai tombol
+**Simpan perubahan** ditekan.
+
+Tiap baris diberi tanda, dengan warna sekaligus kata supaya tetap terbaca kalau
+halamannya dicetak hitam putih:
+
+| Tanda | Warna | Artinya |
+| --- | --- | --- |
+| Baru | hijau | ada di berkas, belum ada di web |
+| Berubah | kuning | ada di keduanya, isinya berbeda |
+| Dihapus | merah | ada di web, tidak ada di berkas, dan akan dibuang |
+| Dibiarkan | biru muda | ada di web, tidak ada di berkas, tapi tidak disentuh |
+
+Pada baris yang berubah, nilai lamanya ditampilkan dicoret di sebelah kiri dan
+nilai barunya ditebalkan di sebelah kanan, jadi arah perubahannya kelihatan
+tanpa membuka tab lain. Yang isinya sudah sama tidak ditulis ulang, dan
+jumlahnya disebut di kepingan hitungan paling atas.
+
+Tiap baris bisa diperlakukan sendiri-sendiri lewat tiga tindakan:
+
+| Tindakan | Gunanya |
+| --- | --- |
+| Kotak centang di kolom Simpan | menentukan baris itu ikut tersimpan atau tidak. Baris yang centangnya dilepas berubah menjadi abu-abu berlabel "Tidak disimpan" dan tetap tinggal di daftar |
+| Tombol **Ubah** | menyunting nilai yang akan disimpan, misalnya membetulkan ruang atau jam yang salah ketik di Excel. Kode dan KP kelas yang sudah ada di web dikunci, karena keduanya penanda yang menghubungkan baris itu dengan data yang tersimpan |
+| Tanda silang | membuang baris itu dari daftar sama sekali. Kalau ternyata masih dibutuhkan, tekan tombol bandingkan sekali lagi |
+
+Suntingan pada satu baris diperiksa saat tombol **Simpan baris** ditekan. Jam
+yang terbalik dan kolom wajib yang dikosongkan ditolak di tempat, jadi tidak
+sampai tersimpan. Yang disimpan nanti persis yang terlihat di layar, termasuk
+hasil suntingan itu.
+
+Angka pada tombol simpan dan pada tiap judul bagian mengikuti pilihan Anda,
+misalnya "2 dari 3 disimpan". Kalau tidak ada satu pun baris yang dicentang,
+tombol simpannya mati sendiri.
+
+Baris yang tidak bisa dibaca, misalnya jam yang formatnya kacau, masuk ke
+bagian **Baris yang dilewati** beserta nomor barisnya di Excel.
+
+Bentuk lembarnya boleh seperti berkas aslinya, dengan sel kode dan nama mata
+kuliah yang digabung ke bawah dan baris kosong penyekat. Jam ditulis seperti
+`13.00 - 14.40`. Berkas hasil unduhan juga bisa diunggah kembali apa adanya.
+
+Centang **Hapus data yang tidak ada di berkas** menentukan keadaan awal baris
+merahnya. Tanpa centang itu, semua baris yang ada di web tapi tidak ada di
+berkas tampil sebagai "Dibiarkan" dan tidak akan disentuh. Dengan centang itu,
+semuanya langsung tercentang sebagai "Dihapus". Apa pun pilihannya, tiap baris
+tetap bisa diatur satu per satu sesudahnya, jadi menghapus satu kelas saja pun
+bisa tanpa ikut membuang yang lain.
+
+Kelas yang dihapus menyeret perubahan sementara yang menunjuknya, supaya tidak
+ada perubahan yatim yang menunjuk kelas yang sudah tidak ada.
+
+Mengubah centang itu setelah perbandingan tersusun akan membatalkan
+ringkasannya, karena isinya sudah tidak lagi menggambarkan apa yang akan
+terjadi. Tekan tombol bandingkan sekali lagi.
+
+**Kode Google Classroom dan Koordinator Mata Kuliah** dikelola di tab ini juga,
+karena keduanya tidak punya tempat di tab lain. Keduanya hanya dipakai pengurus,
+tidak ditampilkan ke mahasiswa, dan tidak bisa dibaca pengunjung sama sekali.
+Kode kelas adalah kunci masuk kelas daring, dan daftar kontak koordinator berisi
+nomor pribadi, jadi keduanya ditutup di aturan keamanan.
+
+> Kode di lembar **Contact Koor** kerap berbeda dari kode di lembar jadwal,
+> karena mengikuti kurikulum yang lain. Karena itu kolom kodenya tidak dipaksa
+> cocok dengan daftar Mata Kuliah, dan barisnya tetap tersimpan apa adanya.
+
 ### Pengumuman
 
 Tampil di halaman utama. Centang **Sematkan** untuk menaruhnya paling atas.
@@ -593,6 +684,11 @@ Pengurus  →  /operasional  →  koleksi matakuliah, jadwal, perubahan,
                                     ↓ dirangkum otomatis tiap menyimpan
 Mahasiswa →  halaman publik  ←  satu dokumen  publik/terkini
 ```
+
+Dua koleksi berdiri di luar aliran itu, yaitu `classroom` dan `koordinator`.
+Keduanya diisi lewat tab Excel, tidak pernah ikut dirangkum ke
+`publik/terkini`, dan aturan keamanannya menutup pembacaan untuk siapa pun yang
+bukan admin. Isinya kunci masuk kelas daring dan kontak pribadi pengurus.
 
 Halaman publik sengaja hanya membaca **satu dokumen**. Kalau ia membaca koleksi
 satu per satu, tiap pengunjung menimbulkan puluhan pembacaan Firestore dan

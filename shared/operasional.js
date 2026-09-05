@@ -12,6 +12,8 @@
   dijalankan di server Google dan tidak bisa dilewati lewat Console peramban.
 */
 
+import { bacaBerkas, susunBerkas, unduhBlob } from './excel.js';
+
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
 
 const { initializeApp } = await import(`${SDK}/firebase-app.js`);
@@ -275,6 +277,10 @@ const data = {
   perubahan: [],
   pengumuman: [],
   pengajar: [],
+  // Dua koleksi di bawah hanya dipakai halaman ini dan berkas Excel. Isinya
+  // tidak pernah ikut diterbitkan ke dokumen publik.
+  classroom: [],
+  koordinator: [],
   pengaturan: { mulaiDefault: '', perMatkul: {} },
 };
 
@@ -307,18 +313,22 @@ async function ambilKoleksi(nama){
 async function muatSemua(){
   status('Memuat data…', 'sibuk');
   try{
-    const [mk, jd, pb, pm, pg] = await Promise.all([
+    const [mk, jd, pb, pm, pg, gc, ko] = await Promise.all([
       ambilKoleksi('matakuliah'),
       ambilKoleksi('jadwal'),
       ambilKoleksi('perubahan'),
       ambilKoleksi('pengumuman'),
       ambilKoleksi('pengajar'),
+      ambilKoleksi('classroom'),
+      ambilKoleksi('koordinator'),
     ]);
     data.matakuliah = mk.sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
     data.jadwal = jd;
     data.perubahan = pb.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
     data.pengumuman = pm;
     data.pengajar = pg;
+    data.classroom = gc;
+    data.koordinator = ko;
 
     try{
       const st = await getDoc(doc(db, 'pengaturan', 'umum'));
@@ -350,12 +360,15 @@ function gambarSemua(){
   isiPilihanMatkul();
   isiPilihanKelas();
   isiPilihanPengajar();
+  isiDaftarKodeMk();
   gambarMatkul();
   gambarJadwal();
   gambarPerubahan();
   gambarKelompok();
   gambarPengajar();
   gambarPengumuman();
+  gambarClassroom();
+  gambarKoordinator();
   gambarPengaturan();
 }
 
@@ -1720,7 +1733,914 @@ async function terbitkan(){
 }
 
 /* ============================================================
-   11. Impor sekali dari data lama
+   11. Excel: unduh, unggah, dan data pendampingnya
+   ============================================================ */
+
+/*
+  Sumber kebenaran data adalah basis data, bukan berkas Excel.
+
+  Pengurus tetap menerima berkas Informasi Kelas Asistensi tiap awal semester,
+  jadi unggahan dipakai untuk mengisi sekali di depan. Sesudah itu perubahan
+  cukup dilakukan di halaman ini, dan berkas Excel yang baru diambil lewat
+  tombol unduh. Dengan begitu tidak ada dua salinan yang harus dijaga sama.
+
+  Dua lembar Excel tidak punya tempat di koleksi yang sudah ada, yaitu kode
+  Google Classroom dan daftar koordinator. Keduanya diberi koleksi sendiri,
+  bukan ditempelkan sebagai kolom jadwal dan mata kuliah, karena kodenya
+  sering tidak sama: lembar Contact Koor memakai kode kurikulum lain, dan
+  lembar google classroom memuat mata kuliah yang tidak diampu KAFBE.
+  Menempelkannya berarti membuang baris yang kodenya tidak cocok, dan berkas
+  hasil unduhan jadi tidak lagi selengkap berkas aslinya.
+*/
+
+function kunciKelas(kode, kp){
+  return `${String(kode || '').toUpperCase()}|${String(kp || '').toUpperCase()}`;
+}
+
+function isiDaftarKodeMk(){
+  const el = $('daftarKodeMk');
+  if(!el) return;
+  el.innerHTML = data.matakuliah
+    .map(m => `<option value="${esc(m.kode)}">${esc(m.nama)}</option>`).join('');
+}
+
+/* ---------- kode Google Classroom ---------- */
+
+function gambarClassroom(){
+  const t = $('tabelClassroom');
+  const q = ($('cariClassroom').value || '').trim().toLowerCase();
+  const baris = data.classroom
+    .filter(c => !q || [c.kode, c.nama, namaMatkul(c.kode), c.kp, c.classroom].join(' ').toLowerCase().includes(q))
+    .sort((a,b) =>
+      String(namaMatkul(a.kode) || a.nama || a.kode).localeCompare(String(namaMatkul(b.kode) || b.nama || b.kode))
+      || String(a.kp).localeCompare(String(b.kp)));
+
+  if(baris.length === 0){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">${
+      data.classroom.length
+        ? 'Tidak ada yang cocok dengan pencarian.'
+        : 'Belum ada kode kelas daring. Isi lewat formulir di atas atau unggah berkas Excel.'
+    }</td></tr></tbody>`;
+    return;
+  }
+
+  t.innerHTML = `
+    <thead><tr><th>Kode</th><th>Mata kuliah</th><th>KP</th><th>Kode kelas</th><th></th></tr></thead>
+    <tbody>${baris.map(c => `<tr>
+      <td><strong>${esc(c.kode)}</strong></td>
+      <td>${esc(namaMatkul(c.kode) || c.nama || '')}</td>
+      <td>${esc(c.kp)}</td>
+      <td>${esc(c.classroom || '')}</td>
+      <td><div class="op-tombol-baris">
+        <button class="op-mini" data-ubah-gc="${esc(c.id)}">Ubah</button>
+        <button class="op-mini op-hapus" data-hapus-gc="${esc(c.id)}">Hapus</button>
+      </div></td>
+    </tr>`).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-ubah-gc]').forEach(b => b.addEventListener('click', () => {
+    const c = data.classroom.find(x => x.id === b.dataset.ubahGc);
+    if(!c) return;
+    $('gcId').value = c.id; $('gcKode').value = c.kode; $('gcNama').value = c.nama || '';
+    $('gcKp').value = c.kp; $('gcKelas').value = c.classroom || '';
+    modeUbah('formClassroom', true);
+    $('gcKode').focus();
+  }));
+
+  t.querySelectorAll('[data-hapus-gc]').forEach(b => b.addEventListener('click', async () => {
+    const c = data.classroom.find(x => x.id === b.dataset.hapusGc);
+    if(!c) return;
+    if(!confirm(`Hapus kode kelas daring ${c.kode} KP ${c.kp}?`)) return;
+    try{
+      status('Menghapus…', 'sibuk');
+      await deleteDoc(doc(db, 'classroom', c.id));
+      await muatSemua();
+      status('Terhapus.', 'benar');
+    }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
+  }));
+}
+
+$('cariClassroom').addEventListener('input', gambarClassroom);
+
+$('formClassroom').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanClassroom');
+  const id = $('gcId').value;
+  const muatan = {
+    kode: $('gcKode').value.trim().toUpperCase(),
+    nama: $('gcNama').value.trim(),
+    kp: $('gcKp').value.trim().toUpperCase(),
+    classroom: $('gcKelas').value.trim(),
+  };
+
+  const salah = [];
+  if(!muatan.kode) salah.push('Kode mata kuliah belum diisi.');
+  if(!muatan.kp) salah.push('KP belum diisi.');
+  const kembar = data.classroom.find(c =>
+    c.id !== id && kunciKelas(c.kode, c.kp) === kunciKelas(muatan.kode, muatan.kp));
+  if(kembar) salah.push(`${muatan.kode} KP ${muatan.kp} sudah punya kode kelas daring.`);
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
+
+  try{
+    status('Menyimpan…', 'sibuk');
+    if(id) await updateDoc(doc(db, 'classroom', id), muatan);
+    else await addDoc(collection(db, 'classroom'), muatan);
+    e.target.reset(); $('gcId').value = ''; modeUbah('formClassroom', false);
+    bersihkanPesan(el);
+    await muatSemua();
+    status('Tersimpan.', 'benar');
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
+
+/* ---------- koordinator mata kuliah ---------- */
+
+function gambarKoordinator(){
+  const t = $('tabelKoordinator');
+  if(data.koordinator.length === 0){
+    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada koordinator. Isi lewat formulir di atas atau unggah berkas Excel.</td></tr></tbody>';
+    return;
+  }
+  const baris = [...data.koordinator].sort((a,b) =>
+    String(a.nama || a.kode).localeCompare(String(b.nama || b.kode)));
+
+  t.innerHTML = `
+    <thead><tr><th>Kode</th><th>Mata kuliah</th><th>Koordinator</th><th>NRP</th><th>WA atau Line</th><th></th></tr></thead>
+    <tbody>${baris.map(k => `<tr>
+      <td><strong>${esc(k.kode)}</strong></td>
+      <td>${esc(k.nama || namaMatkul(k.kode) || '')}</td>
+      <td>${esc(k.koordinator || '')}</td>
+      <td>${esc(k.nrp || '')}</td>
+      <td>${esc(k.kontak || '')}</td>
+      <td><div class="op-tombol-baris">
+        <button class="op-mini" data-ubah-ko="${esc(k.id)}">Ubah</button>
+        <button class="op-mini op-hapus" data-hapus-ko="${esc(k.id)}">Hapus</button>
+      </div></td>
+    </tr>`).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-ubah-ko]').forEach(b => b.addEventListener('click', () => {
+    const k = data.koordinator.find(x => x.id === b.dataset.ubahKo);
+    if(!k) return;
+    $('koId').value = k.id; $('koKode').value = k.kode; $('koNama').value = k.nama || '';
+    $('koNama2').value = k.koordinator || ''; $('koNrp').value = k.nrp || '';
+    $('koKontak').value = k.kontak || '';
+    modeUbah('formKoordinator', true);
+    $('koKode').focus();
+  }));
+
+  t.querySelectorAll('[data-hapus-ko]').forEach(b => b.addEventListener('click', async () => {
+    const k = data.koordinator.find(x => x.id === b.dataset.hapusKo);
+    if(!k) return;
+    if(!confirm(`Hapus koordinator untuk ${k.nama || k.kode}?`)) return;
+    try{
+      status('Menghapus…', 'sibuk');
+      await deleteDoc(doc(db, 'koordinator', k.id));
+      await muatSemua();
+      status('Terhapus.', 'benar');
+    }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
+  }));
+}
+
+$('formKoordinator').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanKoordinator');
+  const id = $('koId').value;
+  const muatan = {
+    kode: $('koKode').value.trim().toUpperCase(),
+    nama: $('koNama').value.trim(),
+    koordinator: $('koNama2').value.trim(),
+    nrp: $('koNrp').value.trim(),
+    kontak: $('koKontak').value.trim(),
+  };
+
+  const salah = [];
+  if(!muatan.kode) salah.push('Kode mata kuliah belum diisi.');
+  const kembar = data.koordinator.find(k => k.id !== id && k.kode === muatan.kode);
+  if(kembar) salah.push(`Kode ${muatan.kode} sudah terdaftar atas nama "${kembar.koordinator || 'tanpa koordinator'}".`);
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
+
+  try{
+    status('Menyimpan…', 'sibuk');
+    if(id) await updateDoc(doc(db, 'koordinator', id), muatan);
+    else await addDoc(collection(db, 'koordinator'), muatan);
+    e.target.reset(); $('koId').value = ''; modeUbah('formKoordinator', false);
+    bersihkanPesan(el);
+    await muatSemua();
+    status('Tersimpan.', 'benar');
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
+
+/* ---------- unduh ---------- */
+
+$('xlUnduh').addEventListener('click', async () => {
+  const el = $('pesanUnduh');
+  bersihkanPesan(el);
+  try{
+    status('Menyusun berkas Excel…', 'sibuk');
+    const blob = await susunBerkas({
+      matakuliah: data.matakuliah,
+      jadwal: data.jadwal,
+      pengajar: data.pengajar.map(p => ({ kode: p.kode, kp: p.kp, pengajar: p.nama, nrp: p.nrp })),
+      classroom: data.classroom,
+      koordinator: data.koordinator,
+    });
+    const hariIni = hariIniJakarta();
+    unduhBlob(blob, `INFORMASI KELAS ASISTENSI ${hariIni}.xlsx`);
+    pesan(el, `Berkas terunduh dengan nama "INFORMASI KELAS ASISTENSI ${hariIni}.xlsx".`, 'benar');
+    status('Berkas Excel selesai disusun.', 'benar');
+  }catch(err){
+    console.error(err);
+    pesan(el, 'Gagal menyusun berkas: ' + esc(err.message), 'salah');
+    status('Gagal menyusun berkas Excel.', 'salah');
+  }
+});
+
+/* ---------- unggah ---------- */
+
+/*
+  Hasil pembacaan berkas disandingkan dengan isi basis data, lalu ditahan di
+  sini sampai pengurus menekan tombol simpan.
+
+  Pemisahan ini disengaja. Berkas yang salah lembar atau salah kolom akan
+  terlihat sebagai daftar yang aneh, misalnya "menghapus 73 kelas", dan masih
+  bisa dibatalkan tanpa apa pun tersimpan.
+
+  usulanExcel   daftar rata semua perubahan yang menunggu keputusan
+  usulanDiubah  id baris yang sedang disunting, atau null
+  ringkasBerkas keterangan tentang berkasnya: lembar yang terbaca, baris yang
+                dilewati, catatan pembacaan, dan jumlah yang sudah sama
+*/
+let usulanExcel = null;
+let usulanDiubah = null;
+let ringkasBerkas = null;
+
+function ringkasKelas(j){
+  return `${j.kode} KP ${j.kp}`;
+}
+
+// Daftar contoh dibatasi supaya ringkasannya tetap bisa dibaca sekali lihat.
+function contohnya(daftar, batas = 12){
+  const isi = daftar.slice(0, batas).map(t => `<li>${esc(t)}</li>`).join('');
+  const sisa = daftar.length - batas;
+  return `<ul>${isi}${sisa > 0 ? `<li>dan ${sisa} lainnya</li>` : ''}</ul>`;
+}
+
+function susunRencana(hasil){
+  const r = {
+    mkBaru: [], mkUbah: [],
+    jdBaru: [], jdUbah: [], jdHapus: [],
+    pgBaru: [], pgHapus: [],
+    gcBaru: [], gcUbah: [], gcHapus: [],
+    koBaru: [], koUbah: [], koHapus: [],
+    dilewati: [], masalah: [...hasil.masalah],
+    // Yang isinya sama persis tidak ditulis ulang ke basis data, tapi tetap
+    // dihitung. Tanpa angka ini, pengurus tidak punya cara tahu bedanya
+    // "berkasnya memang cuma mengubah tiga kelas" dengan "berkasnya salah
+    // lembar sehingga sisanya tidak terbaca".
+    tetap: { matakuliah: 0, jadwal: 0, pengajar: 0, classroom: 0, koordinator: 0 },
+  };
+
+  // ---------- mata kuliah ----------
+  const mkLama = new Map(data.matakuliah.map(m => [m.kode, m]));
+  for(const m of hasil.matakuliah){
+    const lama = mkLama.get(m.kode);
+    if(!lama) r.mkBaru.push({ kode: m.kode, nama: m.nama });
+    else if(lama.nama !== m.nama) r.mkUbah.push({ id: lama.id, kode: m.kode, nama: m.nama, namaLama: lama.nama });
+    else r.tetap.matakuliah++;
+  }
+
+  /*
+    Baris kembar di dalam satu berkas diselesaikan dengan aturan yang sama di
+    mana-mana: yang paling bawah dipakai, dan kejadiannya diberitahukan.
+
+    Alasannya, baris yang lebih bawah biasanya hasil pembetulan yang ditambah
+    belakangan. Yang penting bukan tebakan itu benar atau tidak, melainkan
+    pengurus tahu bahwa berkasnya memuat dua baris berbeda untuk hal yang sama.
+  */
+  const satukan = (daftar, ambilKunci, sebutan) => {
+    const peta = new Map();
+    for(const isi of daftar){
+      const k = ambilKunci(isi);
+      if(peta.has(k)){
+        r.dilewati.push(`Baris ${isi.baris}: ${sebutan(isi)} muncul lebih dari sekali di berkas, yang terakhir dipakai.`);
+      }
+      peta.set(k, isi);
+    }
+    return peta;
+  };
+
+  // ---------- jadwal ----------
+  const jdLama = new Map(data.jadwal.map(j => [kunciKelas(j.kode, j.kp), j]));
+  const layak = hasil.jadwal.filter(j => {
+    if(j.hari && j.mulai && j.selesai) return true;
+    r.dilewati.push(`Baris ${j.baris}: ${ringkasKelas(j)} belum punya hari atau jam yang terbaca.`);
+    return false;
+  });
+  const jdBerkas = satukan(layak, j => kunciKelas(j.kode, j.kp), j => ringkasKelas(j));
+
+  for(const [k, j] of jdBerkas){
+    const muatan = { kode: j.kode, kp: j.kp, hari: j.hari, mulai: j.mulai, selesai: j.selesai, ruang: j.ruang || '' };
+    const lama = jdLama.get(k);
+    if(!lama){ r.jdBaru.push(muatan); continue; }
+    const berubah = ['hari','mulai','selesai','ruang'].some(f => (lama[f] || '') !== muatan[f]);
+    if(berubah) r.jdUbah.push({ id: lama.id, ...muatan, lama });
+    else r.tetap.jadwal++;
+  }
+  r.jdHapus = data.jadwal.filter(j => !jdBerkas.has(kunciKelas(j.kode, j.kp)));
+
+  // ---------- pengajar ----------
+  const kunciPengajar = p => `${kunciKelas(p.kode, p.kp)}|${String(p.nrp || '').trim() || String(p.nama || p.pengajar || '').toLowerCase()}`;
+  const pgLama = new Map(data.pengajar.map(p => [kunciPengajar(p), p]));
+  const pgDipakai = new Set();
+  for(const p of hasil.pengajar){
+    const baru = { kode: p.kode, kp: p.kp, nama: p.pengajar, nrp: p.nrp };
+    const k = kunciPengajar(baru);
+    if(pgDipakai.has(k)) continue;
+    pgDipakai.add(k);
+    if(!pgLama.has(k)) r.pgBaru.push(baru);
+    else r.tetap.pengajar++;
+  }
+  r.pgHapus = data.pengajar.filter(p => !pgDipakai.has(kunciPengajar(p)));
+
+  // ---------- kode Google Classroom ----------
+  const gcLama = new Map(data.classroom.map(c => [kunciKelas(c.kode, c.kp), c]));
+  const gcBerkas = satukan(hasil.classroom, c => kunciKelas(c.kode, c.kp),
+    c => `kode kelas daring ${c.kode} KP ${c.kp}`);
+  for(const [k, c] of gcBerkas){
+    const muatan = { kode: c.kode, nama: c.nama || '', kp: c.kp, classroom: c.classroom || '' };
+    const lama = gcLama.get(k);
+    if(!lama) r.gcBaru.push(muatan);
+    else if((lama.classroom || '') !== muatan.classroom || (lama.nama || '') !== muatan.nama)
+      r.gcUbah.push({ id: lama.id, ...muatan, lama });
+    else r.tetap.classroom++;
+  }
+  r.gcHapus = data.classroom.filter(c => !gcBerkas.has(kunciKelas(c.kode, c.kp)));
+
+  // ---------- koordinator ----------
+  const koLama = new Map(data.koordinator.map(k => [k.kode, k]));
+  const koBerkas = satukan(hasil.koordinator, k => k.kode, k => `koordinator kode ${k.kode}`);
+  for(const [kode, k] of koBerkas){
+    const muatan = {
+      kode, nama: k.nama || '', koordinator: k.koordinator || '',
+      nrp: k.nrp || '', kontak: k.kontak || '',
+    };
+    const lama = koLama.get(kode);
+    if(!lama) r.koBaru.push(muatan);
+    else if(['nama','koordinator','nrp','kontak'].some(f => (lama[f] || '') !== muatan[f]))
+      r.koUbah.push({ id: lama.id, ...muatan, lama });
+    else r.tetap.koordinator++;
+  }
+  r.koHapus = data.koordinator.filter(k => !koBerkas.has(k.kode));
+
+  /*
+    Kelas yang kodenya tidak ada di daftar Mata Kuliah tetap ikut tersimpan,
+    tapi harus disebutkan.
+
+    Halaman publik menampilkan kode mentah kalau namanya tidak ketemu, dan itu
+    tidak terbaca siapa pun. Formulir Jadwal Permanen sudah menolak keadaan
+    seperti ini sejak awal, jadi unggahan tidak boleh diam-diam membuatnya.
+  */
+  const kodeDikenal = new Set([...data.matakuliah.map(m => m.kode), ...r.mkBaru.map(m => m.kode)]);
+  const yatim = [...new Set([...r.jdBaru, ...r.jdUbah].map(j => j.kode).filter(k => !kodeDikenal.has(k)))];
+  for(const kode of yatim){
+    r.masalah.push(`Kode ${kode} dipakai di lembar jadwal tapi tidak punya nama mata kuliah di berkas mana pun. Kelasnya tetap masuk, tapi isi namanya lewat tab Mata Kuliah supaya tidak tampil sebagai kode di halaman jadwal.`);
+  }
+
+  return r;
+}
+
+/*
+  Perbandingan berkas dengan isi basis data, baris per baris.
+
+  Yang ditampilkan bukan sekadar hitungan, melainkan tiap barisnya beserta nilai
+  lamanya. Pengurus perlu bisa menjawab satu pertanyaan sebelum menekan simpan:
+  apa persisnya yang akan berubah pada data yang sudah tayang. Angka "5 kelas
+  diperbarui" tidak menjawab itu.
+
+  Tiap baris juga bisa diperlakukan sendiri-sendiri. Berkas Excel disusun banyak
+  tangan dan tidak selalu benar seluruhnya, jadi memaksa pengurus menerima
+  semuanya atau menolak semuanya akan membuat mereka menolak semuanya, lalu
+  mengetik ulang secara manual. Karena itu tiap baris punya tiga tindakan:
+
+    centang  menentukan baris itu ikut disimpan atau tidak
+    Ubah     menyunting nilai yang akan disimpan, sebelum tersimpan
+    silang   membuang baris itu dari daftar sama sekali
+
+  Keadaan tiap baris dibedakan dengan warna sekaligus kata, tidak hanya warna,
+  supaya tetap terbaca oleh yang kesulitan membedakan warna dan tetap masuk akal
+  kalau halamannya dicetak hitam putih.
+*/
+const TANDA = {
+  tambah: { kelas: 'pra-tambah', label: 'Baru' },
+  ubah:   { kelas: 'pra-ubah',   label: 'Berubah' },
+  hapus:  { kelas: 'pra-hapus',  label: 'Dihapus' },
+  diam:   { kelas: 'pra-diam',   label: 'Dibiarkan' },
+  tolak:  { kelas: 'pra-tolak',  label: 'Tidak disimpan' },
+};
+
+const JUDUL_BAGIAN = {
+  matakuliah: 'Mata kuliah',
+  jadwal: 'Jadwal dan ruang kelas',
+  pengajar: 'Pengajar',
+  classroom: 'Kode Google Classroom',
+  koordinator: 'Koordinator',
+};
+
+/*
+  Kolom tiap bagian, sekaligus penentu apa yang boleh disunting.
+
+  Kolom penanda identitas dikunci pada baris yang sudah ada di web. Kode dan KP
+  adalah tali yang menghubungkan baris berkas dengan dokumen yang tersimpan.
+  Kalau keduanya boleh diubah di sini, baris ini akan menimpa dokumen yang salah
+  tanpa ada yang menyadari.
+*/
+const KOLOM_BAGIAN = {
+  matakuliah: [
+    { k:'kode', label:'Kode', ubah:'tambah' },
+    { k:'nama', label:'Nama', ubah:true, wajib:true },
+  ],
+  jadwal: [
+    { k:'kode', label:'Kode' },
+    { k:'namaMk', label:'Mata kuliah', turunan: u => namaMatkul(u.muatan.kode) || '' },
+    { k:'kp', label:'KP', ubah:'tambah', wajib:true },
+    { k:'hari', label:'Hari', jenis:'hari', ubah:true, wajib:true },
+    { k:'jam', label:'Jam', jenis:'jam', ubah:true },
+    { k:'ruang', label:'Ruang', ubah:true },
+  ],
+  pengajar: [
+    { k:'kode', label:'Kode' },
+    { k:'namaMk', label:'Mata kuliah', turunan: u => namaMatkul(u.muatan.kode) || '' },
+    { k:'kp', label:'KP', ubah:'tambah', wajib:true },
+    { k:'nama', label:'Nama', ubah:true, wajib:true },
+    { k:'nrp', label:'NRP', ubah:true },
+  ],
+  classroom: [
+    { k:'kode', label:'Kode' },
+    { k:'nama', label:'Mata kuliah', ubah:true },
+    { k:'kp', label:'KP', ubah:'tambah', wajib:true },
+    { k:'classroom', label:'Kode kelas', ubah:true },
+  ],
+  koordinator: [
+    { k:'kode', label:'Kode', ubah:'tambah', wajib:true },
+    { k:'nama', label:'Mata kuliah', ubah:true },
+    { k:'koordinator', label:'Koordinator', ubah:true },
+    { k:'nrp', label:'NRP', ubah:true },
+    { k:'kontak', label:'WA atau Line', ubah:true },
+  ],
+};
+
+const HARI_PILIHAN = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+
+/*
+  Rencana perbandingan diratakan menjadi satu daftar usulan.
+
+  Bentuk ini yang membuat tiap baris bisa dicentang, disunting, dan dibuang
+  tanpa perlu tahu ia berasal dari kelompok mana. Yang disimpan nanti dibangun
+  dari daftar ini juga, jadi apa yang terlihat di layar persis itu yang ditulis.
+*/
+function buatUsulan(r, bersihkan){
+  const out = [];
+  let n = 0;
+  const tambah = (koleksi, jenis, muatan, lama, docId) => out.push({
+    id: 'u' + (++n), koleksi, jenis, muatan, lama: lama || null, docId: docId || null,
+    // Penghapusan tidak dicentang sejak awal kecuali pengurus memang memintanya
+    // lewat centang di formulir. Membuang data harus selalu tindakan yang
+    // disengaja, bukan bawaan.
+    terima: jenis !== 'hapus' || bersihkan,
+    dibuang: false,
+  });
+
+  r.mkBaru.forEach(m => tambah('matakuliah', 'tambah', { kode:m.kode, nama:m.nama }));
+  r.mkUbah.forEach(m => tambah('matakuliah', 'ubah', { kode:m.kode, nama:m.nama },
+    { kode:m.kode, nama:m.namaLama }, m.id));
+
+  const isiJadwal = j => ({ kode:j.kode, kp:j.kp, hari:j.hari, mulai:j.mulai, selesai:j.selesai, ruang:j.ruang || '' });
+  r.jdBaru.forEach(j => tambah('jadwal', 'tambah', isiJadwal(j)));
+  r.jdUbah.forEach(j => tambah('jadwal', 'ubah', isiJadwal(j), j.lama, j.id));
+  r.jdHapus.forEach(j => tambah('jadwal', 'hapus', isiJadwal(j), null, j.id));
+
+  r.pgBaru.forEach(p => tambah('pengajar', 'tambah', { kode:p.kode, kp:p.kp, nama:p.nama, nrp:p.nrp || '' }));
+  r.pgHapus.forEach(p => tambah('pengajar', 'hapus', { kode:p.kode, kp:p.kp, nama:p.nama, nrp:p.nrp || '' }, null, p.id));
+
+  const isiGc = c => ({ kode:c.kode, nama:c.nama || '', kp:c.kp, classroom:c.classroom || '' });
+  r.gcBaru.forEach(c => tambah('classroom', 'tambah', isiGc(c)));
+  r.gcUbah.forEach(c => tambah('classroom', 'ubah', isiGc(c), c.lama, c.id));
+  r.gcHapus.forEach(c => tambah('classroom', 'hapus', isiGc(c), null, c.id));
+
+  const isiKo = k => ({ kode:k.kode, nama:k.nama || '', koordinator:k.koordinator || '', nrp:k.nrp || '', kontak:k.kontak || '' });
+  r.koBaru.forEach(k => tambah('koordinator', 'tambah', isiKo(k)));
+  r.koUbah.forEach(k => tambah('koordinator', 'ubah', isiKo(k), k.lama, k.id));
+  r.koHapus.forEach(k => tambah('koordinator', 'hapus', isiKo(k), null, k.id));
+
+  return out;
+}
+
+// Nilai lama ditampilkan berdampingan dengan nilai barunya, bukan digantikan
+// begitu saja, supaya yang berubah bisa dilihat tanpa membuka tab lain.
+function selNilai(lama, baru){
+  const a = String(lama == null ? '' : lama);
+  const b = String(baru == null ? '' : baru);
+  if(a === b) return esc(b);
+  return `<span class="pra-lama">${esc(a || '(kosong)')}</span> `
+    + `<span class="pra-panah" aria-hidden="true">→</span> `
+    + `<span class="pra-baru-nilai">${esc(b || '(kosong)')}</span>`;
+}
+
+function nilaiKolom(u, kol){
+  if(kol.turunan) return esc(kol.turunan(u));
+  if(kol.jenis === 'jam'){
+    const baru = rentangJam(u.muatan.mulai, u.muatan.selesai);
+    return (u.jenis === 'ubah' && u.lama)
+      ? selNilai(rentangJam(u.lama.mulai, u.lama.selesai), baru) : esc(baru);
+  }
+  const baru = u.muatan[kol.k] == null ? '' : u.muatan[kol.k];
+  return (u.jenis === 'ubah' && u.lama) ? selNilai(u.lama[kol.k], baru) : esc(baru);
+}
+
+function isianKolom(u, kol){
+  if(kol.turunan) return esc(kol.turunan(u));
+  const bolehUbah = kol.ubah === true || (kol.ubah === 'tambah' && u.jenis === 'tambah');
+  if(!bolehUbah) return `<span class="pra-terkunci">${nilaiKolom(u, kol)}</span>`;
+
+  const dasar = `data-isian="${esc(u.id)}"`;
+  if(kol.jenis === 'hari'){
+    return `<select ${dasar} data-kunci="hari" aria-label="Hari">
+      ${HARI_PILIHAN.map(h => `<option value="${h}"${h === u.muatan.hari ? ' selected' : ''}>${h}</option>`).join('')}
+    </select>`;
+  }
+  if(kol.jenis === 'jam'){
+    return `<div class="pra-jam">
+      <input type="time" ${dasar} data-kunci="mulai" value="${esc(u.muatan.mulai || '')}" aria-label="Jam mulai" />
+      <input type="time" ${dasar} data-kunci="selesai" value="${esc(u.muatan.selesai || '')}" aria-label="Jam selesai" />
+    </div>`;
+  }
+  return `<input type="text" ${dasar} data-kunci="${esc(kol.k)}" value="${esc(u.muatan[kol.k] || '')}" aria-label="${esc(kol.label)}" />`;
+}
+
+function tandaUsulan(u){
+  if(!u.terima) return u.jenis === 'hapus' ? TANDA.diam : TANDA.tolak;
+  return TANDA[u.jenis];
+}
+
+function barisUsulan(u, kolom){
+  const sedangDiubah = u.id === usulanDiubah;
+  const tanda = tandaUsulan(u);
+  const bolehDiubah = u.jenis !== 'hapus';
+
+  const sel = kolom.map(kol =>
+    `<td>${sedangDiubah ? isianKolom(u, kol) : nilaiKolom(u, kol)}</td>`).join('');
+
+  const tindakan = sedangDiubah
+    ? `<button type="button" class="op-mini" data-simpan-baris="${esc(u.id)}">Simpan baris</button>
+       <button type="button" class="op-mini" data-batal-baris="${esc(u.id)}">Batal</button>`
+    : `${bolehDiubah ? `<button type="button" class="op-mini" data-ubah-baris="${esc(u.id)}">Ubah</button>` : ''}
+       <button type="button" class="op-mini op-hapus pra-silang" data-buang-baris="${esc(u.id)}"
+               title="Buang baris ini dari daftar" aria-label="Buang baris ini dari daftar">✕</button>`;
+
+  return `
+    <tr class="${tanda.kelas}${u.terima ? '' : ' pra-mati'}">
+      <td class="pra-sel-pilih">
+        <input type="checkbox" data-terima="${esc(u.id)}"${u.terima ? ' checked' : ''}
+               aria-label="Simpan baris ini" />
+      </td>
+      <td><span class="pra-tanda">${esc(tanda.label)}</span></td>
+      ${sel}
+      <td><div class="op-tombol-baris">${tindakan}</div></td>
+    </tr>`;
+}
+
+function tabelUsulan(koleksi, daftar){
+  if(daftar.length === 0) return '';
+  const kolom = KOLOM_BAGIAN[koleksi];
+  const dipakai = daftar.filter(u => u.terima).length;
+  return `
+    <h4>${esc(JUDUL_BAGIAN[koleksi])}
+      <span class="pra-jumlah">${dipakai} dari ${daftar.length} disimpan</span></h4>
+    <div class="op-tabel-bungkus">
+      <table class="op-tabel pra-tabel">
+        <thead><tr>
+          <th>Simpan</th>
+          <th>Status</th>
+          ${kolom.map(k => `<th>${esc(k.label)}</th>`).join('')}
+          <th>Tindakan</th>
+        </tr></thead>
+        <tbody>${daftar.map(u => barisUsulan(u, kolom)).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function gambarPratinjau(){
+  const sisa = usulanExcel.filter(u => !u.dibuang);
+  const diterima = sisa.filter(u => u.terima);
+  const hitung = jenis => diterima.filter(u => u.jenis === jenis).length;
+  const dibuang = usulanExcel.length - sisa.length;
+  const jumlahTetap = Object.values(ringkasBerkas.tetap).reduce((a,b) => a + b, 0);
+
+  const chip = (kelas, angka, kata) =>
+    `<span class="pra-chip ${kelas}"><strong>${angka}</strong> ${esc(kata)}</span>`;
+
+  const isi = Object.keys(JUDUL_BAGIAN)
+    .map(koleksi => tabelUsulan(koleksi, sisa.filter(u => u.koleksi === koleksi)))
+    .join('');
+
+  const r = ringkasBerkas;
+  const catatan = [
+    r.dilewati.length ? `<h4>Baris yang dilewati <span class="pra-jumlah">${r.dilewati.length}</span></h4>${contohnya(r.dilewati)}` : '',
+    r.masalah.length ? `<h4>Catatan pembacaan <span class="pra-jumlah">${r.masalah.length}</span></h4>${contohnya(r.masalah)}` : '',
+  ].join('');
+
+  $('pratinjauExcel').innerHTML = `
+    <div class="op-pratinjau">
+      <div class="pra-kepala">
+        <h3>Perbandingan berkas dengan data di web</h3>
+        <p class="pra-tenang">
+          Belum ada satu pun yang tersimpan. Yang dicentang di bawah ini baru berlaku
+          setelah tombol <strong>Simpan perubahan</strong> ditekan.
+        </p>
+        <div class="pra-chip-baris">
+          ${chip('pra-tambah', hitung('tambah'), 'ditambahkan')}
+          ${chip('pra-ubah', hitung('ubah'), 'diubah')}
+          ${chip('pra-hapus', hitung('hapus'), 'dihapus')}
+          ${chip('pra-tetap', jumlahTetap, 'sudah sama')}
+        </div>
+        <p class="op-catatan">
+          Tiap baris bisa diatur sendiri. Hilangkan centangnya supaya baris itu tidak
+          ikut tersimpan, tekan <strong>Ubah</strong> untuk membetulkan isinya lebih
+          dulu, atau tekan tanda silang untuk membuang baris itu dari daftar.
+          ${dibuang ? `<strong>${dibuang} baris sudah dibuang dari daftar ini.</strong>` : ''}
+        </p>
+        <p class="op-catatan">
+          Lembar yang terbaca: ${esc(r.lembarTerbaca.join(', ') || 'tidak ada')}.
+          ${r.lembarLain.length ? `Lembar yang tidak dibaca: ${esc(r.lembarLain.join(', '))}.` : ''}
+        </p>
+      </div>
+      ${sisa.length === 0
+        ? '<p class="pra-sama">Tidak ada lagi baris yang menunggu keputusan.</p>' : ''}
+      ${isi}
+      ${catatan}
+    </div>`;
+
+  // Tombol simpan ikut mati kalau tidak ada satu pun baris yang dicentang,
+  // supaya tidak ada penyimpanan yang tidak menghasilkan apa-apa.
+  $('xlTerapkan').hidden = usulanExcel.length === 0;
+  $('xlTerapkan').disabled = diterima.length === 0;
+  $('xlTerapkan').textContent = diterima.length
+    ? `Simpan ${diterima.length} perubahan` : 'Simpan perubahan';
+}
+
+/* ---------- tindakan per baris ---------- */
+
+function cariUsulan(id){
+  return usulanExcel ? usulanExcel.find(u => u.id === id) : null;
+}
+
+/*
+  Baris yang disunting diperiksa sebelum diterima kembali ke daftar.
+
+  Pemeriksaannya sengaja sederhana dan hanya menyangkut isi baris itu sendiri.
+  Bentrok ruang dan bentrok jam mengajar tetap diperiksa oleh formulir Jadwal
+  Permanen dan Pengajar seperti biasa, dan tidak diulang di sini supaya
+  penyuntingan cepat tidak berubah menjadi wawancara panjang.
+*/
+function periksaBarisUsulan(u, isian){
+  const salah = [];
+  for(const kol of KOLOM_BAGIAN[u.koleksi]){
+    if(!kol.wajib) continue;
+    const bolehUbah = kol.ubah === true || (kol.ubah === 'tambah' && u.jenis === 'tambah');
+    if(!bolehUbah) continue;
+    if(kol.jenis === 'jam') continue;
+    if(!String(isian[kol.k] || '').trim()) salah.push(`${kol.label} tidak boleh kosong.`);
+  }
+
+  if(u.koleksi === 'jadwal'){
+    const m1 = keMenit(isian.mulai), m2 = keMenit(isian.selesai);
+    if(m1 === null) salah.push('Jam mulai tidak valid.');
+    if(m2 === null) salah.push('Jam selesai tidak valid.');
+    if(m1 !== null && m2 !== null && m2 <= m1) salah.push('Jam selesai harus lebih akhir daripada jam mulai.');
+  }
+
+  // Dua baris yang menunjuk kelas yang sama akan saling menimpa saat disimpan,
+  // dan yang menang tidak bisa ditebak. Lebih baik ditolak sekarang.
+  const kunci = u.koleksi === 'koordinator' || u.koleksi === 'matakuliah'
+    ? x => String(x.kode || '').toUpperCase()
+    : x => kunciKelas(x.kode, x.kp) + (u.koleksi === 'pengajar' ? '|' + String(x.nrp || x.nama || '') : '');
+  const kunciBaru = kunci({ ...u.muatan, ...isian });
+  const kembar = usulanExcel.find(x =>
+    x !== u && !x.dibuang && x.terima && x.koleksi === u.koleksi && kunci(x.muatan) === kunciBaru);
+  if(kembar) salah.push('Sudah ada baris lain di daftar ini yang menunjuk data yang sama.');
+
+  return salah;
+}
+
+$('pratinjauExcel').addEventListener('change', (e) => {
+  const centang = e.target.closest('[data-terima]');
+  if(!centang) return;
+  const u = cariUsulan(centang.dataset.terima);
+  if(!u) return;
+  u.terima = centang.checked;
+  gambarPratinjau();
+});
+
+$('pratinjauExcel').addEventListener('click', (e) => {
+  const tombol = e.target.closest('button');
+  if(!tombol) return;
+  const el = $('pesanExcel');
+
+  if(tombol.dataset.ubahBaris){
+    usulanDiubah = tombol.dataset.ubahBaris;
+    bersihkanPesan(el);
+    gambarPratinjau();
+    const isian = $('pratinjauExcel').querySelector(`[data-isian="${usulanDiubah}"]`);
+    if(isian) isian.focus();
+    return;
+  }
+
+  if(tombol.dataset.batalBaris){
+    usulanDiubah = null;
+    bersihkanPesan(el);
+    gambarPratinjau();
+    return;
+  }
+
+  if(tombol.dataset.buangBaris){
+    const u = cariUsulan(tombol.dataset.buangBaris);
+    if(!u) return;
+    u.dibuang = true;
+    if(usulanDiubah === u.id) usulanDiubah = null;
+    gambarPratinjau();
+    return;
+  }
+
+  if(tombol.dataset.simpanBaris){
+    const u = cariUsulan(tombol.dataset.simpanBaris);
+    if(!u) return;
+    const isian = {};
+    document.querySelectorAll(`[data-isian="${u.id}"]`).forEach(inp => {
+      isian[inp.dataset.kunci] = inp.value.trim();
+    });
+    if(isian.kode) isian.kode = isian.kode.toUpperCase();
+    if(isian.kp) isian.kp = isian.kp.toUpperCase();
+
+    const salah = periksaBarisUsulan(u, isian);
+    if(salah.length){ pesan(el, daftarKesalahan('Baris ini belum bisa diterima:', salah), 'salah'); return; }
+
+    Object.assign(u.muatan, isian);
+    // Baris yang baru saja dibetulkan hampir pasti dimaksudkan untuk ikut
+    // tersimpan, jadi centangnya dinyalakan sekalian.
+    u.terima = true;
+    usulanDiubah = null;
+    bersihkanPesan(el);
+    gambarPratinjau();
+  }
+});
+
+$('formExcel').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanExcel');
+  bersihkanPesan(el);
+  $('xlTerapkan').hidden = true;
+  usulanExcel = null;
+  usulanDiubah = null;
+
+  const file = $('xlBerkas').files[0];
+  if(!file){ pesan(el, 'Pilih berkas Excel-nya dulu.', 'salah'); return; }
+
+  try{
+    status('Membaca berkas…', 'sibuk');
+    const hasil = await bacaBerkas(file);
+    const r = susunRencana(hasil);
+    usulanExcel = buatUsulan(r, $('xlBersihkan').checked);
+    ringkasBerkas = {
+      lembarTerbaca: hasil.lembarTerbaca, lembarLain: hasil.lembarLain,
+      dilewati: r.dilewati, masalah: r.masalah, tetap: r.tetap,
+    };
+
+    if(usulanExcel.length === 0){
+      $('pratinjauExcel').innerHTML =
+        '<div class="op-pratinjau"><p class="pra-sama">Tidak ada yang berbeda. '
+        + 'Isi berkas sama dengan data yang sedang tersimpan di web.</p></div>';
+      usulanExcel = null;
+      status('Berkas terbaca dan isinya sudah sama dengan data yang tersimpan.', 'benar');
+      return;
+    }
+
+    gambarPratinjau();
+    status('Berkas terbaca. Belum ada yang tersimpan. Periksa perbandingannya, atur tiap baris kalau perlu, lalu tekan Simpan perubahan.', 'benar');
+  }catch(err){
+    console.error(err);
+    $('pratinjauExcel').innerHTML = '';
+    usulanExcel = null;
+    pesan(el, 'Berkas tidak bisa dibaca: ' + esc(err.message), 'salah');
+    status('Berkas Excel tidak bisa dibaca.', 'salah');
+  }
+});
+
+// Mengubah centang penghapusan sesudah daftar tersusun akan mengubah arti baris
+// merahnya, sedangkan keputusan per baris yang sudah diambil pengurus tidak
+// pantas ditimpa diam-diam. Daftarnya dibatalkan dan berkasnya dibandingkan lagi.
+$('xlBersihkan').addEventListener('change', () => {
+  if(!usulanExcel) return;
+  usulanExcel = null;
+  usulanDiubah = null;
+  $('xlTerapkan').hidden = true;
+  $('pratinjauExcel').innerHTML = '';
+  pesan($('pesanExcel'), 'Pilihan penghapusan berubah. Tekan "Bandingkan dengan data di web" sekali lagi.', 'hati');
+});
+
+$('xlBerkas').addEventListener('change', () => {
+  usulanExcel = null;
+  usulanDiubah = null;
+  $('xlTerapkan').hidden = true;
+  $('pratinjauExcel').innerHTML = '';
+  bersihkanPesan($('pesanExcel'));
+});
+
+/*
+  Penulisan dilakukan berkelompok, bukan satu per satu.
+
+  Satu berkas bisa berisi ratusan baris. Kalau ditulis satu per satu, prosesnya
+  lama dan bisa berhenti di tengah jalan sehingga sebagian data masuk dan
+  sebagian tidak. Firestore membatasi satu kelompok maksimal 500 tulisan, jadi
+  isinya dipotong di bawah angka itu.
+*/
+async function tulisBerkelompok(tugas){
+  const BATAS = 400;
+  for(let i = 0; i < tugas.length; i += BATAS){
+    const batch = writeBatch(db);
+    for(const t of tugas.slice(i, i + BATAS)){
+      if(t.jenis === 'tambah') batch.set(doc(collection(db, t.koleksi)), t.muatan);
+      else if(t.jenis === 'ubah') batch.update(doc(db, t.koleksi, t.id), t.muatan);
+      else if(t.jenis === 'hapus') batch.delete(doc(db, t.koleksi, t.id));
+    }
+    await batch.commit();
+  }
+}
+
+$('xlTerapkan').addEventListener('click', async () => {
+  const el = $('pesanExcel');
+  if(!usulanExcel){ pesan(el, 'Bandingkan berkasnya dulu.', 'salah'); return; }
+  if(usulanDiubah){
+    pesan(el, 'Masih ada baris yang sedang disunting. Simpan atau batalkan baris itu dulu.', 'salah');
+    return;
+  }
+
+  const diterima = usulanExcel.filter(u => u.terima && !u.dibuang);
+  if(diterima.length === 0){ pesan(el, 'Belum ada baris yang dicentang.', 'salah'); return; }
+
+  const hitung = j => diterima.filter(u => u.jenis === j).length;
+  const ringkas = `${hitung('tambah')} ditambahkan, ${hitung('ubah')} diubah, dan ${hitung('hapus')} dihapus`;
+  if(!confirm(`Simpan perubahan dari berkas Excel ke data web?\n\n${ringkas}.`)) return;
+
+  const tugas = [];
+  for(const u of diterima){
+    if(u.jenis === 'tambah'){
+      tugas.push({ jenis:'tambah', koleksi:u.koleksi, muatan:{ ...u.muatan } });
+    }else if(u.jenis === 'ubah'){
+      tugas.push({ jenis:'ubah', koleksi:u.koleksi, id:u.docId, muatan:{ ...u.muatan } });
+    }else{
+      /*
+        Kelas yang dihapus menyeret perubahan sementara yang menunjuknya.
+        Kalau dibiarkan, perubahan itu menjadi yatim: halaman publik tidak bisa
+        lagi menemukan kelas aslinya, jadi barisnya hilang begitu saja tanpa
+        pernah bisa dihapus dari tab Perubahan Sementara.
+      */
+      if(u.koleksi === 'jadwal'){
+        for(const p of data.perubahan.filter(x => x.jadwalId === u.docId)){
+          tugas.push({ jenis:'hapus', koleksi:'perubahan', id:p.id });
+        }
+      }
+      tugas.push({ jenis:'hapus', koleksi:u.koleksi, id:u.docId });
+    }
+  }
+
+  try{
+    status(`Menyimpan ${tugas.length} perubahan…`, 'sibuk');
+    await tulisBerkelompok(tugas);
+    const ditolak = usulanExcel.length - diterima.length;
+    usulanExcel = null;
+    usulanDiubah = null;
+    $('xlTerapkan').hidden = true;
+    $('pratinjauExcel').innerHTML = '';
+    $('formExcel').reset();
+    await muatSemua();
+    await terbitkan();
+    pesan(el,
+      `Selesai. ${tugas.length} perubahan tersimpan dan jadwal publik sudah diterbitkan ulang.`
+      + (ditolak ? ` ${ditolak} baris tidak ikut disimpan sesuai pilihan tadi.` : ''), 'benar');
+  }catch(err){
+    console.error(err);
+    pesan(el, 'Gagal menyimpan: ' + esc(err.message)
+      + '. Sebagian data mungkin sudah masuk, jadi bandingkan berkasnya sekali lagi sebelum mengulang.', 'salah');
+    status('Gagal menerapkan berkas Excel.', 'salah');
+  }
+});
+
+/* ============================================================
+   12. Impor sekali dari data lama
    ============================================================ */
 
 $('tombolImpor').addEventListener('click', async () => {

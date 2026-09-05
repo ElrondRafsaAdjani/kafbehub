@@ -216,6 +216,32 @@ service cloud.firestore {
       allow write: if tulisanAdmin();
     }
 
+    // ---------- Kode kelas Google Classroom ----------
+    /*
+      BEDA SENDIRI DARI KOLEKSI LAIN: koleksi ini TIDAK boleh dibaca publik.
+
+      Kode kelas adalah kunci masuk. Siapa pun yang memegangnya bisa bergabung
+      ke kelas daring mata kuliah mana pun tanpa pernah menjadi mahasiswanya,
+      lalu ikut melihat materi dan tugas di dalamnya. Karena itu aturannya
+      dibuat tertutup, tidak disamakan dengan jadwal yang memang diumumkan.
+    */
+    match /classroom/{id} {
+      allow read: if adminTerdaftar();
+      allow write: if tulisanAdmin();
+    }
+
+    // ---------- Koordinator mata kuliah ----------
+    /*
+      Ikut ditutup dari publik dengan alasan berbeda: isinya nomor WA dan akun
+      Line pengurus. Nama dan NRP memang sudah diumumkan, tapi kontak pribadi
+      tidak, dan sekali koleksi ini dibuka, seluruh daftar kontak pengurus bisa
+      diunduh sekaligus oleh siapa saja.
+    */
+    match /koordinator/{id} {
+      allow read: if adminTerdaftar();
+      allow write: if tulisanAdmin();
+    }
+
     // ---------- Papan skor game ----------
     // Dibiarkan seperti sebelumnya: siapa pun boleh menambah skor tanpa login,
     // tapi bentuk datanya dibatasi, dan skor yang sudah masuk tidak bisa

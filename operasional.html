@@ -73,6 +73,7 @@
       <button class="op-tab-btn" data-tab="perubahan" role="tab">Perubahan Sementara</button>
       <button class="op-tab-btn" data-tab="pengajar" role="tab">Pengajar</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
+      <button class="op-tab-btn" data-tab="excel" role="tab">Excel</button>
       <button class="op-tab-btn" data-tab="pengaturan" role="tab">Pengaturan</button>
     </nav>
 
@@ -422,6 +423,147 @@
       <div class="op-tabel-bungkus">
         <table class="op-tabel" id="tabelPengumuman"></table>
       </div>
+    </section>
+
+    <!-- ---------- EXCEL ---------- -->
+    <section class="op-panel" id="panel-excel" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Excel</h2>
+          <p>Menarik data dari berkas Informasi Kelas Asistensi, dan mengunduh kembali isi terkini sebagai berkas Excel. Lembar Rekap Jumlah Ngajar tidak dibaca dan tidak ditulis.</p>
+        </div>
+      </div>
+
+      <h3>Unduh</h3>
+      <p class="op-catatan">
+        Berkasnya disusun dari data yang sedang tersimpan, jadi setiap perubahan yang
+        dilakukan di halaman ini sudah ikut di dalamnya. Excel lama tidak perlu disunting
+        lagi, cukup diunduh ulang kapan pun dibutuhkan.
+      </p>
+      <div class="op-aksi">
+        <button type="button" class="btn btn-primary op-kecil" id="xlUnduh">Unduh Excel</button>
+      </div>
+      <p class="op-pesan" id="pesanUnduh" role="alert"></p>
+
+      <hr class="op-garis" />
+
+      <h3>Unggah</h3>
+      <p class="op-catatan">
+        Berkas dibandingkan dulu dengan data yang ada di web, dan hasilnya ditampilkan
+        baris per baris dengan tanda warna: hijau untuk yang ditambahkan, kuning untuk
+        yang berubah, merah untuk yang dihapus. Tidak ada satu pun yang tersimpan
+        sebelum tombol <strong>Simpan perubahan</strong> ditekan.
+      </p>
+      <form class="op-form" id="formExcel">
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="xlBerkas">Berkas Excel</label>
+            <input type="file" id="xlBerkas" accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field op-centang">
+            <label for="xlBersihkan">
+              <input type="checkbox" id="xlBersihkan" />
+              Hapus data yang tidak ada di berkas
+            </label>
+          </div>
+        </div>
+        <p class="op-catatan">
+          Tanpa centang itu, unggahan hanya menambah dan memperbarui. Kelas yang sudah
+          dihapus dari Excel akan tetap tinggal di basis data sampai dihapus sendiri.
+        </p>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-ghost op-kecil" id="xlPeriksa">Bandingkan dengan data di web</button>
+          <button type="button" class="btn btn-primary op-kecil" id="xlTerapkan" hidden>Simpan perubahan</button>
+        </div>
+        <p class="op-pesan" id="pesanExcel" role="alert"></p>
+      </form>
+      <div id="pratinjauExcel"></div>
+
+      <hr class="op-garis" />
+
+      <h3>Kode Google Classroom</h3>
+      <p class="op-catatan">
+        Satu kode untuk tiap KP. Dipakai pengurus dan tidak ditampilkan ke mahasiswa.
+      </p>
+      <form class="op-form" id="formClassroom">
+        <input type="hidden" id="gcId" />
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="gcKode">Kode mata kuliah</label>
+            <input type="text" id="gcKode" required maxlength="20" placeholder="1300M03B" list="daftarKodeMk" />
+          </div>
+          <div class="op-field op-lebar">
+            <label for="gcNama">Nama mata kuliah</label>
+            <input type="text" id="gcNama" maxlength="120" placeholder="Statistika II" />
+          </div>
+          <div class="op-field op-sempit">
+            <label for="gcKp">KP</label>
+            <input type="text" id="gcKp" required maxlength="6" placeholder="A" />
+          </div>
+          <div class="op-field">
+            <label for="gcKelas">Kode kelas</label>
+            <input type="text" id="gcKelas" maxlength="40" placeholder="khjrjkw2" />
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
+          <button type="button" class="btn btn-ghost op-kecil" data-batal="formClassroom" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanClassroom" role="alert"></p>
+      </form>
+      <div class="op-saring">
+        <input type="search" id="cariClassroom" placeholder="Cari kode, nama, atau KP…" aria-label="Cari kode Google Classroom" />
+      </div>
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelClassroom"></table>
+      </div>
+
+      <hr class="op-garis" />
+
+      <h3>Koordinator Mata Kuliah</h3>
+      <p class="op-catatan">
+        Kode di lembar Contact Koor kerap berbeda dari kode di lembar jadwal, jadi kolom
+        kodenya dibiarkan bebas diisi dan tidak dipaksa cocok dengan daftar Mata Kuliah.
+      </p>
+      <form class="op-form" id="formKoordinator">
+        <input type="hidden" id="koId" />
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="koKode">Kode mata kuliah</label>
+            <input type="text" id="koKode" required maxlength="20" placeholder="1300M03B" list="daftarKodeMk" />
+          </div>
+          <div class="op-field op-lebar">
+            <label for="koNama">Mata kuliah</label>
+            <input type="text" id="koNama" maxlength="120" placeholder="Statistika II" />
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="koNama2">Nama koordinator</label>
+            <input type="text" id="koNama2" maxlength="80" placeholder="Nama lengkap" />
+          </div>
+          <div class="op-field">
+            <label for="koNrp">NRP</label>
+            <input type="text" id="koNrp" maxlength="20" placeholder="130223203" inputmode="numeric" />
+          </div>
+          <div class="op-field">
+            <label for="koKontak">WA atau Line</label>
+            <input type="text" id="koKontak" maxlength="60" placeholder="elrond013" />
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
+          <button type="button" class="btn btn-ghost op-kecil" data-batal="formKoordinator" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanKoordinator" role="alert"></p>
+      </form>
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelKoordinator"></table>
+      </div>
+
+      <datalist id="daftarKodeMk"></datalist>
     </section>
 
     <!-- ---------- PENGATURAN ---------- -->

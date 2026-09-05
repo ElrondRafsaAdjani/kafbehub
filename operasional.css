@@ -138,6 +138,131 @@ textarea{ resize:vertical; }
 .op-status.salah{ background:#FBE3E2; color:#B03B37; border:1px solid #F0C4C2; }
 .op-status.sibuk{ background:var(--bg-deep); color:var(--owl-dark); border:1px solid var(--line); }
 
+/* ---------- Ringkasan pembacaan berkas Excel ----------
+   Isinya bisa panjang kalau berkasnya besar, jadi tingginya dibatasi dan
+   sisanya digulir di dalam kotak. Tombol terapkan tetap terlihat tanpa harus
+   menggulung layar melewati ratusan baris. */
+.op-pratinjau{
+  background:var(--bg); border:1px solid var(--line);
+  border-radius:var(--radius-md); padding:18px;
+  margin-bottom:22px; max-height:60vh; overflow-y:auto; overscroll-behavior:contain;
+}
+.op-pratinjau h3{ margin:0 0 4px; }
+.op-pratinjau h4{
+  font-size:0.82rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
+  color:var(--owl-dark2); margin:22px 0 8px;
+  display:flex; align-items:center; gap:8px;
+}
+.op-pratinjau ul{ margin:0; padding-left:20px; }
+.op-pratinjau li{
+  font-size:0.84rem; line-height:1.6; color:var(--ink-soft); word-break:break-word;
+}
+.op-pratinjau > p{ font-size:0.86rem; line-height:1.6; color:var(--ink-soft); }
+
+/* Kepala ringkasan menempel di atas selagi daftarnya digulir, supaya jumlah
+   dan peringatan "belum ada yang tersimpan" tidak hilang dari pandangan. */
+.pra-kepala{
+  position:sticky; top:-18px; z-index:1;
+  background:var(--bg); padding:2px 0 12px; margin:-2px 0 0;
+  border-bottom:1px solid var(--line);
+}
+.pra-tenang{ font-size:0.86rem; line-height:1.6; color:var(--owl-dark); margin:6px 0 0; }
+.pra-sama{ margin-top:14px; font-weight:600; color:#1E7A44; }
+.pra-jumlah{
+  font-size:0.72rem; font-weight:800; letter-spacing:0;
+  background:var(--bg-deep); color:var(--owl-dark); border-radius:99px; padding:2px 9px;
+}
+
+/* Kepingan hitungan. Warnanya sama dengan warna baris di tabel di bawahnya,
+   jadi angka dan barisnya terbaca sebagai satu bahasa. */
+.pra-chip-baris{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.pra-chip{
+  font-size:0.78rem; padding:5px 11px; border-radius:99px; border:1px solid;
+  display:inline-flex; align-items:center; gap:5px;
+}
+.pra-chip strong{ font-size:0.86rem; }
+
+/* Tiga keadaan, tiga warna. Semuanya juga diberi kata pada kolom Status,
+   jadi warna bukan satu-satunya penanda. */
+.pra-tambah{ background:#E1F5E9; color:#146235; border-color:#B7E2C7; }
+.pra-ubah{ background:#FBF0D8; color:#7A5405; border-color:#EFD9A4; }
+.pra-hapus{ background:#FBE3E2; color:#96322E; border-color:#F0C4C2; }
+.pra-diam{ background:var(--bg-deep); color:var(--owl-dark); border-color:var(--line); }
+.pra-tetap{ background:var(--surface); color:var(--ink-soft); border-color:var(--line); }
+
+.pra-tabel td{ vertical-align:top; }
+.pra-tabel tr.pra-tambah td{ background:#EDF9F1; }
+.pra-tabel tr.pra-ubah td{ background:#FDF7E8; }
+.pra-tabel tr.pra-hapus td{ background:#FDEEED; }
+.pra-tabel tr.pra-diam td{ background:var(--surface); }
+/* Garis tebal di tepi kiri baris. Penanda ini tetap kelihatan meski latarnya
+   nyaris seputih baris biasa, misalnya saat dicetak. */
+.pra-tabel tr td:first-child{ border-left:4px solid transparent; }
+.pra-tabel tr.pra-tambah td:first-child{ border-left-color:#1E7A44; }
+.pra-tabel tr.pra-ubah td:first-child{ border-left-color:#D69A1F; }
+.pra-tabel tr.pra-hapus td:first-child{ border-left-color:#B03B37; }
+.pra-tabel tr.pra-diam td:first-child{ border-left-color:var(--owl-mid); }
+
+.pra-tanda{
+  display:inline-block; font-size:0.7rem; font-weight:800;
+  letter-spacing:0.05em; text-transform:uppercase; white-space:nowrap;
+}
+.pra-tambah .pra-tanda{ color:#146235; }
+.pra-ubah .pra-tanda{ color:#7A5405; }
+.pra-hapus .pra-tanda{ color:#96322E; }
+.pra-diam .pra-tanda{ color:var(--owl-dark); }
+
+/* Nilai lama dan nilai barunya berdampingan. Yang lama diredupkan dan dicoret,
+   yang baru ditebalkan, jadi arah perubahannya terbaca tanpa penjelasan. */
+.pra-lama{ color:var(--ink-soft); text-decoration:line-through; }
+.pra-panah{ color:var(--ink-soft); margin:0 2px; }
+.pra-baru-nilai{ font-weight:700; color:var(--owl-dark2); }
+
+/* Baris yang centangnya dilepas. Warnanya dikembalikan ke abu-abu netral dan
+   isinya diredupkan, jadi sekali lihat terlihat bahwa baris itu tidak ikut
+   tersimpan meski masih tercantum di daftar. */
+.pra-tolak{ background:var(--bg-deep); color:var(--ink-soft); border-color:var(--line); }
+.pra-tabel tr.pra-tolak td{ background:var(--bg); }
+.pra-tabel tr.pra-tolak td:first-child{ border-left-color:var(--line); }
+.pra-tolak .pra-tanda{ color:var(--ink-soft); }
+.pra-tabel tr.pra-mati td:not(.pra-sel-pilih):not(:last-child){ opacity:0.55; }
+
+/* Kolom tindakan menempel di tepi kanan selagi tabelnya digulir mendatar.
+   Tanpa ini, tombol Ubah dan tanda silang hilang dari layar begitu tabelnya
+   lebih lebar daripada kotaknya, dan baris yang sedang disunting kehilangan
+   tombol simpannya sendiri. */
+.pra-tabel th:last-child,
+.pra-tabel td:last-child{
+  position:sticky; right:0; z-index:1;
+  box-shadow:-7px 0 7px -7px rgba(15,37,64,0.22);
+}
+.pra-tabel th:last-child{ background:var(--bg); }
+
+.pra-sel-pilih{ width:1%; }
+.pra-sel-pilih input{ width:18px; height:18px; cursor:pointer; }
+.pra-silang{ font-size:0.9rem; line-height:1; padding:5px 9px; }
+
+/* Kotak isian di dalam tabel dibuat serapat mungkin supaya barisnya tidak
+   melonjak tinggi saat satu baris masuk mode ubah. */
+.pra-tabel input[type=text],
+.pra-tabel input[type=time],
+.pra-tabel select{
+  width:100%; min-width:92px; padding:6px 8px; font-size:0.84rem;
+  border:1px solid var(--owl-mid); border-radius:8px; background:var(--surface);
+  color:var(--ink);
+}
+.pra-jam{ display:flex; gap:6px; }
+/* Kolom yang tidak boleh disunting tetap ditampilkan saat mode ubah, tapi
+   diredupkan supaya jelas bedanya dengan kolom yang bisa diisi. */
+.pra-terkunci{ color:var(--ink-soft); }
+
+/* Kotak pemilih berkas dibuat sepadan dengan isian lain di formulir yang sama,
+   supaya barisnya tidak terlihat lebih pendek sendiri. */
+.op-form input[type=file]{
+  font-size:0.85rem; padding:8px 10px;
+  border:1px dashed var(--line); border-radius:10px; background:var(--surface);
+}
+
 /* ---------- Tabel ---------- */
 .op-tabel-bungkus{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-md); }
 .op-tabel{ width:100%; border-collapse:collapse; min-width:640px; }

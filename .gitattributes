@@ -1,0 +1,8 @@
+# Pustaka pihak ketiga di shared/vendor disimpan apa adanya, byte per byte.
+#
+# Git biasanya menyesuaikan akhir baris berkas teks dengan kebiasaan sistem
+# yang dipakai. Untuk berkas ini penyesuaian itu merugikan: isinya sudah
+# dicocokkan dengan sidik resmi yang diumumkan penerbitnya, dan sekali akhir
+# barisnya diubah, sidiknya tidak lagi cocok sehingga pemeriksaan ulang di
+# kemudian hari jadi mustahil.
+shared/vendor/** -text
