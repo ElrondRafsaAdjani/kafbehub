@@ -240,6 +240,13 @@ berkasnya dibuat ulang tiap kali diunduh, Excel lama tidak perlu ikut disunting
 setiap ada perubahan jadwal. Ubah di halaman ini, lalu unduh ketika berkasnya
 dibutuhkan untuk dibagikan.
 
+Bentuknya dibuat semirip berkas yang biasa diedarkan: kepala tabel berwarna
+merah dengan tulisan putih, seluruh sel bergaris, kolom kode dan nama mata
+kuliah digabung ke bawah untuk semua KP-nya, dan baris kepalanya dibekukan
+supaya tetap terlihat saat digulir. Pada lembar Tim Pengajar, kolom KP ikut
+digabung untuk pengajar yang mengampu kelas yang sama. Lembar Contact Koor dan
+Tim Pengajar juga diberi baris judul seperti aslinya.
+
 **Unggah.** Membaca berkas Excel dan memasukkan isinya ke basis data. Empat
 lembar dibaca:
 
@@ -294,7 +301,9 @@ Baris yang tidak bisa dibaca, misalnya jam yang formatnya kacau, masuk ke
 bagian **Baris yang dilewati** beserta nomor barisnya di Excel.
 
 Bentuk lembarnya boleh seperti berkas aslinya, dengan sel kode dan nama mata
-kuliah yang digabung ke bawah dan baris kosong penyekat. Jam ditulis seperti
+kuliah yang digabung ke bawah, tiap KP memakan dua baris, dan baris kosong
+penyekat. Catatan kerja yang biasa ditulis di kolom jauh, seperti "ganti
+jadwal" dan "Y", tidak mengganggu pembacaan. Jam ditulis seperti
 `13.00 - 14.40`. Berkas hasil unduhan juga bisa diunggah kembali apa adanya.
 
 Centang **Hapus data yang tidak ada di berkas** menentukan keadaan awal baris

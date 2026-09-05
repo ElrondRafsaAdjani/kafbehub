@@ -13,58 +13,90 @@
   Yang membuat lembar itu tidak bisa dibaca lurus baris per baris:
 
     1. Kode dan nama mata kuliah hanya ditulis sekali, lalu selnya digabung
-       ke bawah untuk KP berikutnya. Sel di bawahnya terbaca kosong.
-    2. Ada baris kosong penyekat antar mata kuliah.
-    3. Di tengah satu kelompok bisa muncul kode lain, misalnya kelas kampus
+       ke bawah untuk semua KP-nya.
+    2. Tiap KP memakan dua baris, yang kedua cuma sambungan dari yang pertama.
+    3. Ada baris kosong penyekat antar mata kuliah, dan catatan kerja pengurus
+       menyelip di kolom-kolom jauh seperti "ganti jadwal" dan "Y".
+    4. Di tengah satu kelompok bisa muncul kode lain, misalnya kelas kampus
        West yang kodenya berbeda dari kelas kampus utama.
-    4. Jam ditulis "13.00 - 14.40", bukan dua kolom jam mulai dan selesai.
+    5. Jam ditulis "13.00 - 14.40", bukan dua kolom jam mulai dan selesai.
+    6. Ada kolom yang sengaja dikosongkan karena isinya sama dengan baris di
+       atasnya, misalnya koordinator yang memegang beberapa kode sekaligus.
 
-  Karena itu nilai yang kosong diwariskan dari baris di atasnya, kecuali kalau
-  barisnya memang membawa kode baru.
+  Sel gabungan dibaca penuh, jadi nomor satu tidak perlu ditebak. Baris
+  sambungan dikenali dari kolom penandanya dan dilewati. Kekosongan yang bukan
+  sel gabungan, seperti nomor enam, diwariskan dari baris di atasnya.
 */
 
 /*
   Membaca dan menulis .xlsx berarti membongkar berkas zip berisi XML, jadi
-  pekerjaan itu diserahkan ke pustaka SheetJS.
+  pekerjaan itu diserahkan ke pustaka.
 
-  Berkasnya disimpan di dalam repo, bukan diambil dari CDN. Halaman ini dipakai
+  DUA PUSTAKA, DAN INI DISENGAJA.
+
+  SheetJS dipakai untuk MEMBACA. Pembacaannya cepat: berkas asli pengurus yang
+  seribu baris selesai dalam sepersekian detik.
+
+  ExcelJS dipakai untuk MENULIS. SheetJS versi bebas tidak bisa menulis warna,
+  garis, dan sel gabungan, padahal justru itu yang membuat berkas unduhan
+  terlihat sama dengan berkas yang biasa diedarkan pengurus.
+
+  Kebalikannya sudah diukur dan tidak dipakai. ExcelJS memang bisa membaca,
+  tapi di peramban satu berkas yang sama memakan sekitar delapan belas detik,
+  sedangkan menulis dengannya cuma sekitar satu detik. Jadi masing-masing
+  dipakai untuk pekerjaan yang memang jadi kekuatannya.
+
+  Keduanya disimpan di dalam repo, bukan diambil dari CDN. Halaman ini dipakai
   pengurus di ruang kelas dengan sambungan seadanya, dan sekali CDN-nya
   terhalang, seluruh tab Excel mati tanpa bisa diperbaiki dari sini. Menyimpan
   sendiri juga berarti tidak ada pihak ketiga yang perlu dipercaya setiap kali
   halaman dibuka.
 
-  Versinya dikunci di 0.18.5, diambil dari cdnjs, dan isinya sudah dicocokkan
-  dengan sidik resmi yang diumumkan cdnjs:
+  Versinya dikunci, diambil dari cdnjs, dan isinya sudah dicocokkan dengan
+  sidik resmi yang diumumkan cdnjs:
 
+    xlsx 0.18.5
     sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA==
+
+    exceljs 4.4.0
+    sha512-dlPw+ytv/6JyepmelABrgeYgHI0O+frEwgfnPdXDTOIZz+eDgfW07QXG02/O8COfivBdGNINy+Vex+lYmJ5rxw==
 
   Kalau suatu saat berkasnya diperbarui, cocokkan lagi sidiknya sebelum
   dimasukkan ke repo.
 
-  Pemuatannya ditunda sampai tombolnya benar-benar dipakai. Ukurannya sekitar
-  900 kB, dan pengurus yang cuma membetulkan satu jadwal tidak perlu menunggu.
+  Pemuatannya ditunda sampai tombolnya benar-benar dipakai, dan yang dimuat
+  hanya yang dibutuhkan. Pengurus yang cuma mengunduh tidak ikut menunggu
+  pustaka pembaca, begitu pula sebaliknya.
 */
-const PUSTAKA = new URL('./vendor/xlsx.full.min.js', import.meta.url).href;
+function muatSkrip(berkas, namaGlobal, sebutan){
+  if(window[namaGlobal]) return Promise.resolve(window[namaGlobal]);
+  const alamat = new URL('./vendor/' + berkas, import.meta.url).href;
 
-let janjiPustaka = null;
-
-export function muatPustaka(){
-  if(window.XLSX) return Promise.resolve(window.XLSX);
-  if(janjiPustaka) return janjiPustaka;
-
-  janjiPustaka = new Promise((selesai, gagal) => {
+  return new Promise((selesai, gagal) => {
     const s = document.createElement('script');
-    s.src = PUSTAKA;
-    s.onload = () => window.XLSX
-      ? selesai(window.XLSX)
-      : gagal(new Error('Pustaka Excel termuat tapi tidak bisa dipakai.'));
-    s.onerror = () => {
-      janjiPustaka = null;
-      gagal(new Error('Pustaka pembaca Excel gagal dimuat. Muat ulang halaman ini, lalu coba lagi.'));
-    };
+    s.src = alamat;
+    s.onload = () => window[namaGlobal]
+      ? selesai(window[namaGlobal])
+      : gagal(new Error(`Pustaka ${sebutan} termuat tapi tidak bisa dipakai.`));
+    s.onerror = () => gagal(new Error(
+      `Pustaka ${sebutan} gagal dimuat. Muat ulang halaman ini, lalu coba lagi.`));
     document.head.appendChild(s);
   });
-  return janjiPustaka;
+}
+
+let janjiPembaca = null;
+let janjiPenulis = null;
+
+export function muatPembaca(){
+  if(!janjiPembaca) janjiPembaca = muatSkrip('xlsx.full.min.js', 'XLSX', 'pembaca Excel')
+    .catch(err => { janjiPembaca = null; throw err; });
+  return janjiPembaca;
+}
+
+export function muatPenulis(){
+  if(!janjiPenulis) janjiPenulis = muatSkrip('exceljs.min.js', 'ExcelJS', 'penulis Excel')
+    .catch(err => { janjiPenulis = null; throw err; });
+  return janjiPenulis;
 }
 
 /* ---------- nama lembar ---------- */
@@ -189,20 +221,72 @@ function samakanHari(nilai){
   ajaran di belakangnya. Selama kata-katanya masih mengandung nama yang
   dikenal, lembarnya tetap ketemu.
 */
-function cariLembar(wb, nama){
+function cariLembar(daftarNama, nama){
   const cari = kunci(nama);
-  const persis = wb.SheetNames.find(n => kunci(n) === cari);
+  const persis = daftarNama.find(n => kunci(n) === cari);
   if(persis) return persis;
-  return wb.SheetNames.find(n => kunci(n).includes(cari) || cari.includes(kunci(n))) || null;
+  return daftarNama.find(n => kunci(n).includes(cari) || cari.includes(kunci(n))) || null;
 }
 
+/*
+  Satu lembar diubah menjadi larik baris, dengan nomor baris yang tetap sama
+  seperti di Excel.
+
+  Dua hal ditangani di sini, dan keduanya berasal dari sel gabungan.
+
+  Pertama, nilai sel induk disalin ke seluruh sel gabungannya. Kode dan nama
+  mata kuliah yang ditulis sekali lalu digabung ke bawah karena itu terbaca
+  pada tiap barisnya, jadi tidak ada yang perlu ditebak.
+
+  Kedua, tiap sel dicatat apakah ia sel induk atau sekadar sambungan. Di berkas
+  aslinya tiap KP memakan dua baris, yang kedua hanya sambungan dari yang
+  pertama, dan tanpa catatan ini tiap kelas terbaca dua kali.
+
+  Penentuan "baris ini cuma sambungan" TIDAK bisa diambil dari seluruh
+  barisnya. Pengurus terbiasa menaruh catatan kerja di kolom jauh, misalnya
+  "ganti jadwal" di kolom L dan "Y" di kolom P, dan catatan itu sering jatuh
+  pada baris sambungan. Kalau keberadaan catatan dianggap tanda baris berisi,
+  sepuluh kelas terbaca dua kali. Karena itu yang diperiksa adalah kolom
+  penanda milik tiap lembar, lewat sambunganKe di bawah.
+
+  Nomor barisnya sengaja dipertahankan, termasuk untuk baris yang dilewati,
+  supaya laporan "Baris 116" menunjuk baris yang sama dengan yang dilihat
+  pengurus saat membuka berkasnya di Excel.
+*/
 function bacaLembar(XLSX, wb, nama){
-  const asli = cariLembar(wb, nama);
+  const asli = cariLembar(wb.SheetNames, nama);
   if(!asli) return null;
-  const baris = XLSX.utils.sheet_to_json(wb.Sheets[asli], {
+  const ws = wb.Sheets[asli];
+  const baris = XLSX.utils.sheet_to_json(ws, {
     header: 1, raw: false, defval: '', blankrows: true,
   });
-  return { nama: asli, baris };
+  const lanjutan = baris.map(b => b.map(() => false));
+
+  for(const rentang of (ws['!merges'] || [])){
+    const { s: mulai, e: akhir } = rentang;
+    const induk = ((baris[mulai.r] || [])[mulai.c]) ?? '';
+    for(let r = mulai.r; r <= akhir.r; r++){
+      if(!baris[r]) baris[r] = [];
+      if(!lanjutan[r]) lanjutan[r] = [];
+      for(let c = mulai.c; c <= akhir.c; c++){
+        if(r === mulai.r && c === mulai.c) continue;
+        baris[r][c] = induk;
+        lanjutan[r][c] = true;
+      }
+    }
+  }
+  return { nama: asli, baris, lanjutan };
+}
+
+/*
+  Benar kalau sel penanda pada baris itu cuma sambungan dari baris di atasnya,
+  sehingga barisnya tidak membawa data baru.
+*/
+function sambunganKe(lembar, indeks, kolom, nama){
+  const j = kolom[nama];
+  if(j === undefined) return false;
+  const b = lembar.lanjutan[indeks];
+  return !!(b && b[j]);
 }
 
 /*
@@ -224,6 +308,8 @@ function bacaJadwal(lembar, masalah){
   for(let i = kepala.indeks + 1; i < lembar.baris.length; i++){
     const baris = lembar.baris[i];
     if(kosong(baris)) continue;
+    // Barisnya cuma sambungan sel gabungan milik KP di atasnya.
+    if(sambunganKe(lembar, i, kepala.kolom, 'kp')) continue;
 
     const kode = ambil(baris, kepala.kolom, 'kode');
     const nama = ambil(baris, kepala.kolom, 'nama');
@@ -296,6 +382,7 @@ function bacaPengajar(lembar, masalah){
   for(let i = kepala.indeks + 1; i < lembar.baris.length; i++){
     const baris = lembar.baris[i];
     if(kosong(baris)) continue;
+    if(sambunganKe(lembar, i, kepala.kolom, 'pengajar')) continue;
 
     const kode = ambil(baris, kepala.kolom, 'kode');
     const nama = ambil(baris, kepala.kolom, 'nama');
@@ -333,6 +420,7 @@ function bacaClassroom(lembar, masalah){
   for(let i = kepala.indeks + 1; i < lembar.baris.length; i++){
     const baris = lembar.baris[i];
     if(kosong(baris)) continue;
+    if(sambunganKe(lembar, i, kepala.kolom, 'kp')) continue;
 
     const kode = ambil(baris, kepala.kolom, 'kode');
     const nama = ambil(baris, kepala.kolom, 'nama');
@@ -371,6 +459,7 @@ function bacaKoordinator(lembar, masalah){
   for(let i = kepala.indeks + 1; i < lembar.baris.length; i++){
     const baris = lembar.baris[i];
     if(kosong(baris)) continue;
+    if(sambunganKe(lembar, i, kepala.kolom, 'kode')) continue;
 
     const kode = ambil(baris, kepala.kolom, 'kode');
     if(!kode) continue;
@@ -400,7 +489,7 @@ function bacaKoordinator(lembar, masalah){
   tetap bisa diuji sendiri tanpa Firestore.
 */
 export async function bacaBerkas(file){
-  const XLSX = await muatPustaka();
+  const XLSX = await muatPembaca();
   const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
 
   const masalah = [];
@@ -457,19 +546,93 @@ export async function bacaBerkas(file){
    ============================================================ */
 
 /*
-  Berkas hasil unduhan sengaja mengisi kode dan nama mata kuliah di SETIAP
-  baris, tidak digabung ke bawah seperti berkas aslinya.
+  Berkas hasil unduhan dibuat semirip mungkin dengan berkas yang biasa dipakai
+  pengurus: kepala tabel berwarna, seluruh sel bergaris, dan kode serta nama
+  mata kuliah digabung ke bawah untuk semua KP-nya.
 
-  Sel gabungan enak dilihat tapi menyulitkan penyaringan dan pengurutan di
-  Excel, dan gampang rusak begitu ada baris disisipkan. Berkas ini tetap bisa
-  diunggah kembali ke halaman operasional, karena pembacanya menerima kedua
-  bentuk itu.
+  Kemiripan itu bukan sekadar enak dilihat. Berkas ini diedarkan ke asisten,
+  ditempel ke grup, dan dicetak. Kalau bentuknya berbeda jauh dari yang sudah
+  dikenal, yang menerima akan mengira ini berkas lain, lalu kembali memakai
+  Excel lama yang justru sudah tertinggal.
+
+  Sel gabungannya tetap bisa dibaca ulang oleh halaman ini, karena pembacanya
+  memang menerima bentuk itu.
 */
-function lembarDari(XLSX, kepala, baris, lebar){
-  const ws = XLSX.utils.aoa_to_sheet([kepala, ...baris]);
-  ws['!cols'] = lebar.map(w => ({ wch: w }));
-  ws['!freeze'] = { xSplit: 0, ySplit: 1 };
-  return ws;
+
+const MERAH = 'FFC00000';
+const PUTIH = 'FFFFFFFF';
+const ABU_GARIS = 'FF9AA5B1';
+
+const garis = {
+  top:    { style: 'thin', color: { argb: ABU_GARIS } },
+  left:   { style: 'thin', color: { argb: ABU_GARIS } },
+  bottom: { style: 'thin', color: { argb: ABU_GARIS } },
+  right:  { style: 'thin', color: { argb: ABU_GARIS } },
+};
+
+function gayaKepala(baris){
+  baris.height = 26;
+  baris.eachCell(sel => {
+    sel.font = { bold: true, color: { argb: PUTIH }, size: 11 };
+    sel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: MERAH } };
+    sel.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    sel.border = garis;
+  });
+}
+
+function gayaJudul(ws, teks, jumlahKolom){
+  const baris = ws.getRow(1);
+  baris.getCell(1).value = teks;
+  baris.height = 28;
+  ws.mergeCells(1, 1, 1, jumlahKolom);
+  const sel = baris.getCell(1);
+  sel.font = { bold: true, size: 12, color: { argb: PUTIH } };
+  sel.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: MERAH } };
+  sel.alignment = { horizontal: 'center', vertical: 'middle' };
+  sel.border = garis;
+}
+
+/*
+  Kolom yang isinya panjang dibiarkan rata kiri, sisanya rata tengah.
+
+  Nama mata kuliah dan nama orang jauh lebih mudah dipindai kalau awalnya
+  sejajar. Kode, KP, hari, dan jam pendek-pendek, jadi rata tengah membuat
+  kolomnya terbaca sebagai satu barisan rapi.
+*/
+function gayaIsi(ws, barisAwal, kolomKiri){
+  for(let r = barisAwal; r <= ws.rowCount; r++){
+    const baris = ws.getRow(r);
+    for(let c = 1; c <= ws.columnCount; c++){
+      const sel = baris.getCell(c);
+      sel.border = garis;
+      sel.alignment = {
+        horizontal: kolomKiri.includes(c) ? 'left' : 'center',
+        vertical: 'middle',
+        wrapText: true,
+      };
+      sel.font = { size: 11 };
+    }
+  }
+}
+
+/*
+  Menggabungkan sel pada kolom tertentu untuk baris berurutan yang nilainya
+  sama, misalnya satu kode mata kuliah yang punya lima KP.
+
+  Yang dipakai sebagai penentu kelompok bukan nilai kolom itu sendiri,
+  melainkan kunci yang diberikan pemanggil. Dua mata kuliah berbeda yang
+  kebetulan bernama sama karena itu tidak ikut tergabung.
+*/
+function gabungKelompok(ws, kunciBaris, barisAwal, kolom){
+  let mulai = 0;
+  for(let i = 0; i <= kunciBaris.length; i++){
+    const sama = i < kunciBaris.length && kunciBaris[i] === kunciBaris[mulai];
+    if(sama) continue;
+    if(i - mulai > 1){
+      for(const c of kolom) ws.mergeCells(barisAwal + mulai, c, barisAwal + i - 1, c);
+    }
+    mulai = i;
+  }
 }
 
 function urutKelas(a, b){
@@ -484,12 +647,29 @@ function urutKelas(a, b){
   operasional: matakuliah, jadwal, pengajar, classroom, dan koordinator.
 */
 export async function susunBerkas(isi){
-  const XLSX = await muatPustaka();
-  const wb = XLSX.utils.book_new();
+  const ExcelJS = await muatPenulis();
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'KAFBE Hub';
+  wb.created = new Date();
 
   const namaDari = kode => {
     const m = (isi.matakuliah || []).find(x => x.kode === kode);
     return m ? m.nama : '';
+  };
+
+  const buatLembar = (nama, kepala, lebar, barisJudul) => {
+    const ws = wb.addWorksheet(nama, {
+      views: [{ state: 'frozen', ySplit: barisJudul ? 2 : 1 }],
+      pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 },
+    });
+    if(barisJudul){
+      ws.addRow([]);
+      gayaJudul(ws, barisJudul, kepala.length);
+    }
+    const barisKepala = ws.addRow(kepala);
+    gayaKepala(barisKepala);
+    ws.columns.forEach((kol, i) => { kol.width = lebar[i]; });
+    return ws;
   };
 
   // ---------- Jadwal + Ruang Kelas ----------
@@ -497,49 +677,75 @@ export async function susunBerkas(isi){
     .map(j => ({ ...j, nama: namaDari(j.kode) }))
     .sort(urutKelas);
 
-  let nomor = 0, kodeSebelum = '';
-  const barisJadwal = jadwal.map(j => {
-    const baru = j.kode !== kodeSebelum;
-    if(baru){ nomor++; kodeSebelum = j.kode; }
-    return [
-      baru ? nomor : '', j.kode, j.nama, j.kp, j.hari,
-      rentangJamExcel(j.mulai, j.selesai), j.ruang || '',
-    ];
-  });
-  XLSX.utils.book_append_sheet(wb, lembarDari(XLSX,
+  const wsJadwal = buatLembar(LEMBAR.jadwal,
     ['No', 'Kode Matkul', 'Nama Matkul', 'KP', 'Hari', 'Jam', 'Ruang Kelas'],
-    barisJadwal, [5, 12, 40, 6, 8, 16, 12]), LEMBAR.jadwal);
+    [6, 14, 42, 7, 10, 16, 14]);
+
+  let nomor = 0, kodeSebelum = null;
+  const kunciJadwal = [];
+  for(const j of jadwal){
+    if(j.kode !== kodeSebelum){ nomor++; kodeSebelum = j.kode; }
+    kunciJadwal.push(j.kode);
+    wsJadwal.addRow([nomor, j.kode, j.nama, j.kp, j.hari,
+      rentangJamExcel(j.mulai, j.selesai), j.ruang || '']);
+  }
+  gayaIsi(wsJadwal, 2, [3]);
+  gabungKelompok(wsJadwal, kunciJadwal, 2, [1, 2, 3]);
 
   // ---------- google classroom ----------
-  const classroom = [...(isi.classroom || [])].sort(urutKelas);
-  nomor = 0; kodeSebelum = '';
-  const barisClassroom = classroom.map(c => {
-    const baru = c.kode !== kodeSebelum;
-    if(baru){ nomor++; kodeSebelum = c.kode; }
-    return [baru ? nomor : '', c.kode, c.nama || namaDari(c.kode), c.kp, c.classroom || ''];
-  });
-  XLSX.utils.book_append_sheet(wb, lembarDari(XLSX,
+  const classroom = [...(isi.classroom || [])]
+    .map(c => ({ ...c, nama: c.nama || namaDari(c.kode) }))
+    .sort(urutKelas);
+
+  const wsGc = buatLembar(LEMBAR.classroom,
     ['No', 'Kode Matkul', 'Nama Matkul', 'KP', 'Kode google classroom'],
-    barisClassroom, [5, 12, 40, 6, 22]), LEMBAR.classroom);
+    [6, 14, 42, 7, 24]);
+
+  nomor = 0; kodeSebelum = null;
+  const kunciGc = [];
+  for(const c of classroom){
+    if(c.kode !== kodeSebelum){ nomor++; kodeSebelum = c.kode; }
+    kunciGc.push(c.kode);
+    wsGc.addRow([nomor, c.kode, c.nama, c.kp, c.classroom || '']);
+  }
+  gayaIsi(wsGc, 2, [3]);
+  gabungKelompok(wsGc, kunciGc, 2, [1, 2, 3]);
 
   // ---------- Contact Koor ----------
   const koordinator = [...(isi.koordinator || [])]
     .sort((a, b) => String(a.nama || a.kode).localeCompare(String(b.nama || b.kode)));
-  XLSX.utils.book_append_sheet(wb, lembarDari(XLSX,
+
+  const wsKoor = buatLembar(LEMBAR.koordinator,
     ['Kode Mata Kuliah', 'Mata Kuliah', 'Nama Koordinator', 'NRP', 'WA / Line'],
-    koordinator.map(k => [k.kode, k.nama || namaDari(k.kode), k.koordinator || '', k.nrp || '', k.kontak || '']),
-    [18, 40, 30, 14, 24]), LEMBAR.koordinator);
+    [20, 42, 32, 16, 26], 'KOORDINATOR MATA KULIAH KAFBE');
+
+  for(const k of koordinator){
+    wsKoor.addRow([k.kode, k.nama || namaDari(k.kode), k.koordinator || '', k.nrp || '', k.kontak || '']);
+  }
+  gayaIsi(wsKoor, 3, [2, 3]);
 
   // ---------- Tim Pengajar ----------
   const pengajar = [...(isi.pengajar || [])]
-    .map(p => ({ ...p, nama: namaDari(p.kode) }))
-    .sort((a, b) => urutKelas(a, b) || String(a.pengajar || a.namaPengajar).localeCompare(String(b.pengajar || b.namaPengajar)));
-  XLSX.utils.book_append_sheet(wb, lembarDari(XLSX,
-    ['KODE MK', 'NAMA MK', 'KP', 'PENGAJAR', 'NRP'],
-    pengajar.map(p => [p.kode, p.nama, p.kp, p.pengajar || p.namaPengajar || '', p.nrp || '']),
-    [12, 40, 6, 32, 14]), LEMBAR.pengajar);
+    .map(p => ({ ...p, nama: namaDari(p.kode), pengajar: p.pengajar || p.namaPengajar || '' }))
+    .sort((a, b) => urutKelas(a, b) || String(a.pengajar).localeCompare(String(b.pengajar)));
 
-  return new Blob([XLSX.write(wb, { bookType: 'xlsx', type: 'array' })],
+  const wsPengajar = buatLembar(LEMBAR.pengajar,
+    ['KODE MK', 'NAMA MK', 'KP', 'PENGAJAR', 'NRP'],
+    [14, 42, 7, 34, 16], 'TIM MATA KULIAH');
+
+  const kunciMk = [], kunciKp = [];
+  for(const p of pengajar){
+    kunciMk.push(p.kode);
+    kunciKp.push(p.kode + '|' + p.kp);
+    wsPengajar.addRow([p.kode, p.nama, p.kp, p.pengajar, p.nrp || '']);
+  }
+  gayaIsi(wsPengajar, 3, [2, 4]);
+  // Satu KP bisa dipegang beberapa pengajar, jadi kolom KP-nya ikut digabung
+  // supaya terbaca bahwa nama-nama itu mengajar kelas yang sama.
+  gabungKelompok(wsPengajar, kunciMk, 3, [1, 2]);
+  gabungKelompok(wsPengajar, kunciKp, 3, [3]);
+
+  return new Blob([await wb.xlsx.writeBuffer()],
     { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 }
 
