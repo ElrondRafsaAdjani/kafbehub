@@ -198,11 +198,6 @@ service cloud.firestore {
       allow write: if tulisanAdmin();
     }
 
-    match /pengaturan/{id} {
-      allow read: if true;
-      allow write: if tulisanAdmin();
-    }
-
     // ---------- Data pengajar ----------
     // Nama dan NRP asisten memang sudah diumumkan lewat kanal resmi KAFBE,
     // jadi tidak ada yang perlu dirahasiakan dan aturannya disamakan dengan

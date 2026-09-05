@@ -291,7 +291,6 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 }
 .tag-libur{background:#FBE3E2; color:#B03B37;}
 .tag-pengganti{background:#E1F5E9; color:#1E7A44;}
-.tag-belum{background:#E7EDF1; color:#5C7285;}
 .tag-ruang{background:#E3EEF8; color:#2C5A85;}
 .row-ruang{background:#F6FAFD;}
 .tag-daring{background:#EDE7F8; color:#5B3FA0;}
@@ -307,11 +306,6 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
    sebelum membaca keterangannya. */
 .tag-diganti{background:#E4EEF6; color:#2C5C86;}
 .row-diganti{background:#F7FBFD;}
-
-.row-belum{background:#FAFCFD;}
-.row-belum .matkul-nama, .row-belum .jam-pill,
-.row-belum .col-ruang, .row-belum .kp-pill{opacity:0.55;}
-.mulai-matkul{display:block; margin-top:4px; font-size:0.84rem; color:var(--ink-soft);}
 
 .row-libur .matkul-nama, .row-libur .jam-pill{text-decoration:line-through; opacity:0.65;}
 .row-libur .col-ruang{text-decoration:line-through; opacity:0.65;}
@@ -383,22 +377,6 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
    Ditulis .kotak .perub-sisa supaya tidak kalah dari .kotak p di atas. */
 .kotak .perub-sisa{
   margin:14px 0 0; font-size:0.88rem; line-height:1.6; color:var(--owl-dark);
-}
-
-/* Kotak "sebagian perkuliahan belum dimulai". Bentuknya memang mendatar,
-   satu baris satu tanggal, jadi gayanya berdiri sendiri dan tidak lagi
-   menumpang kelas .perub-* yang kini bertingkat. */
-.mulai-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;}
-.mulai-item{
-  display:flex; gap:14px; flex-wrap:wrap; align-items:baseline;
-  font-size:0.9rem; color:var(--ink-soft); line-height:1.5;
-  padding-bottom:12px; border-bottom:1px solid var(--line);
-}
-.mulai-item:last-child{border-bottom:none; padding-bottom:0;}
-.mulai-tanggal{font-weight:700; color:var(--owl-dark2); min-width:190px;}
-.mulai-teks{flex:1;}
-@media (max-width:620px){
-  .mulai-tanggal{min-width:0; width:100%;}
 }
 
 .jadwal-toolbar{

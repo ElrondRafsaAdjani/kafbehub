@@ -281,7 +281,6 @@ const data = {
   // tidak pernah ikut diterbitkan ke dokumen publik.
   classroom: [],
   koordinator: [],
-  pengaturan: { mulaiDefault: '', perMatkul: {} },
 };
 
 /*
@@ -330,17 +329,6 @@ async function muatSemua(){
     data.classroom = gc;
     data.koordinator = ko;
 
-    try{
-      const st = await getDoc(doc(db, 'pengaturan', 'umum'));
-      data.pengaturan = st.exists()
-        ? { mulaiDefault: st.data().mulaiDefault || '', perMatkul: st.data().perMatkul || {} }
-        : { mulaiDefault: '', perMatkul: {} };
-      gagalMuat.delete('pengaturan');
-    }catch(err){
-      console.error('Gagal memuat pengaturan', err);
-      gagalMuat.set('pengaturan', err.message || 'tidak diketahui');
-    }
-
     gambarSemua();
 
     if(gagalMuat.size === 0){
@@ -369,7 +357,6 @@ function gambarSemua(){
   gambarPengumuman();
   gambarClassroom();
   gambarKoordinator();
-  gambarPengaturan();
 }
 
 function namaMatkul(kode){
@@ -525,7 +512,6 @@ function isiPilihanMatkul(){
   const opsi = data.matakuliah
     .map(m => `<option value="${esc(m.kode)}">${esc(m.kode)} · ${esc(m.nama)}</option>`).join('');
   $('jdKode').innerHTML = '<option value="">— pilih —</option>' + opsi;
-  $('stKode').innerHTML = '<option value="">— pilih —</option>' + opsi;
 }
 
 function urutJadwal(a, b){
@@ -1077,11 +1063,7 @@ function rentangTanggal(dari, sampai){
   return out;
 }
 
-function mulaiUntukKode(kode){
-  return data.pengaturan.perMatkul[kode] || data.pengaturan.mulaiDefault || null;
-}
-
-let massalKandidat = [];   // { jadwalId, tanggalList[], belumMulai }
+let massalKandidat = [];   // { jadwalId, tanggalList[] }
 
 $('msTampilkan').addEventListener('click', () => {
   const el = $('pesanMassal');
@@ -1110,14 +1092,9 @@ $('msTampilkan').addEventListener('click', () => {
 
   if(peta.size === 0){ pesan(el, 'Tidak ada kelas yang jatuh pada rentang tanggal itu.', 'salah'); return; }
 
-  massalKandidat = [...peta.entries()].map(([jadwalId, tgls]) => {
-    const j = data.jadwal.find(x => x.id === jadwalId);
-    const mulai = mulaiUntukKode(j.kode);
-    // Kelas yang perkuliahannya belum dimulai pada seluruh rentang tidak perlu
-    // diubah, jadi tidak dicentang secara bawaan.
-    const belumMulai = mulai && tgls.every(t => t < mulai);
-    return { jadwalId, tanggalList: tgls, belumMulai };
-  }).sort((a, b) => {
+  massalKandidat = [...peta.entries()].map(([jadwalId, tgls]) => ({
+    jadwalId, tanggalList: tgls,
+  })).sort((a, b) => {
     const ja = data.jadwal.find(x => x.id === a.jadwalId);
     const jb = data.jadwal.find(x => x.id === b.jadwalId);
     return urutJadwal(ja, jb);
@@ -1125,17 +1102,17 @@ $('msTampilkan').addEventListener('click', () => {
 
   const baris = massalKandidat.map(k => {
     const j = data.jadwal.find(x => x.id === k.jadwalId);
-    return `<label class="op-centang-baris${k.belumMulai ? ' op-redup' : ''}">
-      <input type="checkbox" data-massal="${esc(k.jadwalId)}"${k.belumMulai ? '' : ' checked'} />
+    return `<label class="op-centang-baris">
+      <input type="checkbox" data-massal="${esc(k.jadwalId)}" checked />
       <span>
         <strong>${esc(namaMatkul(j.kode) || j.kode)}</strong> KP ${esc(j.kp)}
         <span class="op-samar">· ${esc(j.hari)} ${esc(rentangJam(j.mulai, j.selesai))} · ${esc(j.ruang || 'tanpa ruang')}
-        · ${k.tanggalList.length} tanggal${k.belumMulai ? ' · belum dimulai' : ''}</span>
+        · ${k.tanggalList.length} tanggal</span>
       </span>
     </label>`;
   }).join('');
 
-  const jumlahTercentang = massalKandidat.filter(k => !k.belumMulai).length;
+  const jumlahTercentang = massalKandidat.length;
   $('msDaftar').innerHTML = `
     <div class="op-massal-kepala">
       <strong>${massalKandidat.length} kelas</strong> jatuh pada ${tanggalList.length} hari terpilih.
@@ -1535,62 +1512,6 @@ $('formPengumuman').addEventListener('submit', async (e) => {
 });
 
 /* ============================================================
-   9. Pengaturan
-   ============================================================ */
-
-function gambarPengaturan(){
-  $('stMulai').value = data.pengaturan.mulaiDefault || '';
-  const daftar = Object.entries(data.pengaturan.perMatkul || {});
-  const el = $('daftarPengecualian');
-  if(daftar.length === 0){
-    el.innerHTML = '<p class="op-samar" style="margin:0 0 12px;">Belum ada pengecualian.</p>';
-    return;
-  }
-  el.innerHTML = `<div class="op-tabel-bungkus" style="margin-bottom:14px;"><table class="op-tabel">
-    <thead><tr><th>Mata Kuliah</th><th>Mulai</th><th></th></tr></thead>
-    <tbody>${daftar.map(([kode, tgl]) => `<tr>
-      <td>${esc(kode)}<br><span class="op-samar">${esc(namaMatkul(kode) || 'tidak ada di daftar')}</span></td>
-      <td>${esc(tanggalPanjang(tgl))}</td>
-      <td><button class="op-mini op-hapus" data-buang-kec="${esc(kode)}">Hapus</button></td>
-    </tr>`).join('')}</tbody></table></div>`;
-
-  el.querySelectorAll('[data-buang-kec]').forEach(b => b.addEventListener('click', () => {
-    delete data.pengaturan.perMatkul[b.dataset.buangKec];
-    gambarPengaturan();
-    pesan($('pesanPengaturan'), 'Pengecualian dihapus dari daftar. Tekan "Simpan pengaturan" supaya benar-benar tersimpan.', 'hati');
-  }));
-}
-
-$('tambahPengecualian').addEventListener('click', () => {
-  const kode = $('stKode').value, tgl = $('stTanggal').value;
-  const el = $('pesanPengaturan');
-  if(!kode || !tgl){ pesan(el, 'Pilih mata kuliah dan tanggalnya dulu.', 'salah'); return; }
-  data.pengaturan.perMatkul[kode] = tgl;
-  $('stKode').value = ''; $('stTanggal').value = '';
-  gambarPengaturan();
-  pesan(el, 'Ditambahkan ke daftar. Tekan "Simpan pengaturan" supaya benar-benar tersimpan.', 'hati');
-});
-
-$('formPengaturan').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const el = $('pesanPengaturan');
-  data.pengaturan.mulaiDefault = $('stMulai').value;
-  try{
-    status('Menyimpan…', 'sibuk');
-    await setDoc(doc(db, 'pengaturan', 'umum'), {
-      mulaiDefault: data.pengaturan.mulaiDefault,
-      perMatkul: data.pengaturan.perMatkul,
-    });
-    bersihkanPesan(el);
-    await muatSemua();
-    await terbitkan();
-  }catch(err){
-    console.error(err);
-    status('Gagal menyimpan: ' + err.message, 'salah');
-  }
-});
-
-/* ============================================================
    10. Menerbitkan ke halaman publik
    ============================================================ */
 
@@ -1716,10 +1637,6 @@ async function terbitkan(){
 
     await setDoc(doc(db, 'publik', 'terkini'), {
       updatedAt: new Date().toISOString(),
-      mulai: {
-        default: data.pengaturan.mulaiDefault || null,
-        perMatkul: data.pengaturan.perMatkul || {},
-      },
       days, changes, pengumuman,
     });
 
@@ -2636,76 +2553,5 @@ $('xlTerapkan').addEventListener('click', async () => {
     pesan(el, 'Gagal menyimpan: ' + esc(err.message)
       + '. Sebagian data mungkin sudah masuk, jadi bandingkan berkasnya sekali lagi sebelum mengulang.', 'salah');
     status('Gagal menerapkan berkas Excel.', 'salah');
-  }
-});
-
-/* ============================================================
-   12. Impor sekali dari data lama
-   ============================================================ */
-
-$('tombolImpor').addEventListener('click', async () => {
-  const el = $('pesanImpor');
-  bersihkanPesan(el);
-
-  // Penjaga: menolak jalan kalau sudah ada isinya, supaya tidak menimpa
-  // pekerjaan yang sudah dimasukkan lewat halaman ini.
-  if(data.matakuliah.length || data.jadwal.length){
-    pesan(el, 'Impor dibatalkan karena basis data sudah berisi. Tombol ini hanya untuk pemakaian pertama kali.', 'salah');
-    return;
-  }
-  if(!confirm('Impor daftar mata kuliah dan jadwal permanen dari data lama?')) return;
-
-  try{
-    status('Mengimpor…', 'sibuk');
-    const res = await fetch('data/jadwal.json', { cache: 'no-cache' });
-    if(!res.ok) throw new Error('berkas data lama tidak terbaca (HTTP ' + res.status + ')');
-    const lama = await res.json();
-
-    const matkul = new Map();
-    let jumlahJadwal = 0;
-
-    for(const hari of (lama.days || [])){
-      for(const k of (hari.classes || [])){
-        if(k.kode && !matkul.has(k.kode)) matkul.set(k.kode, k.nama || k.kode);
-      }
-    }
-    for(const [kode, nama] of matkul){
-      await addDoc(collection(db, 'matakuliah'), { kode, nama });
-    }
-
-    for(const hari of (lama.days || [])){
-      for(const k of (hari.classes || [])){
-        const m = String(k.jam || '').match(/(\d{1,2})[.:](\d{2})\s*-\s*(\d{1,2})[.:](\d{2})/);
-        if(!m) continue;
-        await addDoc(collection(db, 'jadwal'), {
-          kode: k.kode,
-          kp: String(k.kp || '').toUpperCase(),
-          hari: hari.day,
-          mulai: `${m[1].padStart(2,'0')}:${m[2]}`,
-          selesai: `${m[3].padStart(2,'0')}:${m[4]}`,
-          ruang: k.ruang || '',
-        });
-        jumlahJadwal++;
-      }
-    }
-
-    if(lama.mulai){
-      await setDoc(doc(db, 'pengaturan', 'umum'), {
-        mulaiDefault: lama.mulai.default || '',
-        perMatkul: lama.mulai.perMatkul || {},
-      });
-    }
-
-    await muatSemua();
-    await terbitkan();
-    pesan(el,
-      `Selesai. ${matkul.size} mata kuliah dan ${jumlahJadwal} kelas berhasil diimpor. `
-      + 'Perubahan sementara tidak ikut diimpor karena bentuk datanya berbeda, '
-      + 'silakan masukkan ulang lewat tab Perubahan Sementara bila masih berlaku.',
-      'benar');
-  }catch(err){
-    console.error(err);
-    pesan(el, 'Impor gagal: ' + esc(err.message), 'salah');
-    status('Impor gagal.', 'salah');
   }
 });

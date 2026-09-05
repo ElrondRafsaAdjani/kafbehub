@@ -61,7 +61,6 @@
     <h2 data-teks="jadwal.judul" data-label="Judul halaman">Jadwal mata kuliah per minggu</h2>
   </div>
 
-  <div id="kotakSemester"></div>
   <div id="kotakPerubahan"></div>
   <div id="kotakPeringatan"></div>
 
@@ -112,7 +111,6 @@
   const elMeta   = document.getElementById('jadwalMeta');
   const elNav    = document.getElementById('weekNav');
   const elRange  = document.getElementById('weekRange');
-  const elSemester = document.getElementById('kotakSemester');
   const elPerub  = document.getElementById('kotakPerubahan');
   const elPering = document.getElementById('kotakPeringatan');
   const btnPrev  = document.getElementById('prevWeek');
@@ -192,13 +190,6 @@
 
   /* ---------- susun jadwal satu hari, sudah termasuk perubahan ---------- */
 
-  // Tanggal mulai perkuliahan untuk satu mata kuliah (lihat data/mulai.json).
-  function mulaiUntuk(kode){
-    const m = data.mulai;
-    if(!m) return null;
-    return (m.perMatkul && m.perMatkul[kode]) || m.default || null;
-  }
-
   function kelasHari(namaHari, tanggalIso){
     const dasar = (data.days.find(d => d.day === namaHari)?.classes || []);
     const perub = (data.changes || []).filter(c => c.tanggal === tanggalIso);
@@ -227,12 +218,6 @@
     for(const c of perub.filter(c => c.tipe === 'menyusul')) menyusul.set(kunci(c), c);
 
     const hasil = dasar.map(k => {
-      // Kelas yang perkuliahannya belum dimulai tidak bisa "ditiadakan".
-      // status ini diperiksa lebih dulu.
-      const mulai = mulaiUntuk(k.kode);
-      if(mulai && tanggalIso < mulai){
-        return { ...k, status:'belum', catatan:`Perkuliahan dimulai ${tglPanjang(mulai)}` };
-      }
       const c = libur.get(kunci(k));
       if(c) return { ...k, status:'libur', catatan:c.catatan };
 
@@ -334,13 +319,12 @@
 
     const KELAS_BARIS = {
       libur:'row-libur', pengganti:'row-pengganti',
-      belum:'row-belum', ruang:'row-ruang', daring:'row-daring',
+      ruang:'row-ruang', daring:'row-daring',
       menyusul:'row-menyusul', diganti:'row-diganti',
     };
     const LABEL = {
       libur: '<span class="tag tag-libur">Ditiadakan</span>',
       pengganti: '<span class="tag tag-pengganti">Kelas pengganti</span>',
-      belum: '<span class="tag tag-belum">Belum dimulai</span>',
       ruang: '<span class="tag tag-ruang">Pindah ruang</span>',
       daring: '<span class="tag tag-daring">Online</span>',
       menyusul: '<span class="tag tag-menyusul">Jadwal menyusul</span>',
@@ -367,7 +351,6 @@
     const hitung = s => semua.filter(k => k.status === s).length;
     const ringkas = [
       `${kelas.length} kelas${q ? ' cocok' : ''}`,
-      hitung('belum')     ? `${hitung('belum')} belum dimulai` : '',
       hitung('libur')     ? `${hitung('libur')} ditiadakan` : '',
       hitung('daring')    ? `${hitung('daring')} daring` : '',
       hitung('ruang')     ? `${hitung('ruang')} pindah ruang` : '',
@@ -388,49 +371,6 @@
           </table>
         </div>
         <p class="jadwal-count">${esc(tglPanjang(iso(tgl)))} · ${ringkas}</p>
-      </div>`;
-  }
-
-  /* ---------- kotak "perkuliahan belum dimulai" ---------- */
-  function renderSemester(){
-    if(!data.mulai || !data.mulai.default) return;
-
-    const hariIni = iso(new Date());
-
-    // Kumpulkan tanggal mulai yang belum terlewati, beserta matkul yang terkait.
-    const kelompok = new Map();
-    const semuaKode = new Set();
-    for(const d of data.days) for(const k of d.classes) semuaKode.add(k.kode);
-
-    for(const kode of semuaKode){
-      const m = mulaiUntuk(kode);
-      if(!m || m <= hariIni) continue;
-      if(!kelompok.has(m)) kelompok.set(m, new Set());
-      const nama = data.days.flatMap(d => d.classes).find(k => k.kode === kode)?.nama;
-      if(nama) kelompok.get(m).add(nama);
-    }
-    if(kelompok.size === 0) return;
-
-    const urut = [...kelompok.entries()].sort((a,b) => a[0].localeCompare(b[0]));
-    const item = urut.map(([tgl, nama]) => {
-      const daftar = [...nama].sort();
-      // Kalau hampir semua matkul mulai di tanggal ini, tidak usah dirinci.
-      const rinci = daftar.length <= 6
-        ? `<span class="mulai-matkul">${daftar.map(esc).join(' · ')}</span>` : '';
-      // Kelas sendiri, bukan .perub-item. Keduanya sempat berbagi kelas yang
-      // sama, dan begitu daftar perubahan dirombak jadi bertingkat, kotak ini
-      // ikut berubah bentuk tanpa ada yang menyentuhnya.
-      return `<li class="mulai-item">
-        <span class="mulai-tanggal">${esc(tglPanjang(tgl))}</span>
-        <span class="mulai-teks">${daftar.length} mata kuliah mulai berjalan${rinci}</span>
-      </li>`;
-    }).join('');
-
-    elSemester.innerHTML = `
-      <div class="kotak kotak-info">
-        <h3>🗓️ Sebagian perkuliahan belum dimulai</h3>
-        <p>Kelas yang belum berjalan diredupkan dan diberi label <strong>Belum dimulai</strong>.</p>
-        <ul class="mulai-list" style="margin-top:14px;">${item}</ul>
       </div>`;
   }
 
@@ -611,7 +551,6 @@
       if(!data.days || data.days.length === 0) throw new Error('data jadwal kosong');
 
       hariAktif = HARI[new Date().getDay()];
-      renderSemester();
       renderPerubahan();
       renderPeringatan();
       render();

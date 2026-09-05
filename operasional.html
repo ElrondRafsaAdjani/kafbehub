@@ -74,7 +74,6 @@
       <button class="op-tab-btn" data-tab="pengajar" role="tab">Pengajar</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
       <button class="op-tab-btn" data-tab="excel" role="tab">Excel</button>
-      <button class="op-tab-btn" data-tab="pengaturan" role="tab">Pengaturan</button>
     </nav>
 
     <!-- ---------- MATA KULIAH ---------- -->
@@ -566,54 +565,6 @@
       <datalist id="daftarKodeMk"></datalist>
     </section>
 
-    <!-- ---------- PENGATURAN ---------- -->
-    <section class="op-panel" id="panel-pengaturan" hidden>
-      <div class="op-panel-kepala">
-        <div>
-          <h2>Pengaturan</h2>
-          <p>Tanggal mulai perkuliahan. Kelas yang belum mulai tetap tampil di halaman jadwal, tapi diredupkan dan diberi label.</p>
-        </div>
-      </div>
-
-      <form class="op-form" id="formPengaturan">
-        <div class="op-baris">
-          <div class="op-field">
-            <label for="stMulai">Mulai kuliah (umum)</label>
-            <input type="date" id="stMulai" />
-          </div>
-        </div>
-        <p class="op-catatan">Pengecualian per mata kuliah, misalnya angkatan baru yang mulai belakangan:</p>
-        <div id="daftarPengecualian"></div>
-        <div class="op-baris">
-          <div class="op-field">
-            <label for="stKode">Mata kuliah</label>
-            <select id="stKode"></select>
-          </div>
-          <div class="op-field">
-            <label for="stTanggal">Mulai tanggal</label>
-            <input type="date" id="stTanggal" />
-          </div>
-          <div class="op-field op-centang">
-            <button type="button" class="btn btn-ghost op-kecil" id="tambahPengecualian">Tambah pengecualian</button>
-          </div>
-        </div>
-        <div class="op-aksi">
-          <button type="submit" class="btn btn-primary op-kecil">Simpan pengaturan</button>
-        </div>
-        <p class="op-pesan" id="pesanPengaturan" role="alert"></p>
-      </form>
-
-      <hr class="op-garis" />
-
-      <h3>Impor data awal</h3>
-      <p class="op-catatan">
-        Dijalankan sekali saja saat pertama kali memakai halaman ini. Isi berkas jadwal lama
-        akan disalin ke basis data. Tombol ini menolak berjalan kalau datanya sudah ada,
-        supaya tidak menimpa pekerjaan yang sudah tersimpan.
-      </p>
-      <button type="button" class="btn btn-ghost op-kecil" id="tombolImpor">Impor dari data lama</button>
-      <p class="op-pesan" id="pesanImpor" role="alert"></p>
-    </section>
   </div>
 </div>
 

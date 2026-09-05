@@ -78,15 +78,14 @@ Punya akun saja **belum cukup**. Wewenangnya ditentukan di sini.
 > siapa pun. Setiap kali `firestore.rules` di repo diubah, isinya harus
 > ditempel ulang ke sini, karena Firebase tidak membacanya dari GitHub.
 
-### 1.5 Impor data lama
+### 1.5 Isi data pertama kali
 
 1. Buka <https://kafbehub.vercel.app/operasional>
 2. Masuk dengan akun tadi
-3. Tab **Pengaturan** → tombol **Impor dari data lama**
+3. Tab **Excel** → unggah berkas Informasi Kelas Asistensi semester berjalan
 
-Tombol ini menolak berjalan kalau datanya sudah ada, jadi aman ditekan.
-Perubahan sementara tidak ikut terimpor, masukkan ulang manual bila masih
-berlaku.
+Cara kerjanya dijelaskan di bagian **Excel** di bawah. Perubahan sementara
+tidak ada di berkas itu, jadi masukkan manual lewat tabnya sendiri.
 
 ---
 
@@ -199,8 +198,6 @@ tercentang semua. **Hapus centang** pada kelas yang tidak terdampak, lalu tekan
 
 Beberapa hal yang otomatis dijaga:
 
-- Kelas yang perkuliahannya **belum dimulai** tidak dicentang secara bawaan,
-  karena menandainya daring tidak ada gunanya
 - Kelas yang **sudah punya perubahan sendiri** pada tanggal itu dilewati, tidak
   ditimpa, karena entri manual lebih spesifik daripada pembuatan massal
 - Rentang lebih dari 31 hari ditolak, sebagai pengaman dari salah ketik tanggal
@@ -334,15 +331,6 @@ nomor pribadi, jadi keduanya ditutup di aturan keamanan.
 
 Tampil di halaman utama. Centang **Sematkan** untuk menaruhnya paling atas.
 Kosongkan tanggal mulai dan selesai kalau ingin tampil terus.
-
-### Pengaturan
-
-Tanggal mulai perkuliahan. Kelas yang belum mulai tetap tampil di halaman
-jadwal, tapi diredupkan dan diberi label "Belum dimulai". Pengecualian per mata
-kuliah dipakai misalnya untuk angkatan baru yang mulai belakangan.
-
-Ingat menekan **Simpan pengaturan** setelah menambah atau menghapus
-pengecualian.
 
 ---
 
@@ -689,7 +677,7 @@ Bagian ini untuk yang membaca kodenya. Pemakai biasa boleh melewatkannya.
 
 ```
 Pengurus  →  /operasional  →  koleksi matakuliah, jadwal, perubahan,
-                              pengumuman, pengaturan
+                              pengumuman
                                     ↓ dirangkum otomatis tiap menyimpan
 Mahasiswa →  halaman publik  ←  satu dokumen  publik/terkini
 ```
