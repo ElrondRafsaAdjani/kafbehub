@@ -23,6 +23,7 @@ const {
 const {
   getFirestore, collection, doc, getDoc, getDocs,
   addDoc, setDoc, updateDoc, deleteDoc, writeBatch,
+  query, orderBy, limit, startAfter, serverTimestamp,
 } = await import(`${SDK}/firebase-firestore.js`);
 
 const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
@@ -261,6 +262,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   diag('Terverifikasi sebagai admin. Membuka halaman…');
+  pemakai = { nama: profil.nama || '', email: user.email || '' };
   $('siapa').textContent = (profil.nama ? profil.nama + ' · ' : '') + user.email;
   $('layarMasuk').hidden = true;
   $('aplikasi').hidden = false;
@@ -270,6 +272,10 @@ onAuthStateChanged(auth, async (user) => {
 /* ============================================================
    3. Memuat data
    ============================================================ */
+
+// Siapa yang sedang memakai halaman, diisi setelah login dan dipakai sebagai
+// pelaku pada catatan log.
+let pemakai = { nama: '', email: '' };
 
 const data = {
   matakuliah: [],
@@ -374,6 +380,9 @@ document.querySelectorAll('.op-tab-btn').forEach(btn => {
     document.querySelectorAll('.op-panel').forEach(p => {
       p.hidden = p.id !== 'panel-' + btn.dataset.tab;
     });
+    // Catatan log baru diambil saat tabnya benar-benar dibuka. Pengurus yang
+    // cuma mengubah satu jadwal tidak perlu ikut menanggung pembacaannya.
+    if(btn.dataset.tab === 'log' && !logSudahDimuat) muatLog(false);
   });
 });
 
@@ -452,6 +461,9 @@ $('formMatkul').addEventListener('submit', async (e) => {
     if(id){
       const lama = data.matakuliah.find(m => m.id === id);
       await updateDoc(doc(db, 'matakuliah', id), { kode, nama });
+      await catat('ubah', 'matakuliah', `${kode} · ${nama}`,
+        lama && (lama.kode !== kode || lama.nama !== nama)
+          ? `Sebelumnya ${lama.kode} · ${lama.nama}` : '');
       // Kode adalah tali penghubung ke jadwal, jadi kalau kode berubah,
       // semua jadwal yang memakainya harus ikut diperbarui. Kalau tidak,
       // jadwalnya jadi yatim dan namanya hilang di halaman publik.
@@ -465,6 +477,7 @@ $('formMatkul').addEventListener('submit', async (e) => {
       }
     }else{
       await addDoc(collection(db, 'matakuliah'), { kode, nama });
+      await catat('tambah', 'matakuliah', `${kode} · ${nama}`);
     }
     e.target.reset(); $('mkId').value = ''; modeUbah('formMatkul', false);
     bersihkanPesan(el);
@@ -499,6 +512,7 @@ async function hapusMatkul(id){
   try{
     status('Menghapus…', 'sibuk');
     await deleteDoc(doc(db, 'matakuliah', id));
+    await catat('hapus', 'matakuliah', `${m.kode} · ${m.nama}`);
     await muatSemua();
     await terbitkan();
   }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
@@ -648,8 +662,15 @@ $('formJadwal').addEventListener('submit', async (e) => {
 
   try{
     status('Menyimpan…', 'sibuk');
+    const lamaJd = isi.id ? data.jadwal.find(x => x.id === isi.id) : null;
     if(isi.id) await updateDoc(doc(db, 'jadwal', isi.id), muatan);
     else await addDoc(collection(db, 'jadwal'), muatan);
+    await catat(isi.id ? 'ubah' : 'tambah', 'jadwal',
+      `${namaMatkul(muatan.kode) || muatan.kode} KP ${muatan.kp} · ${muatan.hari} `
+      + `${rentangJam(muatan.mulai, muatan.selesai)} · ${muatan.ruang || 'tanpa ruang'}`,
+      lamaJd
+        ? `Sebelumnya ${lamaJd.hari} ${rentangJam(lamaJd.mulai, lamaJd.selesai)} · ${lamaJd.ruang || 'tanpa ruang'}`
+        : '');
     e.target.reset(); $('jdId').value = ''; modeUbah('formJadwal', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -671,6 +692,9 @@ async function hapusJadwal(id){
     status('Menghapus…', 'sibuk');
     for(const p of terkait) await deleteDoc(doc(db, 'perubahan', p.id));
     await deleteDoc(doc(db, 'jadwal', id));
+    await catat('hapus', 'jadwal',
+      `${namaMatkul(j.kode) || j.kode} KP ${j.kp} · ${j.hari} ${rentangJam(j.mulai, j.selesai)}`,
+      terkait.length ? `${terkait.length} perubahan sementara ikut terhapus` : '');
     await muatSemua();
     await terbitkan();
   }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
@@ -864,6 +888,9 @@ function gambarPerubahan(){
     try{
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'perubahan', p.id));
+      await catat('hapus', 'perubahan',
+        `${namaMatkul(p.kode) || p.kode} KP ${p.kp} · ${tanggalPanjang(p.tanggal)}`,
+        `Jenis ${p.tipe}`);
       await muatSemua();
       await terbitkan();
     }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
@@ -1025,8 +1052,12 @@ $('formPerubahan').addEventListener('submit', async (e) => {
 
   try{
     status('Menyimpan…', 'sibuk');
+    const lamaPb = isi.id ? data.perubahan.find(x => x.id === isi.id) : null;
     if(isi.id) await updateDoc(doc(db, 'perubahan', isi.id), muatan);
     else await addDoc(collection(db, 'perubahan'), muatan);
+    await catat(isi.id ? 'ubah' : 'tambah', 'perubahan',
+      `${namaMatkul(muatan.kode) || muatan.kode} KP ${muatan.kp} · ${tanggalPanjang(muatan.tanggal)} · jenis ${muatan.tipe}`,
+      lamaPb ? `Sebelumnya ${tanggalPanjang(lamaPb.tanggal)} · jenis ${lamaPb.tipe}` : (muatan.catatan || ''));
     e.target.reset(); $('pbId').value = ''; modeUbah('formPerubahan', false);
     aturTampilanPerubahan(); bersihkanPesan(el);
     await muatSemua();
@@ -1186,6 +1217,10 @@ $('msBuat').addEventListener('click', async () => {
       await batch.commit();
     }
 
+    await catat('massal', 'perubahan', kelompok,
+      `${akanDibuat.length} perubahan dibuat sekaligus untuk ${terpilih.length} kelas`
+      + (dilewati ? `, ${dilewati} dilewati karena sudah punya perubahan sendiri` : ''));
+
     $('msDaftar').innerHTML = ''; $('msAksi').hidden = true; massalKandidat = [];
     $('msCatatan').value = '';
     await muatSemua();
@@ -1229,6 +1264,7 @@ function gambarKelompok(){
         for(const p of anggota.slice(i, i + BATAS)) batch.delete(doc(db, 'perubahan', p.id));
         await batch.commit();
       }
+      await catat('massal', 'perubahan', nama, `${anggota.length} perubahan dalam kelompok ini dihapus sekaligus`);
       await muatSemua();
       await terbitkan();
     }catch(err){
@@ -1379,6 +1415,8 @@ function gambarPengajar(){
     try{
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'pengajar', p.id));
+      await catat('hapus', 'pengajar',
+        `${p.nama} · ${namaMatkul(p.kode) || p.kode} KP ${p.kp}`, `NRP ${p.nrp || 'tidak ada'}`);
       await muatSemua();
       status('Pengajar dihapus.', 'benar');
     }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
@@ -1410,8 +1448,12 @@ $('formPengajar').addEventListener('submit', async (e) => {
   const muatan = { kode: isi.kode, kp: isi.kp, nama: isi.nama, nrp: isi.nrp };
   try{
     status('Menyimpan…', 'sibuk');
+    const lamaPg = isi.id ? data.pengajar.find(x => x.id === isi.id) : null;
     if(isi.id) await updateDoc(doc(db, 'pengajar', isi.id), muatan);
     else await addDoc(collection(db, 'pengajar'), muatan);
+    await catat(isi.id ? 'ubah' : 'tambah', 'pengajar',
+      `${muatan.nama} · ${namaMatkul(muatan.kode) || muatan.kode} KP ${muatan.kp}`,
+      lamaPg ? `Sebelumnya ${lamaPg.nama} · ${lamaPg.kode} KP ${lamaPg.kp}` : `NRP ${muatan.nrp || 'tidak ada'}`);
     e.target.reset(); $('pgId').value = ''; modeUbah('formPengajar', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -1472,6 +1514,7 @@ function gambarPengumuman(){
     try{
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'pengumuman', p.id));
+      await catat('hapus', 'pengumuman', p.judul || '(tanpa judul)');
       await muatSemua();
       await terbitkan();
     }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
@@ -1499,8 +1542,11 @@ $('formPengumuman').addEventListener('submit', async (e) => {
   const muatan = { judul: isi.judul, isi: isi.isi, mulai: isi.mulai, selesai: isi.selesai, pin: isi.pin };
   try{
     status('Menyimpan…', 'sibuk');
+    const lamaPm = isi.id ? data.pengumuman.find(x => x.id === isi.id) : null;
     if(isi.id) await updateDoc(doc(db, 'pengumuman', isi.id), muatan);
     else await addDoc(collection(db, 'pengumuman'), muatan);
+    await catat(isi.id ? 'ubah' : 'tambah', 'pengumuman', muatan.judul || '(tanpa judul)',
+      lamaPm && lamaPm.judul !== muatan.judul ? `Sebelumnya "${lamaPm.judul}"` : '');
     e.target.reset(); $('pmId').value = ''; modeUbah('formPengumuman', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -1730,6 +1776,7 @@ function gambarClassroom(){
     try{
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'classroom', c.id));
+      await catat('hapus', 'classroom', `${c.kode} KP ${c.kp} · ${c.classroom || 'tanpa kode'}`);
       await muatSemua();
       status('Terhapus.', 'benar');
     }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
@@ -1759,8 +1806,12 @@ $('formClassroom').addEventListener('submit', async (e) => {
 
   try{
     status('Menyimpan…', 'sibuk');
+    const lamaGc = id ? data.classroom.find(x => x.id === id) : null;
     if(id) await updateDoc(doc(db, 'classroom', id), muatan);
     else await addDoc(collection(db, 'classroom'), muatan);
+    await catat(id ? 'ubah' : 'tambah', 'classroom',
+      `${muatan.kode} KP ${muatan.kp} · ${muatan.classroom || 'tanpa kode'}`,
+      lamaGc && lamaGc.classroom !== muatan.classroom ? `Sebelumnya ${lamaGc.classroom || 'tanpa kode'}` : '');
     e.target.reset(); $('gcId').value = ''; modeUbah('formClassroom', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -1813,6 +1864,7 @@ function gambarKoordinator(){
     try{
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'koordinator', k.id));
+      await catat('hapus', 'koordinator', `${k.kode} · ${k.koordinator || 'tanpa nama'}`);
       await muatSemua();
       status('Terhapus.', 'benar');
     }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
@@ -1839,8 +1891,13 @@ $('formKoordinator').addEventListener('submit', async (e) => {
 
   try{
     status('Menyimpan…', 'sibuk');
+    const lamaKo = id ? data.koordinator.find(x => x.id === id) : null;
     if(id) await updateDoc(doc(db, 'koordinator', id), muatan);
     else await addDoc(collection(db, 'koordinator'), muatan);
+    await catat(id ? 'ubah' : 'tambah', 'koordinator',
+      `${muatan.kode} · ${muatan.koordinator || 'tanpa nama'}`,
+      lamaKo && lamaKo.koordinator !== muatan.koordinator
+        ? `Sebelumnya ${lamaKo.koordinator || 'tanpa nama'}` : '');
     e.target.reset(); $('koId').value = ''; modeUbah('formKoordinator', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -2538,6 +2595,25 @@ $('xlTerapkan').addEventListener('click', async () => {
     status(`Menyimpan ${tugas.length} perubahan…`, 'sibuk');
     await tulisBerkelompok(tugas);
     const ditolak = usulanExcel.length - diterima.length;
+
+    /*
+      Unggahan dicatat sebagai SATU baris, bukan satu baris per data.
+
+      Satu berkas bisa berisi ratusan baris, dan mencatatnya satu per satu akan
+      menenggelamkan catatan lain yang justru dicari orang. Hitungannya per
+      jenis sudah cukup untuk menjawab "kapan jadwalnya diisi dari Excel, oleh
+      siapa, dan sebanyak apa".
+    */
+    const hitungJenis = koleksi => diterima.filter(u => u.koleksi === koleksi).length;
+    const rincianJenis = Object.keys(JENIS_LOG)
+      .filter(k => hitungJenis(k) > 0)
+      .map(k => `${hitungJenis(k)} ${JENIS_LOG[k].toLowerCase()}`)
+      .join(', ');
+    await catat('impor', 'excel',
+      `${tugas.length} perubahan disimpan dari berkas Excel`
+      + ` (${hitung('tambah')} ditambahkan, ${hitung('ubah')} diubah, ${hitung('hapus')} dihapus)`,
+      [rincianJenis, ditolak ? `${ditolak} baris tidak disimpan sesuai pilihan pengurus` : '']
+        .filter(Boolean).join(' · '));
     usulanExcel = null;
     usulanDiubah = null;
     $('xlTerapkan').hidden = true;
@@ -2555,3 +2631,262 @@ $('xlTerapkan').addEventListener('click', async () => {
     status('Gagal menerapkan berkas Excel.', 'salah');
   }
 });
+
+/* ============================================================
+   12. Log aksi
+   ============================================================ */
+
+/*
+  Catatan setiap penambahan, perubahan, dan penghapusan yang terjadi di halaman
+  ini.
+
+  KENAPA PERLU. Pengurus berganti tiap kepengurusan dan jumlahnya banyak. Kalau
+  ada jadwal yang tiba-tiba berbeda dari yang disepakati, satu-satunya cara
+  menelusurinya dulu adalah bertanya satu per satu. Catatan ini menjawabnya
+  sendiri: apa yang berubah, kapan, dan oleh siapa.
+
+  TIDAK BISA DIHAPUS. Aturan Firestore hanya mengizinkan menambah. Mengubah dan
+  menghapus ditutup untuk semua orang, termasuk pengurus yang menulisnya.
+  Catatan yang bisa dirapikan sendiri oleh pelakunya bukan catatan.
+
+  GAGALNYA TIDAK MENJATUHKAN AKSI UTAMA. Kalau penulisan catatan gagal,
+  jadwalnya tetap tersimpan dan pengurus diberi tahu bahwa catatannya yang
+  bermasalah. Kebalikannya akan lebih buruk: pekerjaan hilang gara-gara buku
+  catatan.
+*/
+
+const JENIS_LOG = {
+  matakuliah:  'Mata kuliah',
+  jadwal:      'Jadwal permanen',
+  perubahan:   'Perubahan sementara',
+  pengajar:    'Pengajar',
+  pengumuman:  'Pengumuman',
+  classroom:   'Kode Google Classroom',
+  koordinator: 'Koordinator',
+  excel:       'Berkas Excel',
+};
+
+const AKSI_LOG = {
+  tambah: 'Tambah',
+  ubah:   'Ubah',
+  hapus:  'Hapus',
+  massal: 'Massal',
+  impor:  'Impor',
+};
+
+const LOG_SEKALI = 200;   // banyaknya catatan yang diambil per pemuatan
+
+let logData = [];
+let logTerakhirDoc = null;    // dokumen terakhir, untuk memuat yang lebih lama
+let logSudahDimuat = false;
+let logMasihAda = false;
+
+/*
+  Menulis satu catatan.
+
+  Dipanggil SESUDAH aksinya berhasil tersimpan, tidak sebelumnya, supaya tidak
+  pernah ada catatan untuk pekerjaan yang ternyata gagal.
+*/
+async function catat(aksi, jenis, ringkas, rincian){
+  try{
+    await addDoc(collection(db, 'log'), {
+      // Waktu diambil dari server, bukan dari jam komputer pengurus. Jam
+      // komputer bisa salah atau sengaja diubah, dan catatan yang waktunya
+      // bisa diatur sendiri kehilangan gunanya.
+      waktu: serverTimestamp(),
+      // Jam komputer tetap disimpan terpisah sebagai cadangan tampilan selama
+      // waktu server belum sempat terisi.
+      waktuKlien: new Date().toISOString(),
+      oleh: pemakai.nama || '',
+      email: pemakai.email || '',
+      aksi, jenis,
+      ringkas: String(ringkas || ''),
+      rincian: String(rincian || ''),
+    });
+    // Kalau tab Log sedang dibuka, daftarnya ikut disegarkan supaya tidak
+    // terlihat seolah aksinya tidak tercatat.
+    if(logSudahDimuat && !$('panel-log').hidden) await muatLog(false);
+  }catch(err){
+    console.error('Gagal menulis catatan log', err);
+    status('Perubahannya tersimpan, tapi catatan log gagal ditulis: ' + err.message, 'salah');
+  }
+}
+
+/* ---------- memuat ---------- */
+
+async function muatLog(lanjut){
+  const el = $('pesanLog');
+  bersihkanPesan(el);
+  try{
+    $('logSegarkan').disabled = true;
+    const acuan = [collection(db, 'log'), orderBy('waktu', 'desc')];
+    const q = (lanjut && logTerakhirDoc)
+      ? query(...acuan, startAfter(logTerakhirDoc), limit(LOG_SEKALI))
+      : query(...acuan, limit(LOG_SEKALI));
+
+    const snap = await getDocs(q);
+    const baru = [];
+    snap.forEach(d => baru.push({ id: d.id, ...d.data() }));
+
+    logTerakhirDoc = snap.docs.length ? snap.docs[snap.docs.length - 1] : logTerakhirDoc;
+    logMasihAda = snap.docs.length === LOG_SEKALI;
+    logData = lanjut ? [...logData, ...baru] : baru;
+    logSudahDimuat = true;
+
+    isiPilihanPelaku();
+    gambarLog();
+  }catch(err){
+    console.error('Gagal memuat log', err);
+    pesan(el, err.code === 'permission-denied'
+      ? 'Koleksi "log" belum diizinkan oleh aturan keamanan Firestore. Tempel ulang isi firestore.rules lewat Firebase Console, lihat langkah 1.4 di PANDUAN-PENGURUS.md.'
+      : 'Gagal memuat catatan: ' + esc(err.message), 'salah');
+  }finally{
+    $('logSegarkan').disabled = false;
+  }
+}
+
+/* ---------- waktu ---------- */
+
+/*
+  Waktu ditampilkan dalam waktu Jakarta, bukan waktu perangkat pembaca.
+
+  Pengurus bisa saja membuka halaman ini dari luar negeri, dan catatan yang
+  jamnya berpindah-pindah mengikuti tempat pembacanya akan sulit dicocokkan
+  dengan kejadian sebenarnya.
+*/
+const JAM_JAKARTA = new Intl.DateTimeFormat('id-ID', {
+  timeZone: 'Asia/Jakarta', day: 'numeric', month: 'long', year: 'numeric',
+  hour: '2-digit', minute: '2-digit',
+});
+const TANGGAL_JAKARTA = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+
+function waktuDari(entri){
+  if(entri.waktu && typeof entri.waktu.toDate === 'function') return entri.waktu.toDate();
+  if(entri.waktuKlien){
+    const d = new Date(entri.waktuKlien);
+    if(!isNaN(d)) return d;
+  }
+  return null;
+}
+
+function waktuPanjang(d){
+  if(!d) return 'waktu tidak tercatat';
+  // Bentuk bawaannya "6 September 2026 pukul 14.05", dan kata "pukul" diganti
+  // koma supaya kolomnya tetap pendek.
+  return JAM_JAKARTA.format(d).replace(' pukul ', ', ').replace(/\./g, '.');
+}
+
+function tanggalJakarta(d){
+  return d ? TANGGAL_JAKARTA.format(d) : '';
+}
+
+/* ---------- saringan, pencarian, urutan ---------- */
+
+function isiPilihanPelaku(){
+  const el = $('logPelaku');
+  const terpilih = el.value;
+  const orang = [...new Set(logData.map(l => l.email).filter(Boolean))].sort();
+  el.innerHTML = '<option value="">Semua pengurus</option>' + orang.map(e => {
+    const nama = (logData.find(l => l.email === e) || {}).oleh;
+    return `<option value="${esc(e)}">${esc(nama ? `${nama} · ${e}` : e)}</option>`;
+  }).join('');
+  if(terpilih) el.value = terpilih;
+}
+
+function saringLog(){
+  const cari = ($('logCari').value || '').trim().toLowerCase();
+  const aksi = $('logAksi').value;
+  const jenis = $('logJenis').value;
+  const pelaku = $('logPelaku').value;
+  const dari = $('logDari').value;
+  const sampai = $('logSampai').value;
+
+  const hasil = logData.filter(l => {
+    if(aksi && l.aksi !== aksi) return false;
+    if(jenis && l.jenis !== jenis) return false;
+    if(pelaku && l.email !== pelaku) return false;
+
+    if(dari || sampai){
+      const tgl = tanggalJakarta(waktuDari(l));
+      if(!tgl) return false;
+      if(dari && tgl < dari) return false;
+      if(sampai && tgl > sampai) return false;
+    }
+
+    if(cari){
+      const isi = [l.ringkas, l.rincian, l.oleh, l.email,
+        AKSI_LOG[l.aksi] || l.aksi, JENIS_LOG[l.jenis] || l.jenis].join(' ').toLowerCase();
+      if(!isi.includes(cari)) return false;
+    }
+    return true;
+  });
+
+  const urut = $('logUrut').value;
+  const waktuAngka = l => { const d = waktuDari(l); return d ? d.getTime() : 0; };
+  hasil.sort((a, b) => {
+    if(urut === 'lama') return waktuAngka(a) - waktuAngka(b);
+    if(urut === 'jenis'){
+      return String(JENIS_LOG[a.jenis] || a.jenis).localeCompare(String(JENIS_LOG[b.jenis] || b.jenis))
+        || waktuAngka(b) - waktuAngka(a);
+    }
+    if(urut === 'pelaku'){
+      return String(a.oleh || a.email).localeCompare(String(b.oleh || b.email))
+        || waktuAngka(b) - waktuAngka(a);
+    }
+    if(urut === 'aksi'){
+      return String(AKSI_LOG[a.aksi] || a.aksi).localeCompare(String(AKSI_LOG[b.aksi] || b.aksi))
+        || waktuAngka(b) - waktuAngka(a);
+    }
+    return waktuAngka(b) - waktuAngka(a);
+  });
+  return hasil;
+}
+
+function gambarLog(){
+  const t = $('tabelLog');
+  const baris = saringLog();
+
+  $('logJumlah').textContent = logData.length === 0
+    ? ''
+    : `Menampilkan ${baris.length} dari ${logData.length} catatan yang termuat`
+      + (logMasihAda ? ', masih ada yang lebih lama.' : '.');
+  $('logMuatLagi').hidden = !logMasihAda;
+
+  if(baris.length === 0){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">${
+      logData.length === 0
+        ? 'Belum ada catatan. Setiap penambahan, perubahan, dan penghapusan mulai sekarang akan tercatat di sini.'
+        : 'Tidak ada catatan yang cocok dengan saringan ini.'
+    }</td></tr></tbody>`;
+    return;
+  }
+
+  t.innerHTML = `
+    <thead><tr><th>Waktu</th><th>Pelaku</th><th>Aksi</th><th>Jenis</th><th>Keterangan</th></tr></thead>
+    <tbody>${baris.map(l => {
+      const d = waktuDari(l);
+      return `<tr>
+        <td class="log-waktu">${esc(waktuPanjang(d))}</td>
+        <td>${esc(l.oleh || '')}${l.email ? `<br><span class="op-samar">${esc(l.email)}</span>` : ''}</td>
+        <td><span class="log-aksi log-${esc(l.aksi)}">${esc(AKSI_LOG[l.aksi] || l.aksi)}</span></td>
+        <td>${esc(JENIS_LOG[l.jenis] || l.jenis || '')}</td>
+        <td>${esc(l.ringkas || '')}${l.rincian ? `<br><span class="op-samar">${esc(l.rincian)}</span>` : ''}</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
+['logCari','logAksi','logJenis','logPelaku','logDari','logSampai','logUrut'].forEach(id => {
+  $(id).addEventListener('input', gambarLog);
+  $(id).addEventListener('change', gambarLog);
+});
+
+$('logBersihkan').addEventListener('click', () => {
+  for(const id of ['logCari','logAksi','logJenis','logPelaku','logDari','logSampai']) $(id).value = '';
+  $('logUrut').value = 'baru';
+  gambarLog();
+});
+
+$('logSegarkan').addEventListener('click', () => muatLog(false));
+$('logMuatLagi').addEventListener('click', () => muatLog(true));

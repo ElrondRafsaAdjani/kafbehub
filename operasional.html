@@ -74,6 +74,7 @@
       <button class="op-tab-btn" data-tab="pengajar" role="tab">Pengajar</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
       <button class="op-tab-btn" data-tab="excel" role="tab">Excel</button>
+      <button class="op-tab-btn" data-tab="log" role="tab">Log</button>
     </nav>
 
     <!-- ---------- MATA KULIAH ---------- -->
@@ -563,6 +564,91 @@
       </div>
 
       <datalist id="daftarKodeMk"></datalist>
+    </section>
+
+    <!-- ---------- LOG ---------- -->
+    <section class="op-panel" id="panel-log" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Log</h2>
+          <p>Catatan setiap penambahan, perubahan, dan penghapusan yang dilakukan di halaman ini, lengkap dengan waktu dan pelakunya. Catatan tidak bisa diubah maupun dihapus dari web, termasuk oleh pengurus sendiri.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formLog" onsubmit="return false">
+        <div class="op-baris">
+          <div class="op-field op-lebar">
+            <label for="logCari">Cari</label>
+            <input type="search" id="logCari" placeholder="Nama mata kuliah, kode, KP, ruang, atau pelakunya…" />
+          </div>
+          <div class="op-field">
+            <label for="logAksi">Aksi</label>
+            <select id="logAksi">
+              <option value="">Semua aksi</option>
+              <option value="tambah">Tambah</option>
+              <option value="ubah">Ubah</option>
+              <option value="hapus">Hapus</option>
+              <option value="massal">Massal</option>
+              <option value="impor">Impor Excel</option>
+            </select>
+          </div>
+          <div class="op-field">
+            <label for="logJenis">Jenis data</label>
+            <select id="logJenis">
+              <option value="">Semua jenis</option>
+              <option value="matakuliah">Mata kuliah</option>
+              <option value="jadwal">Jadwal permanen</option>
+              <option value="perubahan">Perubahan sementara</option>
+              <option value="pengajar">Pengajar</option>
+              <option value="pengumuman">Pengumuman</option>
+              <option value="classroom">Kode Google Classroom</option>
+              <option value="koordinator">Koordinator</option>
+              <option value="excel">Berkas Excel</option>
+            </select>
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="logPelaku">Pelaku</label>
+            <select id="logPelaku"><option value="">Semua pengurus</option></select>
+          </div>
+          <div class="op-field">
+            <label for="logDari">Dari tanggal</label>
+            <input type="date" id="logDari" />
+          </div>
+          <div class="op-field">
+            <label for="logSampai">Sampai tanggal</label>
+            <input type="date" id="logSampai" />
+          </div>
+          <div class="op-field">
+            <label for="logUrut">Urutkan</label>
+            <select id="logUrut">
+              <option value="baru">Terbaru dulu</option>
+              <option value="lama">Terlama dulu</option>
+              <option value="jenis">Jenis data</option>
+              <option value="pelaku">Pelaku</option>
+              <option value="aksi">Aksi</option>
+            </select>
+          </div>
+          <div class="op-field op-centang">
+            <button type="button" class="btn btn-ghost op-kecil" id="logBersihkan">Hapus saringan</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="op-log-kepala">
+        <span id="logJumlah" class="op-samar"></span>
+        <button type="button" class="op-mini" id="logSegarkan">Muat ulang</button>
+      </div>
+
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelLog"></table>
+      </div>
+
+      <div class="op-aksi">
+        <button type="button" class="btn btn-ghost op-kecil" id="logMuatLagi" hidden>Muat catatan yang lebih lama</button>
+      </div>
+      <p class="op-pesan" id="pesanLog" role="alert"></p>
     </section>
 
   </div>

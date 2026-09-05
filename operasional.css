@@ -263,6 +263,25 @@ textarea{ resize:vertical; }
   border:1px dashed var(--line); border-radius:10px; background:var(--surface);
 }
 
+/* ---------- Log aksi ---------- */
+.op-log-kepala{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; margin-bottom:10px;
+}
+/* Kolom waktu tidak boleh terpenggal jadi dua baris, karena tanggal dan jam
+   yang terpisah baris justru lebih sulit dibaca daripada kolom yang lebar. */
+.log-waktu{ white-space:nowrap; }
+.log-aksi{
+  display:inline-block; font-size:0.7rem; font-weight:800;
+  letter-spacing:0.05em; text-transform:uppercase; white-space:nowrap;
+  padding:3px 9px; border-radius:99px; border:1px solid;
+}
+.log-tambah{ background:#E1F5E9; color:#146235; border-color:#B7E2C7; }
+.log-ubah{   background:#FBF0D8; color:#7A5405; border-color:#EFD9A4; }
+.log-hapus{  background:#FBE3E2; color:#96322E; border-color:#F0C4C2; }
+.log-massal{ background:#E4EEF6; color:#2C5C86; border-color:#C3DAEC; }
+.log-impor{  background:var(--bg-deep); color:var(--owl-dark); border-color:var(--line); }
+
 /* ---------- Tabel ---------- */
 .op-tabel-bungkus{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-md); }
 .op-tabel{ width:100%; border-collapse:collapse; min-width:640px; }

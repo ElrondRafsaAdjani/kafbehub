@@ -237,6 +237,38 @@ service cloud.firestore {
       allow write: if tulisanAdmin();
     }
 
+    // ---------- Catatan aksi pengurus ----------
+    /*
+      HANYA BISA DITAMBAH. Mengubah dan menghapus ditutup untuk semua orang,
+      termasuk pengurus yang menulisnya sendiri.
+
+      Ini inti gunanya. Catatan yang bisa dirapikan sendiri oleh pelakunya
+      tidak bisa dipakai menelusuri apa pun, karena bagian yang paling ingin
+      ditelusuri justru yang paling mungkin dihapus. Membersihkan catatan lama
+      hanya bisa lewat Firebase Console, dan itu memang disengaja.
+
+      Tidak dibuka untuk publik karena isinya menyebut nama dan email pengurus,
+      beserta jam kerja mereka.
+
+      Bentuk datanya dibatasi supaya koleksi ini tidak bisa dipakai sebagai
+      tempat menitipkan data lain, dan supaya baris palsu tidak bisa ditulis
+      atas nama orang lain: kolom email harus sama dengan email akun yang
+      sedang login.
+    */
+    match /log/{id} {
+      allow read: if adminTerdaftar();
+      allow create: if tulisanAdmin()
+        && request.resource.data.keys().hasOnly([
+             'waktu', 'waktuKlien', 'oleh', 'email', 'aksi', 'jenis', 'ringkas', 'rincian'
+           ])
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.aksi is string
+        && request.resource.data.jenis is string
+        && request.resource.data.ringkas.size() <= 500
+        && request.resource.data.rincian.size() <= 500;
+      allow update, delete: if false;
+    }
+
     // ---------- Papan skor game ----------
     // Dibiarkan seperti sebelumnya: siapa pun boleh menambah skor tanpa login,
     // tapi bentuk datanya dibatasi, dan skor yang sudah masuk tidak bisa

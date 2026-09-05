@@ -332,6 +332,37 @@ nomor pribadi, jadi keduanya ditutup di aturan keamanan.
 Tampil di halaman utama. Centang **Sematkan** untuk menaruhnya paling atas.
 Kosongkan tanggal mulai dan selesai kalau ingin tampil terus.
 
+### Log
+
+Catatan setiap penambahan, perubahan, dan penghapusan yang dilakukan di halaman
+operasional, lengkap dengan waktu dan pelakunya. Yang tercatat mencakup mata
+kuliah, jadwal permanen beserta ruangnya, perubahan sementara, pengajar,
+pengumuman, kode Google Classroom, koordinator, pembuatan massal, dan
+penyimpanan dari berkas Excel.
+
+Waktunya diambil dari server, bukan dari jam komputer yang dipakai, dan
+ditampilkan dalam waktu Jakarta. Jadi catatannya tetap benar walau ada yang jam
+komputernya meleset atau membukanya dari zona waktu lain.
+
+Tersedia kotak pencarian, saringan aksi, jenis data, pelaku, dan rentang
+tanggal, serta pilihan urutan. Saringan bekerja pada catatan yang sedang
+termuat, yaitu 200 catatan terbaru. Tombol **Muat catatan yang lebih lama**
+menambah 200 berikutnya, dan **Muat ulang** mengambil yang paling baru.
+
+Baris pada tab lain diberi warna berbeda menurut aksinya: hijau untuk
+penambahan, kuning untuk perubahan, merah untuk penghapusan, biru untuk
+pembuatan massal, dan abu-abu untuk penyimpanan dari Excel.
+
+> **Catatan tidak bisa dihapus dari web, oleh siapa pun.** Aturan Firestore
+> hanya mengizinkan menambah. Itu memang inti gunanya: catatan yang bisa
+> dirapikan sendiri oleh pelakunya tidak bisa dipakai menelusuri apa pun.
+> Kalau suatu saat catatannya sudah terlalu banyak dan ingin dipangkas, itu
+> hanya bisa dikerjakan lewat Firebase Console, pada koleksi `log`.
+
+Unggahan Excel dicatat sebagai satu baris berisi hitungan, bukan satu baris per
+data. Satu berkas bisa berisi ratusan baris, dan mencatatnya satu per satu akan
+menenggelamkan catatan lain yang justru dicari orang.
+
 ---
 
 ## Bagian 2B - Halaman Admin Situs (`/adminkafbe`)
@@ -682,7 +713,11 @@ Pengurus  →  /operasional  →  koleksi matakuliah, jadwal, perubahan,
 Mahasiswa →  halaman publik  ←  satu dokumen  publik/terkini
 ```
 
-Dua koleksi berdiri di luar aliran itu, yaitu `classroom` dan `koordinator`.
+Koleksi `log` juga berdiri di luar aliran itu. Isinya ditambah tiap kali ada
+yang disimpan atau dihapus, tidak pernah ikut dirangkum ke `publik/terkini`,
+dan aturannya hanya mengizinkan menambah, tidak mengubah maupun menghapus.
+
+Dua koleksi lain juga di luar aliran itu, yaitu `classroom` dan `koordinator`.
 Keduanya diisi lewat tab Excel, tidak pernah ikut dirangkum ke
 `publik/terkini`, dan aturan keamanannya menutup pembacaan untuk siapa pun yang
 bukan admin. Isinya kunci masuk kelas daring dan kontak pribadi pengurus.
