@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://*.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Surplus &amp; Deadweight Loss - Pengantar Mikroekonomi - KAFBE Hub</title>
+<title>Surplus dan Deadweight Loss - Pengantar Mikroekonomi - KAFBE Hub</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
@@ -91,7 +91,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -143,8 +143,8 @@
   <a class="back-link" href="pemi.html">← Kembali ke Pengantar Mikroekonomi</a>
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Pengantar Mikroekonomi</span>
-    <h2 data-materi="surplus-konsumen-surplus-produsen.judul" data-label="Surplus Konsumen, Surplus Produsen dan Deadweight Loss">Surplus Konsumen, Surplus Produsen &amp; Deadweight Loss</h2>
-    <p data-materi="surplus-konsumen-surplus-produsen.1" data-label="Lanjutan dari kurva supply dan demand, kali ini kita li…">Lanjutan dari kurva supply &amp; demand, kali ini kita lihat siapa untung berapa banyak, dan apa yang terjadi kalau ada pajak.</p>
+    <h2 data-materi="surplus-konsumen-surplus-produsen.judul" data-label="Surplus Konsumen, Surplus Produsen dan Deadweight Loss">Surplus Konsumen, Surplus Produsen dan Deadweight Loss</h2>
+    <p data-materi="surplus-konsumen-surplus-produsen.1" data-label="Lanjutan dari kurva supply dan demand, kali ini kita li…">Lanjutan dari kurva supply dan demand, kali ini membahas siapa yang diuntungkan dan seberapa besar, serta apa yang terjadi ketika ada pajak.</p>
   </div>
 
   <div class="story-card">
@@ -179,7 +179,7 @@
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -209,99 +209,99 @@
 
   // Skenario monopoli: satu penjual sengaja membatasi kuantitas ke 20 unit
   // supaya bisa jual di harga lebih tinggi (Rp40rb), padahal biaya produksi
-  // unit ke-20 itu cuma Rp20rb (dibaca dari kurva Supply/biaya marjinal).
+  // unit ke-20 itu hanya Rp20rb (dibaca dari kurva Supply/biaya marjinal).
   const MONO_Q = 20;
   const MONO_PRICE = demandP(MONO_Q);   // 40
   const MONO_COST = supplyP(MONO_Q);    // 20
 
   const CHAPTERS = {
     recap:'Bagian: Mengingat Kembali', cs:'Bagian: Surplus Konsumen', ps:'Bagian: Surplus Produsen',
-    tax:'Bagian: Kena Pajak', dwl:'Bagian: DWL akibat Pajak',
+    tax:'Bagian: Pengaruh Pajak', dwl:'Bagian: DWL akibat Pajak',
     mono:'Bagian: Monopoli', dwlMono:'Bagian: DWL akibat Monopoli',
-    rumus:'Bagian: Hitung Pakai Rumus Luas'
+    rumus:'Bagian: Menghitung dengan Rumus Luas'
   };
 
   const STEPS = [
     { chapter:'recap', reveal:['baseCurves','oldEq'],
-      text:'Inget lagi kurva Demand &amp; Supply dari sebelumnya, ketemu di titik ekuilibrium: harga <strong>Rp30.000</strong>, jumlah <strong>40 unit</strong>.' },
+      text:'Mari mengingat kembali kurva Demand dan Supply sebelumnya. Keduanya bertemu di titik ekuilibrium pada harga <strong>Rp30.000</strong> dengan jumlah <strong>40 unit</strong>.' },
     { chapter:'cs', reveal:['priceLine'],
-      text:'Di harga pasar ini, <strong>semua pembeli bayar Rp30.000</strong> per unit, nggak peduli seberapa besar mereka sebenarnya rela bayar.' },
+      text:'Pada harga pasar ini, <strong>seluruh pembeli membayar Rp30.000</strong> per unit, berapa pun harga yang sebenarnya bersedia mereka bayar.' },
     { chapter:'cs', reveal:['csArea','psArea','legCs','legPs'],
-      text:'Ini dua-duanya sekaligus: <strong>Surplus Konsumen</strong> (area coral, di atas garis harga) dan <strong>Surplus Produsen</strong> (area navy, di bawahnya). Sekarang kita hitung luasnya satu-satu, pakai rumus, bukan cuma kira-kira dari gambar.' },
+      text:'Keduanya tampil sekaligus: <strong>Surplus Konsumen</strong> pada area coral di atas garis harga, dan <strong>Surplus Produsen</strong> pada area navy di bawahnya. Luas keduanya dihitung satu per satu menggunakan rumus, bukan diperkirakan dari gambar.' },
     { chapter:'cs', reveal:[], hide:['psArea','legPs','baseCurves','oldEq','priceLine'],
-      text:'Mulai dari <strong>Surplus Konsumen</strong> dulu. Kita fokus ke bentuknya aja, semua yang lain disembunyikan sementara.' },
+      text:'Pembahasan dimulai dari <strong>Surplus Konsumen</strong>. Perhatian difokuskan pada bentuknya, sedangkan bagian lain disembunyikan sementara.' },
     { chapter:'cs', reveal:['baseDim40'],
-      text:'Alasnya kita ukur dari sumbu Kuantitas: dari 0 sampai 40. Alas = 40 − 0 = <strong>40</strong>.' },
+      text:'Alasnya diukur pada sumbu Kuantitas, dari 0 sampai 40. Alas = 40 − 0 = <strong>40</strong>.' },
     { chapter:'cs', reveal:['csHeightDim'], formula:'L = \\frac{1}{2} \\times a \\times t',
-      text:'Tingginya dari sumbu Harga: dari Rp30.000 sampai Rp50.000. Tinggi = 50 − 30 = <strong>20</strong>. Luas segitiga rumusnya:' },
+      text:'Tingginya diukur pada sumbu Harga, dari Rp30.000 sampai Rp50.000. Tinggi = 50 − 30 = <strong>20</strong>. Rumus luas segitiga:' },
     { chapter:'cs', reveal:[], formula:'L = \\frac{1}{2} \\times 40 \\times 20 = 400',
-      text:'Tinggal masukkan angkanya: alas = 40, tinggi = 20. Luas Surplus Konsumen = <strong>Rp400rb²</strong>.' },
+      text:'Angkanya kemudian dimasukkan, dengan alas = 40 dan tinggi = 20. Luas Surplus Konsumen = <strong>Rp400rb²</strong>.' },
     { chapter:'ps', reveal:['baseCurves','oldEq','priceLine','psArea','legPs'], hide:['baseDim40','csHeightDim'],
-      text:'Oke, itu luas SK. Sekarang balik dulu ke tampilan normal, terus kita hitung <strong>Surplus Produsen</strong> dengan cara yang sama.' },
+      text:'Itulah luas SK. Tampilan dikembalikan seperti semula, lalu <strong>Surplus Produsen</strong> dihitung dengan cara yang sama.' },
     { chapter:'ps', reveal:[], hide:['csArea','legCs','baseCurves','oldEq','priceLine'],
-      text:'Fokus ke Surplus Produsen aja dulu, sisanya disembunyikan sementara.' },
+      text:'Perhatian difokuskan pada Surplus Produsen, sedangkan bagian lain disembunyikan sementara.' },
     { chapter:'ps', reveal:['baseDim40'],
-      text:'Alasnya sama kayak tadi: dari kuantitas 0 sampai 40. Alas = 40 − 0 = <strong>40</strong>.' },
+      text:'Alasnya sama seperti sebelumnya, yaitu dari kuantitas 0 sampai 40. Alas = 40 − 0 = <strong>40</strong>.' },
     { chapter:'ps', reveal:['psHeightDim'], formula:'L = \\frac{1}{2} \\times a \\times t',
       text:'Tingginya dari Rp10.000 sampai Rp30.000. Tinggi = 30 − 10 = <strong>20</strong>. Rumusnya masih sama:' },
     { chapter:'ps', reveal:[], formula:'L = \\frac{1}{2} \\times 40 \\times 20 = 400',
-      text:'Luas Surplus Produsen = <strong>Rp400rb²</strong> juga, sama persis dengan SK. Nggak kebetulan, kurva Demand &amp; Supply kita memang dibikin simetris.' },
+      text:'Luas Surplus Produsen juga <strong>Rp400rb²</strong>, sama persis dengan SK. Hal ini bukan kebetulan, karena kurva Demand dan Supply pada contoh ini memang dibuat simetris.' },
     { chapter:'tax', reveal:['baseCurves','oldEq','priceLine','taxSupplyLine'], hide:['baseDim40','psHeightDim','psArea','legPs'], formula:null,
-      text:'Sekarang bayangkan pemerintah kasih <strong>pajak Rp10.000 per unit</strong> ke penjual. Ini bikin kurva Supply (dari sisi harga yang dibayar konsumen) geser ke atas.' },
+      text:'Bayangkan pemerintah mengenakan <strong>pajak Rp10.000 per unit</strong> kepada penjual. Hal ini menggeser kurva Supply ke atas, dilihat dari sisi harga yang dibayar konsumen.' },
     { chapter:'tax', reveal:['newEqConsumer'],
-      text:'Ekuilibrium baru: konsumen sekarang bayar <strong>Rp35.000</strong>, tapi jumlah yang laku turun jadi <strong>30 unit</strong>, lebih sedikit dari 40 unit sebelumnya.' },
+      text:'Ekuilibrium baru terbentuk. Konsumen kini membayar <strong>Rp35.000</strong>, tetapi jumlah yang terjual turun menjadi <strong>30 unit</strong>, lebih sedikit daripada 40 unit sebelumnya.' },
     { chapter:'tax', reveal:['producerNet'],
-      text:'Penjual sendiri cuma nerima <strong>Rp25.000</strong> bersih per unit. Selisih Rp10.000-nya itulah yang masuk ke pemerintah sebagai pajak.' },
+      text:'Penjual hanya menerima <strong>Rp25.000</strong> bersih per unit. Selisih Rp10.000 itulah yang masuk ke pemerintah sebagai pajak.' },
     { chapter:'tax', reveal:['csNew','psNew','taxRect','legCsNew','legPsNew','legTax'], hide:['priceLine'],
-      text:'Surplus Konsumen &amp; Surplus Produsen sekarang mengecil. Tapi ada bagian yang nggak hilang, jadi <strong>pendapatan pajak</strong> buat pemerintah (kotak kuning ini).' },
+      text:'Surplus Konsumen dan Surplus Produsen kini mengecil. Namun ada bagian yang tidak hilang, melainkan menjadi <strong>pendapatan pajak</strong> bagi pemerintah, yaitu kotak kuning ini.' },
     { chapter:'dwl', reveal:['dwlArea','dwlBracket','legDwl'],
-      text:'Tapi ada sepotong "kue" yang beneran hilang, nggak dinikmati konsumen, produsen, ataupun pemerintah. Ini <strong>Deadweight Loss</strong>: kesejahteraan sosial yang hilang karena transaksi antara 30 dan 40 unit yang tadinya saling menguntungkan, sekarang nggak jadi terjadi.' },
+      text:'Ada pula bagian yang benar-benar hilang dan tidak dinikmati konsumen, produsen, maupun pemerintah. Inilah <strong>Deadweight Loss</strong>, yaitu kesejahteraan sosial yang lenyap karena transaksi antara 30 dan 40 unit yang tadinya saling menguntungkan menjadi tidak terjadi.' },
     { chapter:'dwl', reveal:[], hide:['csNew','psNew','taxRect','legCsNew','legPsNew','legTax','taxSupplyLine','newEqConsumer','producerNet','baseCurves','oldEq'],
-      text:'Kita hitung juga luas DWL-nya. Fokus ke segitiga ini aja dulu.' },
+      text:'Luas DWL juga dihitung. Perhatian difokuskan pada segitiga ini.' },
     { chapter:'dwl', reveal:['dwlHDim'],
-      text:'Sisi mendatarnya kita ukur dari kuantitas 30 sampai 40. Sisi mendatar = 40 − 30 = <strong>10</strong>.' },
+      text:'Sisi mendatarnya diukur dari kuantitas 30 sampai 40. Sisi mendatar = 40 − 30 = <strong>10</strong>.' },
     { chapter:'dwl', reveal:['dwlVDim'], formula:'L = \\frac{1}{2} \\times a \\times t',
-      text:'Sisi tegaknya dari harga Rp25.000 sampai Rp35.000. Sisi tegak = 35 − 25 = <strong>10</strong>. Rumusnya tetap sama, cuma alasnya sekarang miring:' },
+      text:'Sisi tegaknya dari harga Rp25.000 sampai Rp35.000. Sisi tegak = 35 − 25 = <strong>10</strong>. Rumusnya tetap sama, hanya saja alasnya kini miring:' },
     { chapter:'dwl', reveal:[], formula:'L = \\frac{1}{2} \\times 10 \\times 10 = 50',
       text:'Luas DWL akibat pajak = <strong>Rp50rb²</strong>.' },
     { chapter:'dwl', reveal:['csNew','psNew','taxRect','legCsNew','legPsNew','legTax','taxSupplyLine','newEqConsumer','producerNet','baseCurves','oldEq'], hide:['dwlHDim','dwlVDim'], formula:null,
-      text:'Itu semua bagian dari kasus pajak. Sekarang lanjut ke skenario yang beda: monopoli.' },
+      text:'Seluruh bagian tadi termasuk kasus pajak. Berikutnya dibahas skenario yang berbeda, yaitu monopoli.' },
     { chapter:'mono', reveal:['priceLine'],
       hide:['taxSupplyLine','newEqConsumer','producerNet','csNew','psNew','taxRect','legCsNew','legPsNew','legTax','dwlArea','dwlBracket','legDwl'],
-      text:'Bayangkan cuma ada <strong>satu penjual</strong> di pasar ini, monopoli. Inget lagi titik ekuilibrium kompetitif kita: Rp30.000, 40 unit.' },
+      text:'Bayangkan hanya ada <strong>satu penjual</strong> di pasar ini, yaitu monopoli. Titik ekuilibrium kompetitif sebelumnya berada pada harga Rp30.000 dengan 40 unit.' },
     { chapter:'mono', reveal:['monoQGuide'],
-      text:'Karena cuma dia sendiri yang jualan, si monopolis sengaja <strong>membatasi jumlah barangnya jadi cuma 20 unit</strong>, biar orang-orang berebut dan rela bayar lebih mahal.' },
+      text:'Karena hanya dialah penjual di pasar ini, monopolis sengaja <strong>membatasi jumlah barang menjadi 20 unit</strong>, supaya pembeli berebut dan bersedia membayar lebih mahal.' },
     { chapter:'mono', reveal:['monoPricePoint'], hide:['priceLine'],
-      text:'Dengan jumlah segitu, orang-orang rela bayar sampai <strong>Rp40.000</strong> per unit, jauh lebih mahal dari harga kompetitif Rp30.000.' },
+      text:'Dengan jumlah sebanyak itu, pembeli bersedia membayar hingga <strong>Rp40.000</strong> per unit, jauh lebih mahal daripada harga kompetitif Rp30.000.' },
     { chapter:'mono', reveal:['monoCS','legMonoCS'],
-      text:'Karena harga naik jadi Rp40.000, <strong>Surplus Konsumen</strong> ikut menyusut, sisa area segitiga kecil ini aja, dari yang tadinya sampai ke 40 unit.' },
+      text:'Karena harga naik menjadi Rp40.000, <strong>Surplus Konsumen</strong> ikut menyusut dan hanya menyisakan segitiga kecil ini, dari yang sebelumnya membentang sampai 40 unit.' },
     { chapter:'mono', reveal:['monoCostPoint','monoPS','legMonoPS'],
-      text:'Biaya produksi buat unit ke-20 cuma <strong>Rp20.000</strong> (lihat kurva Supply). Tapi karena monopolis jual <em>semua</em> unit di harga Rp40.000 yang sama (termasuk unit-unit yang biaya produksinya lebih murah), <strong>Surplus Produsen</strong>-nya jadi bentuk trapesium ini, dan lumayan besar.' },
+      text:'Biaya produksi unit ke-20 hanya <strong>Rp20.000</strong>, terbaca pada kurva Supply. Namun monopolis menjual <em>seluruh</em> unit pada harga Rp40.000 yang sama, termasuk unit yang biaya produksinya lebih murah. Akibatnya <strong>Surplus Produsen</strong> berbentuk trapesium ini, dengan luas yang cukup besar.' },
     { chapter:'dwlMono', reveal:['monoDwlArea','monoDwlBracket','legDwlMono'],
-      text:'Sama seperti kasus pajak, ada transaksi antara <strong>20 dan 40 unit</strong> yang jadinya nggak pernah terjadi, padahal dulu saling menguntungkan pembeli &amp; penjual. Ini juga <strong>Deadweight Loss</strong>, kali ini gara-gara monopoli, bukan pajak.' },
+      text:'Sama seperti kasus pajak, transaksi antara <strong>20 dan 40 unit</strong> tidak pernah terjadi, padahal sebelumnya saling menguntungkan pembeli dan penjual. Ini juga <strong>Deadweight Loss</strong>, kali ini disebabkan monopoli, bukan pajak.' },
     { chapter:'dwlMono', reveal:[],
-      text:'Polanya selalu sama: baik karena pajak maupun monopoli, begitu ada yang bikin harga naik &amp; kuantitas turun dari titik paling efisien di pasar, sebagian nilai itu selalu ada yang hilang percuma. Itulah <strong>Deadweight Loss</strong>.' },
+      text:'Polanya selalu sama. Baik karena pajak maupun monopoli, begitu ada sesuatu yang menaikkan harga dan menurunkan kuantitas dari titik paling efisien di pasar, selalu ada nilai yang hilang percuma. Itulah <strong>Deadweight Loss</strong>.' },
     { chapter:'rumus', reveal:['baseCurves','oldEq','csNew','psNew','taxRect','taxSupplyLine','newEqConsumer','producerNet','legCsNew','legPsNew','legTax'],
       hide:['monoQGuide','monoPricePoint','monoCostPoint','monoCS','monoPS','legMonoCS','legMonoPS','monoDwlArea','monoDwlBracket','legDwlMono'],
-      text:'Terakhir, rekap cepat pakai rumus untuk dua kasus yang tersisa: pajak &amp; monopoli.' },
+      text:'Terakhir, rangkuman perhitungan menggunakan rumus untuk dua kasus yang tersisa, yaitu pajak dan monopoli.' },
     { chapter:'rumus', formula:'L = \\frac{1}{2} \\times 30 \\times 15 = 225',
-      text:'SK &amp; SP yang kena pajak juga segitiga, cuma lebih kecil: alas = 30, tinggi = 15 buat dua-duanya (cuma beda posisi). Luas = <strong>Rp225rb²</strong> masing-masing.' },
+      text:'SK dan SP setelah dikenakan pajak tetap berbentuk segitiga, hanya lebih kecil. Alas = 30 dan tinggi = 15 untuk keduanya, yang membedakan hanya posisinya. Luas = <strong>Rp225rb²</strong> masing-masing.' },
     { chapter:'rumus', reveal:['dwlArea','dwlBracket','legDwl'], formula:'L = p \\times l = 30 \\times 10 = 300',
-      text:'Pendapatan pajak itu <strong>persegi panjang</strong>: panjang × lebar = 30 × 10 = <strong>Rp300rb²</strong>. DWL-nya (sudah kita hitung di atas) = Rp50rb².' },
+      text:'Pendapatan pajak berbentuk <strong>persegi panjang</strong>, dengan panjang × lebar = 30 × 10 = <strong>Rp300rb²</strong>. DWL yang sudah dihitung di atas = Rp50rb².' },
     { chapter:'rumus', formula:null,
-      text:'Cek totalnya: sebelum pajak, SK+SP = 400+400 = <strong>800</strong>. Sesudah pajak: SK+SP+Pajak+DWL = 225+225+300+50 = <strong>800</strong> juga. Nggak ada nilai yang hilang ajaib!' },
+      text:'Totalnya dapat diperiksa. Sebelum pajak, SK+SP = 400+400 = <strong>800</strong>. Sesudah pajak, SK+SP+Pajak+DWL = 225+225+300+50 = <strong>800</strong> juga. Tidak ada nilai yang hilang tanpa penjelasan.' },
     { chapter:'rumus', reveal:['monoQGuide','monoPricePoint','monoCostPoint','monoCS','monoPS','legMonoCS','legMonoPS'],
       hide:['csNew','psNew','taxRect','taxSupplyLine','newEqConsumer','producerNet','legCsNew','legPsNew','legTax','dwlArea','dwlBracket','legDwl'],
       formula:'L = \\frac{1}{2} \\times 20 \\times 10 = 100',
-      text:'Sama halnya buat monopoli. SK = ½ × 20 × 10 = <strong>Rp100rb²</strong>.' },
+      text:'Hal yang sama berlaku untuk monopoli. SK = ½ × 20 × 10 = <strong>Rp100rb²</strong>.' },
     { chapter:'rumus', reveal:['monoDwlArea','monoDwlBracket','legDwlMono'], formula:'\\begin{aligned} L &= \\frac{1}{2}(a_1+a_2) \\times t \\\\ &= \\frac{1}{2}(30+20)(20) = 500 \\end{aligned}',
-      text:'SP-nya sekarang <strong>trapesium</strong> (dua sisi sejajar beda panjang, bukan segitiga): Luas = ½×(sisi 1 + sisi 2)×tinggi = ½×(30+20)×20 = <strong>Rp500rb²</strong>. DWL = ½×20×20 = <strong>Rp200rb²</strong>.' },
+      text:'SP kini berbentuk <strong>trapesium</strong>, karena kedua sisi sejajarnya berbeda panjang dan bukan segitiga. Luas = ½×(sisi 1 + sisi 2)×tinggi = ½×(30+20)×20 = <strong>Rp500rb²</strong>. DWL = ½×20×20 = <strong>Rp200rb²</strong>.' },
     { chapter:'rumus', formula:null,
-      text:'Jumlahkan lagi: SK+SP+DWL = 100+500+200 = <strong>800</strong>, sama juga dengan total sebelum monopoli. Rumus luas bangun datar sederhana (segitiga, persegi panjang, trapesium) ternyata cukup buat menghitung semua konsep ini!' }
+      text:'Jika dijumlahkan, SK+SP+DWL = 100+500+200 = <strong>800</strong>, sama dengan total sebelum monopoli. Rumus luas bangun datar sederhana berupa segitiga, persegi panjang, dan trapesium ternyata sudah cukup untuk menghitung seluruh konsep ini.' }
   ];
 
   /*
-    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+    Naskah tiap langkah boleh diubah pengajar melalui halaman /pengajar.
 
     Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
     disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
@@ -382,7 +382,7 @@
     return g;
   }
 
-  // ---------- Kotak rumus (dirender pakai KaTeX biar rapi kayak buku teks) ----------
+  // ---------- Kotak rumus (dirender pakai KaTeX supaya rapi seperti buku teks) ----------
   const formulaBox = document.getElementById('formulaBox');
   function showFormula(latex){
     formulaBox.classList.add('show');
@@ -442,7 +442,7 @@
     const psOld = svgEl('polygon', { points:poly(psOldPts), fill:SUPPLY_C, 'fill-opacity':0.22, stroke:SUPPLY_C, 'stroke-width':1.5, class:'curve-fade' });
     areaGroup.appendChild(psOld); revealMap['psArea'] = [psOld];
 
-    // Garis ukur untuk animasi hitung luas SK & SP (alasnya sama-sama 0→40, jadi 1 elemen dipakai berdua)
+    // Garis ukur untuk animasi hitung luas SK & SP (alasnya sama-sama 0→40, jadi 1 elemen digunakan berdua)
     const baseDim40 = makeHDim(0, OLD_EQ.q, 'alas = ' + OLD_EQ.q + ' − 0 = ' + OLD_EQ.q);
     revealMap['baseDim40'] = [baseDim40];
     const csHeightDim = makeVDim(2, OLD_EQ.p, demandP(0), 'tinggi = ' + demandP(0) + ' − ' + OLD_EQ.p + ' = ' + (demandP(0)-OLD_EQ.p));
@@ -472,14 +472,14 @@
     const dwlVDim = makeVDim(44, NEW_PRODUCER_NET.p, NEW_EQ_CONSUMER.p, 'sisi tegak = ' + NEW_EQ_CONSUMER.p + ' − ' + NEW_PRODUCER_NET.p + ' = ' + (NEW_EQ_CONSUMER.p-NEW_PRODUCER_NET.p));
     revealMap['dwlVDim'] = [dwlVDim];
 
-    // penanda batas wilayah DWL secara eksplisit di sumbu Q (menjawab: DWL cuma antara 30-40, bukan di luar itu)
+    // penanda batas wilayah DWL secara eksplisit di sumbu Q (menjawab: DWL hanya antara 30-40, bukan di luar itu)
     const bracketY = margin.top + plotH + 34;
     const bx1 = sx(NEW_EQ_CONSUMER.q), bx2 = sx(OLD_EQ.q);
     const bracketLine = svgEl('line', { x1:bx1, y1:bracketY, x2:bx2, y2:bracketY, stroke:'#9C3B26', 'stroke-width':2 });
     const bracketTick1 = svgEl('line', { x1:bx1, y1:bracketY-5, x2:bx1, y2:bracketY+5, stroke:'#9C3B26', 'stroke-width':2 });
     const bracketTick2 = svgEl('line', { x1:bx2, y1:bracketY-5, x2:bx2, y2:bracketY+5, stroke:'#9C3B26', 'stroke-width':2 });
     const bracketLbl = svgEl('text', { x:(bx1+bx2)/2, y:bracketY+16, 'text-anchor':'middle', 'font-size':'10.5', 'font-weight':'700', fill:'#9C3B26', 'font-family':'Plus Jakarta Sans' });
-    bracketLbl.textContent = 'DWL cuma di sini (30-40)';
+    bracketLbl.textContent = 'DWL hanya di rentang ini (30-40)';
     const bracketGroup = svgEl('g', { class:'curve-fade' });
     [bracketLine, bracketTick1, bracketTick2, bracketLbl].forEach(el => bracketGroup.appendChild(el));
     chartSvg.appendChild(bracketGroup);
@@ -512,7 +512,7 @@
     const monoBracketTick1 = svgEl('line', { x1:mbx1, y1:monoBracketY-5, x2:mbx1, y2:monoBracketY+5, stroke:'#9C3B26', 'stroke-width':2 });
     const monoBracketTick2 = svgEl('line', { x1:mbx2, y1:monoBracketY-5, x2:mbx2, y2:monoBracketY+5, stroke:'#9C3B26', 'stroke-width':2 });
     const monoBracketLbl = svgEl('text', { x:(mbx1+mbx2)/2, y:monoBracketY+16, 'text-anchor':'middle', 'font-size':'10.5', 'font-weight':'700', fill:'#9C3B26', 'font-family':'Plus Jakarta Sans' });
-    monoBracketLbl.textContent = 'DWL cuma di sini (20-40)';
+    monoBracketLbl.textContent = 'DWL hanya di rentang ini (20-40)';
     const monoBracketGroup = svgEl('g', { class:'curve-fade' });
     [monoBracketLine, monoBracketTick1, monoBracketTick2, monoBracketLbl].forEach(el => monoBracketGroup.appendChild(el));
     chartSvg.appendChild(monoBracketGroup);
@@ -523,13 +523,13 @@
     const supplyLine = svgEl('path', { d:'M '+sx(0)+','+sy(supplyP(0))+' L '+sx(Q_MAX)+','+sy(supplyP(Q_MAX)), fill:'none', stroke:SUPPLY_C, 'stroke-width':3.5, 'stroke-linecap':'round' });
     chartSvg.appendChild(demandLine); chartSvg.appendChild(supplyLine);
     revealMap['baseCurves'] = [demandLine, supplyLine];
-    // label kurva ditaruh di kiri (jauh dari klaster ekuilibrium/pajak di kanan)
+    // label kurva diletakkan di kiri (jauh dari klaster ekuilibrium/pajak di kanan)
     const dLbl = svgEl('text', { x:sx(1), y:sy(demandP(1))-10, 'font-size':'12', 'font-weight':'800', fill:DEMAND_C, 'font-family':'Baloo 2' });
     dLbl.textContent = 'Demand'; chartSvg.appendChild(dLbl); revealMap['baseCurves'].push(dLbl);
     const sLbl = svgEl('text', { x:sx(9), y:sy(supplyP(9))-10, 'text-anchor':'end', 'font-size':'12', 'font-weight':'800', fill:SUPPLY_C, 'font-family':'Baloo 2' });
     sLbl.textContent = 'Supply'; chartSvg.appendChild(sLbl); revealMap['baseCurves'].push(sLbl);
 
-    // ---------- Titik & garis bantu monopoli (ditaruh SETELAH kurva supaya nggak ketutup garisnya) ----------
+    // ---------- Titik & garis bantu monopoli (diletakkan SETELAH kurva supaya tidak ketutup garisnya) ----------
     const monoQGuideLine = svgEl('line', { x1:sx(MONO_Q), y1:sy(MONO_PRICE), x2:sx(MONO_Q), y2:margin.top+plotH, stroke:MONO_C, 'stroke-width':1.5, 'stroke-dasharray':'4,4', class:'curve-fade' });
     chartSvg.appendChild(monoQGuideLine);
     revealMap['monoQGuide'] = [monoQGuideLine];
@@ -547,7 +547,7 @@
 
     const taxLine = svgEl('path', { d:'M '+sx(0)+','+sy(supplyTaxP(0))+' L '+sx(Q_MAX)+','+sy(supplyTaxP(Q_MAX)), fill:'none', stroke:SUPPLY_C, 'stroke-width':3, 'stroke-dasharray':'8,6', class:'curve-fade' });
     chartSvg.appendChild(taxLine);
-    // label pajak ditaruh di ujung kanan-atas garisnya sendiri, jauh dari klaster titik di Q=30-40
+    // label pajak diletakkan di ujung kanan-atas garisnya sendiri, jauh dari klaster titik di Q=30-40
     const taxLbl = svgEl('text', { x:sx(Q_MAX)-4, y:sy(supplyTaxP(Q_MAX))-10, 'text-anchor':'end', 'font-size':'12', 'font-weight':'800', fill:SUPPLY_C, 'font-family':'Baloo 2', class:'curve-fade' });
     taxLbl.textContent = 'Supply + Pajak'; chartSvg.appendChild(taxLbl);
     revealMap['taxSupplyLine'] = [taxLine, taxLbl];
@@ -566,7 +566,7 @@
     chartSvg.appendChild(priceLine);
     revealMap['priceLine'] = [priceLine];
 
-    // ---------- NEW equilibrium (consumer): cuma titik + garis bantu ke angka di sumbu ----------
+    // ---------- NEW equilibrium (consumer): hanya titik + garis bantu ke angka di sumbu ----------
     const newDot = svgEl('circle', { cx:sx(NEW_EQ_CONSUMER.q), cy:sy(NEW_EQ_CONSUMER.p), r:6, fill:DEMAND_C, stroke:'#fff', 'stroke-width':2, class:'curve-fade' });
     const newGuideV = svgEl('line', { x1:sx(NEW_EQ_CONSUMER.q), y1:sy(NEW_EQ_CONSUMER.p), x2:sx(NEW_EQ_CONSUMER.q), y2:margin.top+plotH, stroke:DEMAND_C, 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
     const newGuideH = svgEl('line', { x1:margin.left, y1:sy(NEW_EQ_CONSUMER.p), x2:sx(NEW_EQ_CONSUMER.q), y2:sy(NEW_EQ_CONSUMER.p), stroke:DEMAND_C, 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
@@ -575,7 +575,7 @@
     chartSvg.appendChild(newGuideV); chartSvg.appendChild(newGuideH); chartSvg.appendChild(newDot); chartSvg.appendChild(newLbl);
     revealMap['newEqConsumer'] = [newDot, newGuideV, newGuideH, newLbl];
 
-    // ---------- Producer net price: cuma titik + garis bantu horizontal ke angka di sumbu ----------
+    // ---------- Producer net price: hanya titik + garis bantu horizontal ke angka di sumbu ----------
     const netDot = svgEl('circle', { cx:sx(NEW_PRODUCER_NET.q), cy:sy(NEW_PRODUCER_NET.p), r:6, fill:SUPPLY_C, stroke:'#fff', 'stroke-width':2, class:'curve-fade' });
     const netGuideH = svgEl('line', { x1:margin.left, y1:sy(NEW_PRODUCER_NET.p), x2:sx(NEW_PRODUCER_NET.q), y2:sy(NEW_PRODUCER_NET.p), stroke:SUPPLY_C, 'stroke-width':1.2, 'stroke-dasharray':'3,3', class:'curve-fade' });
     chartSvg.appendChild(netGuideH); chartSvg.appendChild(netDot);
@@ -653,7 +653,7 @@
 
   btnNext.addEventListener('click', () => { if(current < STEPS.length - 1){ current++; render(); } });
   btnPrev.addEventListener('click', () => { if(current > 0){ current--; render(); } });
-  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // Panah kiri dan kanan dipasang melalui modul bersama supaya perilakunya
   // sama di semua halaman materi.
   KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
   btnRestart.addEventListener('click', () => {

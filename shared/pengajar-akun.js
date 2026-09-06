@@ -8,7 +8,7 @@
 
   Bentuk email dan NRP yang sah ditulis di tiga tempat: di sini, di
   firestore.rules, dan di panduan pengurus. Tiga salinan sudah cukup banyak.
-  Kalau halaman pendaftaran dan halaman pengajar masing-masing menyimpan
+  Jika halaman pendaftaran dan halaman pengajar masing-masing menyimpan
   salinannya sendiri lagi, jumlahnya jadi empat, dan yang tertinggal saat
   aturannya berubah biasanya justru yang jarang dibuka.
 
@@ -18,7 +18,7 @@
 */
 
 /*
-  Email student UBAYA dibentuk dari NRP-nya, misalnya NRP 130223001 memakai
+  Email student UBAYA dibentuk dari NRP-nya, misalnya NRP 130223001 menggunakan
   email s130223001@student.ubaya.ac.id.
 */
 export const POLA_EMAIL = /^s\d{6,15}@student\.ubaya\.ac\.id$/i;
@@ -42,7 +42,7 @@ export function periksaPengajuan(nama, nrp, email){
   if(!POLA_NRP.test(nrp)) salah.push('NRP harus berupa angka saja, tanpa huruf dan tanpa spasi.');
   if(!POLA_EMAIL.test(email)){
     salah.push('Email harus email student UBAYA, bentuknya s130223203@student.ubaya.ac.id. '
-      + 'Alamat pribadi seperti Gmail tidak bisa dipakai.');
+      + 'Alamat pribadi seperti Gmail tidak bisa digunakan.');
   }
   return salah;
 }
@@ -68,10 +68,10 @@ export function pesanAuth(kode){
     case 'auth/configuration-not-found':
       return 'Metode masuk email dan kata sandi belum diaktifkan di Firebase Console.';
     case 'auth/email-already-in-use':
-      return 'Email ini sudah punya akun. Masuk saja memakai kata sandi yang dulu dipakai, '
-           + 'atau hubungi pengurus operasional kalau lupa.';
+      return 'Email ini sudah punya akun. Masuk saja menggunakan kata sandi yang dulu digunakan, '
+           + 'atau hubungi pengurus operasional jika lupa.';
     case 'auth/weak-password':
-      return 'Kata sandinya terlalu mudah ditebak. Pakai paling sedikit delapan karakter.';
+      return 'Kata sandinya terlalu mudah ditebak. Gunakan paling sedikit delapan karakter.';
     case 'auth/operation-not-allowed':
       return 'Pendaftaran akun baru sedang dimatikan di Firebase Console.';
     default:
@@ -79,7 +79,7 @@ export function pesanAuth(kode){
   }
 }
 
-/* ---------- Alat bantu tampilan yang dipakai kedua halaman ---------- */
+/* ---------- Alat bantu tampilan yang digunakan kedua halaman ---------- */
 
 export function esc(s){
   return String(s ?? '').replace(/[&<>"']/g, c => (
@@ -123,7 +123,7 @@ export function antarKeIsian(el){
   Formulir pendaftaran panjang, dan sebagian papan ketik ponsel maupun
   pengelola kata sandi memperlakukan Enter sebagai "lanjut". Dengan perilaku
   bawaan peramban, Enter di isian pertama mana pun langsung mengirim seluruh
-  formulir, dan yang dilihat pendaftar cuma penolakan atas sesuatu yang belum
+  formulir, dan yang dilihat pendaftar hanya penolakan atas sesuatu yang belum
   merasa dia kirim.
 
   Isian terakhir dikecualikan. Di situ Enter memang berarti selesai, dan

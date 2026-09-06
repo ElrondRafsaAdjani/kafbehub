@@ -13,7 +13,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -63,7 +63,7 @@
 
 <!-- ============ PENGUMUMAN ============ -->
 <!-- Diisi dari Firestore lewat skrip di bawah halaman. Dibiarkan kosong dan
-     tersembunyi kalau tidak ada pengumuman yang sedang tayang. -->
+     tersembunyi jika tidak ada pengumuman yang sedang tayang. -->
 <section class="wrap pengumuman-wrap" id="pengumumanWrap" hidden aria-live="polite">
   <div id="pengumumanIsi"></div>
 </section>
@@ -74,11 +74,11 @@
     <div>
       <span class="eyebrow" data-en="🦉 FBE Assistant Team" data-teks="beranda.sambutan.label" data-label="Label kecil di atas judul">🦉 Kelompok Asisten FBE</span>
       <h1 data-en="Learn with the KAFBE &lt;em&gt;Owl&lt;/em&gt;" data-teks="beranda.sambutan.judul" data-label="Judul utama">Belajar bersama <em>Burung Hantu</em> KAFBE</h1>
-      <p class="lead" data-en="Where FBE UBAYA students learn course material through visualisations and games." data-teks="beranda.sambutan.teks" data-label="Kalimat pembuka"> Platform di mana mahasiswa FBE UBAYA belajar materi kuliah lewat visualisasi materi dan game.</p>
+      <p class="lead" data-en="Where FBE UBAYA students learn course material through visualisations and games." data-teks="beranda.sambutan.teks" data-label="Kalimat pembuka"> Platform belajar bagi mahasiswa FBE UBAYA untuk memahami materi kuliah melalui visualisasi dan game.</p>
       <div class="hero-cta">
         <a href="#visualisasi" class="btn btn-primary" data-en="📊 Open Course Visuals" data-teks="beranda.sambutan.tombol1" data-label="Tombol pertama">📊 Buka Visualisasi Materi</a>
         <a href="jadwal.html" class="btn btn-ghost" data-en="🗓️ Class Schedule" data-teks="beranda.sambutan.tombol2" data-label="Tombol kedua">🗓️ Jadwal Kelas</a>
-        <a href="#main-santai" class="btn btn-ghost" data-en="🎮 Casual Games" data-teks="beranda.sambutan.tombol3" data-label="Tombol ketiga">🎮 Main Santai</a>
+        <a href="#main-santai" class="btn btn-ghost" data-en="🎮 Casual Games" data-teks="beranda.sambutan.tombol3" data-label="Tombol ketiga">🎮 Game Santai</a>
       </div>
     </div>
     <div class="hero-owl-stage">
@@ -88,10 +88,10 @@
 </section>
 
 <!-- ============ FEATURE OVERVIEW ============ -->
-<section class="wrap" data-bagian="Empat Ruang">
+<section class="wrap" data-bagian="Empat Fitur">
   <div class="section-head">
-    <span class="kicker" data-en="Four Spaces in This Hub" data-teks="beranda.ruang.label" data-label="Label bagian">Empat Ruang di Hub Ini</span>
-    <h2 data-en="Play, learn, and see how it works." data-teks="beranda.ruang.judul" data-label="Judul bagian">Main, belajar, dan lihat cara kerjanya.</h2>
+    <span class="kicker" data-en="Four Features in This Hub" data-teks="beranda.ruang.label" data-label="Label bagian">Empat Fitur di Hub Ini</span>
+    <h2 data-en="Play, learn, and see how it works." data-teks="beranda.ruang.judul" data-label="Judul bagian">Bermain, belajar, dan memahami cara kerjanya.</h2>
   </div>
   <div class="card-grid" data-urutan="beranda-ruang">
     <div class="feature-card" data-fitur="jadwal" data-fitur-label="Jadwal Kelas">
@@ -108,19 +108,19 @@
       <p data-en="Learn course material through visuals that make it easier to grasp." data-teks="beranda.kartu.visualisasi.teks" data-label="Visualisasi Materi: keterangan">Belajar materi dengan visualisasi untuk memudahkan pemahaman.</p>
       <a href="#visualisasi" class="btn btn-gold" data-en="See All Courses" data-teks="beranda.kartu.visualisasi.tombol" data-label="Visualisasi Materi: tombol">Lihat Semua Mata Kuliah</a>
     </div>
-    <div class="feature-card" data-fitur="main-santai" data-fitur-label="Main Santai">
+    <div class="feature-card" data-fitur="main-santai" data-fitur-label="Game Santai">
       <span class="badge badge-live" data-en="Active">Aktif</span>
       <div class="feature-icon">🎮</div>
-      <h3 data-en="Casual Games" data-teks="beranda.kartu.santai.judul" data-label="Main Santai: judul">Main Santai</h3>
-      <p data-en="Light games for a break between classes. Starting with &lt;strong&gt;Flappy Owl&lt;/strong&gt;, a Flappy Bird twist starring the KAFBE mascot." data-teks="beranda.kartu.santai.teks" data-label="Main Santai: keterangan">Game ringan buat refreshing sela-sela kuliah atau asistensi. Dimulai dengan <strong>Flappy Owl</strong>, versi Flappy Bird dengan maskot KAFBE.</p>
-      <a href="game-santai/flappy-owl.html" class="btn btn-gold" data-en="Play" data-teks="beranda.kartu.santai.tombol" data-label="Main Santai: tombol">Mainkan</a>
+      <h3 data-en="Casual Games" data-teks="beranda.kartu.santai.judul" data-label="Game Santai: judul">Game Santai</h3>
+      <p data-en="Light games for a break between classes. Starting with &lt;strong&gt;Flappy Owl&lt;/strong&gt;, a Flappy Bird twist starring the KAFBE mascot." data-teks="beranda.kartu.santai.teks" data-label="Game Santai: keterangan">Game ringan untuk refreshing di sela kuliah atau asistensi. Dimulai dengan <strong>Flappy Owl</strong>, versi Flappy Bird dengan maskot KAFBE.</p>
+      <a href="game-santai/flappy-owl.html" class="btn btn-gold" data-en="Play" data-teks="beranda.kartu.santai.tombol" data-label="Game Santai: tombol">Mainkan</a>
     </div>
-    <div class="feature-card" data-fitur="belajar-main" data-fitur-label="Belajar Sambil Main">
+    <div class="feature-card" data-fitur="belajar-main" data-fitur-label="Belajar Sambil Bermain">
       <span class="badge badge-soon" data-en="In Development">Dalam Pengembangan</span>
       <div class="feature-icon">🧠</div>
-      <h3 data-en="Learn by Playing" data-teks="beranda.kartu.belajar.judul" data-label="Belajar Sambil Main: judul">Belajar Sambil Main</h3>
-      <p data-en="Learning through games, so exploring the material feels lighter." data-teks="beranda.kartu.belajar.teks" data-label="Belajar Sambil Main: keterangan">Belajar melalui game untuk memudahkan pemahaman dan eksplor materi lebih menyenangkan.</p>
-      <a href="#belajar-main" class="btn btn-ghost" data-en="See the Plan" data-teks="beranda.kartu.belajar.tombol" data-label="Belajar Sambil Main: tombol">Lihat Rencana</a>
+      <h3 data-en="Learn by Playing" data-teks="beranda.kartu.belajar.judul" data-label="Belajar Sambil Bermain: judul">Belajar Sambil Bermain</h3>
+      <p data-en="Learning through games, so exploring the material feels lighter." data-teks="beranda.kartu.belajar.teks" data-label="Belajar Sambil Bermain: keterangan">Belajar melalui game untuk memudahkan pemahaman dan membuat eksplorasi materi lebih menyenangkan.</p>
+      <a href="#belajar-main" class="btn btn-ghost" data-en="See the Plan" data-teks="beranda.kartu.belajar.tombol" data-label="Belajar Sambil Bermain: tombol">Lihat Rencana</a>
     </div>
   </div>
 </section>
@@ -131,34 +131,34 @@
     <span class="kicker" data-en="Course Visuals" data-teks="beranda.visual.label" data-label="Label bagian">Visualisasi Materi</span>
     <h2 data-en="Choose a course" data-teks="beranda.visual.judul" data-label="Judul bagian">Pilih mata kuliah</h2>
     <p data-en="Visuals are grouped by course." data-teks="beranda.visual.teks" data-label="Keterangan bagian">Visualisasi materi dikelompokkan per mata kuliah.</p>
-  <p class="catatan-layar" data-en="Visuals are more comfortable on a tablet, laptop, or desktop. They still open on a phone.">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
+  <p class="catatan-layar" data-en="Visuals are more comfortable on a tablet, laptop, or desktop. They still open on a phone.">Visualisasi materi lebih nyaman dibuka melalui tablet, laptop, atau komputer. Halaman ini tetap dapat dibuka melalui ponsel.</p>
   </div>
   <div class="card-grid" data-urutan="beranda-visualisasi">
     <div class="feature-card" data-fitur="materi-pemi" data-fitur-label="Pengantar Mikroekonomi">
       <span class="badge badge-live" data-en="Active">Aktif</span>
       <div class="feature-icon">📈</div>
       <h3 data-en="Introductory Microeconomics" data-teks="beranda.mk.pemi.judul" data-label="Mikroekonomi: judul">Pengantar Mikroekonomi</h3>
-      <p data-en="Demand and supply curves, elasticity, surplus, deadweight loss, and market structures." data-teks="beranda.mk.pemi.teks" data-label="Mikroekonomi: keterangan">Belajar kurva demand, supply, elastisitas, surplus, deadweight loss, dan bentuk-bentuk pasar.</p>
+      <p data-en="Demand and supply curves, elasticity, surplus, deadweight loss, and market structures." data-teks="beranda.mk.pemi.teks" data-label="Mikroekonomi: keterangan">Kurva demand dan supply, elastisitas, surplus, deadweight loss, serta bentuk pasar.</p>
       <a href="materi/pemi.html" class="btn btn-gold" data-en="Open">Buka</a>
     </div>
     <div class="feature-card" data-fitur="materi-si" data-fitur-label="Sistem Informasi">
       <span class="badge badge-live" data-en="Active">Aktif</span>
       <div class="feature-icon">🗂️</div>
       <h3 data-en="Information Systems" data-teks="beranda.mk.si.judul" data-label="Sistem Informasi: judul">Sistem Informasi</h3>
-      <p data-en="Mapping business processes with flowcharts and ERDs, built step by step. Needs a wide screen (laptop, desktop, or tablet)." data-teks="beranda.mk.si.teks" data-label="Sistem Informasi: keterangan">Menggambarkan proses bisnis dengan flowchart dan ERD. Dibangun langkah demi langkah. Butuh layar lebar (laptop/PC/tablet).</p>
+      <p data-en="Mapping business processes with flowcharts and ERDs, built step by step. Needs a wide screen (laptop, desktop, or tablet)." data-teks="beranda.mk.si.teks" data-label="Sistem Informasi: keterangan">Menggambarkan proses bisnis dengan flowchart dan ERD, dibangun langkah demi langkah. Membutuhkan layar lebar seperti laptop, PC, atau tablet.</p>
       <a href="materi/si.html" class="btn btn-gold" data-en="Open">Buka</a>
     </div>
     <div class="feature-card" data-fitur="materi-mo" data-fitur-label="Manajemen Operasi">
       <span class="badge badge-live" data-en="Active">Aktif</span>
       <div class="feature-icon">🛠️</div>
       <h3 data-en="Operations Management" data-teks="beranda.mk.mo.judul" data-label="Manajemen Operasi: judul">Manajemen Operasi</h3>
-      <p data-en="The critical path of a project: forward pass, backward pass, and slack time." data-teks="beranda.mk.mo.teks" data-label="Manajemen Operasi: keterangan">Critical path sebuah proyek: hitung maju, hitung mundur, dan slack time.</p>
+      <p data-en="The Critical Path Method of a project: forward pass, backward pass, and slack time." data-teks="beranda.mk.mo.teks" data-label="Manajemen Operasi: keterangan">Critical Path Method sebuah proyek: perhitungan maju, perhitungan mundur, dan slack time.</p>
       <a href="materi/mo.html" class="btn btn-gold" data-en="Open">Buka</a>
     </div>
-    <div class="feature-card" data-fitur="materi-mki" data-fitur-label="Manajemen Keuangan &amp; Investasi">
+    <div class="feature-card" data-fitur="materi-mki" data-fitur-label="Manajemen Keuangan dan Investasi">
       <span class="badge badge-live" data-en="Active">Aktif</span>
       <div class="feature-icon">💰</div>
-      <h3 data-en="Financial Management &amp; Investment" data-teks="beranda.mk.mki.judul" data-label="Manajemen Keuangan: judul">Manajemen Keuangan &amp; Investasi</h3>
+      <h3 data-en="Financial Management and Investment" data-teks="beranda.mk.mki.judul" data-label="Manajemen Keuangan: judul">Manajemen Keuangan dan Investasi</h3>
       <p data-en="Time value of money, bond valuation, and stock valuation." data-teks="beranda.mk.mki.teks" data-label="Manajemen Keuangan: keterangan">Time value of money, valuasi obligasi, dan valuasi saham.</p>
       <a href="materi/mki.html" class="btn btn-gold" data-en="Open">Buka</a>
     </div>
@@ -179,9 +179,9 @@
 </section>
 
 <!-- ============ BELAJAR SAMBIL MAIN ============ -->
-<section id="belajar-main" class="wrap" data-bagian="Belajar Sambil Main">
+<section id="belajar-main" class="wrap" data-bagian="Belajar Sambil Bermain">
   <div class="section-head">
-    <span class="kicker" data-en="Learn by Playing" data-teks="beranda.belajar.label" data-label="Label bagian">Belajar Sambil Main</span>
+    <span class="kicker" data-en="Learn by Playing" data-teks="beranda.belajar.label" data-label="Label bagian">Belajar Sambil Bermain</span>
     <h2 data-en="Planned learning games" data-teks="beranda.belajar.judul" data-label="Judul bagian">Rencana game pembelajaran</h2>
     <p data-en="In development." data-teks="beranda.belajar.teks" data-label="Keterangan bagian">Dalam pengembangan.</p>
   </div>
@@ -208,23 +208,23 @@
 </section>
 
 <!-- ============ MAIN SANTAI (preview, game ada di file sendiri) ============ -->
-<section id="main-santai" class="wrap" data-bagian="Main Santai">
+<section id="main-santai" class="wrap" data-bagian="Game Santai">
   <div class="section-head">
-    <span class="kicker" data-en="Casual Games" data-teks="beranda.santai.label" data-label="Label bagian">Main Santai</span>
+    <span class="kicker" data-en="Casual Games" data-teks="beranda.santai.label" data-label="Label bagian">Game Santai</span>
     <h2 data-en="Flappy Owl 🦉" data-teks="beranda.santai.judul" data-label="Judul bagian">Flappy Owl 🦉</h2>
-    <p data-en="Fly the blue KAFBE owl through the obstacles." data-teks="beranda.santai.teks" data-label="Keterangan bagian">Terbangin si hantu biru KAFBE melewati tantangan.</p>
+    <p data-en="Fly the blue KAFBE owl through the obstacles." data-teks="beranda.santai.teks" data-label="Keterangan bagian">Terbangkan Si Hantu Biru KAFBE melewati rintangan.</p>
   </div>
-  <div class="feature-card" style="max-width:420px;" data-fitur="main-santai" data-fitur-label="Main Santai (kartu bawah)">
+  <div class="feature-card" style="max-width:420px;" data-fitur="main-santai" data-fitur-label="Game Santai (kartu bawah)">
     <span class="badge badge-live" data-en="Active">Aktif</span>
     <svg viewBox="0 0 300 300" style="width:80px;"><use href="#kafbe-owl"/></svg>
     <h3>Flappy Owl</h3>
-    <p data-en="Click, tap, or press Space to fly. The leaderboard is shared by every visitor." data-teks="beranda.santai.cara" data-label="Cara bermain">Klik / ketuk / tekan Spasi untuk terbang. Papan peringkat berlaku untuk semua pengunjung.</p>
-    <a href="game-santai/flappy-owl.html" class="btn btn-gold" data-en="Play Now" data-teks="beranda.santai.tombol" data-label="Tombol main">Main Sekarang</a>
+    <p data-en="Click, tap, or press Space to fly. The leaderboard is shared by every visitor." data-teks="beranda.santai.cara" data-label="Cara bermain">Klik, ketuk, atau tekan Spasi untuk terbang. Papan peringkat berlaku untuk seluruh pengunjung.</p>
+    <a href="game-santai/flappy-owl.html" class="btn btn-gold" data-en="Play Now" data-teks="beranda.santai.tombol" data-label="Tombol main">Mainkan Sekarang</a>
   </div>
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -232,7 +232,7 @@
 <script>
 /*
   Pengumuman dari halaman /operasional. Sengaja dimuat setelah halaman tampil
-  dan gagal secara diam-diam: kalau Firestore tidak terjangkau, blok ini tetap
+  dan gagal secara diam-diam: jika Firestore tidak terjangkau, blok ini tetap
   tersembunyi dan sisa halaman sama sekali tidak terganggu.
 */
 (function(){

@@ -16,7 +16,7 @@
 
   KENAPA GRAFIKNYA DIGAMBAR SENDIRI
 
-  Halaman ini memakai Content-Security-Policy yang hanya mengizinkan skrip dari
+  Halaman ini menggunakan Content-Security-Policy yang hanya mengizinkan skrip dari
   situs sendiri dan gstatic. Pustaka grafik dari CDN mana pun akan ditolak, dan
   melonggarkan aturan itu demi satu grafik bukan pertukaran yang sepadan.
   Grafiknya SVG biasa, sekitar seratus baris, tanpa pustaka apa pun.
@@ -102,7 +102,7 @@ function alamatTerbaca(kunci){
   dipilih, lalu penyaringannya dikerjakan di peramban.
 
   Sekali ambil berarti sekitar 180 pembacaan Firestore, dan berpindah-pindah
-  saringan sesudahnya tidak menimbulkan pembacaan baru sama sekali. Kalau tiap
+  saringan sesudahnya tidak menimbulkan pembacaan baru sama sekali. Jika tiap
   saringan mengambil ulang, sekadar membandingkan satu minggu dengan tiga bulan
   sudah menghabiskan ratusan pembacaan.
 */
@@ -380,7 +380,7 @@ export async function muatDasbor(paksa){
     pesan.innerHTML = err.code === 'permission-denied'
       ? 'Catatan kunjungan tidak bisa dibaca. Aturan Firestore untuk koleksi '
         + '<code>statistik</code> belum terpasang. Tempel ulang isi '
-        + '<code>firestore.rules</code> lewat Firebase Console.'
+        + '<code>firestore.rules</code> melalui Firebase Console.'
       : 'Gagal memuat catatan kunjungan: ' + (err.message || 'tidak diketahui');
   }
 }

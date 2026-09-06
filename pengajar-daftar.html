@@ -22,7 +22,7 @@
   HALAMAN PENDAFTARAN, TERPISAH DARI HALAMAN MASUK.
 
   Keduanya dulu satu halaman dengan dua formulir yang bergantian tampil. Yang
-  membuatnya tidak enak dipakai bukan formulirnya, melainkan formulir masuk
+  membuatnya tidak enak digunakan bukan formulirnya, melainkan formulir masuk
   yang tetap ada di dokumen meski sedang disembunyikan: pengelola kata sandi
   membaca seluruh halaman, menemukan pasangan nama pengguna dan kata sandi di
   situ, lalu menyimpulkan halaman ini adalah halaman masuk. Akibatnya kotak
@@ -46,9 +46,9 @@
     </p>
 
     <!--
-      Terpakai kalau akun Firebase-nya sudah jadi tapi baris pengajuannya belum
+      Terpakai jika akun Firebase-nya sudah jadi tetapi baris pengajuannya belum
       tersimpan, misalnya karena jaringan putus tepat di antara kedua langkah
-      itu. Yang dipakai tetap formulir yang sama, hanya kotak kata sandinya
+      itu. Yang digunakan tetap formulir yang sama, hanya kotak kata sandinya
       dilepas karena akunnya sudah ada.
 
       Dulu keadaan ini punya layarnya sendiri di halaman pengajar, dan layar
@@ -56,7 +56,7 @@
       terpecah menjadi dua formulir yang berbeda, padahal maksudnya satu.
     -->
     <p class="op-catatan pg-kembali" id="catatanLanjutan" hidden>
-      Akun Anda sudah ada, tapi datanya belum terkirim ke pengurus. Lengkapi di
+      Akun Anda sudah ada, tetapi datanya belum terkirim ke pengurus. Lengkapi di
       bawah ini, lalu kirim sekali lagi.
       <button type="button" class="pg-tautan" id="keluarLanjutan">Keluar dari akun ini</button>
     </p>
@@ -70,15 +70,15 @@
 
       <label for="dfEmail">Email student UBAYA</label>
       <input type="email" id="dfEmail" name="emailBaru" required autocomplete="email" placeholder="s130223203@student.ubaya.ac.id" aria-describedby="dfEmailKet" />
-      <p class="pg-keterangan" id="dfEmailKet">Emailnya memakai NRP Anda. NRP 130223001 memakai email s130223001@student.ubaya.ac.id.</p>
+      <p class="pg-keterangan" id="dfEmailKet">Emailnya menggunakan NRP Anda. NRP 130223001 menggunakan email s130223001@student.ubaya.ac.id.</p>
 
       <!-- Dilepas saat akunnya sudah ada. Memakai display:contents supaya
-           jarak antar isian di dalam formulir tidak berubah gara-gara ada
+           jarak antar isian di dalam formulir tidak berubah karena ada
            pembungkus tambahan. -->
       <div class="pg-bagian" id="bagianSandi">
         <label for="dfSandi">Kata sandi baru</label>
         <input type="password" id="dfSandi" name="sandiBaru" required minlength="8" autocomplete="new-password" aria-describedby="dfSandiKet" />
-        <p class="pg-keterangan" id="dfSandiKet">Paling sedikit delapan karakter. Jangan pakai kata sandi yang sama dengan akun lain.</p>
+        <p class="pg-keterangan" id="dfSandiKet">Paling sedikit delapan karakter. Jangan gunakan kata sandi yang sama dengan akun lain.</p>
 
         <label for="dfSandi2">Ulangi kata sandi</label>
         <input type="password" id="dfSandi2" name="sandiUlang" required minlength="8" autocomplete="new-password" />
@@ -99,7 +99,7 @@
       <pre id="diagnosa"></pre>
     </details>
 
-    <p class="op-catatan">Setelah dikirim, tunggu pengurus operasional menerima pengajuan Anda. Sampai saat itu, akunnya bisa masuk tapi belum bisa mengubah naskah materi.</p>
+    <p class="op-catatan">Setelah dikirim, tunggu pengurus operasional menerima pengajuan Anda. Sampai saat itu, akunnya bisa masuk tetapi belum bisa mengubah naskah materi.</p>
   </div>
 </section>
 

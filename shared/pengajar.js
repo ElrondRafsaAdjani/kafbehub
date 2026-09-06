@@ -9,7 +9,7 @@
   hanya untuk KENYAMANAN pemakai, bukan pengamanan.
 
   Yang benar-benar menjaga data adalah firestore.rules, karena aturan itu
-  dijalankan di server Google dan tidak bisa dilewati lewat Console peramban.
+  dijalankan di server Google dan tidak bisa dilewati melalui Console peramban.
   Di sana pula wewenang per mata kuliah ditegakkan, sehingga pengajar yang
   mencoba menulis topik di luar wewenangnya akan ditolak server meskipun
   halaman ini berhasil dibujuk menampilkan tombolnya.
@@ -43,18 +43,18 @@ const {
 
   Firebase menyimpan sesi yang sedang masuk di penyimpanan peramban, dan
   kuncinya disusun dari nama aplikasi ini. Selama /pengajar, /operasional, dan
-  /adminkafbe sama-sama memakai nama bawaan, ketiganya berbagi satu sesi yang
+  /adminkafbe sama-sama menggunakan nama bawaan, ketiganya berbagi satu sesi yang
   sama untuk seluruh situs.
 
   Akibatnya nyata dan sempat terjadi: pengurus yang membuka /operasional di tab
   lain akan menemukan dirinya masuk sebagai akun pengajar, lalu halaman itu
   mengeluarkannya karena bukan admin. Keluar itu berlaku untuk seluruh situs,
-  sehingga tab pengajar yang sedang dipakai mengetik ikut terlempar ke layar
+  sehingga tab pengajar yang sedang digunakan mengetik ikut terlempar ke layar
   masuk, dan naskah yang belum disimpan hilang bersamanya.
 
   Dengan nama tersendiri, tiap halaman punya sesinya sendiri. Satu orang bisa
   masuk sebagai pengurus di satu tab dan sebagai pengajar di tab lain tanpa
-  keduanya saling menjatuhkan. Halaman pendaftaran memakai nama yang sama
+  keduanya saling menjatuhkan. Halaman pendaftaran menggunakan nama yang sama
   dengan halaman ini, dan itu memang disengaja, supaya akun yang baru dibuat
   langsung terbawa ke sini.
 */
@@ -84,7 +84,7 @@ function status(teks, jenis){
   Catatan langkah saat mencoba masuk.
 
   Kegagalan pada tahap ini sulit dilacak karena tersebar di beberapa proses
-  asinkron, dan kalau salah satunya gagal diam-diam pemakai cuma melihat
+  asinkron, dan jika salah satunya gagal diam-diam pemakai hanya melihat
   halaman yang tidak bereaksi. Setiap langkah dicatat ke panel yang bisa dibuka
   di layar masuk, sehingga tidak perlu membuka developer tools untuk tahu
   langkah mana yang berhenti.
@@ -136,7 +136,7 @@ document.querySelectorAll('[data-keluar]').forEach(b => b.addEventListener('clic
 
 /* ---------- Menentukan layar yang tampil ---------- */
 
-// Siapa yang sedang memakai halaman, diisi setelah masuk dan dipakai sebagai
+// Siapa yang sedang menggunakan halaman, diisi setelah masuk dan digunakan sebagai
 // pelaku pada catatan log.
 let pemakai = { nama: '', email: '', uid: '' };
 let wewenang = { semua: false, mk: [] };
@@ -161,8 +161,8 @@ let uidTerbuka = null;
 onAuthStateChanged(auth, async (user) => {
   if(!user){
     /*
-      Sesi berakhir. Kalau itu terjadi selagi halamannya terbuka, pemakainya
-      berhak tahu sebabnya, bukan cuma mendapati dirinya kembali di layar
+      Sesi berakhir. Jika itu terjadi selagi halamannya terbuka, pemakainya
+      berhak tahu sebabnya, bukan hanya mendapati dirinya kembali di layar
       masuk tanpa penjelasan apa pun.
 
       Naskah yang belum disimpan tidak ikut hilang, sebab dititipkan ke
@@ -216,7 +216,7 @@ async function tentukanLayar(user){
 
       Pemeriksaan ini pernah selalu berakhir dengan signOut, dan itu keliru.
       Kegagalan membaca satu dokumen bisa terjadi karena jaringan tersendat
-      sesaat, dan kalau kejadiannya saat pengajar sedang mengetik, naskah yang
+      sesaat, dan jika kejadiannya saat pengajar sedang mengetik, naskah yang
       belum disimpan ikut hilang bersama halamannya. Kehilangan pekerjaan itu
       jauh lebih merugikan daripada risiko yang dicegahnya.
 
@@ -230,16 +230,16 @@ async function tentukanLayar(user){
     */
     if(uidTerbuka === user.uid){
       status('Status akun tidak bisa diperiksa ulang. Naskah yang sedang Anda '
-        + 'kerjakan tetap aman, tapi simpanlah lebih awal.', 'salah');
+        + 'kerjakan tetap aman, tetapi simpanlah lebih awal.', 'salah');
       return;
     }
 
-    // Pesan dipasang LEBIH DULU, baru keluar. Kalau urutannya dibalik dan
+    // Pesan dipasang LEBIH DULU, baru keluar. Jika urutannya dibalik dan
     // signOut gagal, pemakai hanya melihat halaman masuk kosong tanpa
     // penjelasan apa pun, dan itu justru yang paling membingungkan.
     tampilkanLayar('layarMasuk');
     pesan($('pesanMasuk'),
-      'Masuk berhasil, tapi status pengajuan tidak bisa diperiksa.<br>'
+      'Masuk berhasil, tetapi status pengajuan tidak bisa diperiksa.<br>'
       + `Pesan aslinya: <code>${esc(err.message || err.code || 'tidak diketahui')}</code><br><br>`
       + 'Biasanya ini berarti aturan keamanan Firestore belum diperbarui. '
       + 'Lihat bagian akun pengajar di PANDUAN-PENGURUS.md.',
@@ -252,7 +252,7 @@ async function tentukanLayar(user){
   /*
     Akunnya ada, pengajuannya belum. Diantar melengkapi, bukan dikeluarkan.
 
-    Yang mengerjakannya halaman pendaftaran, memakai formulir yang sama persis,
+    Yang mengerjakannya halaman pendaftaran, menggunakan formulir yang sama persis,
     hanya tanpa kotak kata sandi karena akunnya sudah ada. Dulu keadaan ini
     punya layarnya sendiri di halaman ini, dan layar itu menanyakan ulang nama
     serta NRP saja, sehingga pendaftaran terasa terpecah menjadi dua formulir
@@ -265,7 +265,7 @@ async function tentukanLayar(user){
   }
 
   /*
-    Dokumen yang dibuat langsung lewat Firebase Console boleh tidak menyebut
+    Dokumen yang dibuat langsung melalui Firebase Console boleh tidak menyebut
     status, dan itu dianggap sudah diterima. Bawaan yang sama juga ditulis di
     firestore.rules, supaya halaman ini dan server tidak pernah berbeda
     pendapat soal siapa yang boleh menyimpan.
@@ -367,7 +367,7 @@ function susunDaftar(){
 
   $('catatanWewenang').textContent = wewenang.semua
     ? 'Akun Anda boleh mengubah naskah seluruh mata kuliah.'
-    : 'Akun Anda dibatasi pada mata kuliah di atas. Topik lain tetap bisa dibaca lewat situs, tapi tidak bisa Anda ubah.';
+    : 'Akun Anda dibatasi pada mata kuliah di atas. Topik lain tetap bisa dibaca melalui situs, tetapi tidak bisa Anda ubah.';
 }
 
 function tandaiTopikAktif(kunci){
@@ -404,7 +404,7 @@ function tandaiJumlahUbah(kunci, jumlah){
     tersimpan naskah pengganti yang sudah ada di Firestore
     draf     naskah yang sedang diketik, belum tentu tersimpan
 
-  Sebuah medan disebut berubah kalau isi drafnya berbeda dari bawaannya. Yang
+  Sebuah medan disebut berubah jika isi drafnya berbeda dari bawaannya. Yang
   disimpan ke Firestore hanya yang berubah, sehingga halaman materi yang
   naskahnya dikembalikan ke asal tidak meninggalkan sisa apa pun di basis data.
 */
@@ -426,7 +426,7 @@ function kosongkanIsi(){
 
   Dibandingkan dengan isi yang tersimpan, bukan dengan naskah bawaan halaman.
   Bedanya terasa saat pengajar mengembalikan naskah yang tadinya sudah diubah:
-  hasilnya kembali sama dengan bawaan, tapi Firestore masih memuat naskah
+  hasilnya kembali sama dengan bawaan, tetapi Firestore masih memuat naskah
   penggantinya, jadi pembatalan itu tetap perlu disimpan.
 */
 function adaPerubahan(){
@@ -481,12 +481,12 @@ function susunSimpanan(){
   KENAPA PERLU
 
   Sesi bisa berakhir tanpa diminta. Token Firebase diperbarui diam-diam tiap
-  sekitar satu jam, dan kalau pembaruan itu gagal karena jaringan mati, sesinya
+  sekitar satu jam, dan jika pembaruan itu gagal karena jaringan mati, sesinya
   berakhir dan halaman kembali ke layar masuk. Tanpa titipan ini, naskah yang
   sudah diketik setengah jam ikut lenyap begitu saja, dan pekerjaannya harus
   diulang dari nol.
 
-  Titipannya per orang dan per topik, jadi dua pengajar yang memakai komputer
+  Titipannya per orang dan per topik, jadi dua pengajar yang menggunakan komputer
   yang sama tidak saling menimpa. Isinya naskah materi yang memang terbuka
   untuk umum, bukan kata sandi maupun tanda pengenal, jadi tidak ada yang
   perlu dirahasiakan di sini.
@@ -547,7 +547,7 @@ async function bukaTopik(mk, topik){
     pesan($('pgPesan'),
       'Halaman materinya tidak bisa dibuka untuk dibaca naskah aslinya.<br>'
       + `Pesan aslinya: <code>${esc(err.message || 'tidak diketahui')}</code><br><br>`
-      + 'Coba muat ulang halaman ini. Kalau tetap gagal, kemungkinan halaman '
+      + 'Coba muat ulang halaman ini. Jika tetap gagal, kemungkinan halaman '
       + 'materinya belum memuat <code>shared/materi.js</code>.',
       'salah');
     return;
@@ -567,7 +567,7 @@ async function bukaTopik(mk, topik){
     console.error('Gagal membaca naskah tersimpan', err);
     status('Naskah tersimpan tidak bisa dibaca.', 'salah');
     pesan($('pgPesan'),
-      'Naskah bawaan berhasil dibaca, tapi naskah pengganti di Firestore tidak.<br>'
+      'Naskah bawaan berhasil dibaca, tetapi naskah pengganti di Firestore tidak.<br>'
       + `Pesan aslinya: <code>${esc(err.message || err.code || 'tidak diketahui')}</code>`,
       'salah');
     return;
@@ -583,8 +583,8 @@ async function bukaTopik(mk, topik){
   }
 
   /*
-    Kalau ada titipan naskah yang belum sempat disimpan, isinya dipasang di
-    atas draf ini dan pemakainya diberi tahu. Titipan hanya dipakai kalau
+    Jika ada titipan naskah yang belum sempat disimpan, isinya dipasang di
+    atas draf ini dan pemakainya diberi tahu. Titipan hanya digunakan jika
     memang berbeda dari yang sudah tersimpan, supaya sisa titipan lama tidak
     memunculkan pemberitahuan yang membingungkan.
   */
@@ -609,10 +609,10 @@ async function bukaTopik(mk, topik){
 
   if(adaTitipan){
     pesan($('pgPesan'),
-      'Ada naskah yang Anda ketik sebelumnya tapi belum sempat disimpan, dan '
+      'Ada naskah yang Anda ketik sebelumnya tetapi belum sempat disimpan, dan '
       + 'naskah itu sudah dipasang kembali di bawah. Periksa dulu, lalu simpan '
-      + 'kalau memang benar. '
-      + '<button type="button" class="pg-mini" id="pgBuangDraf">Buang, pakai yang tersimpan</button>',
+      + 'jika memang benar. '
+      + '<button type="button" class="pg-mini" id="pgBuangDraf">Buang, gunakan yang tersimpan</button>',
       'hati');
 
     $('pgBuangDraf').addEventListener('click', () => {
@@ -637,7 +637,7 @@ async function bukaTopik(mk, topik){
 /*
   Membaca naskah bawaan lewat bingkai tersembunyi.
 
-  Bingkainya dipakai ulang untuk tiap topik, dan alamatnya dikosongkan dulu
+  Bingkainya digunakan ulang untuk tiap topik, dan alamatnya dikosongkan dulu
   supaya membuka topik yang sama dua kali tetap memicu peristiwa load.
 */
 function bacaBawaan(kunci){
@@ -678,8 +678,8 @@ function bacaBawaan(kunci){
 /*
   Pembersih markup untuk pratinjau.
 
-  Yang dipakai adalah pembersih milik shared/materi.js di dalam bingkai, jadi
-  hasil pratinjau di sini dan hasil di halaman materi selalu sama persis. Kalau
+  Yang digunakan adalah pembersih milik shared/materi.js di dalam bingkai, jadi
+  hasil pratinjau di sini dan hasil di halaman materi selalu sama persis. Jika
   bingkainya sudah tidak terjangkau, naskahnya ditampilkan sebagai teks biasa,
   bukan sebagai markup yang belum diperiksa siapa pun.
 */
@@ -745,7 +745,7 @@ function gambarPenyunting(){
     const contoh = bawaan.label.peta[milik[0]] || a;
     wadah.appendChild(kelompok(
       contoh.split('·')[0].trim() || a,
-      'Kalimat pendek yang dipakai berulang di halaman ini.',
+      'Kalimat pendek yang digunakan berulang di halaman ini.',
       milik, 'peta'));
   }
 
@@ -920,7 +920,7 @@ $('pgSimpan').addEventListener('click', async () => {
       Ditulis utuh, bukan digabung dengan isi lama.
 
       Naskah yang dikembalikan ke bawaan memang harus hilang dari dokumen, dan
-      penggabungan biasa tidak pernah menghapus apa pun. Kalau dokumennya
+      penggabungan biasa tidak pernah menghapus apa pun. Jika dokumennya
       digabung, naskah yang sudah dibatalkan pengajar akan tetap tayang.
     */
     await setDoc(doc(db, 'materi', topikKini.kunci), {
@@ -938,7 +938,7 @@ $('pgSimpan').addEventListener('click', async () => {
     buangDraf(topikKini.kunci);
     await catatLog(jumlah);
 
-    status('Naskah tersimpan. Halaman materinya sudah memakai naskah baru.', 'benar');
+    status('Naskah tersimpan. Halaman materinya sudah menggunakan naskah baru.', 'benar');
     bersihkanPesan($('pgPesan'));
     perbaruiRingkasan();
   }catch(err){
@@ -969,14 +969,14 @@ async function catatLog(jumlah){
       oleh: pemakai.nama || pemakai.email,
       email: pemakai.email,
       // "aksi" adalah kata kerjanya dan "jenis" adalah macam datanya, mengikuti
-      // bentuk yang sudah dipakai catatan dari halaman operasional.
+      // bentuk yang sudah digunakan catatan dari halaman operasional.
       aksi: 'ubah',
       jenis: 'materi',
       ringkas: `${topikKini.matkul}: ${topikKini.nama}`.slice(0, 500),
       rincian: `${jumlah} naskah berbeda dari bawaan halaman.`.slice(0, 500)
     });
   }catch(err){
-    console.warn('Naskah tersimpan, tapi catatan log gagal ditulis.', err);
+    console.warn('Naskah tersimpan, tetapi catatan log gagal ditulis.', err);
   }
 }
 

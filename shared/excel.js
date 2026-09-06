@@ -14,7 +14,7 @@
 
     1. Kode dan nama mata kuliah hanya ditulis sekali, lalu selnya digabung
        ke bawah untuk semua KP-nya.
-    2. Tiap KP memakan dua baris, yang kedua cuma sambungan dari yang pertama.
+    2. Tiap KP memakan dua baris, yang kedua hanya sambungan dari yang pertama.
     3. Ada baris kosong penyekat antar mata kuliah, dan catatan kerja pengurus
        menyelip di kolom-kolom jauh seperti "ganti jadwal" dan "Y".
     4. Di tengah satu kelompok bisa muncul kode lain, misalnya kelas kampus
@@ -34,19 +34,19 @@
 
   DUA PUSTAKA, DAN INI DISENGAJA.
 
-  SheetJS dipakai untuk MEMBACA. Pembacaannya cepat: berkas asli pengurus yang
+  SheetJS digunakan untuk MEMBACA. Pembacaannya cepat: berkas asli pengurus yang
   seribu baris selesai dalam sepersekian detik.
 
-  ExcelJS dipakai untuk MENULIS. SheetJS versi bebas tidak bisa menulis warna,
+  ExcelJS digunakan untuk MENULIS. SheetJS versi bebas tidak bisa menulis warna,
   garis, dan sel gabungan, padahal justru itu yang membuat berkas unduhan
   terlihat sama dengan berkas yang biasa diedarkan pengurus.
 
-  Kebalikannya sudah diukur dan tidak dipakai. ExcelJS memang bisa membaca,
-  tapi di peramban satu berkas yang sama memakan sekitar delapan belas detik,
-  sedangkan menulis dengannya cuma sekitar satu detik. Jadi masing-masing
-  dipakai untuk pekerjaan yang memang jadi kekuatannya.
+  Kebalikannya sudah diukur dan tidak digunakan. ExcelJS memang bisa membaca,
+  tetapi di peramban satu berkas yang sama memakan sekitar delapan belas detik,
+  sedangkan menulis dengannya hanya sekitar satu detik. Jadi masing-masing
+  digunakan untuk pekerjaan yang memang jadi kekuatannya.
 
-  Keduanya disimpan di dalam repo, bukan diambil dari CDN. Halaman ini dipakai
+  Keduanya disimpan di dalam repo, bukan diambil dari CDN. Halaman ini digunakan
   pengurus di ruang kelas dengan sambungan seadanya, dan sekali CDN-nya
   terhalang, seluruh tab Excel mati tanpa bisa diperbaiki dari sini. Menyimpan
   sendiri juga berarti tidak ada pihak ketiga yang perlu dipercaya setiap kali
@@ -61,11 +61,11 @@
     exceljs 4.4.0
     sha512-dlPw+ytv/6JyepmelABrgeYgHI0O+frEwgfnPdXDTOIZz+eDgfW07QXG02/O8COfivBdGNINy+Vex+lYmJ5rxw==
 
-  Kalau suatu saat berkasnya diperbarui, cocokkan lagi sidiknya sebelum
+  Jika suatu saat berkasnya diperbarui, cocokkan lagi sidiknya sebelum
   dimasukkan ke repo.
 
-  Pemuatannya ditunda sampai tombolnya benar-benar dipakai, dan yang dimuat
-  hanya yang dibutuhkan. Pengurus yang cuma mengunduh tidak ikut menunggu
+  Pemuatannya ditunda sampai tombolnya benar-benar digunakan, dan yang dimuat
+  hanya yang dibutuhkan. Pengurus yang hanya mengunduh tidak ikut menunggu
   pustaka pembaca, begitu pula sebaliknya.
 */
 function muatSkrip(berkas, namaGlobal, sebutan){
@@ -77,7 +77,7 @@ function muatSkrip(berkas, namaGlobal, sebutan){
     s.src = alamat;
     s.onload = () => window[namaGlobal]
       ? selesai(window[namaGlobal])
-      : gagal(new Error(`Pustaka ${sebutan} termuat tapi tidak bisa dipakai.`));
+      : gagal(new Error(`Pustaka ${sebutan} termuat tetapi tidak bisa digunakan.`));
     s.onerror = () => gagal(new Error(
       `Pustaka ${sebutan} gagal dimuat. Muat ulang halaman ini, lalu coba lagi.`));
     document.head.appendChild(s);
@@ -193,7 +193,7 @@ export function pecahJam(nilai){
   return { mulai: `${p2(m[1])}:${m[2]}`, selesai: `${p2(m[3])}:${m[4]}` };
 }
 
-// "13:00" menjadi "13.00", bentuk yang dipakai di dalam berkas Excel.
+// "13:00" menjadi "13.00", bentuk yang digunakan di dalam berkas Excel.
 function jamTitik(jam){
   const m = String(jam || '').match(/^(\d{1,2}):(\d{2})$/);
   return m ? `${String(Number(m[1])).padStart(2, '0')}.${m[2]}` : String(jam || '');
@@ -242,10 +242,10 @@ function cariLembar(daftarNama, nama){
   aslinya tiap KP memakan dua baris, yang kedua hanya sambungan dari yang
   pertama, dan tanpa catatan ini tiap kelas terbaca dua kali.
 
-  Penentuan "baris ini cuma sambungan" TIDAK bisa diambil dari seluruh
+  Penentuan "baris ini hanya sambungan" TIDAK bisa diambil dari seluruh
   barisnya. Pengurus terbiasa menaruh catatan kerja di kolom jauh, misalnya
   "ganti jadwal" di kolom L dan "Y" di kolom P, dan catatan itu sering jatuh
-  pada baris sambungan. Kalau keberadaan catatan dianggap tanda baris berisi,
+  pada baris sambungan. Jika keberadaan catatan dianggap tanda baris berisi,
   sepuluh kelas terbaca dua kali. Karena itu yang diperiksa adalah kolom
   penanda milik tiap lembar, lewat sambunganKe di bawah.
 
@@ -279,7 +279,7 @@ function bacaLembar(XLSX, wb, nama){
 }
 
 /*
-  Benar kalau sel penanda pada baris itu cuma sambungan dari baris di atasnya,
+  Benar jika sel penanda pada baris itu hanya sambungan dari baris di atasnya,
   sehingga barisnya tidak membawa data baru.
 */
 function sambunganKe(lembar, indeks, kolom, nama){
@@ -291,7 +291,7 @@ function sambunganKe(lembar, indeks, kolom, nama){
 
 /*
   Lembar "Jadwal + Ruang Kelas" menjadi dua hal sekaligus: daftar mata kuliah
-  dan daftar kelas. Keduanya memang satu tabel di Excel, tapi di basis data
+  dan daftar kelas. Keduanya memang satu tabel di Excel, tetapi di basis data
   dipisah supaya nama mata kuliah cukup ditulis satu kali.
 */
 function bacaJadwal(lembar, masalah){
@@ -308,7 +308,7 @@ function bacaJadwal(lembar, masalah){
   for(let i = kepala.indeks + 1; i < lembar.baris.length; i++){
     const baris = lembar.baris[i];
     if(kosong(baris)) continue;
-    // Barisnya cuma sambungan sel gabungan milik KP di atasnya.
+    // Barisnya hanya sambungan sel gabungan milik KP di atasnya.
     if(sambunganKe(lembar, i, kepala.kolom, 'kp')) continue;
 
     const kode = ambil(baris, kepala.kolom, 'kode');
@@ -321,21 +321,21 @@ function bacaJadwal(lembar, masalah){
 
       Namanya lain cerita. Ada kode yang kolom namanya memang dibiarkan kosong
       karena mata kuliahnya sama dengan baris di atasnya, hanya beda kode
-      kurikulum. Nama itu diwarisi, tapi diberitahukan, supaya pengurus bisa
-      membetulkan kalau tebakannya keliru.
+      kurikulum. Nama itu diwarisi, tetapi diberitahukan, supaya pengurus bisa
+      membetulkan jika tebakannya keliru.
     */
     if(kode){
       kodeAkhir = kode.toUpperCase();
       if(nama) namaAkhir = nama;
       else if(namaAkhir){
-        masalah.push(`Baris ${i + 1} lembar "${lembar.nama}": kode ${kodeAkhir} tidak diberi nama mata kuliah, jadi dipakai nama dari baris di atasnya, "${namaAkhir}".`);
+        masalah.push(`Baris ${i + 1} lembar "${lembar.nama}": kode ${kodeAkhir} tidak diberi nama mata kuliah, jadi digunakan nama dari baris di atasnya, "${namaAkhir}".`);
       }
     }
     else if(nama) namaAkhir = nama;
 
     if(!kp) continue;
     if(!kodeAkhir){
-      masalah.push(`Baris ${i + 1} lembar "${lembar.nama}" punya KP tapi tidak punya kode mata kuliah.`);
+      masalah.push(`Baris ${i + 1} lembar "${lembar.nama}" punya KP tetapi tidak punya kode mata kuliah.`);
       continue;
     }
 
@@ -546,13 +546,13 @@ export async function bacaBerkas(file){
    ============================================================ */
 
 /*
-  Berkas hasil unduhan dibuat semirip mungkin dengan berkas yang biasa dipakai
+  Berkas hasil unduhan dibuat semirip mungkin dengan berkas yang biasa digunakan
   pengurus: kepala tabel berwarna, seluruh sel bergaris, dan kode serta nama
   mata kuliah digabung ke bawah untuk semua KP-nya.
 
   Kemiripan itu bukan sekadar enak dilihat. Berkas ini diedarkan ke asisten,
-  ditempel ke grup, dan dicetak. Kalau bentuknya berbeda jauh dari yang sudah
-  dikenal, yang menerima akan mengira ini berkas lain, lalu kembali memakai
+  ditempel ke grup, dan dicetak. Jika bentuknya berbeda jauh dari yang sudah
+  dikenal, yang menerima akan mengira ini berkas lain, lalu kembali menggunakan
   Excel lama yang justru sudah tertinggal.
 
   Sel gabungannya tetap bisa dibaca ulang oleh halaman ini, karena pembacanya
@@ -595,7 +595,7 @@ function gayaJudul(ws, teks, jumlahKolom){
 /*
   Kolom yang isinya panjang dibiarkan rata kiri, sisanya rata tengah.
 
-  Nama mata kuliah dan nama orang jauh lebih mudah dipindai kalau awalnya
+  Nama mata kuliah dan nama orang jauh lebih mudah dipindai jika awalnya
   sejajar. Kode, KP, hari, dan jam pendek-pendek, jadi rata tengah membuat
   kolomnya terbaca sebagai satu barisan rapi.
 */
@@ -619,7 +619,7 @@ function gayaIsi(ws, barisAwal, kolomKiri){
   Menggabungkan sel pada kolom tertentu untuk baris berurutan yang nilainya
   sama, misalnya satu kode mata kuliah yang punya lima KP.
 
-  Yang dipakai sebagai penentu kelompok bukan nilai kolom itu sendiri,
+  Yang digunakan sebagai penentu kelompok bukan nilai kolom itu sendiri,
   melainkan kunci yang diberikan pemanggil. Dua mata kuliah berbeda yang
   kebetulan bernama sama karena itu tidak ikut tergabung.
 */
@@ -643,7 +643,7 @@ function urutKelas(a, b){
 /*
   Menyusun berkas Excel dari data yang sedang tersimpan.
 
-  Parameter "isi" memakai bentuk yang sama dengan yang dipakai halaman
+  Parameter "isi" menggunakan bentuk yang sama dengan yang digunakan halaman
   operasional: matakuliah, jadwal, pengajar, classroom, dan koordinator.
 */
 export async function susunBerkas(isi){

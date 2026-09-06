@@ -6,10 +6,10 @@
   Halaman /adminkafbe menulis satu dokumen Firestore, yaitu publik/situs.
   Berkas ini membacanya di sisi pengunjung lalu menerapkan tiga hal:
 
-    1. Status seluruh situs. Kalau "maintenance", isi halaman diganti layar
+    1. Status seluruh situs. Jika "maintenance", isi halaman diganti layar
        pemeliharaan.
     2. Status tiap fitur. Kartu ber-atribut data-fitur mendapat lencana sesuai
-       statusnya, dan tombolnya disembunyikan kalau fiturnya sedang tidak
+       statusnya, dan tombolnya disembunyikan jika fiturnya sedang tidak
        aktif. Halaman ber-atribut data-fitur-halaman ikut tertutup.
     3. Naskah pengganti. Elemen ber-atribut data-teks isinya ditimpa nilai dari
        admin, lengkap dengan versi bahasa Inggrisnya.
@@ -20,7 +20,7 @@
 
   Supaya halaman tetap utuh tanpa JavaScript, tanpa jaringan, dan saat
   Firestore sedang bermasalah. Nilai dari admin hanya menimpa yang sudah ada,
-  tidak pernah menjadi satu-satunya sumber. Kalau berkas ini gagal berjalan,
+  tidak pernah menjadi satu-satunya sumber. Jika berkas ini gagal berjalan,
   pengunjung melihat situs versi bawaan, bukan halaman kosong.
 
   CARA MENAMBAH TEKS YANG BISA DIUBAH ADMIN
@@ -61,7 +61,7 @@
 
     Naskah di sini ditulis admin, bukan pengunjung, dan aturan Firestore sudah
     membatasi siapa yang boleh menulisnya. Meski begitu isinya tetap disaring:
-    kalau suatu hari akun admin diambil alih, kerusakan yang bisa ditanam lewat
+    jika suatu hari akun admin diambil alih, kerusakan yang bisa ditanam lewat
     naskah situs jadi terbatas pada penebalan dan miring, bukan skrip.
 
     Hanya lima tag yang dibiarkan lewat, tanpa atribut apa pun.
@@ -86,12 +86,12 @@
   /* ---------- 1. Layar pemeliharaan ---------- */
 
   /*
-    Kalau kunjungan sebelumnya menemukan situs sedang dipelihara, isi halaman
+    Jika kunjungan sebelumnya menemukan situs sedang dipelihara, isi halaman
     disembunyikan lebih dulu sebelum sempat tergambar. Tanpa ini pengunjung
     sempat melihat halaman biasa sekejap lalu berganti, dan kedipan itu justru
     terlihat seperti situsnya rusak.
 
-    Nilai simpanan hanya dipakai untuk menghindari kedipan. Yang menentukan
+    Nilai simpanan hanya digunakan untuk menghindari kedipan. Yang menentukan
     tetap jawaban Firestore yang selalu diambil ulang di bawah.
   */
   function statusTersimpan(){
@@ -159,7 +159,7 @@
         + simbol.outerHTML + '</svg>';
     }
 
-    // Hanya terpakai kalau halamannya memang tidak punya lambang sama sekali.
+    // Hanya terpakai jika halamannya memang tidak punya lambang sama sekali.
     // Layar penutup tetap tampil utuh, hanya tanpa gambar.
     return '';
   }
@@ -167,12 +167,12 @@
   /* ---------- 1B. Elemen bersama ---------- */
 
   /*
-    Tiga bagian yang dipakai semua halaman sekaligus: kepala navigasi, penutup
+    Tiga bagian yang digunakan semua halaman sekaligus: kepala navigasi, penutup
     halaman, dan saklar bahasa Indonesia dan Inggris. Ketiganya dimatikan lewat
     kelas pada elemen <html>, bukan dengan menghapus elemennya, supaya bisa
     kembali muncul begitu dinyalakan lagi dari halaman admin.
 
-    Kelasnya dipasang sedini mungkin memakai nilai simpanan kunjungan
+    Kelasnya dipasang sedini mungkin menggunakan nilai simpanan kunjungan
     sebelumnya, sama seperti layar pemeliharaan. Tanpa itu kepala navigasi
     sempat tergambar lalu hilang, dan kedipan itu terlihat seperti halaman yang
     rusak.
@@ -279,7 +279,7 @@
 
     Halaman topik memang bergantung pada dua hal sekaligus. Mematikan seluruh
     mata kuliahnya harus ikut menutup topiknya, dan mematikan satu topik saja
-    tidak boleh menutup mata kuliahnya. Yang dipakai adalah status paling
+    tidak boleh menutup mata kuliahnya. Yang digunakan adalah status paling
     membatasi di antara semuanya, sebab satu saja yang belum siap sudah cukup
     membuat halaman itu belum layak dibuka.
   */
@@ -332,12 +332,12 @@
     tiap kartunya dikenali lewat data-fitur.
 
     Kuncinya ditulis eksplisit di HTML, bukan disimpulkan dari nama halaman
-    atau nama bagian. Nama bagian seperti "Kepala Halaman" dipakai berulang di
+    atau nama bagian. Nama bagian seperti "Kepala Halaman" digunakan berulang di
     banyak halaman, jadi menyimpulkan kunci dari situ akan membuat urutan satu
     halaman merembet ke halaman lain suatu hari nanti.
 
     Kartu yang kuncinya tidak disebut dalam daftar urutan tidak dibuang, hanya
-    ditaruh di belakang dengan urutan aslinya. Jadi menambah kartu baru di HTML
+    diletakkan di belakang dengan urutan aslinya. Jadi menambah kartu baru di HTML
     tetap aman meski daftar urutannya belum diperbarui.
   */
   function terapkanUrutan(urutan){
@@ -458,16 +458,16 @@
         Firestore tidak terjangkau, jadi kegagalan di sini berarti pengunjung
         melihat versi bawaan halaman, bukan pesan galat.
       */
-      console.warn('Pengaturan situs tidak bisa dimuat, memakai bawaan halaman.', err);
+      console.warn('Pengaturan situs tidak bisa dimuat, menggunakan bawaan halaman.', err);
     }
 
     siap(function(){
       if(cfg){
         terapkanSemua(cfg);
       }else{
-        // Tidak ada jawaban dari Firestore. Kalau tirai sempat dipasang karena
+        // Tidak ada jawaban dari Firestore. Jika tirai sempat dipasang karena
         // kunjungan sebelumnya, tirainya dibuka supaya halaman tidak terkunci
-        // kosong hanya gara-gara jaringan sedang buruk.
+        // kosong hanya karena jaringan sedang buruk.
         simpanStatus('aktif');
         bukaTirai();
       }

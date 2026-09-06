@@ -83,7 +83,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -188,7 +188,7 @@
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -243,7 +243,7 @@
         s6:'Setelah Purchasing Department menerima purchase requisition, mereka akan membuat Purchase Order (PO) secara online,',
         s7:'di mana rangkap pertama file diberikan ke supplier, rangkap kedua ke Inventory Manager, rangkap ketiga untuk Financial Department, rangkap keempat adalah rangkap buta (blind) untuk Warehouse, dan rangkap terakhir diberikan ke Purchasing Department.',
         s8:'Setelah barang diterima, Warehouse akan memeriksa barang secara manual berdasarkan PO Blind,',
-        s9:'dan menyiapkan Receiving Report (RR) secara terkomputerisasi, lalu mengirimnya lewat email ke Inventory Manager dan Purchasing Department.',
+        s9:'dan menyiapkan Receiving Report (RR) secara terkomputerisasi, lalu mengirimnya melalui email ke Inventory Manager dan Purchasing Department.',
         s10:'Supplier kemudian akan mengirimkan invoice, yang diterima oleh Financial Department,',
         s11:'lalu staf keuangan akan membayar invoice tersebut ketika sudah jatuh tempo pembayaran.',
         s12:'Financial Department kemudian akan membuat dua rangkap Cash Disbursement (CD),',
@@ -777,7 +777,7 @@
 
     btnNextStep.addEventListener('click', () => { if(current < STEPS.length-1){ current++; render(); } });
     btnPrevFlow.addEventListener('click', () => { if(current > 0){ current--; render(); } });
-    // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+    // Panah kiri dan kanan dipasang melalui modul bersama supaya perilakunya
     // sama di semua halaman materi.
     KafbeNavigasiSlide.pasang({ mundur: btnPrevFlow, maju: btnNextStep });
     btnRestartFlow.addEventListener('click', () => {
@@ -802,7 +802,7 @@
     btnLangEN.addEventListener('click', () => setLang('en'));
 
     /*
-      Naskah boleh diubah pengajar lewat halaman /pengajar.
+      Naskah boleh diubah pengajar melalui halaman /pengajar.
 
       Yang didaftarkan hanya narasi proses dan nama tiap langkah, karena itulah
       bagian yang berisi kalimat. Bentuk bagan, urutan simpul, dan garis

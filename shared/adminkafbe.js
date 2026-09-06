@@ -10,10 +10,10 @@
 
     - hanya akun terdaftar di koleksi "adminutama" yang boleh menulis
       publik/situs, jadi pengurus operasional ditolak di sisi server;
-    - naskah dan status fitur hanya boleh berubah kalau dokumennya sudah
+    - naskah dan status fitur hanya boleh berubah jika dokumennya sudah
       berstatus maintenance.
 
-  Kalau ada yang melewati halaman ini lewat Console peramban, dua aturan itu
+  Jika ada yang melewati halaman ini melalui Console peramban, dua aturan itu
   tetap menolaknya.
 
   ------------------------------------------------------------------
@@ -204,20 +204,20 @@ onAuthStateChanged(auth, async (user) => {
   if(!profil){
     if(galat){
       pesan($('pesanMasuk'),
-        'Masuk berhasil, tapi status admin utama tidak bisa diperiksa.<br>'
+        'Masuk berhasil, tetapi status admin utama tidak bisa diperiksa.<br>'
         + `Pesan aslinya: <code>${esc(galat.message || galat.code || 'tidak diketahui')}</code><br><br>`
         + 'Biasanya ini berarti aturan keamanan Firestore belum diperbarui. '
-        + 'Tempel ulang isi <code>firestore.rules</code> lewat Firebase Console.',
+        + 'Tempel ulang isi <code>firestore.rules</code> melalui Firebase Console.',
         'salah');
     }else{
       pesan($('pesanMasuk'),
         'Akun ini bukan admin utama, jadi tidak bisa membuka halaman ini.<br><br>'
         + 'Akun pengurus operasional memang sengaja tidak diberi akses ke sini. '
-        + 'Kalau akun ini memang seharusnya bisa masuk, di Firestore buat koleksi '
+        + 'Jika akun ini memang seharusnya bisa masuk, di Firestore buat koleksi '
         + '<code>adminutama</code> dengan dokumen yang <strong>Document ID-nya persis '
         + 'sama</strong> dengan baris di bawah ini:'
         + `<br><code class="op-uid">${esc(user.uid)}</code>`
-        + 'Pakai ID itu, <strong>bukan</strong> tombol Auto-ID.',
+        + 'Gunakan ID itu, <strong>bukan</strong> tombol Auto-ID.',
         'salah');
     }
     try{ await signOut(auth); }
@@ -257,7 +257,7 @@ onAuthStateChanged(auth, async (user) => {
   simpanan: apa yang tersimpan di Firestore, hanya berisi yang BERBEDA dari
             bawaan. Menyimpan selisihnya saja, bukan salinan lengkap, membuat
             perbaikan naskah langsung di HTML tetap sampai ke pengunjung
-            selama kolom itu belum pernah ditimpa lewat halaman ini.
+            selama kolom itu belum pernah ditimpa melalui halaman ini.
 */
 const bawaan  = { fitur: new Map(), teks: new Map(), urutan: new Map() };
 let   simpanan = { statusSitus: 'aktif', pesanMaintenance: {}, fitur: {}, teks: {}, urutan: {}, elemen: {} };
@@ -277,8 +277,8 @@ function sedangDipelihara(){
    sebaliknya: begitu diterapkan, saat itu juga ditulis.
 
    Perbedaan itu pernah menjebak: naskah diubah, lalu situs dinyalakan kembali
-   lewat tab Status Situs, dan naskahnya ikut hilang tanpa satu pun peringatan.
-   Yang terlihat cuma tombol Simpan yang seolah tidak berpengaruh apa-apa.
+   melalui tab Status Situs, dan naskahnya ikut hilang tanpa satu pun peringatan.
+   Yang terlihat hanya tombol Simpan yang seolah tidak berpengaruh apa-apa.
 
    Sekarang keadaan tersimpan direkam sebagai cap. Apa pun yang membuat isi
    layar berbeda dari cap itu memunculkan palang peringatan, dan menyalakan
@@ -373,9 +373,9 @@ function statusDariLencana(kartu){
 
 /*
   Nama yang dibaca manusia untuk tiap kunci, diambil dari data-fitur-label dan
-  data-label di HTML. Kemunculan PERTAMA yang dipakai.
+  data-label di HTML. Kemunculan PERTAMA yang digunakan.
 
-  Di halaman publik satu kunci memang boleh dipakai berkali-kali, dan itu
+  Di halaman publik satu kunci memang boleh digunakan berkali-kali, dan itu
   disengaja: kartu "Main Santai" muncul dua kali di beranda dan keduanya harus
   ikut satu status yang sama.
 */
@@ -384,11 +384,11 @@ const labelTeks  = new Map();
 
 /*
   Markup asli tiap bagian disimpan apa adanya, lalu digambar ulang di panel ini
-  memakai styles.css yang sama dengan halaman publik.
+  menggunakan styles.css yang sama dengan halaman publik.
 
   Sebelumnya panel ini hanya menampilkan daftar kotak isian bertuliskan nama
-  kunci. Itu benar isinya, tapi tidak menjawab pertanyaan yang sebenarnya
-  dipakai saat mengelola situs, yaitu "kalau saya ubah ini, halamannya jadi
+  kunci. Itu benar isinya, tetapi tidak menjawab pertanyaan yang sebenarnya
+  digunakan saat mengelola situs, yaitu "jika saya ubah ini, halamannya jadi
   seperti apa". Sekarang yang tampil kartu yang sama persis dengan yang dilihat
   mahasiswa, dan yang diubah ditunjuk langsung di gambarnya.
 */
@@ -431,7 +431,7 @@ async function bacaHalaman(h){
       labelTeks.set(kunci, el.dataset.label || kunci);
     });
 
-    // Urutan bawaan tiap kisi kartu, dipakai tombol "kembalikan urutan".
+    // Urutan bawaan tiap kisi kartu, digunakan tombol "kembalikan urutan".
     sec.querySelectorAll('[data-urutan]').forEach(kisi => {
       bawaan.urutan.set(kisi.dataset.urutan,
         [...kisi.querySelectorAll('[data-fitur]')].map(x => x.dataset.fitur));
@@ -518,7 +518,7 @@ async function muatSemua(){
 function gambarSemua(){
   // Capnya disetel PALING DULU. Apa yang baru saja dimuat adalah keadaan
   // tersimpan, dan gambarCermin() membandingkan dirinya dengan cap itu untuk
-  // menandai kartu mana yang belum tersimpan. Kalau urutannya dibalik, seluruh
+  // menandai kartu mana yang belum tersimpan. Jika urutannya dibalik, seluruh
   // kartu akan tertandai "belum disimpan" tepat setelah halaman dimuat.
   segarkanCap();
   gambarGembok();
@@ -598,13 +598,13 @@ function gambarElemen(){
 
 SAKLAR_ELEMEN.forEach(s => {
   $(s.id).addEventListener('change', () => {
-    // Saklarnya sudah dimatikan saat situs aktif, tapi keadaan itu bisa
+    // Saklarnya sudah dimatikan saat situs aktif, tetapi keadaan itu bisa
     // berubah tanpa halaman dimuat ulang, jadi keadaannya diperiksa lagi di
-    // sini dan centangnya dikembalikan kalau ternyata belum boleh.
+    // sini dan centangnya dikembalikan jika ternyata belum boleh.
     if(!sedangDipelihara()){
       $(s.id).checked = elemenNyala(s.kunci);
       pesan($('pesanTampilan'),
-        'Situs masih aktif. Masuk ke pemeliharaan dulu lewat tab <strong>Status Situs</strong>.', 'salah');
+        'Situs masih aktif. Masuk ke pemeliharaan dulu melalui tab <strong>Status Situs</strong>.', 'salah');
       return;
     }
 
@@ -647,7 +647,7 @@ const LENCANA = {
 };
 
 /*
-  Naskah dan status yang sedang berlaku dipasang ke salinan markup, memakai
+  Naskah dan status yang sedang berlaku dipasang ke salinan markup, menggunakan
   aturan yang sama dengan shared/situs.js. Jadi yang tampil di panel ini bukan
   gambaran kasar, melainkan hasil akhirnya.
 */
@@ -702,7 +702,7 @@ function adaTimpaan(wadah){
   Ini yang dulu tidak terlihat. Kartu yang statusnya baru diubah tampak persis
   sama dengan kartu yang perubahannya sudah tayang, jadi pengurus wajar mengira
   penguncian sudah berlaku padahal belum pernah sampai ke server. Palang kuning
-  di atas halaman menyebut jumlahnya, tapi tidak menunjuk kartu yang mana.
+  di atas halaman menyebut jumlahnya, tetapi tidak menunjuk kartu yang mana.
 
   Sekarang kartunya sendiri yang menyatakannya.
 */
@@ -723,7 +723,7 @@ function adaBelumSimpan(wadah){
 }
 
 /*
-  Tombol di dalam salinan ini mengarah ke halaman publik. Kalau dibiarkan,
+  Tombol di dalam salinan ini mengarah ke halaman publik. Jika dibiarkan,
   sekali salah klik pengurus terlempar keluar dari panel dan pekerjaan yang
   belum disimpan hilang. Semua klik di dalam cermin ditahan di sini, kecuali
   klik pada tombol milik panel ini sendiri.
@@ -823,7 +823,7 @@ function pasangAlatKartu(sec){
     kartu.classList.add('ak-kartu');
 
     // Kartu yang perubahannya belum sampai ke server diberi tanda sendiri,
-    // supaya jelas kartu MANA yang belum tayang, bukan cuma berapa banyak.
+    // supaya jelas kartu MANA yang belum tayang, bukan hanya berapa banyak.
     const menunggu = belumTersimpan('fitur', kartu.dataset.fitur)
       || [...kartu.querySelectorAll('[data-teks]')].some(x => belumTersimpan('teks', x.dataset.teks));
     kartu.classList.toggle('ak-kartu-belum', menunggu);
@@ -855,7 +855,7 @@ function pasangAlatKartu(sec){
 /*
   Yang bisa dipindah HANYA urutannya. Sengaja tidak ada pengaturan posisi
   bebas, kemiringan, atau ukuran, sebab tata letak situs diatur styles.css dan
-  harus tetap rapi dari layar ponsel sampai layar lebar. Kartu yang ditaruh di
+  harus tetap rapi dari layar ponsel sampai layar lebar. Kartu yang diletakkan di
   titik bebas akan berantakan begitu lebar layarnya berubah, dan kerusakan itu
   baru ketahuan di perangkat orang lain.
 */
@@ -871,7 +871,7 @@ function pasangSeret(sec){
         kartuDiseret = kartu;
         kartu.classList.add('ak-sedang-diseret');
         e.dataTransfer.effectAllowed = 'move';
-        // Sebagian peramban membatalkan seretan kalau tidak ada data sama sekali.
+        // Sebagian peramban membatalkan seretan jika tidak ada data sama sekali.
         e.dataTransfer.setData('text/plain', kartu.dataset.fitur);
       });
 
@@ -920,7 +920,7 @@ function kunciCermin(){
     .forEach(x => { x.disabled = terkunci; });
   // Hanya kartu yang memang berada di dalam kisi ber-atribut data-urutan yang
   // boleh diseret. Kartu di luar kisi itu tidak punya penangan seret sama
-  // sekali, jadi menandainya bisa diseret cuma menjanjikan sesuatu yang tidak
+  // sekali, jadi menandainya bisa diseret hanya menjanjikan sesuatu yang tidak
   // akan terjadi.
   wadah.querySelectorAll('[data-urutan] [data-fitur]')
     .forEach(x => { x.draggable = !terkunci; });
@@ -947,7 +947,7 @@ function medanTeks(kunci){
 function bukaPenyunting(konteks){
   if(!sedangDipelihara()){
     pesan($('pesanTampilan'),
-      'Situs masih aktif. Masuk ke pemeliharaan dulu lewat tab <strong>Status Situs</strong>.', 'salah');
+      'Situs masih aktif. Masuk ke pemeliharaan dulu melalui tab <strong>Status Situs</strong>.', 'salah');
     return;
   }
 
@@ -1123,7 +1123,7 @@ function jelaskanGagal(err){
   if(err && err.code === 'permission-denied'){
     return 'Ditolak server. Dua sebab yang mungkin: situs belum berstatus pemeliharaan, '
       + 'atau akun ini belum terdaftar di koleksi <code>adminutama</code>. '
-      + 'Ubah statusnya lebih dulu lewat tab <strong>Status Situs</strong>, lalu coba lagi.';
+      + 'Ubah statusnya lebih dulu melalui tab <strong>Status Situs</strong>, lalu coba lagi.';
   }
   return 'Gagal menyimpan: ' + esc((err && err.message) || 'tidak diketahui');
 }
@@ -1133,7 +1133,7 @@ $('tombolSimpanTampilan').addEventListener('click', async () => {
   bersihkanPesan(el);
 
   if(!sedangDipelihara()){
-    pesan(el, 'Situs masih aktif. Masuk ke pemeliharaan dulu lewat tab <strong>Status Situs</strong>.', 'salah');
+    pesan(el, 'Situs masih aktif. Masuk ke pemeliharaan dulu melalui tab <strong>Status Situs</strong>.', 'salah');
     return;
   }
 
@@ -1202,7 +1202,7 @@ async function ubahStatus(baru){
   if(baru === 'aktif' && adaPerubahan()){
     const lanjut = confirm(
       'Masih ada perubahan yang belum disimpan: ' + rincianPerubahan() + '.\n\n'
-      + 'Kalau situs dinyalakan sekarang, perubahan itu tidak ikut tayang, dan '
+      + 'Jika situs dinyalakan sekarang, perubahan itu tidak ikut tayang, dan '
       + 'tidak bisa disimpan lagi sampai situs ditutup untuk pemeliharaan sekali lagi.\n\n'
       + 'Tekan Batal untuk kembali dan menyimpannya dulu.');
     if(!lanjut) return;
@@ -1325,7 +1325,7 @@ $('formCatatan').addEventListener('submit', async (e) => {
   if(!isi.ringkasan) salah.push('Isi perubahan belum ditulis.');
   if(!isi.halaman.length) salah.push('Pilih setidaknya satu halaman atau tab yang diperbarui.');
 
-  // Nomor versi yang sama dipakai dua kali membuat riwayatnya tidak bisa
+  // Nomor versi yang sama digunakan dua kali membuat riwayatnya tidak bisa
   // dipercaya, jadi ditolak sejak awal.
   const kembar = catatan.find(c => c.versi === isi.versi && c.id !== $('cvId').value);
   if(kembar) salah.push(`Versi ${isi.versi} sudah tercatat pada ${tanggalPanjang(kembar.tanggal)}.`);

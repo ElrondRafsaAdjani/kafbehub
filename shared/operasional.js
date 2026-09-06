@@ -9,7 +9,7 @@
   memberi tahu jadwal bentrok sebelum tersimpan.
 
   Yang benar-benar menjaga data adalah firestore.rules, karena aturan itu
-  dijalankan di server Google dan tidak bisa dilewati lewat Console peramban.
+  dijalankan di server Google dan tidak bisa dilewati melalui Console peramban.
 */
 
 import { bacaBerkas, susunBerkas, unduhBlob } from './excel.js';
@@ -55,7 +55,7 @@ function keMenit(jam){
   return j * 60 + n;
 }
 
-// 470 -> "07.50", bentuk yang dipakai halaman publik.
+// 470 -> "07.50", bentuk yang digunakan halaman publik.
 function keJamTitik(menit){
   const j = Math.floor(menit / 60), n = menit % 60;
   return `${String(j).padStart(2,'0')}.${String(n).padStart(2,'0')}`;
@@ -66,8 +66,8 @@ function rentangJam(mulai, selesai){
 }
 
 // Tanggal hari ini menurut zona waktu Jakarta (UTC+7), bukan zona waktu jam
-// komputer pemakai. Kalau pakai toISOString() biasa, pengumuman bisa dianggap
-// belum berakhir gara-gara jamnya masih dini hari menurut UTC padahal di
+// komputer pemakai. Jika pakai toISOString() biasa, pengumuman bisa dianggap
+// belum berakhir karena jamnya masih dini hari menurut UTC padahal di
 // Jakarta harinya sudah berganti.
 function hariIniJakarta(){
   return new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -85,7 +85,7 @@ function tanggalPanjang(iso){
   return `${hariDariTanggal(iso)}, ${d} ${BULAN[m-1]} ${y}`;
 }
 
-// Dua rentang waktu dianggap bentrok kalau saling menimpa, bukan sekadar
+// Dua rentang waktu dianggap bentrok jika saling menimpa, bukan sekadar
 // bersentuhan di ujungnya. Kelas 08.00-09.00 dan 09.00-10.00 tidak bentrok.
 function beririsan(mulai1, selesai1, mulai2, selesai2){
   return mulai1 < selesai2 && mulai2 < selesai1;
@@ -99,13 +99,13 @@ function samakanRuang(r){
   Sebagian "ruang" sebenarnya bukan tempat, melainkan keterangan bahwa kelasnya
   tidak menempati ruangan sama sekali.
 
-  Dua kelas daring pada jam yang sama sama sekali tidak berebut apa pun, tapi
+  Dua kelas daring pada jam yang sama sama sekali tidak berebut apa pun, tetapi
   pemeriksa bentrok ruangan dulu memperlakukan tulisan ONLINE seperti nama
   ruangan biasa. Akibatnya memindahkan kelas ke hari lain sekaligus menjadikannya
-  daring selalu ditolak dengan alasan ruangnya sudah dipakai kelas pengganti
+  daring selalu ditolak dengan alasan ruangnya sudah digunakan kelas pengganti
   lain, padahal keduanya memang daring.
 
-  Fungsi ini mengembalikan nama ruang hanya kalau ruangnya benar-benar ada.
+  Fungsi ini mengembalikan nama ruang hanya jika ruangnya benar-benar ada.
   Untuk kelas daring, ruang kosong, atau tanda hubung, hasilnya kosong sehingga
   pemeriksaan bentroknya dilewati.
 */
@@ -134,7 +134,7 @@ function daftarKesalahan(judul, list){
   Catatan langkah saat mencoba masuk.
 
   Kegagalan pada tahap ini sulit dilacak karena tersebar di beberapa proses
-  asinkron, dan kalau salah satunya gagal diam-diam pemakai cuma melihat
+  asinkron, dan jika salah satunya gagal diam-diam pemakai hanya melihat
   halaman yang tidak bereaksi. Setiap langkah dicatat ke panel yang bisa dibuka
   di layar masuk, sehingga tidak perlu membuka developer tools untuk tahu
   langkah mana yang berhenti.
@@ -235,24 +235,24 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   if(!profil){
-    // Pesan dipasang LEBIH DULU, baru keluar. Kalau urutannya dibalik dan
+    // Pesan dipasang LEBIH DULU, baru keluar. Jika urutannya dibalik dan
     // signOut gagal, pemakai hanya melihat halaman masuk kosong tanpa
     // penjelasan apa pun, dan itu justru yang paling membingungkan.
     if(galat){
       pesan($('pesanMasuk'),
-        'Masuk berhasil, tapi status admin tidak bisa diperiksa.<br>'
+        'Masuk berhasil, tetapi status admin tidak bisa diperiksa.<br>'
         + `Pesan aslinya: <code>${esc(galat.message || galat.code || 'tidak diketahui')}</code><br><br>`
         + 'Biasanya ini berarti aturan keamanan Firestore belum terpasang. '
         + 'Lihat langkah 1.4 di PANDUAN-PENGURUS.md.',
         'salah');
     }else{
       pesan($('pesanMasuk'),
-        'Masuk berhasil, tapi akun ini belum terdaftar sebagai admin.<br><br>'
+        'Masuk berhasil, tetapi akun ini belum terdaftar sebagai admin.<br><br>'
         + 'Di Firestore, koleksi <code>admins</code> harus punya dokumen yang '
         + '<strong>Document ID-nya persis sama</strong> dengan baris di bawah ini:'
         + `<br><code class="op-uid">${esc(user.uid)}</code>`
-        + 'Pastikan memakai ID itu, <strong>bukan</strong> tombol Auto-ID, dan '
-        + 'UID-nya ditaruh sebagai Document ID, bukan sebagai isi field.',
+        + 'Pastikan menggunakan ID itu, <strong>bukan</strong> tombol Auto-ID, dan '
+        + 'UID-nya diletakkan sebagai Document ID, bukan sebagai isi field.',
         'salah');
     }
 
@@ -273,7 +273,7 @@ onAuthStateChanged(auth, async (user) => {
    3. Memuat data
    ============================================================ */
 
-// Siapa yang sedang memakai halaman, diisi setelah login dan dipakai sebagai
+// Siapa yang sedang menggunakan halaman, diisi setelah login dan digunakan sebagai
 // pelaku pada catatan log.
 let pemakai = { nama: '', email: '' };
 
@@ -283,7 +283,7 @@ const data = {
   perubahan: [],
   pengumuman: [],
   pengajar: [],
-  // Dua koleksi di bawah hanya dipakai halaman ini dan berkas Excel. Isinya
+  // Dua koleksi di bawah hanya digunakan halaman ini dan berkas Excel. Isinya
   // tidak pernah ikut diterbitkan ke dokumen publik.
   classroom: [],
   koordinator: [],
@@ -312,7 +312,7 @@ async function ambilKoleksi(nama){
   }catch(err){
     console.error(`Gagal memuat koleksi "${nama}"`, err);
     gagalMuat.set(nama, err.code === 'permission-denied'
-      ? 'Aturan keamanan Firestore belum mengizinkan koleksi ini. Tempel ulang isi firestore.rules lewat Firebase Console, lihat langkah 1.4 di PANDUAN-PENGURUS.md.'
+      ? 'Aturan keamanan Firestore belum mengizinkan koleksi ini. Tempel ulang isi firestore.rules melalui Firebase Console, lihat langkah 1.4 di PANDUAN-PENGURUS.md.'
       : (err.message || 'tidak diketahui'));
     return [];
   }
@@ -338,7 +338,7 @@ async function muatSemua(){
     data.pengajar = pg;
     data.classroom = gc;
     data.koordinator = ko;
-    // Yang menunggu keputusan ditaruh paling atas, sebab itulah satu-satunya
+    // Yang menunggu keputusan diletakkan paling atas, sebab itulah satu-satunya
     // baris yang menuntut pekerjaan dari pengurus.
     data.pengajarakun = ap.sort((a, b) =>
       (a.status === 'menunggu' ? 0 : 1) - (b.status === 'menunggu' ? 0 : 1)
@@ -351,7 +351,7 @@ async function muatSemua(){
     }else{
       status(
         `Sebagian data tidak bisa dimuat: ${[...gagalMuat.keys()].join(', ')}. `
-        + 'Bagian lainnya tetap bisa dipakai seperti biasa.', 'salah');
+        + 'Bagian lainnya tetap bisa digunakan seperti biasa.', 'salah');
     }
   }catch(err){
     console.error(err);
@@ -391,7 +391,7 @@ document.querySelectorAll('.op-tab-btn').forEach(btn => {
       p.hidden = p.id !== 'panel-' + btn.dataset.tab;
     });
     // Catatan log baru diambil saat tabnya benar-benar dibuka. Pengurus yang
-    // cuma mengubah satu jadwal tidak perlu ikut menanggung pembacaannya.
+    // hanya mengubah satu jadwal tidak perlu ikut menanggung pembacaannya.
     if(btn.dataset.tab === 'log' && !logSudahDimuat) muatLog(false);
   });
 });
@@ -420,17 +420,17 @@ function modeUbah(formId, aktif){
 function gambarMatkul(){
   const t = $('tabelMatkul');
   if(data.matakuliah.length === 0){
-    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada mata kuliah. Tambahkan lewat formulir di atas.</td></tr></tbody>';
+    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada mata kuliah. Tambahkan melalui formulir di atas.</td></tr></tbody>';
     return;
   }
   t.innerHTML = `
     <thead><tr><th>Kode</th><th>Nama</th><th>Dipakai jadwal</th><th></th></tr></thead>
     <tbody>${data.matakuliah.map(m => {
-      const dipakai = data.jadwal.filter(j => j.kode === m.kode).length;
+      const digunakan = data.jadwal.filter(j => j.kode === m.kode).length;
       return `<tr>
         <td><strong>${esc(m.kode)}</strong></td>
         <td>${esc(m.nama)}</td>
-        <td class="op-samar">${dipakai} kelas</td>
+        <td class="op-samar">${digunakan} kelas</td>
         <td><div class="op-tombol-baris">
           <button class="op-mini" data-ubah-mk="${esc(m.id)}">Ubah</button>
           <button class="op-mini op-hapus" data-hapus-mk="${esc(m.id)}">Hapus</button>
@@ -462,7 +462,7 @@ $('formMatkul').addEventListener('submit', async (e) => {
   if(!kode) salah.push('Kode tidak boleh kosong.');
   if(!nama) salah.push('Nama tidak boleh kosong.');
   const kembar = data.matakuliah.find(m => m.kode === kode && m.id !== id);
-  if(kembar) salah.push(`Kode ${kode} sudah dipakai untuk "${kembar.nama}".`);
+  if(kembar) salah.push(`Kode ${kode} sudah digunakan untuk "${kembar.nama}".`);
 
   if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
 
@@ -474,8 +474,8 @@ $('formMatkul').addEventListener('submit', async (e) => {
       await catat('ubah', 'matakuliah', `${kode} · ${nama}`,
         lama && (lama.kode !== kode || lama.nama !== nama)
           ? `Sebelumnya ${lama.kode} · ${lama.nama}` : '');
-      // Kode adalah tali penghubung ke jadwal, jadi kalau kode berubah,
-      // semua jadwal yang memakainya harus ikut diperbarui. Kalau tidak,
+      // Kode adalah tali penghubung ke jadwal, jadi jika kode berubah,
+      // semua jadwal yang memakainya harus ikut diperbarui. Jika tidak,
       // jadwalnya jadi yatim dan namanya hilang di halaman publik.
       if(lama && lama.kode !== kode){
         const terdampak = data.jadwal.filter(j => j.kode === lama.kode);
@@ -502,10 +502,10 @@ $('formMatkul').addEventListener('submit', async (e) => {
 async function hapusMatkul(id){
   const m = data.matakuliah.find(x => x.id === id);
   if(!m) return;
-  const dipakai = data.jadwal.filter(j => j.kode === m.kode);
-  if(dipakai.length){
+  const digunakan = data.jadwal.filter(j => j.kode === m.kode);
+  if(digunakan.length){
     pesan($('pesanMatkul'),
-      `"${esc(m.nama)}" masih dipakai ${dipakai.length} kelas di Jadwal Permanen. `
+      `"${esc(m.nama)}" masih digunakan ${digunakan.length} kelas di Jadwal Permanen. `
       + 'Hapus atau pindahkan kelas-kelas itu dulu supaya jadwal tidak kehilangan namanya.',
       'salah');
     return;
@@ -589,7 +589,7 @@ function gambarJadwal(){
 
 $('cariJadwal').addEventListener('input', gambarJadwal);
 
-// Pemeriksaan inilah yang mencegah dua kelas memakai ruangan yang sama pada
+// Pemeriksaan inilah yang mencegah dua kelas menggunakan ruangan yang sama pada
 // jam yang beririsan, dan mencegah satu KP tercatat dua kali.
 function periksaJadwal({ id, kode, kp, hari, mulai, selesai, ruang }){
   const salah = [];
@@ -623,14 +623,14 @@ function periksaJadwal({ id, kode, kp, hari, mulai, selesai, ruang }){
         && beririsan(m1, m2, keMenit(j.mulai), keMenit(j.selesai)));
       for(const b of bentrok){
         salah.push(
-          `Ruang ${ruang} sudah dipakai ${b.kode} KP ${b.kp} pada ${b.hari} `
+          `Ruang ${ruang} sudah digunakan ${b.kode} KP ${b.kp} pada ${b.hari} `
           + `${rentangJam(b.mulai, b.selesai)}.`);
       }
     }else if(!samakanRuang(ruang)){
       hati.push('Ruang dikosongkan, jadi bentrok ruangan tidak bisa diperiksa.');
     }
 
-    // Bukan kesalahan, tapi pantas ditanyakan: satu mata kuliah dengan dua KP
+    // Bukan kesalahan, tetapi pantas ditanyakan: satu mata kuliah dengan dua KP
     // berbeda di jam yang sama biasanya berarti salah ketik KP.
     const barengan = data.jadwal.filter(j =>
       j.id !== id && j.kode === kode && j.hari === hari
@@ -659,7 +659,7 @@ $('formJadwal').addEventListener('submit', async (e) => {
   const { salah, hati } = periksaJadwal(isi);
   if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
   if(hati.length && el.dataset.konfirmasi !== '1'){
-    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi kalau memang benar:', hati), 'hati');
+    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi jika memang benar:', hati), 'hati');
     el.dataset.konfirmasi = '1';
     return;
   }
@@ -723,12 +723,12 @@ function kampusDari(kp){
 }
 
 /*
-  Daftar pilihan kelas memakai NAMA mata kuliah, bukan kodenya.
+  Daftar pilihan kelas menggunakan NAMA mata kuliah, bukan kodenya.
 
   Kode seperti 1303MW24 tidak dihafal siapa pun, jadi memilih kelas berarti
   mencocokkan kode satu per satu dengan daftar di tab Mata Kuliah. Nama mata
-  kuliahnya yang dikenal, jadi itu yang ditaruh paling depan. Kodenya sengaja
-  tidak dibuang sama sekali, hanya dipindah ke belakang sebagai penegas kalau
+  kuliahnya yang dikenal, jadi itu yang diletakkan paling depan. Kodenya sengaja
+  tidak dibuang sama sekali, hanya dipindah ke belakang sebagai penegas jika
   ada dua mata kuliah bernama mirip.
 
   Pilihannya juga dikelompokkan per hari. Dengan puluhan kelas dalam satu
@@ -763,7 +763,7 @@ function isiPilihanKelas(){
 
   el.innerHTML = '<option value="">— pilih —</option>' + opsi;
 
-  // Kelas yang sedang dipilih dipertahankan kalau masih lolos saringan. Kalau
+  // Kelas yang sedang dipilih dipertahankan jika masih lolos saringan. Jika
   // tersaring keluar, pilihannya dikosongkan supaya tidak ada kelas tersembunyi
   // yang diam-diam masih terpilih.
   el.value = terpilih;
@@ -779,9 +779,9 @@ function isiPilihanKelas(){
 // Jenis "daring" dan "libur" tidak butuh ruang maupun tanggal pengganti,
 // jadi kolomnya disembunyikan supaya tidak membingungkan.
 /*
-  Jenis "menyusul" memakai kotak isian yang sama dengan "pindah", bedanya
+  Jenis "menyusul" menggunakan kotak isian yang sama dengan "pindah", bedanya
   seluruh kotak itu boleh dikosongkan. Dipakai untuk perpindahan yang sudah
-  pasti terjadi tapi tanggal, jam, atau ruangnya belum ditentukan.
+  pasti terjadi tetapi tanggal, jam, atau ruangnya belum ditentukan.
 */
 function aturTampilanPerubahan(){
   const tipe = $('pbTipe').value;
@@ -798,7 +798,7 @@ aturTampilanPerubahan();
 
 /*
   Tanggal terdampak yang tidak jatuh pada hari kelasnya memang sudah ditolak
-  saat menyimpan. Tapi menunggu sampai tombol Simpan ditekan berarti pengurus
+  saat menyimpan. Namun menunggu sampai tombol Simpan ditekan berarti pengurus
   sudah terlanjur mengisi seluruh formulir sebelum tahu tanggalnya keliru.
 
   Pemeriksaan yang sama dijalankan lagi di sini begitu kelas dan tanggalnya
@@ -916,7 +916,7 @@ function periksaPerubahan(isi){
   if(!isi.tanggal){ salah.push('Tanggal terdampak belum diisi.'); return { salah, hati }; }
 
   // Tanggal harus jatuh pada hari kelas itu berlangsung. Tanpa pemeriksaan ini
-  // orang gampang salah pilih tanggal dan perubahannya tidak pernah muncul.
+  // orang mudah salah pilih tanggal dan perubahannya tidak pernah muncul.
   const hari = hariDariTanggal(isi.tanggal);
   if(hari !== j.hari){
     salah.push(`${tanggalPanjang(isi.tanggal)} jatuh pada ${hari}, sedangkan kelas ini berlangsung hari ${j.hari}.`);
@@ -939,8 +939,8 @@ function periksaPerubahan(isi){
       sebab justru ketidakpastian itulah yang sedang dicatat.
 
       Yang tetap ditolak pada "menyusul" adalah pengisian yang setengah jalan,
-      misalnya jam mulai diisi tapi jam selesai tidak. Keadaan begitu bukan
-      "belum ditentukan", melainkan kemungkinan besar lupa mengisi, dan kalau
+      misalnya jam mulai diisi tetapi jam selesai tidak. Keadaan begitu bukan
+      "belum ditentukan", melainkan kemungkinan besar lupa mengisi, dan jika
       diteruskan akan tampil ke mahasiswa sebagai jam yang tidak masuk akal.
     */
     if(!belumPasti){
@@ -970,10 +970,10 @@ function periksaPerubahan(isi){
       const hariBaru = hariDariTanggal(isi.tanggalBaru);
 
       /*
-        Ruang yang benar-benar dipakai kelas pengganti ini: yang diisi di kotak
-        Ruang baru kalau ada, kalau kosong berarti tetap memakai ruang aslinya.
+        Ruang yang benar-benar digunakan kelas pengganti ini: yang diisi di kotak
+        Ruang baru jika ada, jika kosong berarti tetap menggunakan ruang aslinya.
 
-        Kalau yang diisi ternyata bukan ruang fisik, misalnya ONLINE, hasilnya
+        Jika yang diisi ternyata bukan ruang fisik, misalnya ONLINE, hasilnya
         kosong dan seluruh pemeriksaan bentrok ruangan dilewati. Sengaja TIDAK
         jatuh kembali ke ruang asli dalam keadaan itu, sebab kelas yang sudah
         dipindah ke daring memang tidak lagi menempati ruang aslinya.
@@ -989,7 +989,7 @@ function periksaPerubahan(isi){
           && ruangFisik(x.ruang) === ruang
           && beririsan(m1, m2, keMenit(x.mulai), keMenit(x.selesai)));
         for(const b of bentrok){
-          salah.push(`Ruang ${isi.ruangBaru || j.ruang} sudah dipakai ${b.kode} KP ${b.kp} setiap ${b.hari} ${rentangJam(b.mulai, b.selesai)}.`);
+          salah.push(`Ruang ${isi.ruangBaru || j.ruang} sudah digunakan ${b.kode} KP ${b.kp} setiap ${b.hari} ${rentangJam(b.mulai, b.selesai)}.`);
         }
       }
 
@@ -1003,7 +1003,7 @@ function periksaPerubahan(isi){
       for(const p of gantiLain){
         // Ruang kelas pengganti lain dicari dengan aturan yang sama. Dulu yang
         // dibaca hanya ruangBaru miliknya, sehingga kelas pengganti yang tetap
-        // memakai ruang aslinya luput dari pemeriksaan.
+        // menggunakan ruang aslinya luput dari pemeriksaan.
         const asal = data.jadwal.find(x => x.id === p.jadwalId);
         const ruangLain = samakanRuang(p.ruangBaru)
           ? ruangFisik(p.ruangBaru)
@@ -1011,7 +1011,7 @@ function periksaPerubahan(isi){
 
         if(ruang && ruangLain === ruang
            && beririsan(m1, m2, keMenit(p.mulaiBaru), keMenit(p.selesaiBaru))){
-          salah.push(`Ruang itu sudah dipakai kelas pengganti ${p.kode} KP ${p.kp} pada tanggal yang sama.`);
+          salah.push(`Ruang itu sudah digunakan kelas pengganti ${p.kode} KP ${p.kp} pada tanggal yang sama.`);
         }
       }
 
@@ -1045,7 +1045,7 @@ $('formPerubahan').addEventListener('submit', async (e) => {
   const { salah, hati } = periksaPerubahan(isi);
   if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
   if(hati.length && el.dataset.konfirmasi !== '1'){
-    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi kalau memang benar:', hati), 'hati');
+    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi jika memang benar:', hati), 'hati');
     el.dataset.konfirmasi = '1';
     return;
   }
@@ -1210,7 +1210,7 @@ $('msBuat').addEventListener('click', async () => {
   try{
     status('Membuat ' + akanDibuat.length + ' perubahan…', 'sibuk');
 
-    // Ditulis sebagai satu transaksi. Kalau di tengah jalan gagal, tidak ada
+    // Ditulis sebagai satu transaksi. Jika di tengah jalan gagal, tidak ada
     // yang tersimpan sama sekali, sehingga tidak pernah ada keadaan separuh
     // jadi yang membingungkan untuk dibereskan.
     const BATAS = 450;   // Firestore membatasi 500 operasi per transaksi
@@ -1449,7 +1449,7 @@ $('formPengajar').addEventListener('submit', async (e) => {
   const { salah, hati } = periksaPengajar(isi);
   if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
   if(hati.length && el.dataset.konfirmasi !== '1'){
-    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi kalau memang benar:', hati), 'hati');
+    pesan(el, daftarKesalahan('Periksa dulu, lalu tekan Simpan sekali lagi jika memang benar:', hati), 'hati');
     el.dataset.konfirmasi = '1';
     return;
   }
@@ -1480,7 +1480,7 @@ $('formPengajar').addEventListener('submit', async (e) => {
    7d. Akun pengajar
    ============================================================
 
-   Pengajuan akun yang dikirim sendiri lewat halaman /pengajar. Yang diputuskan
+   Pengajuan akun yang dikirim sendiri melalui halaman /pengajar. Yang diputuskan
    di sini ada dua hal sekaligus: apakah orangnya benar-benar asisten, dan mata
    kuliah mana saja yang boleh dia ubah naskahnya.
 
@@ -1502,8 +1502,8 @@ const STATUS_AKUN = {
   ditolak:  { label: 'Ditolak',  kelas: 'libur'   },
 };
 
-// Dokumen yang dibuat langsung lewat Firebase Console boleh tidak menyebut
-// status. Bawaannya sama dengan yang dipakai firestore.rules dan halaman
+// Dokumen yang dibuat langsung melalui Firebase Console boleh tidak menyebut
+// status. Bawaannya sama dengan yang digunakan firestore.rules dan halaman
 // pengajar, supaya ketiganya tidak pernah berbeda pendapat.
 function statusAkun(a){
   return a.status || 'diterima';
@@ -1543,7 +1543,7 @@ function periksaAkun(a){
   }else if(!cocokNrp.length){
     catatan.push({ jenis:'salah', teks:`NRP ${nrp || '(kosong)'} tidak ada di daftar pengajar.` });
 
-    // Kalau namanya justru ketemu, kemungkinan besar NRP-nya salah ketik, dan
+    // Jika namanya justru ketemu, kemungkinan besar NRP-nya salah ketik, dan
     // itu jauh lebih berguna diketahui daripada sekadar "tidak ditemukan".
     const cocokNama = data.pengajar.filter(p => samakanNama(p.nama) === samakanNama(a.nama));
     if(cocokNama.length){
@@ -1561,11 +1561,11 @@ function periksaAkun(a){
   }
 
   /*
-    Email student UBAYA memakai NRP-nya sendiri, jadi ketidakcocokan di sini
+    Email student UBAYA menggunakan NRP-nya sendiri, jadi ketidakcocokan di sini
     bukan sekadar hal yang perlu dilirik.
 
     Salah satu dari keduanya pasti keliru, dan keduanya sama-sama menentukan:
-    NRP dipakai mencocokkan dengan data pengajar, email dipakai masuk. Karena
+    NRP digunakan mencocokkan dengan data pengajar, email digunakan masuk. Karena
     itu dihitung sebagai ketidakcocokan berat, sehingga menerimanya pun minta
     ditekan dua kali.
   */
@@ -1582,7 +1582,7 @@ function periksaAkun(a){
 }
 
 // Mata kuliah materi yang boleh diberikan. Diambil dari daftar yang sama
-// dengan yang dipakai halaman pengajar, supaya kodenya tidak pernah berbeda.
+// dengan yang digunakan halaman pengajar, supaya kodenya tidak pernah berbeda.
 function daftarMateri(){
   return Array.isArray(window.KAFBE_MATERI_DAFTAR) ? window.KAFBE_MATERI_DAFTAR : [];
 }
@@ -1676,17 +1676,17 @@ function gambarAkunPengajar(){
     const s = statusAkun(a);
     const akibat = s === 'diterima'
       ? 'Wewenangnya langsung dicabut. Naskah materi tidak bisa lagi dia ubah, '
-        + 'bahkan kalau halamannya sedang terbuka.'
+        + 'bahkan jika halamannya sedang terbuka.'
       : (s === 'ditolak'
           ? 'Penolakannya ikut terhapus, sehingga orang ini bisa mendaftar lagi. '
-            + 'Kalau maksud Anda menutup pintunya, biarkan barisnya dan pakai Tolak.'
+            + 'Jika maksud Anda menutup pintunya, biarkan barisnya dan gunakan Tolak.'
           : 'Pengajuannya hilang dari antrean tanpa pernah diputuskan.');
 
     if(!confirm(
       `Hapus baris ${a.nama} (${a.nrp})?\n\n${akibat}\n\n`
       + 'Akun Firebase-nya tidak ikut terhapus. Orang ini masih bisa masuk dan '
       + 'mengirim pengajuan baru. Untuk menutup akunnya sama sekali, '
-      + 'nonaktifkan lewat Firebase Console pada menu Authentication.')) return;
+      + 'nonaktifkan melalui Firebase Console pada menu Authentication.')) return;
     try{
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'pengajarakun', a.id));
@@ -1793,7 +1793,7 @@ $('formAkun').addEventListener('submit', async (e) => {
   }
 
   /*
-    Peringatan hasil pencocokan tidak memblokir, tapi menerima pengajuan yang
+    Peringatan hasil pencocokan tidak memblokir, tetapi menerima pengajuan yang
     datanya tidak cocok perlu dilakukan dengan sadar, bukan tersenggol. Karena
     itu penyimpanannya minta ditekan dua kali.
   */
@@ -1801,7 +1801,7 @@ $('formAkun').addEventListener('submit', async (e) => {
   const berat = catatan.filter(c => c.jenis === 'salah');
   if(status_ === 'diterima' && berat.length && el.dataset.konfirmasi !== '1'){
     pesan(el, daftarKesalahan(
-      'Data pendaftar ini tidak cocok dengan data pengajar. Periksa dulu, lalu tekan Simpan keputusan sekali lagi kalau memang benar:',
+      'Data pendaftar ini tidak cocok dengan data pengajar. Periksa dulu, lalu tekan Simpan keputusan sekali lagi jika memang benar:',
       berat.map(c => c.teks)), 'hati');
     el.dataset.konfirmasi = '1';
     return;
@@ -1810,7 +1810,7 @@ $('formAkun').addEventListener('submit', async (e) => {
 
   /*
     Ditulis utuh, bukan digabung. Nama, NRP, dan email disalin apa adanya dari
-    baris yang sudah tersimpan, dan aturan Firestore menolak kalau ketiganya
+    baris yang sudah tersimpan, dan aturan Firestore menolak jika ketiganya
     berubah. Jadi keputusan pengurus tidak bisa sekaligus menyunting identitas
     pendaftarnya, baik sengaja maupun karena salah pencet.
   */
@@ -1949,7 +1949,7 @@ $('formPengumuman').addEventListener('submit', async (e) => {
   puluhan pembacaan Firestore untuk setiap pengunjung. Sebagai gantinya seluruh
   isinya dirangkum jadi SATU dokumen di sini, sehingga pengunjung cukup membaca
   satu dokumen saja. Penulisan jarang, pembacaan sering, jadi kerja beratnya
-  ditaruh di sisi penulisan.
+  diletakkan di sisi penulisan.
 */
 async function terbitkan(){
   status('Menerbitkan ke halaman publik…', 'sibuk');
@@ -1983,7 +1983,7 @@ async function terbitkan(){
         });
       }else if(p.tipe === 'pindah'){
         /*
-          Pada tanggal aslinya kelas ini tidak berlangsung, TAPI ada
+          Pada tanggal aslinya kelas ini tidak berlangsung, TETAPI ada
           penggantinya. Itu keadaan yang berbeda dari benar-benar ditiadakan,
           jadi jenisnya "diganti", bukan "libur".
 
@@ -2007,7 +2007,7 @@ async function terbitkan(){
         });
       }else if(p.tipe === 'menyusul'){
         /*
-          Perpindahan yang sudah pasti terjadi, tapi belum tentu kapan dan di
+          Perpindahan yang sudah pasti terjadi, tetapi belum tentu kapan dan di
           mana. Pada tanggal aslinya kelas ini TIDAK berlangsung, jadi tetap
           perlu ditandai supaya mahasiswa tidak datang percuma.
 
@@ -2026,7 +2026,7 @@ async function terbitkan(){
           catatan: p.catatan || '',
         });
 
-        // Kalau tanggal dan jamnya ternyata sudah ditentukan, kelas
+        // Jika tanggal dan jamnya ternyata sudah ditentukan, kelas
         // penggantinya ikut ditayangkan pada tanggal itu. Ruang yang belum
         // ditentukan ditulis "Menyusul", bukan dikosongkan, supaya kolom
         // ruangnya tidak terbaca seolah lupa diisi.
@@ -2073,7 +2073,7 @@ async function terbitkan(){
   }catch(err){
     console.error(err);
     status(
-      'Data tersimpan, TAPI gagal menerbitkan ke halaman publik: ' + err.message
+      'Data tersimpan, TETAPI gagal menerbitkan ke halaman publik: ' + err.message
       + '. Coba simpan ulang salah satu data supaya penerbitan diulang.', 'salah');
   }
 }
@@ -2086,14 +2086,14 @@ async function terbitkan(){
   Sumber kebenaran data adalah basis data, bukan berkas Excel.
 
   Pengurus tetap menerima berkas Informasi Kelas Asistensi tiap awal semester,
-  jadi unggahan dipakai untuk mengisi sekali di depan. Sesudah itu perubahan
+  jadi unggahan digunakan untuk mengisi sekali di depan. Sesudah itu perubahan
   cukup dilakukan di halaman ini, dan berkas Excel yang baru diambil lewat
   tombol unduh. Dengan begitu tidak ada dua salinan yang harus dijaga sama.
 
   Dua lembar Excel tidak punya tempat di koleksi yang sudah ada, yaitu kode
   Google Classroom dan daftar koordinator. Keduanya diberi koleksi sendiri,
   bukan ditempelkan sebagai kolom jadwal dan mata kuliah, karena kodenya
-  sering tidak sama: lembar Contact Koor memakai kode kurikulum lain, dan
+  sering tidak sama: lembar Contact Koor menggunakan kode kurikulum lain, dan
   lembar google classroom memuat mata kuliah yang tidak diampu KAFBE.
   Menempelkannya berarti membuang baris yang kodenya tidak cocok, dan berkas
   hasil unduhan jadi tidak lagi selengkap berkas aslinya.
@@ -2125,7 +2125,7 @@ function gambarClassroom(){
     t.innerHTML = `<tbody><tr><td class="op-kosong">${
       data.classroom.length
         ? 'Tidak ada yang cocok dengan pencarian.'
-        : 'Belum ada kode kelas daring. Isi lewat formulir di atas atau unggah berkas Excel.'
+        : 'Belum ada kode kelas daring. Isi melalui formulir di atas atau unggah berkas Excel.'
     }</td></tr></tbody>`;
     return;
   }
@@ -2210,7 +2210,7 @@ $('formClassroom').addEventListener('submit', async (e) => {
 function gambarKoordinator(){
   const t = $('tabelKoordinator');
   if(data.koordinator.length === 0){
-    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada koordinator. Isi lewat formulir di atas atau unggah berkas Excel.</td></tr></tbody>';
+    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada koordinator. Isi melalui formulir di atas atau unggah berkas Excel.</td></tr></tbody>';
     return;
   }
   const baris = [...data.koordinator].sort((a,b) =>
@@ -2354,9 +2354,9 @@ function susunRencana(hasil){
     gcBaru: [], gcUbah: [], gcHapus: [],
     koBaru: [], koUbah: [], koHapus: [],
     dilewati: [], masalah: [...hasil.masalah],
-    // Yang isinya sama persis tidak ditulis ulang ke basis data, tapi tetap
+    // Yang isinya sama persis tidak ditulis ulang ke basis data, tetapi tetap
     // dihitung. Tanpa angka ini, pengurus tidak punya cara tahu bedanya
-    // "berkasnya memang cuma mengubah tiga kelas" dengan "berkasnya salah
+    // "berkasnya memang hanya mengubah tiga kelas" dengan "berkasnya salah
     // lembar sehingga sisanya tidak terbaca".
     tetap: { matakuliah: 0, jadwal: 0, pengajar: 0, classroom: 0, koordinator: 0 },
   };
@@ -2372,7 +2372,7 @@ function susunRencana(hasil){
 
   /*
     Baris kembar di dalam satu berkas diselesaikan dengan aturan yang sama di
-    mana-mana: yang paling bawah dipakai, dan kejadiannya diberitahukan.
+    mana-mana: yang paling bawah digunakan, dan kejadiannya diberitahukan.
 
     Alasannya, baris yang lebih bawah biasanya hasil pembetulan yang ditambah
     belakangan. Yang penting bukan tebakan itu benar atau tidak, melainkan
@@ -2383,7 +2383,7 @@ function susunRencana(hasil){
     for(const isi of daftar){
       const k = ambilKunci(isi);
       if(peta.has(k)){
-        r.dilewati.push(`Baris ${isi.baris}: ${sebutan(isi)} muncul lebih dari sekali di berkas, yang terakhir dipakai.`);
+        r.dilewati.push(`Baris ${isi.baris}: ${sebutan(isi)} muncul lebih dari sekali di berkas, yang terakhir digunakan.`);
       }
       peta.set(k, isi);
     }
@@ -2455,16 +2455,16 @@ function susunRencana(hasil){
 
   /*
     Kelas yang kodenya tidak ada di daftar Mata Kuliah tetap ikut tersimpan,
-    tapi harus disebutkan.
+    tetapi harus disebutkan.
 
-    Halaman publik menampilkan kode mentah kalau namanya tidak ketemu, dan itu
+    Halaman publik menampilkan kode mentah jika namanya tidak ketemu, dan itu
     tidak terbaca siapa pun. Formulir Jadwal Permanen sudah menolak keadaan
     seperti ini sejak awal, jadi unggahan tidak boleh diam-diam membuatnya.
   */
   const kodeDikenal = new Set([...data.matakuliah.map(m => m.kode), ...r.mkBaru.map(m => m.kode)]);
   const yatim = [...new Set([...r.jdBaru, ...r.jdUbah].map(j => j.kode).filter(k => !kodeDikenal.has(k)))];
   for(const kode of yatim){
-    r.masalah.push(`Kode ${kode} dipakai di lembar jadwal tapi tidak punya nama mata kuliah di berkas mana pun. Kelasnya tetap masuk, tapi isi namanya lewat tab Mata Kuliah supaya tidak tampil sebagai kode di halaman jadwal.`);
+    r.masalah.push(`Kode ${kode} digunakan di lembar jadwal tetapi tidak punya nama mata kuliah di berkas mana pun. Kelasnya tetap masuk, tetapi isi namanya melalui tab Mata Kuliah supaya tidak tampil sebagai kode di halaman jadwal.`);
   }
 
   return r;
@@ -2489,7 +2489,7 @@ function susunRencana(hasil){
 
   Keadaan tiap baris dibedakan dengan warna sekaligus kata, tidak hanya warna,
   supaya tetap terbaca oleh yang kesulitan membedakan warna dan tetap masuk akal
-  kalau halamannya dicetak hitam putih.
+  jika halamannya dicetak hitam putih.
 */
 const TANDA = {
   tambah: { kelas: 'pra-tambah', label: 'Baru' },
@@ -2512,7 +2512,7 @@ const JUDUL_BAGIAN = {
 
   Kolom penanda identitas dikunci pada baris yang sudah ada di web. Kode dan KP
   adalah tali yang menghubungkan baris berkas dengan dokumen yang tersimpan.
-  Kalau keduanya boleh diubah di sini, baris ini akan menimpa dokumen yang salah
+  Jika keduanya boleh diubah di sini, baris ini akan menimpa dokumen yang salah
   tanpa ada yang menyadari.
 */
 const KOLOM_BAGIAN = {
@@ -2673,10 +2673,10 @@ function barisUsulan(u, kolom){
 function tabelUsulan(koleksi, daftar){
   if(daftar.length === 0) return '';
   const kolom = KOLOM_BAGIAN[koleksi];
-  const dipakai = daftar.filter(u => u.terima).length;
+  const digunakan = daftar.filter(u => u.terima).length;
   return `
     <h4>${esc(JUDUL_BAGIAN[koleksi])}
-      <span class="pra-jumlah">${dipakai} dari ${daftar.length} disimpan</span></h4>
+      <span class="pra-jumlah">${digunakan} dari ${daftar.length} disimpan</span></h4>
     <div class="op-tabel-bungkus">
       <table class="op-tabel pra-tabel">
         <thead><tr>
@@ -2741,7 +2741,7 @@ function gambarPratinjau(){
       ${catatan}
     </div>`;
 
-  // Tombol simpan ikut mati kalau tidak ada satu pun baris yang dicentang,
+  // Tombol simpan ikut mati jika tidak ada satu pun baris yang dicentang,
   // supaya tidak ada penyimpanan yang tidak menghasilkan apa-apa.
   $('xlTerapkan').hidden = usulanExcel.length === 0;
   $('xlTerapkan').disabled = diterima.length === 0;
@@ -2886,7 +2886,7 @@ $('formExcel').addEventListener('submit', async (e) => {
     }
 
     gambarPratinjau();
-    status('Berkas terbaca. Belum ada yang tersimpan. Periksa perbandingannya, atur tiap baris kalau perlu, lalu tekan Simpan perubahan.', 'benar');
+    status('Berkas terbaca. Belum ada yang tersimpan. Periksa perbandingannya, atur tiap baris jika perlu, lalu tekan Simpan perubahan.', 'benar');
   }catch(err){
     console.error(err);
     $('pratinjauExcel').innerHTML = '';
@@ -2919,7 +2919,7 @@ $('xlBerkas').addEventListener('change', () => {
 /*
   Penulisan dilakukan berkelompok, bukan satu per satu.
 
-  Satu berkas bisa berisi ratusan baris. Kalau ditulis satu per satu, prosesnya
+  Satu berkas bisa berisi ratusan baris. Jika ditulis satu per satu, prosesnya
   lama dan bisa berhenti di tengah jalan sehingga sebagian data masuk dan
   sebagian tidak. Firestore membatasi satu kelompok maksimal 500 tulisan, jadi
   isinya dipotong di bawah angka itu.
@@ -2961,7 +2961,7 @@ $('xlTerapkan').addEventListener('click', async () => {
     }else{
       /*
         Kelas yang dihapus menyeret perubahan sementara yang menunjuknya.
-        Kalau dibiarkan, perubahan itu menjadi yatim: halaman publik tidak bisa
+        Jika dibiarkan, perubahan itu menjadi yatim: halaman publik tidak bisa
         lagi menemukan kelas aslinya, jadi barisnya hilang begitu saja tanpa
         pernah bisa dihapus dari tab Perubahan Sementara.
       */
@@ -3023,7 +3023,7 @@ $('xlTerapkan').addEventListener('click', async () => {
   Catatan setiap penambahan, perubahan, dan penghapusan yang terjadi di halaman
   ini.
 
-  KENAPA PERLU. Pengurus berganti tiap kepengurusan dan jumlahnya banyak. Kalau
+  KENAPA PERLU. Pengurus berganti tiap kepengurusan dan jumlahnya banyak. Jika
   ada jadwal yang tiba-tiba berbeda dari yang disepakati, satu-satunya cara
   menelusurinya dulu adalah bertanya satu per satu. Catatan ini menjawabnya
   sendiri: apa yang berubah, kapan, dan oleh siapa.
@@ -3032,9 +3032,9 @@ $('xlTerapkan').addEventListener('click', async () => {
   menghapus ditutup untuk semua orang, termasuk pengurus yang menulisnya.
   Catatan yang bisa dirapikan sendiri oleh pelakunya bukan catatan.
 
-  GAGALNYA TIDAK MENJATUHKAN AKSI UTAMA. Kalau penulisan catatan gagal,
+  GAGALNYA TIDAK MENJATUHKAN AKSI UTAMA. Jika penulisan catatan gagal,
   jadwalnya tetap tersimpan dan pengurus diberi tahu bahwa catatannya yang
-  bermasalah. Kebalikannya akan lebih buruk: pekerjaan hilang gara-gara buku
+  bermasalah. Kebalikannya akan lebih buruk: pekerjaan hilang karena buku
   catatan.
 */
 
@@ -3050,7 +3050,7 @@ const JENIS_LOG = {
   akunpengajar:'Akun pengajar',
   // Ditulis dari halaman /pengajar, bukan dari halaman ini. Catatannya tetap
   // masuk ke daftar yang sama supaya seluruh perubahan bisa ditelusuri di satu
-  // tempat, tanpa perlu ingat halaman mana yang dipakai saat itu.
+  // tempat, tanpa perlu ingat halaman mana yang digunakan saat itu.
   materi:      'Naskah materi',
 };
 
@@ -3091,12 +3091,12 @@ async function catat(aksi, jenis, ringkas, rincian){
       ringkas: String(ringkas || ''),
       rincian: String(rincian || ''),
     });
-    // Kalau tab Log sedang dibuka, daftarnya ikut disegarkan supaya tidak
+    // Jika tab Log sedang dibuka, daftarnya ikut disegarkan supaya tidak
     // terlihat seolah aksinya tidak tercatat.
     if(logSudahDimuat && !$('panel-log').hidden) await muatLog(false);
   }catch(err){
     console.error('Gagal menulis catatan log', err);
-    status('Perubahannya tersimpan, tapi catatan log gagal ditulis: ' + err.message, 'salah');
+    status('Perubahannya tersimpan, tetapi catatan log gagal ditulis: ' + err.message, 'salah');
   }
 }
 
@@ -3126,7 +3126,7 @@ async function muatLog(lanjut){
   }catch(err){
     console.error('Gagal memuat log', err);
     pesan(el, err.code === 'permission-denied'
-      ? 'Koleksi "log" belum diizinkan oleh aturan keamanan Firestore. Tempel ulang isi firestore.rules lewat Firebase Console, lihat langkah 1.4 di PANDUAN-PENGURUS.md.'
+      ? 'Koleksi "log" belum diizinkan oleh aturan keamanan Firestore. Tempel ulang isi firestore.rules melalui Firebase Console, lihat langkah 1.4 di PANDUAN-PENGURUS.md.'
       : 'Gagal memuat catatan: ' + esc(err.message), 'salah');
   }finally{
     $('logSegarkan').disabled = false;

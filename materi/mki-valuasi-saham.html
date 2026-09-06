@@ -92,7 +92,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -193,7 +193,7 @@
     </p>
 
     <h3 style="margin-top:24px;" data-materi="mencari-laju-pertumbuhannya.judul" data-label="Mencari laju pertumbuhannya">Mencari laju pertumbuhannya</h3>
-    <p data-materi="mencari-laju-pertumbuhannya.1" data-label="Kalau yang diketahui hanya dividen paling awal dan pali…">Kalau yang diketahui hanya dividen paling awal dan paling akhir, lajunya dicari dengan akar.</p>
+    <p data-materi="mencari-laju-pertumbuhannya.1" data-label="Jika yang diketahui hanya dividen paling awal dan pali…">Jika yang diketahui hanya dividen paling awal dan paling akhir, lajunya dicari dengan akar.</p>
     <div class="rumus">g = <sup>n</sup>√(FV ÷ PV) &minus; 1</div>
   </div>
 
@@ -203,23 +203,23 @@
       <div><b>Common stock</b>
         Kepemilikan atas perusahaan beserta hak atas sebagian labanya. Dividennya tidak dijanjikan,
         bahkan banyak perusahaan yang sengaja tidak pernah membagikannya. Risikonya harga bisa turun,
-        tapi kerugiannya tidak pernah melebihi uang yang ditanamkan.
+        tetapi kerugiannya tidak pernah melebihi uang yang ditanamkan.
         <ul><li>Hak membeli lebih dulu saat penerbitan baru</li><li>Hak suara dalam rapat pemegang saham</li></ul>
       </div>
       <div><b>Preferred stock</b>
-        Lebih mirip obligasi. Dividennya tetap dan dibayarkan lebih dulu, tapi harganya jarang naik jauh
+        Lebih mirip obligasi. Dividennya tetap dan dibayarkan lebih dulu, tetapi harganya jarang naik jauh
         sehingga peluang untungnya juga terbatas. Karena lebih pasti, imbal hasil yang diharapkan
         lebih kecil daripada common stock.
         <ul><li>Didahulukan dalam pembagian dividen</li><li>Didahulukan bila perusahaan dilikuidasi</li>
         <li>Sebagian bisa ditukar jadi common stock</li><li>Umumnya tanpa hak suara</li></ul>
       </div>
     </div>
-    <p style="margin-top:14px;" data-materi="dua-jenis-saham.1" data-label="Karena dividen preferred stock tetap besarnya dan berla…">Karena dividen preferred stock tetap besarnya dan berlangsung terus, penilaiannya memakai model zero growth.</p>
+    <p style="margin-top:14px;" data-materi="dua-jenis-saham.1" data-label="Karena dividen preferred stock tetap besarnya dan berla…">Karena dividen preferred stock tetap besarnya dan berlangsung terus, penilaiannya menggunakan model zero growth.</p>
   </div>
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -234,7 +234,7 @@
   /* ===================================================================
      Tiga model, masing-masing punya contoh dan ceritanya sendiri.
      Yang digambar selalu sama bentuknya: deretan dividen per tahun, lalu
-     nilainya setelah ditarik ke hari ini. Yang berbeda cuma perilaku
+     nilainya setelah ditarik ke hari ini. Yang berbeda hanya perilaku
      dividennya, supaya perpindahan antar model terasa menyambung.
   =================================================================== */
 
@@ -252,16 +252,16 @@
       babAwal: 'Bagian: Dividen yang tidak berubah',
       langkah: [
         { tampil:[], teks:
-          `Sebuah perusahaan membagikan dividen <strong>${usd(D)}</strong> per lembar, dan diperkirakan segitu terus tanpa pernah berubah.` },
+          `Sebuah perusahaan membagikan dividen <strong>${usd(D)}</strong> per lembar, dan diperkirakan tetap sebesar itu tanpa pernah berubah.` },
         { tampil:['d1','d2','d3','d4','d5','d6','d7','d8','dst'], teks:
           `Dividennya sama besar tiap tahun, dan tidak berhenti. Batang yang berderet ke kanan itu tidak pernah habis.` },
         { tampil:['pv1','pv2','pv3','pv4','pv5','pv6','pv7','pv8'], teks:
-          `Tapi dividen tahun kedelapan tidak sepenting tahun pertama, karena harus ditunggu delapan tahun. Setelah didiskonto, batangnya makin pendek ke kanan.` },
+          `Namun dividen tahun kedelapan tidak sepenting tahun pertama, karena harus ditunggu delapan tahun. Setelah didiskonto, batangnya makin pendek ke kanan.` },
         { tampil:['jumlah'], teks:
-          `Kalau seluruhnya dijumlahkan sampai tak terhingga, hasilnya tidak membesar tanpa batas. Deret yang menyusut seperti ini punya jumlah yang terbatas.
+          `Jika seluruhnya dijumlahkan sampai tak terhingga, hasilnya tidak membesar tanpa batas. Deret yang menyusut seperti ini punya jumlah yang terbatas.
            <span class="hit">P<sub>0</sub> = ${usd(D)} ÷ ${pct(r)} = <strong>${usd(P0)}</strong></span>` },
         { tampil:['hasil'], teks:
-          `Jadi selembar sahamnya bernilai <strong>${usd(P0)}</strong>. Model ini juga yang dipakai menilai <strong>preferred stock</strong>, sebab dividennya memang tetap.` }
+          `Jadi selembar sahamnya bernilai <strong>${usd(P0)}</strong>. Model ini juga yang digunakan menilai <strong>preferred stock</strong>, sebab dividennya memang tetap.` }
       ]
     };
   }
@@ -284,12 +284,12 @@
           `Dividennya menanjak.
            <span class="hit">D<sub>1</sub> = ${usd(D0)} × (1 + ${pct(g)}) = ${usd(D1)}</span>` },
         { tampil:['pv1','pv2','pv3','pv4','pv5','pv6','pv7','pv8'], teks:
-          `Dividennya naik ${pct(g)} tiap tahun, tapi pendiskontoannya ${pct(r)} tiap tahun. Karena pembaginya tumbuh lebih cepat, nilai sekarangnya tetap menyusut.` },
+          `Dividennya naik ${pct(g)} tiap tahun, tetapi pendiskontoannya ${pct(r)} tiap tahun. Karena pembaginya tumbuh lebih cepat, nilai sekarangnya tetap menyusut.` },
         { tampil:['jumlah'], teks:
           `Yang dijumlahkan bukan lagi ${pct(r)} penuh, melainkan selisihnya terhadap pertumbuhan.
            <span class="hit">P<sub>0</sub> = ${usd(D1)} ÷ (${pct(r)} &minus; ${pct(g)}) = <strong>${usd(P0)}</strong></span>` },
         { tampil:['hasil'], teks:
-          `Perhatikan penyebutnya <strong>r &minus; g</strong>. Kalau pertumbuhan mendekati imbal hasil yang diminta, penyebutnya mengecil dan harganya melonjak. Karena itu model ini hanya sahih bila <strong>g lebih kecil daripada r</strong>.` }
+          `Perhatikan penyebutnya <strong>r &minus; g</strong>. Jika pertumbuhan mendekati imbal hasil yang diminta, penyebutnya mengecil dan harganya melonjak. Karena itu model ini hanya sahih bila <strong>g lebih kecil daripada r</strong>.` }
       ]
     };
   }
@@ -316,7 +316,7 @@
       babAwal: 'Bagian: Dividen yang tumbuh dua tahap',
       langkah: [
         { tampil:[], teks:
-          `Perusahaan muda bisa tumbuh cepat, tapi tidak selamanya. Misalnya dividen naik <strong>${pct(gCepat)}</strong> selama <strong>${n} tahun</strong>, setelah itu melambat jadi <strong>${pct(gTetap)}</strong> seterusnya.` },
+          `Perusahaan muda bisa tumbuh cepat, tetapi tidak selamanya. Misalnya dividen naik <strong>${pct(gCepat)}</strong> selama <strong>${n} tahun</strong>, setelah itu melambat jadi <strong>${pct(gTetap)}</strong> seterusnya.` },
         { tampil:['d1','d2','d3','garisBatas'], teks:
           `Tiga tahun pertama naiknya tajam.
            <span class="hit">${div.map(d => usd(d)).join(' &nbsp; ')}</span>` },
@@ -332,7 +332,7 @@
           `Angka itu masih berada di tahun ketiga, jadi harus ditarik ke hari ini juga.
            <span class="hit">${usd(nilaiAkhir)} ÷ (1 + ${pct(r)})<sup>${n}</sup> = ${usd(pvAkhir)}</span>` },
         { tampil:['jumlah','hasil'], teks:
-          `Tinggal menjumlahkan dua bagian tadi.
+          `Kedua bagian tadi kemudian dijumlahkan.
            <span class="hit">${usd(pvDiv)} + ${usd(pvAkhir)} = <strong>${usd(P0)}</strong></span>` }
       ]
     };
@@ -501,7 +501,7 @@
   });
   btnPrev.addEventListener('click', () => { if(ke > 0){ ke--; tampilkan(); } });
   btnUlang.addEventListener('click', () => { ke = 0; tampilkan(); });
-  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // Panah kiri dan kanan dipasang melalui modul bersama supaya perilakunya
   // sama di semua halaman materi.
   KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
 

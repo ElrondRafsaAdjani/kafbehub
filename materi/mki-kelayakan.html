@@ -142,7 +142,7 @@
 
   <!-- ============ SOAL ============ -->
   <div class="kotak-materi" id="soal">
-    <h3 data-materi="soal-yang-dipakai.judul" data-label="Soal yang dipakai">Soal yang dipakai</h3>
+    <h3 data-materi="soal-yang-dipakai.judul" data-label="Soal yang digunakan">Soal yang digunakan</h3>
     <p data-materi="soal-yang-dipakai.1" data-label="Venus Corp. mempertimbangkan dua proyek yang saling men…">Venus Corp. mempertimbangkan dua proyek yang saling meniadakan. Modal awal masing-masing $121.000, batas payback period 2 tahun, dan biaya modal 20%. Angkanya boleh diubah sendiri.</p>
 
     <div class="saklar">
@@ -167,7 +167,7 @@
   <!-- ============ PAYBACK PERIOD ============ -->
   <div class="kotak-materi" id="pp">
     <h3 data-materi="payback-period.judul" data-label="Payback Period">Payback Period</h3>
-    <p data-materi="payback-period.1" data-label="Berapa lama modal awal kembali. Arus kas dikumpulkan ta…">Berapa lama modal awal kembali. Arus kas dikumpulkan tahun demi tahun sampai menutup modalnya. Cara ini mengabaikan nilai waktu uang, jadi tidak pernah dipakai sendirian.</p>
+    <p data-materi="payback-period.1" data-label="Berapa lama modal awal kembali. Arus kas dikumpulkan ta…">Berapa lama modal awal kembali. Arus kas dikumpulkan tahun demi tahun sampai menutup modalnya. Cara ini mengabaikan nilai waktu uang, jadi tidak pernah digunakan sendirian.</p>
 
     <div class="gambar-kotak"><svg id="svgPp" viewBox="0 0 660 260"></svg></div>
     <div class="langkah-hitung" id="hitungPp"></div>
@@ -186,7 +186,7 @@
   <!-- ============ IRR ============ -->
   <div class="kotak-materi" id="irr">
     <h3 data-materi="internal-rate-of-return.judul" data-label="Internal Rate of Return">Internal Rate of Return</h3>
-    <p data-materi="internal-rate-of-return.1" data-label="Tingkat diskonto yang membuat NPV tepat nol. Tidak ada…">Tingkat diskonto yang membuat NPV tepat nol. Tidak ada rumus langsungnya, jadi dicari dengan coba-coba: ambil dua tingkat diskonto, hitung NPV masing-masing, lalu tarik garis lurus di antaranya untuk menebak di mana NPV menyentuh nol.</p>
+    <p data-materi="internal-rate-of-return.1" data-label="Tingkat diskonto yang membuat NPV tepat nol. Tidak ada…">Tingkat diskonto yang membuat NPV tepat nol. Tidak ada rumus langsungnya, sehingga nilainya dicari dengan cara trial and error: ambil dua tingkat diskonto, hitung NPV masing-masing, lalu tarik garis lurus di antaranya untuk menebak di mana NPV menyentuh nol.</p>
 
     <div class="kendali">
       <label>Tebakan pertama <span id="lblR1" class="nilai-besar">15%</span>
@@ -201,7 +201,7 @@
     <div class="gambar-kotak"><svg id="svgGaris" viewBox="0 0 660 200"></svg></div>
     <div class="langkah-hitung" id="hitungIrr"></div>
 
-    <h4 data-materi="kalau-npv-digambar-untuk.judul" data-label="Kalau NPV digambar untuk semua tingkat diskonto">Kalau NPV digambar untuk semua tingkat diskonto</h4>
+    <h4 data-materi="kalau-npv-digambar-untuk.judul" data-label="Jika NPV digambar untuk semua tingkat diskonto">Jika NPV digambar untuk semua tingkat diskonto</h4>
     <div class="gambar-kotak"><svg id="svgIrr" viewBox="0 0 660 300"></svg></div>
     <p class="catatan" id="catatanIrr"></p>
   </div>
@@ -211,25 +211,25 @@
     <h3 data-materi="profitability-index.judul" data-label="Profitability Index">Profitability Index</h3>
     <p data-materi="profitability-index.1" data-label="Nilai sekarang dari seluruh arus kas dibagi modal awal.…">Nilai sekarang dari seluruh arus kas dibagi modal awal. Menjawab pertanyaan berapa rupiah manfaat yang didapat untuk tiap satu rupiah yang ditanam.</p>
     <div class="langkah-hitung" id="hitungPi"></div>
-    <p class="catatan" data-materi="profitability-index.2" data-label="PI dan NPV selalu sepakat: bila NPV di atas nol, PI pas…">PI dan NPV selalu sepakat: bila NPV di atas nol, PI pasti di atas satu. Bedanya, NPV menyebut jumlah uangnya, sedangkan PI menyebut perbandingannya, sehingga lebih enak dipakai membandingkan proyek yang modalnya berbeda jauh.</p>
+    <p class="catatan" data-materi="profitability-index.2" data-label="PI dan NPV selalu sepakat: bila NPV di atas nol, PI pas…">PI dan NPV selalu sepakat: bila NPV di atas nol, PI pasti di atas satu. Bedanya, NPV menyebut jumlah uangnya, sedangkan PI menyebut perbandingannya, sehingga lebih enak digunakan membandingkan proyek yang modalnya berbeda jauh.</p>
   </div>
 
   <!-- ============ KESIMPULAN ============ -->
   <div class="kotak-materi" id="putusan">
     <h3 data-materi="kesimpulan.judul" data-label="Kesimpulan">Kesimpulan</h3>
-    <p data-materi="kesimpulan.1" data-label="Kedua proyek dinilai dengan seluruh alat ukur pada angk…">Kedua proyek dinilai dengan seluruh alat ukur pada angka yang sedang dipakai di atas.</p>
+    <p data-materi="kesimpulan.1" data-label="Kedua proyek dinilai dengan seluruh alat ukur pada angk…">Kedua proyek dinilai dengan seluruh alat ukur pada angka yang sedang digunakan di atas.</p>
     <table class="putusan" id="tabelPutusan"></table>
     <p class="catatan" id="catatanPutusan"></p>
 
     <div class="dua">
-      <div><b>Kalau alat ukurnya berbeda pendapat</b>Untuk proyek yang saling meniadakan, NPV yang dipakai, karena langsung menyatakan berapa tambahan kekayaan dalam rupiah. IRR bisa menyesatkan ketika modal kedua proyek berbeda jauh.</div>
+      <div><b>Jika alat ukurnya berbeda pendapat</b>Untuk proyek yang saling meniadakan, NPV yang digunakan, karena langsung menyatakan berapa tambahan kekayaan dalam rupiah. IRR bisa menyesatkan ketika modal kedua proyek berbeda jauh.</div>
       <div><b>Payback period bukan penentu</b>Ia hanya mengukur kecepatan kembalinya modal dan mengabaikan seluruh arus kas setelah titik impas. Berguna sebagai penyaring awal, bukan sebagai keputusan akhir.</div>
     </div>
   </div>
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -384,7 +384,7 @@
   }
 
   /*
-    Garis bantu interpolasi, mengikuti bentuk yang dipakai di lembar asistensi:
+    Garis bantu interpolasi, mengikuti bentuk yang digunakan di lembar asistensi:
     dua tebakan di kedua ujung, dan IRR ditaksir dari garis lurus di antaranya.
   */
   function gambarGaris(r1, n1, r2, n2, irrTaksir){
@@ -439,7 +439,7 @@
       s += `<text x="${x(r)}" y="${y(n) - 11}" text-anchor="middle" font-size="10.5"
              font-weight="700" fill="var(--owl-dark)">${nama}</text>`;
     }
-    // Garis lurus penghubung dua tebakan, yaitu yang dipakai interpolasi
+    // Garis lurus penghubung dua tebakan, yaitu yang digunakan interpolasi
     if(r1 <= rMaks && r2 <= rMaks){
       s += `<line x1="${x(r1)}" y1="${y(npv(cf, r1, modal))}" x2="${x(r2)}" y2="${y(npv(cf, r2, modal))}"
              stroke="var(--gold-deep)" stroke-width="2" stroke-dasharray="6 4"/>`;
@@ -536,7 +536,7 @@
     el('catatanIrr').innerHTML = irrT === null
       ? 'Arus kas ini tidak menghasilkan IRR pada rentang yang wajar.'
       : `Lengkung NPV sebenarnya melengkung, sedangkan interpolasi menariknya dengan garis lurus. `
-        + `Karena itu hasil coba-coba hampir selalu meleset sedikit: di sini interpolasi memberi `
+        + `Karena itu hasil trial and error hampir selalu meleset sedikit. Di sini interpolasi memberikan `
         + `<strong>${irrI === null ? '—' : persen(irrI)}</strong> sementara nilai tepatnya `
         + `<strong>${persen(irrT)}</strong>${beda === null ? '' : `, selisih ${f2(beda)} poin persen`}. `
         + `Semakin berdekatan kedua tebakan, semakin kecil selisihnya.`;
@@ -591,8 +591,8 @@
     const lolosY = hasil.Y.npv > 0 && hasil.Y.pi > 1 && hasil.Y.irr > coc;
     let kesimpulan;
     if(lolosX && lolosY) kesimpulan = hasil.X.npv >= hasil.Y.npv
-      ? 'Keduanya layak, tapi karena saling meniadakan yang dipilih Proyek X, sebab NPV-nya lebih besar.'
-      : 'Keduanya layak, tapi karena saling meniadakan yang dipilih Proyek Y, sebab NPV-nya lebih besar.';
+      ? 'Keduanya layak, tetapi karena saling meniadakan yang dipilih Proyek X, sebab NPV-nya lebih besar.'
+      : 'Keduanya layak, tetapi karena saling meniadakan yang dipilih Proyek Y, sebab NPV-nya lebih besar.';
     else if(lolosX) kesimpulan = 'Hanya Proyek X yang lolos seluruh syarat, jadi Proyek X yang dipilih.';
     else if(lolosY) kesimpulan = 'Hanya Proyek Y yang lolos seluruh syarat, jadi Proyek Y yang dipilih.';
     else kesimpulan = 'Tidak ada yang lolos seluruh syarat pada angka ini, jadi keduanya sebaiknya ditolak.';

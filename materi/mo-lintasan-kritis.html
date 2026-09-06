@@ -72,7 +72,7 @@
 
   /* Jaringannya lebar dan tidak bisa dipersempit tanpa membuat angkanya
      bertumpuk, jadi di layar sempit digulirkan di dalam kotaknya sendiri.
-     Yang bergeser cuma gambarnya, bukan seluruh halaman. */
+     Yang bergeser hanya gambarnya, bukan seluruh halaman. */
   .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:14px; overflow-x:auto;}
   #jaringSvg{display:block; width:100%; min-width:660px; height:auto; aspect-ratio:720/470;}
 
@@ -121,7 +121,7 @@
   }
   .dua b{display:block; color:var(--owl-dark2); font-size:1rem; margin-bottom:4px;}
 
-  /* Contoh kotak aktivitas yang dipakai di bagian keterangan. */
+  /* Contoh kotak aktivitas yang digunakan di bagian keterangan. */
   .kotak-contoh{
     display:inline-grid; grid-template-columns:auto auto; gap:0;
     border:2px solid var(--owl-dark2); border-radius:10px; overflow:hidden;
@@ -162,7 +162,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -212,7 +212,7 @@
     <p data-materi="critical-path.1" data-label="Mengenal konsepnya lebih dulu, lalu cara mengerjakannya…">Mengenal konsepnya lebih dulu, lalu cara mengerjakannya, baru masuk ke contoh soal yang digambar langkah demi langkah.</p>
   </div>
 
-  <p class="catatan-layar" data-materi="critical-path.2" data-label="Visualisasinya lebih nyaman dibuka lewat tablet, laptop…">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
+  <p class="catatan-layar" data-materi="critical-path.2" data-label="Visualisasinya lebih nyaman dibuka melalui tablet, laptop…">Visualisasi materi lebih nyaman dibuka melalui tablet, laptop, atau komputer. Halaman ini tetap dapat dibuka melalui ponsel.</p>
 
   <!-- ============ 1. KONSEP ============ -->
   <div class="kotak-materi">
@@ -224,13 +224,13 @@
       <div><b>Kenapa disebut kritis</b>
         Aktivitas di jalur ini tidak punya waktu cadangan. Menunda salah satunya berarti menunda proyeknya, sehingga jalur ini yang paling perlu dijaga.</div>
       <div><b>Kenapa selalu jalur terpanjang</b>
-        Proyek baru selesai kalau semua jalur sudah selesai. Jalur yang paling lama adalah yang terakhir rampung, jadi jalur itulah yang menahan tanggal selesainya.</div>
+        Proyek baru selesai jika semua jalur sudah selesai. Jalur yang paling lama adalah yang terakhir rampung, jadi jalur itulah yang menahan tanggal selesainya.</div>
     </div>
 
     <h4 data-materi="critical-path-method-cpm.judul" data-label="Critical Path Method (CPM)">Critical Path Method (CPM)</h4>
     <p data-materi="critical-path-method-cpm.1" data-label="Critical Path Method adalah cara terstruktur untuk mene…">Critical Path Method adalah cara terstruktur untuk menemukan jalur tersebut. Caranya dengan menggambar aktivitas beserta urutannya menjadi sebuah jaringan, menghitung waktu paling cepat dan paling lambat tiap aktivitas, lalu melihat aktivitas mana yang sama sekali tidak punya kelonggaran.</p>
-    <p data-materi="critical-path-method-cpm.2" data-label="Dari CPM didapat tiga jawaban sekaligus. Pertama, berap…">Dari CPM didapat tiga jawaban sekaligus. Pertama, berapa lama proyek selesai kalau berjalan normal. Kedua, aktivitas mana yang tidak boleh terlambat. Ketiga, aktivitas mana yang masih punya kelonggaran, sehingga tenaga dan biaya tidak perlu ditumpuk di situ.</p>
-    <p data-materi="critical-path-method-cpm.3" data-label="CPM menganggap lama tiap aktivitas sudah diketahui dan…">CPM menganggap lama tiap aktivitas sudah diketahui dan bersifat pasti. Kalau lama aktivitas masih berupa perkiraan yang bisa meleset, metode yang lebih cocok adalah PERT.</p>
+    <p data-materi="critical-path-method-cpm.2" data-label="Dari CPM didapat tiga jawaban sekaligus. Pertama, berap…">Dari CPM didapat tiga jawaban sekaligus. Pertama, berapa lama proyek selesai jika berjalan normal. Kedua, aktivitas mana yang tidak boleh terlambat. Ketiga, aktivitas mana yang masih punya kelonggaran, sehingga tenaga dan biaya tidak perlu ditumpuk di situ.</p>
+    <p data-materi="critical-path-method-cpm.3" data-label="CPM menganggap lama tiap aktivitas sudah diketahui dan…">CPM menganggap lama tiap aktivitas sudah diketahui dan bersifat pasti. Jika lama aktivitas masih berupa perkiraan yang bisa meleset, metode yang lebih cocok adalah PERT.</p>
 
     <h4 data-materi="arti-tiap-istilah.judul" data-label="Arti tiap istilah">Arti tiap istilah</h4>
     <p data-materi="arti-tiap-istilah.1" data-label="Empat angka pada setiap aktivitas selalu ditulis pada p…">Empat angka pada setiap aktivitas selalu ditulis pada posisi yang sama, sehingga bisa dibaca sekilas tanpa perlu dilabeli satu per satu.</p>
@@ -253,12 +253,12 @@
       </table>
     </div>
 
-    <h4 data-materi="rumus-yang-dipakai.judul" data-label="Rumus yang dipakai">Rumus yang dipakai</h4>
+    <h4 data-materi="rumus-yang-dipakai.judul" data-label="Rumus yang digunakan">Rumus yang digunakan</h4>
     <div class="rumus">EF = ES + waktu aktivitas</div>
     <div class="rumus">LS = LF − waktu aktivitas</div>
     <div class="rumus">Slack = LS − ES = LF − EF</div>
 
-    <p style="margin-top:14px;" data-materi="rumus-yang-dipakai.1" data-label="Slack bisa dihitung dengan dua cara itu dan hasilnya se…">Slack bisa dihitung dengan dua cara itu dan hasilnya selalu sama. Kalau keduanya berbeda, berarti ada salah hitung di langkah sebelumnya, jadi ini sekaligus cara memeriksa pekerjaan sendiri.</p>
+    <p style="margin-top:14px;" data-materi="rumus-yang-dipakai.1" data-label="Slack bisa dihitung dengan dua cara itu dan hasilnya se…">Slack bisa dihitung dengan dua cara itu dan hasilnya selalu sama. Jika keduanya berbeda, berarti ada salah hitung di langkah sebelumnya, jadi ini sekaligus cara memeriksa pekerjaan sendiri.</p>
   </div>
 
   <!-- ============ 2. CARA MENGERJAKAN ============ -->
@@ -277,12 +277,12 @@
 
     <h4 data-materi="dua-hal-yang-paling.judul" data-label="Dua hal yang paling sering keliru">Dua hal yang paling sering keliru</h4>
     <div class="dua">
-      <div><b>Hitung maju memakai yang TERBESAR</b>
-        Sebuah aktivitas baru bisa mulai kalau semua pendahulunya sudah selesai, jadi
-        yang dipakai EF paling besar, bukan yang paling kecil.</div>
-      <div><b>Hitung mundur memakai yang TERKECIL</b>
+      <div><b>Hitung maju menggunakan yang TERBESAR</b>
+        Sebuah aktivitas baru bisa mulai jika semua pendahulunya sudah selesai, jadi
+        yang digunakan EF paling besar, bukan yang paling kecil.</div>
+      <div><b>Hitung mundur menggunakan yang TERKECIL</b>
         Sebuah aktivitas harus sudah selesai sebelum penerus mana pun dimulai, jadi
-        yang dipakai LS paling kecil, bukan yang paling besar.</div>
+        yang digunakan LS paling kecil, bukan yang paling besar.</div>
     </div>
   </div>
 
@@ -299,13 +299,13 @@
       <div><b>Pertanyaannya</b>
         Pertama, tentukan critical path dan waktu penyelesaian normalnya.
         Kedua, tentukan biaya total untuk menyelesaikan proyek ini.</div>
-      <div><b>Kenapa memakai CPM</b>
+      <div><b>Kenapa menggunakan CPM</b>
         Soal tidak menyebut proyek ini proyek baru, jadi lama tiap aktivitas dianggap
         sudah diketahui dari pengerjaan yang pernah berjalan. Keadaan seperti itu
         dikerjakan dengan CPM, bukan PERT.</div>
     </div>
 
-    <p style="margin:16px 0 0;" data-materi="soalnya.2" data-label="Kolom crashing time dan crashing cost belum dipakai unt…">Kolom crashing time dan crashing cost belum dipakai untuk menjawab dua pertanyaan di atas. Dua kolom itu baru diperlukan kalau proyeknya ingin dipercepat, dan soal aslinya memang berlanjut ke sana. Bagian itu dikerjakan di halaman <a href="mo-crashing.html">Crashing</a>, memakai jawaban dari halaman ini.</p>
+    <p style="margin:16px 0 0;" data-materi="soalnya.2" data-label="Kolom crashing time dan crashing cost belum digunakan unt…">Kolom crashing time dan crashing cost belum digunakan untuk menjawab dua pertanyaan di atas. Dua kolom itu baru diperlukan jika proyeknya ingin dipercepat, dan soal aslinya memang berlanjut ke sana. Bagian itu dikerjakan di halaman <a href="mo-crashing.html">Crashing</a>, menggunakan jawaban dari halaman ini.</p>
     <p style="margin:12px 0 0;" data-materi="soalnya.3" data-label="Jaringannya digambar satu aktivitas per langkah, mengik…">Jaringannya digambar satu aktivitas per langkah, mengikuti urutan pada tabel. Aktivitas yang sedang digambar ikut disorot di tabel kecil sebelah gambar, jadi terlihat jelas kotak mana yang berasal dari baris mana.</p>
   </div>
 
@@ -354,13 +354,13 @@
     <p id="ringkasBiaya" style="margin:12px 0 0;"></p>
 
     <h4 data-materi="pertanyaan-berikutnya.judul" data-label="Pertanyaan berikutnya">Pertanyaan berikutnya</h4>
-    <p style="margin:0 0 16px;" data-materi="pertanyaan-berikutnya.1" data-label="Soal aslinya masih berlanjut. Perusahaan ingin proyekny…">Soal aslinya masih berlanjut. Perusahaan ingin proyeknya selesai dua minggu lebih cepat, dan yang ditanyakan aktivitas mana yang dipercepat beserta biaya totalnya yang baru. Itu materi crashing, memakai jawaban dari halaman ini sebagai titik berangkat.</p>
+    <p style="margin:0 0 16px;" data-materi="pertanyaan-berikutnya.1" data-label="Soal aslinya masih berlanjut. Perusahaan ingin proyekny…">Soal aslinya masih berlanjut. Perusahaan ingin proyeknya selesai dua minggu lebih cepat, dan yang ditanyakan aktivitas mana yang dipercepat beserta biaya totalnya yang baru. Itu materi crashing, menggunakan jawaban dari halaman ini sebagai titik berangkat.</p>
     <a href="mo-crashing.html" class="btn btn-gold">Lanjut ke Crashing →</a>
   </div>
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -377,7 +377,7 @@
      mundur membaca daftar yang sama secara terbalik. Jadi aktivitas harus
      ditulis dengan pendahulu selalu berada di atas penerusnya.
 
-     Urutan ini juga dipakai sebagai urutan menggambar, dan menjadi isi tabel
+     Urutan ini juga digunakan sebagai urutan menggambar, dan menjadi isi tabel
      data soal di sebelah gambar.
 
      Mengubah angka waktu di sini otomatis mengubah seluruh gambar, tabel, dan
@@ -462,7 +462,7 @@
 
   /* ---------- Tabel soal ----------
 
-     Dua tabel, satu sumber data. Yang lengkap dipakai di bagian soal, yang
+     Dua tabel, satu sumber data. Yang lengkap digunakan di bagian soal, yang
      ringkas menemani gambar dan ikut disorot mengikuti langkahnya. */
 
   (function(){
@@ -605,7 +605,7 @@
     return out;
   }
   // Sebuah aktivitas selalu digambar bersama panah dari para pendahulunya,
-  // atau panah dari Start kalau ia memang tidak punya pendahulu.
+  // atau panah dari Start jika ia memang tidak punya pendahulu.
   function gambarAktivitas(id){
     var a = AKTIVITAS.filter(function(z){ return z.id === id; })[0];
     var out = ['kotak' + id];
@@ -684,8 +684,8 @@
 
     { bab:'Hitung maju',
       teks:'<b>G</b> menunggu D, E, dan F sekaligus. EF ketiganya ' + m.D.ef + ', ' + m.E.ef + ', dan ' + m.F.ef + ', '
-         + 'dan yang dipakai yang <b>paling besar</b>, yaitu ' + m.G.es + '. '
-         + 'Kalau memakai yang kecil, G seolah bisa mulai padahal D belum selesai.',
+         + 'dan yang digunakan yang <b>paling besar</b>, yaitu ' + m.G.es + '. '
+         + 'Jika menggunakan yang kecil, G seolah bisa mulai padahal D belum selesai.',
       tampil: idMaju(['G']) },
 
     { bab:'Lama proyek',
@@ -722,12 +722,12 @@
 
     { bab:'Setelah ini',
       teks:'Sampai di sini pertanyaan a dan b sudah terjawab. Pertanyaan berikutnya pada soal ini meminta proyeknya dipercepat dua minggu, '
-         + 'dan untuk itu dipakai <b>crashing</b>. Pembahasannya ada di topik berikutnya.',
+         + 'dan untuk itu digunakan <b>crashing</b>. Pembahasannya ada di topik berikutnya.',
       tampil:['papanJalur'], soroti:true }
   ];
 
   /*
-    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+    Naskah tiap langkah boleh diubah pengajar melalui halaman /pengajar.
 
     Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
     disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
@@ -824,7 +824,7 @@
 
   btnNext.addEventListener('click', function(){ if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
   btnPrev.addEventListener('click', function(){ if(ke > 0){ ke--; tampilkan(); } });
-  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // Panah kiri dan kanan dipasang melalui modul bersama supaya perilakunya
   // sama di semua halaman materi.
   KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
   btnUlang.addEventListener('click', function(){ ke = 0; tampilkan(); });

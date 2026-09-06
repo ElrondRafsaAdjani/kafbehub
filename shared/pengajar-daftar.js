@@ -8,7 +8,7 @@
   tahu letak kesalahannya sebelum akun Firebase-nya terlanjur dibuat.
 
   Yang benar-benar menolak adalah firestore.rules. Di sanalah ditegakkan bahwa
-  pengajuan harus atas nama akun sendiri, berstatus menunggu, memakai email
+  pengajuan harus atas nama akun sendiri, berstatus menunggu, menggunakan email
   student UBAYA, dan tanpa satu pun kolom wewenang. Melewati halaman ini lewat
   Console peramban tidak menghasilkan apa pun selain penolakan server.
 */
@@ -38,8 +38,8 @@ const $ = id => document.getElementById(id);
 /*
   Catatan langkah saat mendaftar.
 
-  Pendaftaran berjalan dalam dua langkah asinkron, dan kalau salah satunya
-  gagal diam-diam pemakai cuma melihat halaman yang tidak bereaksi. Setiap
+  Pendaftaran berjalan dalam dua langkah asinkron, dan jika salah satunya
+  gagal diam-diam pemakai hanya melihat halaman yang tidak bereaksi. Setiap
   langkah dicatat ke panel yang bisa dibuka di bawah formulir, sehingga tidak
   perlu membuka developer tools untuk tahu langkah mana yang berhenti.
 */
@@ -58,9 +58,9 @@ function diag(teks){
   Keadaan biasa adalah pendaftaran dari nol: belum ada akun, dan keempat isian
   diisi sekaligus.
 
-  Keadaan kedua muncul kalau akun Firebase-nya sudah jadi tapi baris
+  Keadaan kedua muncul jika akun Firebase-nya sudah jadi tetapi baris
   pengajuannya belum tersimpan, misalnya karena jaringan putus tepat di antara
-  kedua langkah itu. Yang dipakai tetap formulir yang sama, hanya kotak kata
+  kedua langkah itu. Yang digunakan tetap formulir yang sama, hanya kotak kata
   sandinya dilepas karena akunnya sudah ada, dan emailnya dikunci pada email
   akun itu.
 
@@ -68,7 +68,7 @@ function diag(teks){
   layar itu menanyakan ulang nama serta NRP saja. Akibatnya pendaftaran terasa
   terpecah menjadi dua formulir berbeda, padahal maksudnya satu hal yang sama.
 */
-let akunAda = null;   // diisi kalau sedang melengkapi pengajuan
+let akunAda = null;   // diisi jika sedang melengkapi pengajuan
 
 function pasangModeLanjutan(user){
   akunAda = user;
@@ -93,7 +93,7 @@ onAuthStateChanged(auth, async (user) => {
     pengajar sudah tahu sendiri harus menampilkan apa untuk tiap status, jadi
     urusannya diserahkan ke sana.
 
-    Kalau status pengajuannya gagal diperiksa, halaman pengajar juga yang
+    Jika status pengajuannya gagal diperiksa, halaman pengajar juga yang
     menjelaskannya, sebab di sanalah pesan galat untuk keadaan itu ditulis.
   */
   try{
@@ -105,7 +105,7 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  diag('Akun sudah ada tapi pengajuannya belum. Melanjutkan pengisian.');
+  diag('Akun sudah ada tetapi pengajuannya belum. Melanjutkan pengisian.');
   pasangModeLanjutan(user);
 });
 
@@ -160,10 +160,10 @@ $('formDaftar').addEventListener('submit', async (e) => {
   */
   if(angkaEmail(email) !== nrp && el.dataset.konfirmasi !== '1'){
     pesan(el,
-      'Email tidak sesuai NRP. Email student UBAYA memakai NRP Anda, jadi '
+      'Email tidak sesuai NRP. Email student UBAYA menggunakan NRP Anda, jadi '
       + `menurut NRP <strong>${esc(nrp)}</strong> emailnya adalah `
       + `<code>${esc(emailSeharusnya(nrp))}</code>.<br><br>`
-      + 'Perbaiki salah satunya, atau tekan Kirim pengajuan sekali lagi kalau '
+      + 'Perbaiki salah satunya, atau tekan Kirim pengajuan sekali lagi jika '
       + 'email Anda memang berbeda dari itu.',
       'hati');
     el.dataset.konfirmasi = '1';
@@ -180,7 +180,7 @@ $('formDaftar').addEventListener('submit', async (e) => {
     menulis baris pengajuannya.
 
     Baris pengajuan hanya boleh ditulis oleh pemilik akunnya sendiri menurut
-    aturan Firestore, jadi urutannya memang tidak bisa dibalik. Kalau langkah
+    aturan Firestore, jadi urutannya memang tidak bisa dibalik. Jika langkah
     kedua gagal, akunnya sudah terlanjur jadi. Halaman ini lalu berpindah
     sendiri ke keadaan melengkapi, dengan isian yang sudah diketik tetap di
     tempatnya, sehingga percobaan berikutnya tinggal menekan tombolnya lagi.

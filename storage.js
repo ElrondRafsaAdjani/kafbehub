@@ -3,8 +3,8 @@
 
   - "Skor terbaik" (getBest/setBest) tetap disimpan per perangkat lewat
     localStorage, cukup untuk statistik pribadi "skor terbaikmu di HP/laptop ini".
-  - "Papan peringkat" (getLeaderboard/addScore) sekarang memakai Firebase
-    Firestore, jadi BENERAN dibagikan ke semua pengunjung situs, bukan cuma
+  - "Papan peringkat" (getLeaderboard/addScore) sekarang menggunakan Firebase
+    Firestore, jadi BENERAN dibagikan ke semua pengunjung situs, bukan hanya
     lokal di satu browser.
   - Setiap game punya papan peringkatnya sendiri lewat parameter `gameId`
     (contoh: 'flappy-owl'). Game baru nanti tinggal panggil fungsi yang sama
@@ -12,7 +12,7 @@
 
   SEBELUM DIISI KONFIGURASI FIREBASE (lihat firebase-config.js):
   kode ini otomatis jatuh ke localStorage per-perangkat supaya situs tetap
-  jalan, tapi papan peringkat belum benar-benar global sampai kamu isi
+  jalan, tetapi papan peringkat belum benar-benar global sampai kamu isi
   konfigurasinya.
 
   CATATAN KEAMANAN (Firestore Security Rules):
@@ -37,7 +37,7 @@
 
   Ini membatasi entri baru harus punya bentuk yang wajar, dan tidak ada yang
   bisa mengubah/menghapus skor yang sudah tersimpan. Tidak sempurna (orang
-  tetap bisa spam entri baru lewat console browser), tapi cukup untuk hub
+  tetap bisa spam entri baru lewat console browser), tetapi cukup untuk hub
   internal seperti ini.
 */
 window.KafbeStorage = (function(){
@@ -73,7 +73,7 @@ window.KafbeStorage = (function(){
     try{ localStorage.setItem('kafbe_best_' + gameId, String(n)); }catch(e){}
   }
 
-  // ---------- Local fallback leaderboard (dipakai kalau Firebase belum di-setup) ----------
+  // ---------- Local fallback leaderboard (digunakan jika Firebase belum di-setup) ----------
   function localKey(gameId){ return 'kafbe_leaderboard_' + gameId; }
   function getLocalLeaderboard(gameId){
     try{
@@ -103,7 +103,7 @@ window.KafbeStorage = (function(){
     const c = cache.get(gameId);
     if(!c) return null;
     if(Date.now() - c.waktu > CACHE_TTL_MS){ cache.delete(gameId); return null; }
-    // Cache yang isinya lebih pendek dari yang diminta tidak bisa dipakai.
+    // Cache yang isinya lebih pendek dari yang diminta tidak bisa digunakan.
     if(c.limitN < limitN) return null;
     return c.data;
   }
@@ -151,8 +151,8 @@ window.KafbeStorage = (function(){
       }catch(e){
         indexTersedia = false;
         console.info(
-          'KafbeStorage: composite index belum ada, sementara memakai cara lama '
-          + '(membaca semua skor). Buat index lewat tautan pada pesan error di '
+          'KafbeStorage: composite index belum ada, sementara menggunakan cara lama '
+          + '(membaca semua skor). Buat index melalui tautan pada pesan error di '
           + 'bawah ini supaya pembacaan turun jadi ' + limitN + ' dokumen saja.',
           e && e.message
         );
@@ -209,7 +209,7 @@ window.KafbeStorage = (function(){
         ts: firestore.serverTimestamp()
       });
       // Papan peringkat berubah, jadi cache lama harus dibuang supaya skor
-      // yang baru saja dikirim langsung kelihatan.
+      // yang baru saja dikirim langsung terlihat.
       cache.delete(gameId);
     }catch(e){
       console.error('KafbeStorage: gagal simpan skor ke Firebase, simpan ke lokal saja.', e);

@@ -20,9 +20,9 @@
       <script src="/shared/nav.js"></script>
 
   Halaman itu juga perlu memuat styles.css dan memiliki simbol <symbol
-  id="kafbe-owl"> seperti halaman lain, karena lambangnya dipakai di sini.
+  id="kafbe-owl"> seperti halaman lain, karena lambangnya digunakan di sini.
 
-  CATATAN: halaman /operasional sengaja TIDAK memakai navigasi ini dan tidak
+  CATATAN: halaman /operasional sengaja TIDAK menggunakan navigasi ini dan tidak
   boleh dimasukkan ke daftar TAUTAN, karena halaman pengurus memang tidak
   ditautkan dari mana pun di situs.
 */
@@ -32,15 +32,15 @@
   //   href  : alamat tujuan, ditulis dari akar situs supaya benar dari
   //           kedalaman folder mana pun (materi/, game-santai/, dan seterusnya)
   //   aktif : pola alamat yang membuat menu ini ditandai sedang dibuka
-  //   fitur : kunci fitur di halaman /adminkafbe. Kalau fitur itu sedang tidak
+  //   fitur : kunci fitur di halaman /adminkafbe. Jika fitur itu sedang tidak
   //           aktif, menunya diredupkan oleh shared/situs.js supaya pengunjung
   //           tidak diantar ke halaman yang ujungnya menolak membuka diri.
   var TAUTAN = [
     { teks: 'Beranda',             en: 'Home',              href: '/index.html#beranda',      aktif: /^\/(index\.html)?$/ },
     { teks: 'Jadwal Kelas',        en: 'Class Schedule',    href: '/jadwal.html',             aktif: /^\/jadwal(\.html)?$/,   fitur: 'jadwal' },
     { teks: 'Visualisasi Materi',  en: 'Course Visuals',    href: '/index.html#visualisasi',  aktif: /^\/materi\//,           fitur: 'visualisasi' },
-    { teks: 'Belajar Sambil Main', en: 'Learn by Playing',  href: '/index.html#belajar-main', aktif: /^\/belajar-sambil-main\//, fitur: 'belajar-main' },
-    { teks: 'Main Santai',         en: 'Casual Games',      href: '/index.html#main-santai',  aktif: /^\/game-santai\//,      fitur: 'main-santai' }
+    { teks: 'Belajar Sambil Bermain', en: 'Learn by Playing',  href: '/index.html#belajar-main', aktif: /^\/belajar-sambil-main\//, fitur: 'belajar-main' },
+    { teks: 'Game Santai',         en: 'Casual Games',      href: '/index.html#main-santai',  aktif: /^\/game-santai\//,      fitur: 'main-santai' }
   ];
 
   var wadah = document.getElementById('kafbeNav');
@@ -54,7 +54,7 @@
     });
   }
 
-  // Menu memakai data-en supaya ikut berganti lewat mekanisme yang sama dengan
+  // Menu menggunakan data-en supaya ikut berganti lewat mekanisme yang sama dengan
   // isi halaman, bukan digambar ulang sendiri.
   var butir = TAUTAN.map(function(t){
     var aktif = t.aktif && t.aktif.test(jalur);

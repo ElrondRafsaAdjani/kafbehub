@@ -124,7 +124,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -171,7 +171,7 @@
     <a href="#membaca">2. Cara membaca tabel</a>
     <a href="#tabel">3. Tabel Z</a>
     <a href="#latihan">4. Latihan</a>
-    <a href="#pendekatan">5. Poisson &amp; Binomial</a>
+    <a href="#pendekatan">5. Poisson dan Binomial</a>
   </nav>
 
   <!-- ============ 1. KONSEP ============ -->
@@ -300,7 +300,7 @@
   <!-- ============ 5. PENDEKATAN ============ -->
   <div class="kotak-materi" id="pendekatan">
     <h3 data-materi="5-poisson-dan-binomial.judul" data-label="5. Poisson dan Binomial yang didekati Normal">5. Poisson dan Binomial yang didekati Normal</h3>
-    <p data-materi="5-poisson-dan-binomial.1" data-label="Kalau datanya mencacah dan jumlahnya besar, distribusi…">Kalau datanya mencacah dan jumlahnya besar, distribusi Poisson dan Binomial bentuknya sudah mirip kurva normal, sehingga boleh dihitung memakai tabel Z yang sama.</p>
+    <p data-materi="5-poisson-dan-binomial.1" data-label="Jika datanya mencacah dan jumlahnya besar, distribusi…">Jika datanya mencacah dan jumlahnya besar, distribusi Poisson dan Binomial bentuknya sudah mirip kurva normal, sehingga boleh dihitung menggunakan tabel Z yang sama.</p>
 
     <h4 data-materi="poisson-normal.judul" data-label="Poisson ≈ Normal">Poisson ≈ Normal</h4>
     <div class="rumus">
@@ -319,15 +319,15 @@
     <h4 data-materi="kenapa-ada-0-5.judul" data-label="Kenapa ada ± 0,5">Kenapa ada ± 0,5</h4>
     <p data-materi="kenapa-ada-0-5.1" data-label="Poisson dan Binomial mencacah dengan bilangan bulat, se…">Poisson dan Binomial mencacah dengan bilangan bulat, sedangkan kurva normal menerima nilai pecahan mana pun. Angka <strong>0,5</strong> menambal celah di antara dua bilangan bulat itu, dan disebut <strong>faktor koreksi</strong>.</p>
     <div class="fakta">
-      <div><b>Pakai &minus; 0,5</b>Bila yang dicari termasuk batasnya ke arah kanan, misalnya <strong>P(X ≥ a)</strong>.</div>
-      <div><b>Pakai + 0,5</b>Bila yang dicari termasuk batasnya ke arah kiri, misalnya <strong>P(X ≤ a)</strong>.</div>
-      <div><b>Setelah ketemu Z</b>Langkahnya sama persis dengan bagian sebelumnya: baca tabel, lalu hitung luasnya.</div>
+      <div><b>Gunakan &minus; 0,5</b>Bila yang dicari termasuk batasnya ke arah kanan, misalnya <strong>P(X ≥ a)</strong>.</div>
+      <div><b>Gunakan + 0,5</b>Bila yang dicari termasuk batasnya ke arah kiri, misalnya <strong>P(X ≤ a)</strong>.</div>
+      <div><b>Setelah nilai Z ditemukan</b>Langkahnya sama persis dengan bagian sebelumnya: baca tabel, lalu hitung luasnya.</div>
     </div>
   </div>
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -557,7 +557,7 @@
     { label:'P(z<Z<1,50)=0,1337',  mode:'z', pola:'antara',    a:'', b:'1,50', p:'0,1337' }
   ];
 
-  // Label soal mengandung tanda "<". Kalau ditulis apa adanya, peramban
+  // Label soal mengandung tanda "<". Jika ditulis apa adanya, peramban
   // membacanya sebagai awal tag sehingga tulisan sesudahnya hilang, misalnya
   // "P(Z<z)=0,9591" hanya tampil sebagai "P(Z".
   const escHtml = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

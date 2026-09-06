@@ -69,7 +69,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -146,7 +146,7 @@
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -159,10 +159,10 @@
   // Data tinggi badan.
   //
   // Angkanya sengaja ditetapkan, bukan diacak, supaya gambarnya selalu sama
-  // setiap kali halaman dibuka dan enak dipakai menjelaskan di depan kelas.
+  // setiap kali halaman dibuka dan enak digunakan menjelaskan di depan kelas.
   // Tiap orang digambar sebagai satu titik; yang tingginya sama menumpuk.
   // ===================================================================
-  // Sengaja simetris terhadap 170 cm. Kurva normal itu simetris, jadi kalau
+  // Sengaja simetris terhadap 170 cm. Kurva normal itu simetris, jadi jika
   // datanya berat sebelah, kurvanya akan melayang di atas tumpukan pada satu
   // sisi, dan justru merusak inti pelajarannya bahwa kurva ini muncul DARI
   // data, bukan digambar di atasnya.
@@ -197,7 +197,7 @@
     tampil : muncul di langkah ini dan tetap terlihat sesudahnya
     sorot  : hanya terlihat pada langkah ini saja
 
-    Label tinggi badan masuk ke "sorot", bukan "tampil". Kalau semuanya
+    Label tinggi badan masuk ke "sorot", bukan "tampil". Jika semuanya
     dibiarkan menumpuk, label 160 dan 165 saling menimpa karena titiknya
     bersebelahan dan sama-sama di baris terbawah.
   */
@@ -221,15 +221,15 @@
     { bab:'banyak', tampil:['pusat','pusatLbl'], sorot:[],
       teks:'Tumpukannya paling tebal di sekitar <strong>170 cm</strong>. Di sinilah kebanyakan orang berkumpul.' },
     { bab:'banyak', tampil:['ekorKiri','ekorKanan','ekorLblKiri','ekorLblKanan'], sorot:[],
-      teks:'Yang sangat pendek dan yang sangat tinggi sama-sama sedikit. Kedua ujungnya tipis, cuma satu dua titik.' },
+      teks:'Yang sangat pendek dan yang sangat tinggi sama-sama sedikit. Kedua ujungnya tipis, hanya satu dua titik.' },
     { bab:'kurva', tampil:['kurva','kurvaLbl'], sorot:[],
-      teks:'Kalau puncak tiap tumpukan kita ikuti, garisnya melengkung: menggunung di tengah, melandai ke kiri dan ke kanan. Inilah <strong>kurva normal</strong>.' },
+      teks:'Jika puncak tiap tumpukan kita ikuti, garisnya melengkung: menggunung di tengah, melandai ke kiri dan ke kanan. Inilah <strong>kurva normal</strong>.' },
     { bab:'kurva', tampil:['ringkas'], sorot:[],
-      teks:'Kurva ini tidak dikarang, melainkan muncul sendiri dari data nyata. Pola yang sama terlihat pada berat badan, nilai ujian, dan ukuran sepatu. Itu sebabnya <strong>distribusi normal</strong> dipakai di mana-mana.' }
+      teks:'Kurva ini tidak dikarang, melainkan muncul sendiri dari data nyata. Pola yang sama terlihat pada berat badan, nilai ujian, dan ukuran sepatu. Itu sebabnya <strong>distribusi normal</strong> digunakan di mana-mana.' }
   ];
 
   /*
-    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+    Naskah tiap langkah boleh diubah pengajar melalui halaman /pengajar.
 
     Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
     disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
@@ -298,7 +298,7 @@
       malah terbaca sebagai batang histogram, padahal yang sedang diceritakan
       justru titik-titik itu sendiri.
 
-      Tulisannya ditaruh di atas kotak, bukan di dalamnya, dan warnanya gelap
+      Tulisannya diletakkan di atas kotak, bukan di dalamnya, dan warnanya gelap
       supaya tetap terbaca.
     */
     const tinggiTumpukan = (nMaks) => 9 + (nMaks - 1) * JARAK + R + 8;
@@ -348,7 +348,7 @@
     s += `<g id="sisa">${sisa}</g>`;
 
     // Label tinggi badan, satu untuk tiap orang yang diceritakan. Diberi latar
-    // agar tetap terbaca kalau kebetulan jatuh di atas sorotan.
+    // agar tetap terbaca jika kebetulan jatuh di atas sorotan.
     for(const c of CERITA){
       const x = sx(c.cm), y = cyTitik(c.idx) - 15;
       s += `<g id="${idLabel(c.cm, c.idx)}" class="viz-hide">
@@ -430,7 +430,7 @@
   btnNext.addEventListener('click', () => { if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
   btnPrev.addEventListener('click', () => { if(ke > 0){ ke--; tampilkan(); } });
   btnUlang.addEventListener('click', () => { ke = 0; tampilkan(); });
-  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // Panah kiri dan kanan dipasang melalui modul bersama supaya perilakunya
   // sama di semua halaman materi.
   KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
 

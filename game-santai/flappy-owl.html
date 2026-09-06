@@ -69,7 +69,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -131,17 +131,17 @@
       <div class="overlay" id="overlayStart">
         <svg viewBox="0 0 300 300" style="width:110px; margin-bottom:4px;"><use href="#kafbe-owl"/></svg>
         <h3>Siap terbang?</h3>
-        <p>Klik / ketuk layar atau tekan Spasi untuk mulai &amp; setiap kali ingin naik.</p>
+        <p>Klik, ketuk layar, atau tekan Spasi untuk memulai dan setiap kali ingin naik.</p>
         <button class="btn btn-gold" id="btnStart">Mulai Main</button>
       </div>
 
       <div class="overlay hidden" id="overlayOver">
         <h3>Nabrak rak buku! 📚</h3>
-        <p id="finalScoreText">Skor kamu: 0</p>
+        <p id="finalScoreText">Skor Anda: 0</p>
         <div id="nameFormWrap" style="display:none;">
-          <p style="margin-top:0;">Wah, masuk papan peringkat! Tulis nama kamu:</p>
+          <p style="margin-top:0;">Skor Anda masuk papan peringkat. Silakan tuliskan nama Anda:</p>
           <form class="name-form" id="nameForm">
-            <input id="nameInput" maxlength="14" placeholder="Nama kamu" autocomplete="off" required />
+            <input id="nameInput" maxlength="14" placeholder="Nama Anda" autocomplete="off" required />
             <button class="btn btn-gold" type="submit">Simpan</button>
           </form>
         </div>
@@ -173,7 +173,7 @@
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -392,7 +392,7 @@
   const OWL_SPRITE_SIZE = 76;
   const OWL_SPRITE_MID = OWL_SPRITE_SIZE / 2;
 
-  // Gambar bentuk burung ke context manapun (dipakai untuk pre-render sprite).
+  // Gambar bentuk burung ke context manapun (digunakan untuk pre-render sprite).
   // targetCtx harus sudah di-translate ke titik pusat sebelum fungsi ini dipanggil.
   function paintOwlShape(targetCtx, flapOffset){
     // ear tufts - small equilateral triangles, not pointy horns
@@ -486,7 +486,7 @@
   let lastTime = null;
   let accumulator = 0;
   const FIXED_DT = 1/60;       // physics selalu melangkah dalam potongan waktu tetap
-  const MAX_FRAME_TIME = 0.25; // batas "kejar ketinggalan" kalau ada jeda panjang (ganti tab, dsb.)
+  const MAX_FRAME_TIME = 0.25; // batas "kejar ketinggalan" jika ada jeda panjang (ganti tab, dsb.)
 
   function loop(timestamp){
     if(lastTime === null) lastTime = timestamp;
@@ -513,7 +513,7 @@
     const newBest = Math.max(best, score);
     statBest.textContent = newBest;
 
-    finalScoreText.textContent = 'Skor kamu: ' + score;
+    finalScoreText.textContent = 'Skor Anda: ' + score;
     overlayOver.classList.remove('hidden');
 
     const board = await Storage.getLeaderboard(GAME_ID);

@@ -1,7 +1,7 @@
 /*
   Daftar mata kuliah dan topik materi.
 
-  Dipakai halaman /pengajar untuk menyusun menu, dan dipakai aturan Firestore
+  Dipakai halaman /pengajar untuk menyusun menu, dan digunakan aturan Firestore
   sebagai acuan kode mata kuliah yang sah. Isinya sengaja hanya nama dan alamat
   berkas, tanpa satu pun kalimat materi.
 
@@ -12,7 +12,7 @@
   menambah satu baris di sini, sama seperti menambah halaman baru di
   DAFTAR_HALAMAN pada shared/adminkafbe.js.
 
-  Kode mata kuliah harus sama persis dengan kode yang dipakai koleksi
+  Kode mata kuliah harus sama persis dengan kode yang digunakan koleksi
   "matakuliah" di halaman operasional bila mata kuliahnya memang terdaftar di
   sana, supaya satu nama tidak ditulis dua versi.
 */

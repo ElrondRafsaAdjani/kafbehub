@@ -89,7 +89,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -201,7 +201,7 @@
   </div>
 
   <div class="kotak-materi">
-    <h3 data-materi="kalau-bunganya-dibayar-dua.judul" data-label="Kalau bunganya dibayar dua kali setahun">Kalau bunganya dibayar dua kali setahun</h3>
+    <h3 data-materi="kalau-bunganya-dibayar-dua.judul" data-label="Jika bunganya dibayar dua kali setahun">Jika bunganya dibayar dua kali setahun</h3>
     <p data-materi="kalau-bunganya-dibayar-dua.1" data-label="Semua angka yang berkaitan dengan satu periode dibelah…">Semua angka yang berkaitan dengan satu periode dibelah dua, dan banyaknya periode dikalikan dua. Bentuk persamaannya tidak berubah sama sekali.</p>
     <div class="rumus">
       B<sub>0</sub> =
@@ -215,7 +215,7 @@
 
   <div class="kotak-materi">
     <h3 data-materi="yield-to-maturity.judul" data-label="Yield to Maturity">Yield to Maturity</h3>
-    <p data-materi="yield-to-maturity.1" data-label="Kalau harga obligasinya sudah diketahui dan yang dicari…">Kalau harga obligasinya sudah diketahui dan yang dicari justru imbal hasilnya, pertanyaannya dibalik: berapa tingkat pengembalian yang didapat pembeli bila obligasi dipegang sampai jatuh tempo. Perkiraan cepatnya memakai rumus berikut.</p>
+    <p data-materi="yield-to-maturity.1" data-label="Jika harga obligasinya sudah diketahui dan yang dicari…">Jika harga obligasinya sudah diketahui dan yang dicari justru imbal hasilnya, pertanyaannya dibalik: berapa tingkat pengembalian yang didapat pembeli bila obligasi dipegang sampai jatuh tempo. Perkiraan cepatnya menggunakan rumus berikut.</p>
     <div class="rumus">
       YTM =
       <span class="pecahan">
@@ -223,12 +223,12 @@
         <span class="bawah">(par + N<sub>d</sub>) ÷ 2</span>
       </span>
     </div>
-    <p style="margin-top:10px;" data-materi="yield-to-maturity.2" data-label="Nd adalah nilai pasar dikurangi biaya penerbitan. Pembi…"><strong>N<sub>d</sub></strong> adalah nilai pasar dikurangi biaya penerbitan. Pembilangnya menjumlahkan bunga tahunan dengan selisih harga yang tersebar rata sepanjang sisa umurnya, sedangkan penyebutnya memakai harga rata-rata antara sekarang dan saat jatuh tempo.</p>
+    <p style="margin-top:10px;" data-materi="yield-to-maturity.2" data-label="Nd adalah nilai pasar dikurangi biaya penerbitan. Pembi…"><strong>N<sub>d</sub></strong> adalah nilai pasar dikurangi biaya penerbitan. Pembilangnya menjumlahkan bunga tahunan dengan selisih harga yang tersebar rata sepanjang sisa umurnya, sedangkan penyebutnya menggunakan harga rata-rata antara sekarang dan saat jatuh tempo.</p>
   </div>
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -238,7 +238,7 @@
   "use strict";
 
   /* ===================================================================
-     Contohnya sengaja memakai angka bulat dan rd di atas i, supaya di akhir
+     Contohnya sengaja menggunakan angka bulat dan rd di atas i, supaya di akhir
      terlihat obligasinya dijual di bawah par. Keadaan itu yang paling sering
      membingungkan waktu pertama belajar.
   =================================================================== */
@@ -273,7 +273,7 @@
     { bab:'kenal', tampil:['par','labelPar'], teks:
       `Di tahun kelima, selain bunga terakhir, pokok sebesar <strong>${usd(M)}</strong> juga dikembalikan. Batang tinggi di ujung kanan itulah pokoknya.` },
     { bab:'kenal', tampil:['catatanR'], teks:
-      `Sekarang pasar meminta imbal hasil <strong>10%</strong> untuk obligasi sejenis. Angka itu yang dipakai mendiskonto, bukan bunga 8% yang tertulis di suratnya.` },
+      `Sekarang pasar meminta imbal hasil <strong>10%</strong> untuk obligasi sejenis. Angka itu yang digunakan mendiskonto, bukan bunga 8% yang tertulis di suratnya.` },
 
     { bab:'kupon', tampil:['pv1','panah1'], teks:
       `Bunga ${usd(I)} tahun pertama baru diterima setahun lagi, jadi nilainya hari ini lebih kecil.
@@ -287,7 +287,7 @@
     { bab:'kupon', tampil:['totalKupon'], teks:
       `Kelima bunga itu dijumlahkan setelah masing-masing dikecilkan.
        <span class="hit">Jumlah bunga = ${usd(totalKupon)}</span>
-       Padahal kalau dijumlahkan mentah-mentah tanpa didiskonto, angkanya ${usd(I * n)}.` },
+       Padahal jika dijumlahkan mentah-mentah tanpa didiskonto, angkanya ${usd(I * n)}.` },
 
     { bab:'par', tampil:['pvPar','panahPar'], teks:
       `Pokok ${usd(M)} juga baru kembali lima tahun lagi, jadi diperlakukan sama.
@@ -298,11 +298,11 @@
        <span class="hit">${usd(totalKupon)} + ${usd(pvPar)} = <strong>${usd(nilai)}</strong></span>` },
     { bab:'hasil', tampil:['garisPar','labelBanding'], teks:
       `Nilainya <strong>${usd(nilai)}</strong>, di bawah par ${usd(M)}. Obligasi ini dijual <strong>at discount</strong>.
-       Sebabnya pasar meminta 10% sementara suratnya cuma menjanjikan 8%, jadi harganya turun sampai selisihnya tertutup.` }
+       Sebabnya pasar meminta 10% sementara suratnya hanya menjanjikan 8%, jadi harganya turun sampai selisihnya tertutup.` }
   ];
 
   /*
-    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+    Naskah tiap langkah boleh diubah pengajar melalui halaman /pengajar.
 
     Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
     disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
@@ -368,7 +368,7 @@
     const hPar = tinggi(M);
     const yPar = dasar - hKupon - hPar;
     /*
-      Tulisannya berwarna gelap, bukan putih. Batang ini memakai --owl-mid yang
+      Tulisannya berwarna gelap, bukan putih. Batang ini menggunakan --owl-mid yang
       cerah, dan teks putih di atasnya nyaris tidak terbaca.
     */
     s += `<g id="par" class="viz-hide">
@@ -405,8 +405,8 @@
            Q${(x(n) + xTotal) / 2},${Math.min(yPar, yPvPar) - 34} ${xTotal + 24},${yPvPar + hPvPar / 2}"
            fill="none" stroke="var(--gold-deep)" stroke-width="1.8" marker-end="url(#kiri)"/>`;
 
-    // Hasil akhir ditulis DI DALAM puncak kolom, bukan di atasnya. Kalau
-    // ditaruh di atas, tulisannya sejajar garis par dan sekilas terbaca seolah
+    // Hasil akhir ditulis DI DALAM puncak kolom, bukan di atasnya. Jika
+    // diletakkan di atas, tulisannya sejajar garis par dan sekilas terbaca seolah
     // nilainya sama dengan par, padahal justru jarak antara puncak kolom dan
     // garis itulah diskonnya.
     s += `<text id="totalAkhir" class="viz-hide" x="${xTotal}" y="${yPvPar + 19}"
@@ -463,7 +463,7 @@
   btnNext.addEventListener('click', () => { if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
   btnPrev.addEventListener('click', () => { if(ke > 0){ ke--; tampilkan(); } });
   btnUlang.addEventListener('click', () => { ke = 0; tampilkan(); });
-  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // Panah kiri dan kanan dipasang melalui modul bersama supaya perilakunya
   // sama di semua halaman materi.
   KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
 

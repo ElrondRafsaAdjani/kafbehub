@@ -77,14 +77,14 @@
 
   /* Jaringannya lebar dan tidak bisa dipersempit tanpa membuat angkanya
      bertumpuk, jadi di layar sempit digulirkan di dalam kotaknya sendiri.
-     Yang bergeser cuma gambarnya, bukan seluruh halaman. */
+     Yang bergeser hanya gambarnya, bukan seluruh halaman. */
   .chart-wrap{background:var(--bg-deep); border-radius:20px; padding:14px; overflow-x:auto;}
   #jaringSvg{display:block; width:100%; min-width:660px; height:auto; aspect-ratio:720/470;}
 
   /* min-width:0 dan max-width:100% WAJIB di sini, jangan dihapus. Anak grid
      maupun flex menolak menyusut lebih kecil daripada isinya, sehingga gambar
      yang ber-min-width 660 piksel akan mendorong seluruh halaman ke samping di
-     layar ponsel kalau dua aturan ini hilang. */
+     layar ponsel jika dua aturan ini hilang. */
   .story-layout > *{min-width:0; max-width:100%;}
 
   .kotak{transition:opacity .35s ease;}
@@ -157,7 +157,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -207,7 +207,7 @@
     <p data-materi="crashing.1" data-label="Mempercepat proyek dengan tambahan biaya paling kecil.…">Mempercepat proyek dengan tambahan biaya paling kecil. Lanjutan langsung dari topik critical path.</p>
   </div>
 
-  <p class="catatan-layar" data-materi="crashing.2" data-label="Visualisasinya lebih nyaman dibuka lewat tablet, laptop…">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
+  <p class="catatan-layar" data-materi="crashing.2" data-label="Visualisasinya lebih nyaman dibuka melalui tablet, laptop…">Visualisasi materi lebih nyaman dibuka melalui tablet, laptop, atau komputer. Halaman ini tetap dapat dibuka melalui ponsel.</p>
 
   <!-- ============ 1. KONSEP ============ -->
   <div class="kotak-materi">
@@ -236,25 +236,25 @@
     </div>
 
     <h4 data-materi="syarat-sebuah-aktivitas-boleh.judul" data-label="Syarat sebuah aktivitas boleh dipercepat">Syarat sebuah aktivitas boleh dipercepat</h4>
-    <p data-materi="syarat-sebuah-aktivitas-boleh.1" data-label="Aktivitas kritis belum tentu boleh dipercepat. Sebelum…">Aktivitas kritis belum tentu boleh dipercepat. Sebelum biayanya dibandingkan, waktunya diperiksa dulu terhadap permintaan soal. Kalau soal meminta percepatan dua minggu, normal time harus sanggup dikurangi crash time sebanyak dua kali tanpa menjadi negatif.</p>
+    <p data-materi="syarat-sebuah-aktivitas-boleh.1" data-label="Aktivitas kritis belum tentu boleh dipercepat. Sebelum…">Aktivitas kritis belum tentu boleh dipercepat. Sebelum biayanya dibandingkan, waktunya diperiksa dulu terhadap permintaan soal. Jika soal meminta percepatan dua minggu, normal time harus sanggup dikurangi crash time sebanyak dua kali tanpa menjadi negatif.</p>
 
     <div class="rumus"><span>normal time − crash time − crash time ≥ 0</span></div>
 
-    <p style="margin-top:14px;" data-materi="syarat-sebuah-aktivitas-boleh.2" data-label="Aktivitas yang hasil pemeriksaannya negatif langsung gu…">Aktivitas yang hasil pemeriksaannya negatif langsung gugur dan tidak ikut dipertimbangkan, semurah apa pun crash cost per period-nya. Kalau semua kandidat gugur, artinya permintaan percepatan itu memang tidak bisa dipenuhi.</p>
+    <p style="margin-top:14px;" data-materi="syarat-sebuah-aktivitas-boleh.2" data-label="Aktivitas yang hasil pemeriksaannya negatif langsung gu…">Aktivitas yang hasil pemeriksaannya negatif langsung gugur dan tidak ikut dipertimbangkan, semurah apa pun crash cost per period-nya. Jika semua kandidat gugur, artinya permintaan percepatan itu memang tidak bisa dipenuhi.</p>
   </div>
 
   <!-- ============ 2. CARA MENGERJAKAN ============ -->
   <div class="kotak-materi">
     <h3 data-materi="cara-mengerjakan.judul" data-label="Cara mengerjakan">Cara mengerjakan</h3>
-    <p data-materi="cara-mengerjakan.1" data-label="Urutan ini dipakai setelah critical path dan waktu peny…">Urutan ini dipakai setelah critical path dan waktu penyelesaian normalnya sudah ketemu.</p>
+    <p data-materi="cara-mengerjakan.1" data-label="Urutan ini digunakan setelah critical path dan waktu peny…">Urutan ini digunakan setelah critical path dan waktu penyelesaian normalnya sudah diketahui.</p>
 
     <ol class="langkah-kerja">
       <li><b>Kumpulkan kandidatnya.</b> Hanya aktivitas yang berada di critical path yang boleh dipercepat. Aktivitas lain tidak berpengaruh pada tanggal selesai.</li>
       <li><b>Hitung crash cost per period tiap kandidat.</b> Selisih biaya dibagi selisih waktu, hasilnya tambahan biaya untuk satu minggu percepatan.</li>
       <li><b>Periksa syarat waktunya.</b> Normal time dikurangi crash time sebanyak permintaan soal tidak boleh negatif. Kandidat yang hasilnya negatif gugur di sini juga.</li>
       <li><b>Percepat yang paling murah di antara yang lolos.</b> Ambil satu minggu lebih dulu, lalu catat tambahan biayanya.</li>
-      <li><b>Periksa ulang critical path-nya.</b> Setelah dipercepat, jalur lain bisa ikut menjadi kritis. Kalau itu terjadi, percepatan berikutnya harus mempertimbangkan jalur yang baru.</li>
-      <li><b>Ulangi sampai target tercapai.</b> Biaya total baru adalah biaya normal ditambah seluruh tambahan biaya percepatan. Kalau tidak ada kandidat yang lolos pemeriksaan, permintaan percepatannya tidak bisa dipenuhi dan biayanya tetap sebesar biaya normal.</li>
+      <li><b>Periksa ulang critical path-nya.</b> Setelah dipercepat, jalur lain bisa ikut menjadi kritis. Jika itu terjadi, percepatan berikutnya harus mempertimbangkan jalur yang baru.</li>
+      <li><b>Ulangi sampai target tercapai.</b> Biaya total baru adalah biaya normal ditambah seluruh tambahan biaya percepatan. Jika tidak ada kandidat yang lolos pemeriksaan, permintaan percepatannya tidak bisa dipenuhi dan biayanya tetap sebesar biaya normal.</li>
     </ol>
 
     <h4 data-materi="kekeliruan-yang-sering-muncul.judul" data-label="Kekeliruan yang sering muncul">Kekeliruan yang sering muncul</h4>
@@ -262,15 +262,15 @@
       <div><b>Mempercepat aktivitas yang tidak kritis</b>
         Biaya bertambah tanpa memajukan tanggal selesai. Periksa dulu slack-nya sebelum memilih.</div>
       <div><b>Langsung memilih yang termurah</b>
-        Crash cost per period baru berguna setelah syarat waktunya lolos. Kandidat termurah pun tidak terpakai kalau pemeriksaannya negatif.</div>
+        Crash cost per period baru berguna setelah syarat waktunya lolos. Kandidat termurah pun tidak terpakai jika pemeriksaannya negatif.</div>
     </div>
   </div>
 
   <!-- ============ 3. SOAL ============ -->
   <div class="kotak-materi">
-    <h3 data-materi="soalnya.judul" data-label="Soalnya">Soalnya</h3>
+    <h3 data-materi="soalnya.judul" data-label="Soal">Soal</h3>
     <p data-materi="soalnya.1" data-label="Soal ini lanjutan dari proyek peningkatan kualitas kema…">Soal ini lanjutan dari proyek peningkatan kualitas kemasan milik Perusahaan MJ. Dari topik critical path sudah diketahui critical path-nya Start, A, D, G, Finish dengan waktu penyelesaian normal 21 minggu dan biaya total $3.540.</p>
-    <p data-materi="soalnya.2" data-label="Pertanyaannya: kalau perusahaan ingin mempercepat proye…"><b>Pertanyaannya:</b> kalau perusahaan ingin mempercepat proyek selama dua minggu, aktivitas apa yang harus dipercepat dan berapa biaya total yang baru.</p>
+    <p data-materi="soalnya.2" data-label="Pertanyaannya: jika perusahaan ingin mempercepat proye…"><b>Pertanyaannya:</b> jika perusahaan ingin mempercepat proyek selama dua minggu, aktivitas apa yang harus dipercepat dan berapa biaya total yang baru.</p>
 
     <div class="tabel-gulir">
       <table class="ringkas" id="tabelSoal"></table>
@@ -322,17 +322,17 @@
     <h4 data-materi="kesimpulannya.judul" data-label="Kesimpulannya">Kesimpulannya</h4>
     <div class="jawaban-akhir" id="jawabanAkhir"></div>
 
-    <h4 data-materi="kalau-menemukan-jawaban-yang.judul" data-label="Kalau menemukan jawaban yang berbeda">Kalau menemukan jawaban yang berbeda</h4>
-    <p style="margin:0;" data-materi="kalau-menemukan-jawaban-yang.1" data-label="Ada kunci yang beredar dengan jawaban D dipercepat dua…">Ada kunci yang beredar dengan jawaban D dipercepat dua kali dan biaya total $3.570. Jawaban itu memakai pembacaan syarat yang berbeda dan tidak sejalan dengan syarat yang dipakai di halaman ini, sebab dengan pemeriksaan di atas D pun hasilnya negatif. Kalau di kelas Anda dipakai syarat yang lain, ikuti yang disepakati pengajarnya dan bandingkan cara pemeriksaannya.</p>
+    <h4 data-materi="kalau-menemukan-jawaban-yang.judul" data-label="Jika menemukan jawaban yang berbeda">Jika menemukan jawaban yang berbeda</h4>
+    <p style="margin:0;" data-materi="kalau-menemukan-jawaban-yang.1" data-label="Ada kunci yang beredar dengan jawaban D dipercepat dua…">Ada kunci yang beredar dengan jawaban D dipercepat dua kali dan biaya total $3.570. Jawaban itu menggunakan pembacaan syarat yang berbeda dan tidak sejalan dengan syarat yang digunakan di halaman ini, sebab dengan pemeriksaan di atas D pun hasilnya negatif. Jika di kelas Anda digunakan syarat yang lain, ikuti yang disepakati pengajarnya dan bandingkan cara pemeriksaannya.</p>
 
     <h4 data-materi="kembali-ke-topik-sebelumnya.judul" data-label="Kembali ke topik sebelumnya">Kembali ke topik sebelumnya</h4>
-    <p style="margin:0 0 16px;" data-materi="kembali-ke-topik-sebelumnya.1" data-label="Critical path dan waktu penyelesaian normal yang dipaka…">Critical path dan waktu penyelesaian normal yang dipakai di halaman ini berasal dari topik sebelumnya, lengkap dengan cara menggambar jaringan dan menghitung slack-nya.</p>
+    <p style="margin:0 0 16px;" data-materi="kembali-ke-topik-sebelumnya.1" data-label="Critical path dan waktu penyelesaian normal yang dipaka…">Critical path dan waktu penyelesaian normal yang digunakan di halaman ini berasal dari topik sebelumnya, lengkap dengan cara menggambar jaringan dan menghitung slack-nya.</p>
     <a href="mo-lintasan-kritis.html" class="btn btn-ghost">← Buka Critical Path</a>
   </div>
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -376,7 +376,7 @@
   function angka(n){
     return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
-  // Tanda minus yang dipakai sama dengan yang ada di rumus, bukan tanda hubung.
+  // Tanda minus yang digunakan sama dengan yang ada di rumus, bukan tanda hubung.
   function angkaBertanda(n){
     return (n < 0 ? '−' : '') + angka(Math.abs(n));
   }
@@ -489,7 +489,7 @@
             + '<td>' + angka(a.biayaCepat) + ' − ' + angka(a.biaya) + ' = $' + angka(a.biayaCepat - a.biaya) + '</td>'
             + '<td>$' + angka(biayaPerMinggu(a)) + ' per minggu</td>'
             + '<td>' + tulisSyarat(a) + '</td>'
-            + '<td>' + (!lolos ? 'negatif, gugur' : (pilih ? 'lolos dan paling murah' : 'lolos tapi lebih mahal')) + '</td></tr>';
+            + '<td>' + (!lolos ? 'negatif, gugur' : (pilih ? 'lolos dan paling murah' : 'lolos tetapi lebih mahal')) + '</td></tr>';
         }).join('')
       + '</tbody>';
 
@@ -630,7 +630,7 @@
 
     { bab:'Memilih kandidat',
       teks:'Yang boleh dipercepat hanya aktivitas di critical path, yaitu <b>' + KANDIDAT.map(function(a){ return a.id; }).join(', ') + '</b>. '
-         + 'Aktivitas lain masih punya kelonggaran, jadi mempercepatnya cuma menambah biaya tanpa memajukan tanggal selesai.',
+         + 'Aktivitas lain masih punya kelonggaran, jadi mempercepatnya hanya menambah biaya tanpa memajukan tanggal selesai.',
       pangkas:{}, tampil:[], soroti:true },
 
     { bab:'Crash cost per period',
@@ -660,7 +660,7 @@
   ];
 
   /*
-    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+    Naskah tiap langkah boleh diubah pengajar melalui halaman /pengajar.
 
     Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
     disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
@@ -774,7 +774,7 @@
       g.setAttribute('opacity', (l.soroti && !kritis[a.id]) ? '0.42' : '1');
     });
 
-    // Panah ikut menyala kalau kedua ujungnya berada pada jalur terpanjang.
+    // Panah ikut menyala jika kedua ujungnya berada pada jalur terpanjang.
     svg.querySelectorAll('.panah').forEach(function(p){
       var nama = p.id.replace('panah', '');
       var kritisPanah = false;
@@ -835,7 +835,7 @@
 
   btnNext.addEventListener('click', function(){ if(ke < LANGKAH.length - 1){ ke++; tampilkan(); } });
   btnPrev.addEventListener('click', function(){ if(ke > 0){ ke--; tampilkan(); } });
-  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // Panah kiri dan kanan dipasang melalui modul bersama supaya perilakunya
   // sama di semua halaman materi.
   KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
   btnUlang.addEventListener('click', function(){ ke = 0; tampilkan(); });

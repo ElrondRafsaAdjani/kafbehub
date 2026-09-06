@@ -12,7 +12,7 @@
   isi asli disimpan ke data-asli, lalu isinya ditukar bolak-balik dari situ.
 
   Teks yang dirakit JavaScript, misalnya narasi langkah demi langkah pada
-  halaman materi, tidak bisa ditandai begitu. Halaman-halaman itu memakai:
+  halaman materi, tidak bisa ditandai begitu. Halaman-halaman itu menggunakan:
 
       KafbeBahasa.pilih('teks Indonesia', 'English text')
 

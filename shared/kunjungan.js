@@ -3,7 +3,7 @@
 
   KENAPA MENCATAT SENDIRI, PADAHAL SUDAH ADA VERCEL ANALYTICS
 
-  Vercel Analytics memang terpasang, tapi angkanya hanya bisa dilihat di papan
+  Vercel Analytics memang terpasang, tetapi angkanya hanya bisa dilihat di papan
   Vercel dan tidak bisa diambil dari peramban. Selain itu rata-rata lama
   kunjungan dan jam teramai tidak tersedia di paket gratisnya. Karena dasbor
   di /adminkafbe perlu keduanya, catatannya dibuat sendiri di sini.
@@ -12,19 +12,19 @@
 
   Dicatat  : tanggal, jam, alamat halaman, lama membuka halaman, dan satu
              penanda perangkat acak yang dibuat sendiri oleh peramban.
-  TIDAK    : nama, email, lokasi, alamat IP, maupun apa pun yang bisa dipakai
+  TIDAK    : nama, email, lokasi, alamat IP, maupun apa pun yang bisa digunakan
              mengenali orangnya. Penanda perangkatnya angka acak, tidak
              tersambung ke identitas apa pun, dan hilang begitu penyimpanan
              peramban dibersihkan.
 
   BENTUK PENYIMPANANNYA
 
-  Satu dokumen per HARI, bukan satu dokumen per kunjungan. Kalau tiap kunjungan
+  Satu dokumen per HARI, bukan satu dokumen per kunjungan. Jika tiap kunjungan
   menjadi dokumen sendiri, membaca enam bulan berarti ribuan pembacaan
   Firestore sekali buka dasbor. Dengan satu dokumen per hari, enam bulan cukup
   sekitar 180 pembacaan.
 
-  Penambahannya memakai increment() dari Firestore, yang dihitung di server.
+  Penambahannya menggunakan increment() dari Firestore, yang dihitung di server.
   Jadi dua pengunjung yang datang bersamaan tidak saling menimpa hitungan.
 
   YANG PERLU DIKETAHUI SOAL KETELITIANNYA
@@ -60,7 +60,7 @@
   var KUNCI_HARI      = 'kafbe_hari_tercatat';
 
   function hariIni(){
-    // Tanggal LOKAL, bukan UTC. Kalau memakai toISOString(), pengunjung
+    // Tanggal LOKAL, bukan UTC. Jika menggunakan toISOString(), pengunjung
     // sebelum pukul 07.00 WIB akan tercatat di tanggal kemarin.
     var d = new Date();
     var p = function(n){ return String(n).padStart(2, '0'); };
@@ -109,7 +109,7 @@
       var c = window.KAFBE_FIREBASE_CONFIG;
       if(!c || !c.apiKey) return;
 
-      // Halaman pengurus tidak ikut dihitung. Kalau ikut, angka kunjungan
+      // Halaman pengurus tidak ikut dihitung. Jika ikut, angka kunjungan
       // akan naik sendiri tiap kali dasbornya dibuka untuk melihat angka itu.
       if(/^\/(adminkafbe|operasional)/.test(location.pathname)) return;
 

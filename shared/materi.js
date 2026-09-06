@@ -23,7 +23,7 @@
 
   Supaya halaman tetap utuh tanpa jaringan dan saat Firestore bermasalah. Nilai
   dari pengajar hanya menimpa yang sudah ada, tidak pernah menjadi satu-satunya
-  sumber. Kalau berkas ini gagal berjalan, mahasiswa melihat materi versi
+  sumber. Jika berkas ini gagal berjalan, mahasiswa melihat materi versi
   bawaan halaman, bukan halaman kosong.
 
   CARA MENAMBAH NASKAH YANG BISA DIUBAH PENGAJAR
@@ -51,7 +51,7 @@
     /materi/pemi-elastisitas.html menjadi "pemi-elastisitas".
 
     Diambil dari alamat, bukan dari atribut di <body>, supaya berkas ini sudah
-    tahu kuncinya sejak dimuat di <head> dan bisa memakai simpanan kunjungan
+    tahu kuncinya sejak dimuat di <head> dan bisa menggunakan simpanan kunjungan
     sebelumnya sebelum isi halaman tergambar.
   */
   function kunciHalaman(){
@@ -70,7 +70,7 @@
     disaring, karena naskah materi memang boleh memuat markup, dan markup yang
     diterima mentah-mentah adalah jalan masuk yang paling sering terlewat.
 
-    Kalau suatu hari akun pengajar diambil alih, kerusakan yang bisa ditanam
+    Jika suatu hari akun pengajar diambil alih, kerusakan yang bisa ditanam
     lewat naskah terbatas pada tulisan yang berantakan, bukan skrip yang
     berjalan di peramban mahasiswa.
 
@@ -87,7 +87,7 @@
     Tag yang dibuang berikut seluruh isinya, bukan sekadar dilepas bungkusnya.
 
     Untuk tag biasa, melepas bungkus dan menyisakan kalimatnya adalah pilihan
-    yang benar: pengajar yang memakai tag terlarang tidak kehilangan tulisannya.
+    yang benar: pengajar yang menggunakan tag terlarang tidak kehilangan tulisannya.
     Untuk yang di bawah ini justru sebaliknya, sebab isinya memang bukan
     kalimat. Menyisakan isi <script> hanya membuat baris kode muncul sebagai
     tulisan di tengah materi, dan itu terlihat seperti halamannya rusak.
@@ -133,7 +133,7 @@
 
       if(!TAG_BOLEH[n.tagName]){
         // Tagnya dibuang, isinya dipertahankan. Jadi pengajar yang tidak
-        // sengaja memakai tag terlarang tetap tidak kehilangan kalimatnya.
+        // sengaja menggunakan tag terlarang tetap tidak kehilangan kalimatnya.
         bersihkanSimpul(n);
         while(n.firstChild) induk.insertBefore(n.firstChild, n);
         induk.removeChild(n);
@@ -180,7 +180,7 @@
 
   /*
     Jawaban Firestore disimpan di peramban supaya kunjungan berikutnya sudah
-    memakai naskah pengajar sejak gambar pertama. Tanpa ini halaman sempat
+    menggunakan naskah pengajar sejak gambar pertama. Tanpa ini halaman sempat
     menampilkan naskah bawaan sekejap lalu berganti, dan kedipan itu terlihat
     seperti halamannya salah memuat.
 
@@ -252,7 +252,7 @@
   /*
     Medan yang boleh diubah dibatasi pada nama-nama yang memang berisi kalimat.
     Sisa isi objek langkah, misalnya daftar elemen yang disorot atau nama
-    gambar yang dipakai, tidak pernah disentuh. Di situlah batas antara naskah
+    gambar yang digunakan, tidak pernah disentuh. Di situlah batas antara naskah
     dan grafik dijaga.
   */
   var MEDAN_TEKS = ['teks', 'text', 'info', 'ket', 'judul'];
@@ -352,7 +352,7 @@
     /*
       Didaftarkan halaman sesudah larik langkahnya dibuat dan sebelum gambar
       pertama dibuat. Naskah simpanan langsung dipasang di sini, jadi gambar
-      pertama sudah memakai naskah pengajar tanpa perlu digambar dua kali.
+      pertama sudah menggunakan naskah pengajar tanpa perlu digambar dua kali.
     */
     daftarLangkah: function(larik, opsi, gambar){
       if(!Array.isArray(larik)) return larik;
@@ -436,7 +436,7 @@
         Firestore tidak terjangkau, jadi kegagalan di sini berarti mahasiswa
         melihat naskah bawaan halaman, bukan pesan galat.
       */
-      console.warn('Naskah materi tidak bisa dimuat, memakai bawaan halaman.', err);
+      console.warn('Naskah materi tidak bisa dimuat, menggunakan bawaan halaman.', err);
       return;
     }
 
@@ -448,7 +448,7 @@
 
     tulisSimpanan(baru);
 
-    // Kalau isinya sama persis dengan yang sudah dipasang dari simpanan,
+    // Jika isinya sama persis dengan yang sudah dipasang dari simpanan,
     // halaman tidak perlu digambar ulang sama sekali.
     var berubah = JSON.stringify(baru) !== JSON.stringify(naskahKini);
     naskahKini = baru;

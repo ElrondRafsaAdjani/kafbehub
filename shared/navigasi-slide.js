@@ -3,23 +3,23 @@
 
   KENAPA DIPISAH KE SATU BERKAS
 
-  Hampir semua halaman visualisasi materi memakai pola yang sama. Ada satu
+  Hampir semua halaman visualisasi materi menggunakan pola yang sama. Ada satu
   tombol "Sebelumnya", satu tombol "Lanjut", dan isi kotak yang berganti tiap
   kali salah satu tombol ditekan. Sebelum berkas ini ada, sebagian halaman
-  sudah bisa dijalankan memakai tombol panah dan sebagian lagi belum. Pembaca
-  yang terbiasa memakai panah di satu halaman jadi bingung ketika panahnya
+  sudah bisa dijalankan menggunakan tombol panah dan sebagian lagi belum. Pembaca
+  yang terbiasa menggunakan panah di satu halaman jadi bingung ketika panahnya
   diam di halaman lain.
 
-  Dengan satu berkas bersama, semua halaman slide memakai aturan yang persis
+  Dengan satu berkas bersama, semua halaman slide menggunakan aturan yang persis
   sama dan perbaikan cukup ditulis sekali.
 
   APA YANG DIJAGA
 
-  Panah tidak boleh mengganggu ketika pengguna sedang mengetik. Kalau fokus
+  Panah tidak boleh mengganggu ketika pengguna sedang mengetik. Jika fokus
   sedang berada di kotak isian, kotak pilihan, penggeser nilai, atau area yang
   bisa disunting, panah dibiarkan bekerja seperti biasa di elemen itu.
 
-  Panah juga tidak dipakai kalau ditekan bersama Ctrl, Alt, Shift, atau Cmd,
+  Panah juga tidak digunakan jika ditekan bersama Ctrl, Alt, Shift, atau Cmd,
   karena gabungan itu sudah punya arti sendiri di peramban.
 
   Tombol yang sedang mati atau sedang disembunyikan tidak ikut ditekan. Ini
@@ -36,7 +36,7 @@
     });
 
   Nilai yang dikirim boleh berupa elemen tombol maupun teks pemilih CSS.
-  Fungsi ini mengembalikan fungsi pelepas, dipakai kalau suatu saat pendengar
+  Fungsi ini mengembalikan fungsi pelepas, digunakan jika suatu saat pendengar
   perlu dicabut.
 */
 (function () {

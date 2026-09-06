@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://*.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
 <meta name="referrer" content="strict-origin-when-cross-origin" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Grafik Supply &amp; Demand - Pengantar Mikroekonomi - KAFBE Hub</title>
+<title>Grafik Supply dan Demand - Pengantar Mikroekonomi - KAFBE Hub</title>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
@@ -71,7 +71,7 @@
 
 <!-- Status situs, status fitur, dan naskah pengganti. Sengaja dimuat di
      <head> dan tidak ditunda, supaya layar pemeliharaan sempat dipasang
-     SEBELUM isi halaman tergambar. Kalau berkas ini gagal, halaman tetap
+     SEBELUM isi halaman tergambar. Jika berkas ini gagal, halaman tetap
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
@@ -123,7 +123,7 @@
   <a class="back-link" href="pemi.html">← Kembali ke Pengantar Mikroekonomi</a>
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Pengantar Mikroekonomi</span>
-    <h2 data-materi="grafik-supply-dan-demand.judul" data-label="Grafik Supply dan Demand">Grafik Supply &amp; Demand</h2>
+    <h2 data-materi="grafik-supply-dan-demand.judul" data-label="Grafik Supply dan Demand">Grafik Supply dan Demand</h2>
     <p data-materi="grafik-supply-dan-demand.1" data-label="Ikuti cerita si burung hantu KAFBE membangun kurva perm…">Ikuti cerita si burung hantu KAFBE membangun kurva permintaan dan penawaran, titik demi titik.</p>
   </div>
 
@@ -148,14 +148,14 @@
       <button type="button" class="btn btn-ghost" id="btnPrev">← Sebelumnya</button>
       <div class="spacer"></div>
       <button type="button" class="btn btn-ghost" id="btnRestart">🔁 Ulangi dari Awal</button>
-      <a href="pemi-shift-movement.html" class="btn btn-gold" id="btnNextMaterial">Materi Berikutnya: Shift &amp; Movement →</a>
+      <a href="pemi-shift-movement.html" class="btn btn-gold" id="btnNextMaterial">Materi Berikutnya: Shift dan Movement →</a>
       <button type="button" class="btn btn-primary" id="btnNext">Lanjut →</button>
     </div>
   </div>
 </section>
 
 <footer class="wrap" data-bagian="Penutup">
-  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Info jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
   <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
 </footer>
 
@@ -166,8 +166,8 @@
 
   // ===================================================================
   // Model: Demand P = 50 - 0.5Q ,  Supply P = 10 + 0.5Q
-  // Titik-titik di bawah cuma buat ilustrasi tiap langkah cerita;
-  // garis yang digambar tetap persamaan penuhnya (bukan cuma antar titik).
+  // Titik-titik di bawah hanya buat ilustrasi tiap langkah cerita;
+  // garis yang digambar tetap persamaan penuhnya (bukan hanya antar titik).
   // ===================================================================
   const demandP = (Q) => 50 - 0.5*Q;
   const supplyP = (Q) => 10 + 0.5*Q;
@@ -180,27 +180,27 @@
 
   const STEPS = [
     { chapter:'demand', reveal:['d1'],
-      text:'Bayangkan ada barang dijual di pasar dengan harga <strong>Rp35.000</strong>. Pada harga segini, ada <strong>30 orang</strong> yang mau membelinya.' },
+      text:'Bayangkan sebuah barang dijual di pasar dengan harga <strong>Rp35.000</strong>. Pada harga tersebut ada <strong>30 orang</strong> yang bersedia membelinya.' },
     { chapter:'demand', reveal:['d2'],
-      text:'Sekarang harganya naik jadi <strong>Rp40.000</strong>. Yang mau beli jadi berkurang, tinggal <strong>20 orang</strong>.' },
+      text:'Harganya kemudian naik menjadi <strong>Rp40.000</strong>. Jumlah yang bersedia membeli berkurang menjadi <strong>20 orang</strong>.' },
     { chapter:'demand', reveal:['d3'],
-      text:'Semakin tinggi harganya, semakin sedikit yang mau beli. Di harga <strong>Rp45.000</strong>, tinggal <strong>10 orang</strong> yang berminat.' },
+      text:'Semakin tinggi harganya, semakin sedikit yang bersedia membeli. Pada harga <strong>Rp45.000</strong>, hanya tersisa <strong>10 orang</strong> yang berminat.' },
     { chapter:'demand', reveal:['dLine','dLabel'],
-      text:'Kalau titik-titik tadi kita hubungkan, jadi garis yang miring ke bawah. Inilah <strong>Kurva Permintaan (Demand)</strong>, makin mahal harganya, makin sedikit yang mau beli.' },
+      text:'Apabila titik-titik tadi dihubungkan, terbentuk garis yang miring ke bawah. Inilah <strong>Kurva Permintaan (Demand)</strong>: semakin mahal harganya, semakin sedikit yang bersedia membeli.' },
     { chapter:'supply', reveal:['s1'],
-      text:'Sekarang gantian dari sisi penjual. Waktu harga <strong>Rp15.000</strong>, penjual cuma mau menjual <strong>10 unit</strong>, untungnya masih tipis soalnya.' },
+      text:'Berikutnya dilihat dari sisi penjual. Pada harga <strong>Rp15.000</strong>, penjual hanya bersedia menjual <strong>10 unit</strong>, karena keuntungannya masih tipis.' },
     { chapter:'supply', reveal:['s2'],
-      text:'Begitu harga naik ke <strong>Rp20.000</strong>, penjual jadi lebih semangat, mereka menawarkan <strong>20 unit</strong>.' },
+      text:'Begitu harga naik ke <strong>Rp20.000</strong>, penjual menjadi lebih terdorong dan menawarkan <strong>20 unit</strong>.' },
     { chapter:'supply', reveal:['s3'],
-      text:'Semakin tinggi harganya, semakin banyak juga yang mau dijual. Di harga <strong>Rp25.000</strong>, mereka menawarkan <strong>30 unit</strong>.' },
+      text:'Semakin tinggi harganya, semakin banyak pula yang bersedia dijual. Pada harga <strong>Rp25.000</strong>, penjual menawarkan <strong>30 unit</strong>.' },
     { chapter:'supply', reveal:['sLine','sLabel'],
-      text:'Titik-titik ini kalau dihubungkan, membentuk garis yang naik ke atas. Inilah <strong>Kurva Penawaran (Supply)</strong>, makin mahal harganya, makin banyak yang mau dijual.' },
+      text:'Apabila titik-titik ini dihubungkan, terbentuk garis yang naik ke atas. Inilah <strong>Kurva Penawaran (Supply)</strong>: semakin mahal harganya, semakin banyak yang bersedia dijual.' },
     { chapter:'eq', reveal:['eqDotOuter','eqDotInner','eqGuideV','eqGuideH','eqLabel'],
-      text:'Coba lihat di mana kedua kurva ini bertemu, di situ harga &amp; jumlah barang pas buat pembeli maupun penjual. Ini namanya <strong>Titik Keseimbangan (Equilibrium)</strong>: harga <strong>Rp30.000</strong> dengan <strong>40 unit</strong>.' }
+      text:'Perhatikan tempat kedua kurva ini bertemu. Pada titik itu harga dan jumlah barang sudah sesuai bagi pembeli maupun penjual. Inilah <strong>Titik Keseimbangan (Equilibrium)</strong>, yaitu harga <strong>Rp30.000</strong> dengan <strong>40 unit</strong>.' }
   ];
 
   /*
-    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+    Naskah tiap langkah boleh diubah pengajar melalui halaman /pengajar.
 
     Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
     disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
@@ -269,11 +269,11 @@
       revealMap['d'+(i+1)] = [c];
     });
 
-    // demand line: persamaan penuh dari Q=0 sampai Q_MAX (bukan cuma antar titik)
+    // demand line: persamaan penuh dari Q=0 sampai Q_MAX (bukan hanya antar titik)
     const dLine = svgEl('path', { d:'M '+sx(0)+','+sy(demandP(0))+' L '+sx(Q_MAX)+','+sy(demandP(Q_MAX)), fill:'none', stroke:demandColor, 'stroke-width':3.5, 'stroke-linecap':'round', class:'curve-line' });
     chartSvg.appendChild(dLine);
     revealMap['dLine'] = [dLine];
-    // label kurva ditaruh di ujung kiri-atas garis, jauh dari klaster titik ekuilibrium di kanan
+    // label kurva diletakkan di ujung kiri-atas garis, jauh dari klaster titik ekuilibrium di kanan
     const dLabel = svgEl('text', { x:sx(1), y:sy(demandP(1))-10, 'font-size':'13', 'font-weight':'800', fill:demandColor, 'font-family':'Baloo 2', class:'curve-fade' });
     dLabel.textContent = 'Demand (D)';
     chartSvg.appendChild(dLabel);
@@ -290,7 +290,7 @@
     const sLine = svgEl('path', { d:'M '+sx(0)+','+sy(supplyP(0))+' L '+sx(Q_MAX)+','+sy(supplyP(Q_MAX)), fill:'none', stroke:supplyColor, 'stroke-width':3.5, 'stroke-linecap':'round', class:'curve-line' });
     chartSvg.appendChild(sLine);
     revealMap['sLine'] = [sLine];
-    // label kurva ditaruh di ujung kiri-bawah garis, sisi yang sama dengan label Demand tapi beda ketinggian
+    // label kurva diletakkan di ujung kiri-bawah garis, sisi yang sama dengan label Demand tetapi beda ketinggian
     const sLabel = svgEl('text', { x:sx(16), y:sy(supplyP(16))-10, 'text-anchor':'end', 'font-size':'13', 'font-weight':'800', fill:supplyColor, 'font-family':'Baloo 2', class:'curve-fade' });
     sLabel.textContent = 'Supply (S)';
     chartSvg.appendChild(sLabel);
@@ -308,7 +308,7 @@
     chartSvg.appendChild(eqOuter); chartSvg.appendChild(eqInner);
     revealMap['eqDotOuter'] = [eqOuter];
     revealMap['eqDotInner'] = [eqInner];
-    // label ekuilibrium ditaruh di kanan-atas titik, area yang kosong (jauh dari label kurva di kiri)
+    // label ekuilibrium diletakkan di kanan-atas titik, area yang kosong (jauh dari label kurva di kiri)
     const eqLabel = svgEl('text', { x:ex+12, y:ey-12, 'font-size':'13', 'font-weight':'800', fill:'#16294A', 'font-family':'Baloo 2', class:'curve-fade' });
     eqLabel.textContent = 'E';
     chartSvg.appendChild(eqLabel);
@@ -384,7 +384,7 @@
   btnPrev.addEventListener('click', () => {
     if(current > 0){ current--; render(); }
   });
-  // Panah kiri dan kanan dipasang lewat modul bersama supaya perilakunya
+  // Panah kiri dan kanan dipasang melalui modul bersama supaya perilakunya
   // sama di semua halaman materi.
   KafbeNavigasiSlide.pasang({ mundur: btnPrev, maju: btnNext });
   btnRestart.addEventListener('click', () => {
