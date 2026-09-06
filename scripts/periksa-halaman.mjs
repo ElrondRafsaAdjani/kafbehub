@@ -35,7 +35,9 @@ const AKAR = process.cwd();
 
 // Halaman pengurus sengaja tidak mencatat kunjungan dan tidak perlu diperiksa
 // untuk syarat itu.
-const HALAMAN_PENGURUS = new Set(['adminkafbe.html', 'operasional.html', 'pengajar.html']);
+const HALAMAN_PENGURUS = new Set([
+  'adminkafbe.html', 'operasional.html', 'pengajar.html', 'pengajar-daftar.html',
+]);
 
 /*
   Halaman yang sengaja dinonaktifkan: tidak ditautkan dari mana pun, diberi

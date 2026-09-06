@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'none';" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Daftar Akun Pengajar - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="operasional.css">
+<link rel="stylesheet" href="pengajar.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body class="op-body">
+
+<!--
+  HALAMAN PENDAFTARAN, TERPISAH DARI HALAMAN MASUK.
+
+  Keduanya dulu satu halaman dengan dua formulir yang bergantian tampil. Yang
+  membuatnya tidak enak dipakai bukan formulirnya, melainkan formulir masuk
+  yang tetap ada di dokumen meski sedang disembunyikan: pengelola kata sandi
+  membaca seluruh halaman, menemukan pasangan nama pengguna dan kata sandi di
+  situ, lalu menyimpulkan halaman ini adalah halaman masuk. Akibatnya kotak
+  email diisi alamat pribadi yang tersimpan, dan sebagian pengelola bahkan
+  mengirimkannya sendiri.
+
+  Menyembunyikan formulir tidak menghapusnya dari dokumen, jadi satu-satunya
+  cara menghentikan tebakan itu adalah memisahkan halamannya. Di sini tidak
+  ada satu pun kotak kata sandi lama, sehingga peramban membacanya sebagai
+  pendaftaran, dan saran alamat tetap muncul tanpa ada yang terkirim sendiri.
+-->
+<section class="op-masuk">
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1>Daftar akun pengajar</h1>
+    <p class="op-sub">Isi data Anda sesuai data asisten. Pengurus operasional yang memutuskan diterima atau tidak.</p>
+
+    <p class="op-catatan pg-kembali">
+      Sudah punya akun?
+      <a class="pg-tautan" href="pengajar.html">Kembali ke halaman masuk</a>
+    </p>
+
+    <form id="formDaftar">
+      <label for="dfNama">Nama lengkap</label>
+      <input type="text" id="dfNama" name="namaLengkap" required maxlength="80" autocomplete="name" placeholder="Sesuai data asisten" />
+
+      <label for="dfNrp">NRP</label>
+      <input type="text" id="dfNrp" name="nrp" required maxlength="15" inputmode="numeric" autocomplete="off" placeholder="130223203" />
+
+      <label for="dfEmail">Email student UBAYA</label>
+      <input type="email" id="dfEmail" name="emailBaru" required autocomplete="email" placeholder="s130223203@student.ubaya.ac.id" aria-describedby="dfEmailKet" />
+      <p class="pg-keterangan" id="dfEmailKet">Emailnya memakai NRP Anda. NRP 130223001 memakai email s130223001@student.ubaya.ac.id.</p>
+
+      <label for="dfSandi">Kata sandi baru</label>
+      <input type="password" id="dfSandi" name="sandiBaru" required minlength="8" autocomplete="new-password" aria-describedby="dfSandiKet" />
+      <p class="pg-keterangan" id="dfSandiKet">Paling sedikit delapan karakter. Jangan pakai kata sandi yang sama dengan akun lain.</p>
+
+      <label for="dfSandi2">Ulangi kata sandi</label>
+      <input type="password" id="dfSandi2" name="sandiUlang" required minlength="8" autocomplete="new-password" />
+
+      <button type="submit" class="btn btn-primary op-penuh" id="tombolDaftar">Kirim pengajuan</button>
+    </form>
+
+    <p class="op-pesan" id="pesanDaftar" role="alert"></p>
+
+    <!-- Catatan langkah demi langkah saat mendaftar. Tersembunyi sampai ada
+         percobaan, dan berguna untuk menunjukkan langkah mana yang gagal tanpa
+         perlu membuka developer tools. -->
+    <details class="op-diagnosa" id="diagnosaBungkus" hidden>
+      <summary>Rincian teknis percobaan mendaftar</summary>
+      <pre id="diagnosa"></pre>
+    </details>
+
+    <p class="op-catatan">Setelah dikirim, tunggu pengurus operasional menerima pengajuan Anda. Sampai saat itu, akunnya bisa masuk tapi belum bisa mengubah naskah materi.</p>
+  </div>
+</section>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<script src="firebase-config.js"></script>
+<script type="module" src="shared/pengajar-daftar.js"></script>
+</body>
+</html>

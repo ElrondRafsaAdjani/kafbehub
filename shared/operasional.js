@@ -1665,10 +1665,28 @@ function gambarAkunPengajar(){
   t.querySelectorAll('[data-hapus-ak]').forEach(b => b.addEventListener('click', async () => {
     const a = data.pengajarakun.find(x => x.id === b.dataset.hapusAk);
     if(!a) return;
+
+    /*
+      Akibat menghapus berbeda-beda menurut status barisnya, dan bedanya
+      penting. Menghapus baris yang sudah diterima mencabut wewenang, sedangkan
+      menghapus baris yang ditolak justru membuka kembali pintu yang tadi baru
+      saja ditutup. Peringatan yang berbunyi sama untuk keduanya akan membuat
+      yang kedua terasa seperti tindakan yang aman, padahal kebalikannya.
+    */
+    const s = statusAkun(a);
+    const akibat = s === 'diterima'
+      ? 'Wewenangnya langsung dicabut. Naskah materi tidak bisa lagi dia ubah, '
+        + 'bahkan kalau halamannya sedang terbuka.'
+      : (s === 'ditolak'
+          ? 'Penolakannya ikut terhapus, sehingga orang ini bisa mendaftar lagi. '
+            + 'Kalau maksud Anda menutup pintunya, biarkan barisnya dan pakai Tolak.'
+          : 'Pengajuannya hilang dari antrean tanpa pernah diputuskan.');
+
     if(!confirm(
-      `Hapus pengajuan ${a.nama} (${a.nrp})?\n\n`
-      + 'Akun Firebase-nya tidak ikut terhapus, tapi wewenangnya hilang dan '
-      + 'orang ini bisa mendaftar ulang dari halaman pengajar.')) return;
+      `Hapus baris ${a.nama} (${a.nrp})?\n\n${akibat}\n\n`
+      + 'Akun Firebase-nya tidak ikut terhapus. Orang ini masih bisa masuk dan '
+      + 'mengirim pengajuan baru. Untuk menutup akunnya sama sekali, '
+      + 'nonaktifkan lewat Firebase Console pada menu Authentication.')) return;
     try{
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'pengajarakun', a.id));

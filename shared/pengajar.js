@@ -26,12 +26,16 @@
   halaman aslinya sudah tidak ada.
 */
 
+import {
+  POLA_EMAIL, periksaPengajuan, pesanAuth,
+  esc, daftarKesalahan, pesan, bersihkanPesan, antarKeIsian, enterPindahIsian,
+} from './pengajar-akun.js';
+
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
 
 const { initializeApp } = await import(`${SDK}/firebase-app.js`);
 const {
-  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  signOut, onAuthStateChanged,
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
 } = await import(`${SDK}/firebase-auth.js`);
 const {
   getFirestore, collection, doc, getDoc, setDoc, addDoc, serverTimestamp,
@@ -46,25 +50,6 @@ const db   = getFirestore(app);
    ============================================================ */
 
 const $ = id => document.getElementById(id);
-
-function esc(s){
-  return String(s ?? '').replace(/[&<>"']/g, c => (
-    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
-  ));
-}
-
-function pesan(el, teks, jenis){
-  el.className = 'op-pesan tampil ' + (jenis || '');
-  el.innerHTML = teks;
-}
-function bersihkanPesan(el){
-  el.className = 'op-pesan';
-  el.innerHTML = '';
-}
-
-function daftarKesalahan(judul, list){
-  return `${esc(judul)}<ul>${list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
-}
 
 let waktuStatus = null;
 function status(teks, jenis){
@@ -97,146 +82,9 @@ function diag(teks){
 }
 
 /* ============================================================
-   2. Masuk, mendaftar, dan keluar
+   2. Masuk dan keluar
    ============================================================ */
 
-// Pesan bawaan Firebase berbahasa Inggris dan sebagian membingungkan,
-// jadi diterjemahkan ke kalimat yang bisa ditindaklanjuti pemakai.
-function pesanAuth(kode){
-  switch(kode){
-    case 'auth/invalid-email':
-      return 'Format email tidak benar.';
-    case 'auth/user-disabled':
-      return 'Akun ini dinonaktifkan. Hubungi pengurus operasional.';
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-    case 'auth/invalid-credential':
-      return 'Email atau kata sandi salah.';
-    case 'auth/too-many-requests':
-      return 'Terlalu banyak percobaan gagal. Tunggu beberapa menit lalu coba lagi.';
-    case 'auth/network-request-failed':
-      return 'Gagal menghubungi server. Periksa koneksi internet Anda.';
-    case 'auth/configuration-not-found':
-      return 'Metode masuk email dan kata sandi belum diaktifkan di Firebase Console.';
-    case 'auth/email-already-in-use':
-      return 'Email ini sudah punya akun. Masuk saja memakai kata sandi yang dulu dipakai, '
-           + 'atau hubungi pengurus operasional kalau lupa.';
-    case 'auth/weak-password':
-      return 'Kata sandinya terlalu mudah ditebak. Pakai paling sedikit delapan karakter.';
-    case 'auth/operation-not-allowed':
-      return 'Pendaftaran akun baru sedang dimatikan di Firebase Console.';
-    default:
-      return 'Tidak berhasil (' + kode + ').';
-  }
-}
-
-/*
-  Bentuk email dan NRP yang diterima.
-
-  Pemeriksaan yang sama juga ditulis di firestore.rules, dan yang di sanalah
-  yang benar-benar menolak. Yang di sini hanya supaya pendaftar tahu letak
-  kesalahannya sebelum akun Firebase-nya terlanjur dibuat.
-*/
-const POLA_EMAIL = /^s\d{6,15}@student\.ubaya\.ac\.id$/i;
-const POLA_NRP   = /^\d{6,15}$/;
-
-function angkaEmail(email){
-  const m = String(email || '').match(/^s(\d+)@/i);
-  return m ? m[1] : '';
-}
-
-// Email student UBAYA dibentuk dari NRP-nya, misalnya NRP 130223001 memakai
-// email s130223001@student.ubaya.ac.id. Jadi email yang benar selalu bisa
-// dihitung, dan pendaftar tidak perlu menebak letak kesalahannya.
-function emailSeharusnya(nrp){
-  return 's' + String(nrp || '').trim() + '@student.ubaya.ac.id';
-}
-
-function periksaPengajuan(nama, nrp, email){
-  const salah = [];
-  if(nama.length < 3) salah.push('Nama lengkap belum diisi.');
-  if(nama.length > 80) salah.push('Nama lengkap terlalu panjang.');
-  if(!POLA_NRP.test(nrp)) salah.push('NRP harus berupa angka saja, tanpa huruf dan tanpa spasi.');
-  if(!POLA_EMAIL.test(email)){
-    salah.push('Email harus email student UBAYA, bentuknya s130223203@student.ubaya.ac.id. '
-      + 'Alamat pribadi seperti Gmail tidak bisa dipakai.');
-  }
-  return salah;
-}
-
-/*
-  Mengantar pemakai ke isian yang bermasalah.
-
-  Pesan galat saja tidak cukup ketika formulirnya lebih tinggi dari satu layar
-  ponsel: pesannya tampil di bawah, sedangkan isian yang salah ada di atas, dan
-  keduanya tidak pernah terlihat bersamaan. Isinya sekalian disorot supaya
-  alamat yang telanjur diisikan pengelola kata sandi bisa langsung ditimpa
-  tanpa perlu menghapusnya satu per satu.
-*/
-function antarKeIsian(id){
-  const el = $(id);
-  if(!el) return;
-  el.focus({ preventScroll: true });
-  if(typeof el.select === 'function') el.select();
-  el.scrollIntoView({ block: 'center' });
-}
-
-function isianBermasalah(nama, nrp, email){
-  if(nama.length < 3 || nama.length > 80) return 'dfNama';
-  if(!POLA_NRP.test(nrp)) return 'dfNrp';
-  if(!POLA_EMAIL.test(email)) return 'dfEmail';
-  return '';
-}
-
-/* ---------- Berpindah antara masuk dan daftar ---------- */
-
-function tampilkanDaftar(daftar){
-  $('formMasuk').hidden = daftar;
-  $('formDaftar').hidden = !daftar;
-  $('catatanMasuk').hidden = daftar;
-  $('catatanDaftar').hidden = !daftar;
-  $('judulMasuk').textContent = daftar ? 'Daftar akun pengajar' : 'Pengajar KAFBE';
-  $('subMasuk').textContent = daftar
-    ? 'Isi data Anda sesuai data asisten. Pengurus operasional yang memutuskan diterima atau tidak.'
-    : 'Halaman pengajar. Masuk untuk mengubah naskah materi kuliah.';
-  bersihkanPesan($('pesanMasuk'));
-  // Penanda "sudah pernah diperingatkan" ikut dilepas, supaya peringatan NRP
-  // tetap muncul lagi kalau formulirnya ditinggalkan lalu dibuka ulang.
-  $('pesanMasuk').dataset.konfirmasi = '';
-}
-
-$('keDaftar').addEventListener('click', () => tampilkanDaftar(true));
-$('keMasuk').addEventListener('click', () => tampilkanDaftar(false));
-
-/* ---------- Menahan pengiriman yang belum diniatkan ---------- */
-
-/*
-  Menekan Enter di tengah formulir memindahkan kursor ke isian berikutnya,
-  bukan mengirim pengajuannya.
-
-  Formulir pendaftaran ini panjang, dan sebagian pengelola kata sandi maupun
-  papan ketik ponsel memperlakukan Enter sebagai "lanjut". Dengan perilaku
-  bawaan peramban, Enter di isian pertama mana pun langsung mengirim seluruh
-  formulir, termasuk saat alamat yang terisi otomatis masih alamat pribadi.
-  Yang dilihat pendaftar cuma penolakan, padahal dia belum merasa mengirim apa
-  pun.
-
-  Isian terakhir dikecualikan. Di situ Enter memang berarti selesai, dan
-  menahannya justru akan terasa seperti tombolnya rusak.
-*/
-function enterPindahIsian(form, idTerakhir){
-  form.addEventListener('keydown', (e) => {
-    if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
-    if(e.target.id === idTerakhir) return;
-
-    e.preventDefault();
-    const isian = [...form.querySelectorAll('input')];
-    const berikut = isian[isian.indexOf(e.target) + 1];
-    if(berikut) berikut.focus();
-  });
-}
-
-enterPindahIsian($('formDaftar'), 'dfSandi2');
 enterPindahIsian($('formLengkapi'), 'lkNrp');
 
 /* ---------- Masuk ---------- */
@@ -259,88 +107,6 @@ $('formMasuk').addEventListener('submit', async (e) => {
     tombol.disabled = false;
     tombol.textContent = 'Masuk';
   }
-});
-
-/* ---------- Mendaftar ---------- */
-
-/*
-  Dua langkah yang harus dikerjakan berurutan: membuat akun Firebase, lalu
-  menulis baris pengajuannya.
-
-  Baris pengajuan hanya boleh ditulis oleh pemilik akunnya sendiri menurut
-  aturan Firestore, jadi urutannya memang tidak bisa dibalik. Kalau langkah
-  kedua gagal, akunnya sudah terlanjur jadi dan pemakainya diantar ke layar
-  "Lengkapi pengajuan" supaya bisa mengulang langkah itu saja.
-*/
-$('formDaftar').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const tombol = $('tombolDaftar');
-  const el = $('pesanMasuk');
-  bersihkanPesan(el);
-
-  const nama  = $('dfNama').value.trim();
-  const nrp   = $('dfNrp').value.trim();
-  const email = $('dfEmail').value.trim().toLowerCase();
-  const sandi = $('dfSandi').value;
-
-  const salah = periksaPengajuan(nama, nrp, email);
-  if(sandi.length < 8) salah.push('Kata sandi minimal delapan karakter.');
-  if(sandi !== $('dfSandi2').value) salah.push('Kedua kata sandi belum sama.');
-
-  if(salah.length){
-    pesan(el, daftarKesalahan('Belum bisa dikirim:', salah), 'salah');
-    const isian = isianBermasalah(nama, nrp, email)
-      || (sandi.length < 8 ? 'dfSandi' : 'dfSandi2');
-    antarKeIsian(isian);
-    return;
-  }
-
-  /*
-    Email student UBAYA dibentuk dari NRP-nya, jadi email yang seharusnya bisa
-    dihitung sendiri dan disebutkan apa adanya. Memberi tahu "keduanya berbeda"
-    saja akan membuat pendaftar menebak-nebak yang mana yang salah.
-
-    Pengajuannya tetap boleh dikirim setelah ditekan sekali lagi. Yang berhak
-    memutuskan adalah pengurus, bukan halaman ini, dan pengurus melihat
-    peringatan yang sama di tab Akun Pengajar. Menutup jalannya sama sekali
-    akan menghalangi orang yang emailnya memang menyimpang dari kebiasaan.
-  */
-  if(angkaEmail(email) !== nrp && el.dataset.konfirmasi !== '1'){
-    pesan(el,
-      'Email tidak sesuai NRP. Email student UBAYA memakai NRP Anda, jadi '
-      + `menurut NRP <strong>${esc(nrp)}</strong> emailnya adalah `
-      + `<code>${esc(emailSeharusnya(nrp))}</code>.<br><br>`
-      + 'Perbaiki salah satunya, atau tekan Kirim pengajuan sekali lagi kalau '
-      + 'email Anda memang berbeda dari itu.',
-      'hati');
-    el.dataset.konfirmasi = '1';
-    antarKeIsian('dfEmail');
-    return;
-  }
-  el.dataset.konfirmasi = '';
-
-  tombol.disabled = true;
-  tombol.textContent = 'Mengirim…';
-
-  try{
-    diag('Membuat akun Firebase untuk ' + email + ' …');
-    const hasil = await createUserWithEmailAndPassword(auth, email, sandi);
-    diag('Akun dibuat. UID: ' + hasil.user.uid);
-
-    $('dfSandi').value = '';
-    $('dfSandi2').value = '';
-
-    await kirimPengajuan(hasil.user, nama, nrp);
-  }catch(err){
-    diag('GAGAL mendaftar: ' + (err.code || err.message));
-    pesan(el, esc(pesanAuth(err.code || '')), 'salah');
-    tombol.disabled = false;
-    tombol.textContent = 'Kirim pengajuan';
-    return;
-  }
-
-  tombol.disabled = false;
-  tombol.textContent = 'Kirim pengajuan';
 });
 
 /*
@@ -393,7 +159,7 @@ $('formLengkapi').addEventListener('submit', async (e) => {
 
   if(salah.length){
     pesan(el, daftarKesalahan('Belum bisa dikirim:', salah), 'salah');
-    antarKeIsian(nama.length < 3 || nama.length > 80 ? 'lkNama' : 'lkNrp');
+    antarKeIsian(nama.length < 3 || nama.length > 80 ? $('lkNama') : $('lkNrp'));
     return;
   }
 
@@ -439,7 +205,6 @@ function tampilkanLayar(id){
 onAuthStateChanged(auth, async (user) => {
   if(!user){
     tampilkanLayar('layarMasuk');
-    tampilkanDaftar(false);
     return;
   }
   await tentukanLayar(user);

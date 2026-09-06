@@ -2,17 +2,20 @@
 
 Panduan untuk yang mengelola kafbehub.vercel.app. Tidak perlu bisa coding.
 
-Ada tiga halaman pengurus, dengan wewenang terpisah:
+Ada tiga wewenang pengurus yang terpisah, dan satu halaman pendaftaran yang
+belum punya wewenang apa pun:
 
 | Halaman | Untuk apa | Daftar wewenang |
 |---|---|---|
 | `/operasional` | Jadwal, perubahan sementara, pengajar, pengumuman | koleksi `admins` |
 | `/pengajar` | Naskah materi kuliah, dibatasi per mata kuliah | koleksi `pengajarakun` |
+| `/pengajar-daftar` | Pendaftaran akun pengajar, menunggu persetujuan | belum punya wewenang |
 | `/adminkafbe` | Naskah situs, status fitur, status situs, catatan versi | koleksi `adminutama` |
 
-Ketiganya tidak saling mewarisi. Akun operasional tidak bisa membuka
-`/adminkafbe` maupun `/pengajar`. Ketiganya juga tidak ditautkan dari mana pun
-di situs.
+Ketiga wewenang itu tidak saling mewarisi. Akun operasional tidak bisa membuka
+`/adminkafbe` maupun `/pengajar`. Semua halaman di atas juga tidak ditautkan
+dari mana pun di situs, kecuali `/pengajar-daftar` yang memang ditautkan dari
+`/pengajar` supaya pengajar baru bisa menemukannya.
 
 ---
 
@@ -612,8 +615,9 @@ risiko merusak gambarnya.
 Pengajar mendaftar sendiri. Pengurus operasional yang menyetujui. Tidak ada
 langkah di Firebase Console sama sekali.
 
-1. Pengajar membuka `/pengajar`, menekan **Buat akun pengajar**, lalu mengisi
-   nama lengkap, NRP, email student UBAYA, dan kata sandi barunya.
+1. Pengajar membuka `/pengajar`, menekan **Buat akun pengajar** sehingga
+   berpindah ke `/pengajar-daftar`, lalu mengisi nama lengkap, NRP, email
+   student UBAYA, dan kata sandi barunya dalam satu halaman.
 2. Akunnya langsung jadi, tapi belum bisa mengubah apa pun. Yang dia lihat
    adalah layar **Pengajuan sedang ditinjau**.
 3. Pengurus operasional membuka `/operasional` tab **Akun Pengajar**, menilai
@@ -624,6 +628,13 @@ langkah di Firebase Console sama sekali.
 Email yang diterima hanya email student UBAYA berbentuk
 `s130223203@student.ubaya.ac.id`. Bentuk lain ditolak, dan penolakannya
 dikerjakan aturan Firestore di server, bukan cuma oleh halamannya.
+
+Halaman pendaftaran sengaja berdiri sendiri dan tidak memuat formulir masuk
+sama sekali. Selama keduanya berada di satu halaman, pengelola kata sandi
+membaca keduanya, menyimpulkan itu halaman masuk, lalu mengisi kotak email
+dengan alamat pribadi yang tersimpan, bahkan kadang mengirimkannya sendiri.
+Menyembunyikan formulir tidak menghapusnya dari dokumen, jadi memisahkan
+halamannya adalah satu-satunya cara menghentikan tebakan itu.
 
 ### Wewenangnya dibatasi per mata kuliah
 

@@ -18,22 +18,23 @@
 </head>
 <body class="op-body">
 
-<!-- ============ LAYAR MASUK DAN DAFTAR ============ -->
+<!-- ============ LAYAR MASUK ============ -->
+<!--
+  Pendaftaran punya halamannya sendiri di /pengajar-daftar, dan sengaja tidak
+  ditumpuk di sini sebagai formulir kedua yang bergantian tampil.
+
+  Menyembunyikan formulir tidak menghapusnya dari dokumen. Selama formulir
+  masuk dan formulir pendaftaran berada di satu halaman, pengelola kata sandi
+  membaca keduanya, menyimpulkan halaman ini halaman masuk, lalu mengisi kotak
+  email pendaftaran dengan alamat pribadi yang tersimpan. Memisahkan halamannya
+  adalah satu-satunya cara menghentikan tebakan itu.
+-->
+
 <section id="layarMasuk" class="op-masuk">
   <div class="op-kartu-masuk">
     <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
-    <h1 id="judulMasuk">Pengajar KAFBE</h1>
-    <p class="op-sub" id="subMasuk">Halaman pengajar. Masuk untuk mengubah naskah materi kuliah.</p>
-
-    <!-- Jalan kembali ke layar masuk ditaruh DI ATAS formulir, bukan di
-         bawahnya. Formulir pendaftaran tingginya melebihi satu layar ponsel,
-         dan pesan galat masih menambah tingginya lagi, jadi tautan yang
-         ditaruh di bawah tidak akan pernah terlihat justru pada saat paling
-         dibutuhkan, yaitu ketika isiannya perlu diperbaiki. -->
-    <p class="op-catatan pg-kembali" id="catatanDaftar" hidden>
-      Sudah punya akun?
-      <button type="button" class="pg-tautan" id="keMasuk">Kembali ke halaman masuk</button>
-    </p>
+    <h1>Pengajar KAFBE</h1>
+    <p class="op-sub">Halaman pengajar. Masuk untuk mengubah naskah materi kuliah.</p>
 
     <form id="formMasuk" autocomplete="on">
       <label for="email">Email pengajar</label>
@@ -43,35 +44,6 @@
       <input type="password" id="sandi" name="sandi" required autocomplete="current-password" />
 
       <button type="submit" class="btn btn-primary op-penuh" id="tombolMasuk">Masuk</button>
-    </form>
-
-    <!-- Pendaftaran akun baru. Yang dibuat di sini adalah pengajuan, bukan
-         akses. Wewenangnya baru ada setelah pengurus operasional menerimanya
-         di tab Akun Pengajar. -->
-    <form id="formDaftar" autocomplete="on" hidden>
-      <label for="dfNama">Nama lengkap</label>
-      <input type="text" id="dfNama" name="nama" required maxlength="80" autocomplete="name" placeholder="Sesuai data asisten" />
-
-      <label for="dfNrp">NRP</label>
-      <input type="text" id="dfNrp" name="nrp" required maxlength="15" inputmode="numeric" placeholder="130223203" />
-
-      <!-- autocomplete="email", bukan "username".
-           Keduanya sama-sama memunculkan saran alamat yang tersimpan, tapi
-           "username" membuat pengelola kata sandi menyangka ini formulir masuk
-           dan sebagian di antaranya lalu mengisi sekaligus mengirim sendiri.
-           Padahal alamat yang tersimpan biasanya email pribadi, bukan email
-           student, sehingga pengiriman itu selalu berakhir dengan penolakan. -->
-      <label for="dfEmail">Email student UBAYA</label>
-      <input type="email" id="dfEmail" name="emailBaru" required autocomplete="email" placeholder="s130223203@student.ubaya.ac.id" aria-describedby="dfEmailKet" />
-      <p class="pg-keterangan" id="dfEmailKet">Emailnya memakai NRP Anda. NRP 130223001 memakai email s130223001@student.ubaya.ac.id.</p>
-
-      <label for="dfSandi">Kata sandi baru</label>
-      <input type="password" id="dfSandi" name="sandiBaru" required minlength="8" autocomplete="new-password" />
-
-      <label for="dfSandi2">Ulangi kata sandi</label>
-      <input type="password" id="dfSandi2" name="sandiUlang" required minlength="8" autocomplete="new-password" />
-
-      <button type="submit" class="btn btn-primary op-penuh" id="tombolDaftar">Kirim pengajuan</button>
     </form>
 
     <p class="op-pesan" id="pesanMasuk" role="alert"></p>
@@ -84,9 +56,9 @@
       <pre id="diagnosa"></pre>
     </details>
 
-    <p class="op-catatan" id="catatanMasuk">
+    <p class="op-catatan">
       Belum punya akun?
-      <button type="button" class="pg-tautan" id="keDaftar">Buat akun pengajar</button>
+      <a class="pg-tautan" href="pengajar-daftar.html">Buat akun pengajar</a>
     </p>
   </div>
 </section>
