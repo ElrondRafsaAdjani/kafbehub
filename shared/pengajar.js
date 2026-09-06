@@ -118,7 +118,7 @@ document.querySelectorAll('[data-keluar]').forEach(b => b.addEventListener('clic
 
 // Siapa yang sedang memakai halaman, diisi setelah masuk dan dipakai sebagai
 // pelaku pada catatan log.
-let pemakai = { nama: '', email: '' };
+let pemakai = { nama: '', email: '', uid: '' };
 let wewenang = { semua: false, mk: [] };
 
 const LAYAR = ['layarMasuk', 'layarTunggu', 'layarTolak', 'aplikasi'];
@@ -127,11 +127,27 @@ function tampilkanLayar(id){
   for(const l of LAYAR) $(l).hidden = (l !== id);
 }
 
+/*
+  Siapa yang sudah lolos pemeriksaan dan halamannya sedang terbuka.
+
+  Firebase memancarkan peristiwa perubahan sesi lebih dari sekali, misalnya
+  saat token diperbarui diam-diam tiap sekitar satu jam. Tanpa penanda ini,
+  tiap pancaran itu menjalankan ulang seluruh pemeriksaan, menggambar ulang
+  daftar topik, dan menghapus tanda topik yang sedang dibuka, padahal tidak ada
+  apa pun yang berubah.
+*/
+let uidTerbuka = null;
+
 onAuthStateChanged(auth, async (user) => {
   if(!user){
+    uidTerbuka = null;
     tampilkanLayar('layarMasuk');
     return;
   }
+
+  // Orang yang sama, halaman sudah terbuka. Tidak ada yang perlu dikerjakan.
+  if(user.uid === uidTerbuka) return;
+
   await tentukanLayar(user);
 });
 
@@ -156,6 +172,29 @@ async function tentukanLayar(user){
   }catch(err){
     console.error('Gagal memeriksa status pengajar', err);
     diag('GAGAL membaca pengajarakun: ' + (err.code || err.message));
+
+    /*
+      SENGAJA TIDAK MENGELUARKAN PEMAKAI YANG HALAMANNYA SUDAH TERBUKA.
+
+      Pemeriksaan ini pernah selalu berakhir dengan signOut, dan itu keliru.
+      Kegagalan membaca satu dokumen bisa terjadi karena jaringan tersendat
+      sesaat, dan kalau kejadiannya saat pengajar sedang mengetik, naskah yang
+      belum disimpan ikut hilang bersama halamannya. Kehilangan pekerjaan itu
+      jauh lebih merugikan daripada risiko yang dicegahnya.
+
+      Lagipula mengeluarkan pemakai tidak menambah keamanan sedikit pun.
+      Wewenang ditegakkan aturan Firestore pada tiap penyimpanan, jadi akun
+      yang wewenangnya sudah dicabut akan ditolak server saat menyimpan,
+      terlepas dari apa yang sedang tampil di layarnya.
+
+      Karena itu: sebelum halamannya terbuka, tetap gagal tertutup dan keluar.
+      Sesudah terbuka, cukup diberi tahu dan pekerjaannya dibiarkan utuh.
+    */
+    if(uidTerbuka === user.uid){
+      status('Status akun tidak bisa diperiksa ulang. Naskah yang sedang Anda '
+        + 'kerjakan tetap aman, tapi simpanlah lebih awal.', 'salah');
+      return;
+    }
 
     // Pesan dipasang LEBIH DULU, baru keluar. Kalau urutannya dibalik dan
     // signOut gagal, pemakai hanya melihat halaman masuk kosong tanpa
@@ -210,7 +249,8 @@ async function tentukanLayar(user){
   }
 
   diag('Pengajuan sudah diterima. Membuka halaman…');
-  pemakai = { nama: profil.nama || '', email: user.email || '' };
+  uidTerbuka = user.uid;
+  pemakai = { nama: profil.nama || '', email: user.email || '', uid: user.uid };
   wewenang = {
     semua: profil.semua === true,
     mk: Array.isArray(profil.mk) ? profil.mk.map(String) : []
@@ -394,6 +434,52 @@ function susunSimpanan(){
   return out;
 }
 
+/* ---------- Draf yang belum disimpan ---------- */
+
+/*
+  Naskah yang sedang diketik dititipkan ke penyimpanan peramban pada tiap
+  ketukan, dan dihapus begitu benar-benar tersimpan ke Firestore.
+
+  KENAPA PERLU
+
+  Sesi bisa berakhir tanpa diminta. Token Firebase diperbarui diam-diam tiap
+  sekitar satu jam, dan kalau pembaruan itu gagal karena jaringan mati, sesinya
+  berakhir dan halaman kembali ke layar masuk. Tanpa titipan ini, naskah yang
+  sudah diketik setengah jam ikut lenyap begitu saja, dan pekerjaannya harus
+  diulang dari nol.
+
+  Titipannya per orang dan per topik, jadi dua pengajar yang memakai komputer
+  yang sama tidak saling menimpa. Isinya naskah materi yang memang terbuka
+  untuk umum, bukan kata sandi maupun tanda pengenal, jadi tidak ada yang
+  perlu dirahasiakan di sini.
+*/
+function kunciDraf(kunci){
+  return 'kafbe_draf_' + (pemakai.uid || 'tanpa') + '_' + kunci;
+}
+
+function simpanDraf(){
+  if(!topikKini || !bawaan) return;
+  try{
+    if(samaDenganTersimpan()){
+      localStorage.removeItem(kunciDraf(topikKini.kunci));
+    }else{
+      localStorage.setItem(kunciDraf(topikKini.kunci), JSON.stringify(susunSimpanan()));
+    }
+  }catch(e){
+    // Peramban menolak menyimpan, misalnya karena mode penyamaran atau kuota
+    // penuh. Penyuntingannya tetap jalan, hanya tanpa jaring pengaman.
+  }
+}
+
+function bacaDraf(kunci){
+  try{ return JSON.parse(localStorage.getItem(kunciDraf(kunci))) || null; }
+  catch(e){ return null; }
+}
+
+function buangDraf(kunci){
+  try{ localStorage.removeItem(kunciDraf(kunci)); }catch(e){}
+}
+
 async function bukaTopik(mk, topik){
   if(topikKini && topikKini.kunci !== topik.kunci && adaPerubahan()
      && !confirm('Ada perubahan yang belum disimpan pada topik sebelumnya. Tetap pindah?')){
@@ -458,8 +544,55 @@ async function bukaTopik(mk, topik){
     }
   }
 
+  /*
+    Kalau ada titipan naskah yang belum sempat disimpan, isinya dipasang di
+    atas draf ini dan pemakainya diberi tahu. Titipan hanya dipakai kalau
+    memang berbeda dari yang sudah tersimpan, supaya sisa titipan lama tidak
+    memunculkan pemberitahuan yang membingungkan.
+  */
+  const titipan = bacaDraf(topik.kunci);
+  let adaTitipan = false;
+
+  if(titipan){
+    for(const g of GRUP){
+      for(const k in (titipan[g] || {})){
+        if(bawaan[g][k] === undefined) continue;   // naskahnya sudah tidak ada
+        if(typeof titipan[g][k] !== 'string') continue;
+        if(draf[g][k] === titipan[g][k]) continue;
+        draf[g][k] = titipan[g][k];
+        adaTitipan = true;
+      }
+    }
+    if(!adaTitipan) buangDraf(topik.kunci);
+  }
+
   gambarPenyunting();
   perbaruiRingkasan();
+
+  if(adaTitipan){
+    pesan($('pgPesan'),
+      'Ada naskah yang Anda ketik sebelumnya tapi belum sempat disimpan, dan '
+      + 'naskah itu sudah dipasang kembali di bawah. Periksa dulu, lalu simpan '
+      + 'kalau memang benar. '
+      + '<button type="button" class="pg-mini" id="pgBuangDraf">Buang, pakai yang tersimpan</button>',
+      'hati');
+
+    $('pgBuangDraf').addEventListener('click', () => {
+      buangDraf(topik.kunci);
+      for(const g of GRUP){
+        for(const k in bawaan[g]){
+          const ada = tersimpan[g][k];
+          draf[g][k] = (typeof ada === 'string' && ada.trim() !== '') ? ada : bawaan[g][k];
+        }
+      }
+      gambarPenyunting();
+      perbaruiRingkasan();
+      bersihkanPesan($('pgPesan'));
+    });
+    status('Naskah yang belum tersimpan dikembalikan.', 'benar');
+    return;
+  }
+
   status('Naskah siap diubah.', 'benar');
 }
 
@@ -692,6 +825,7 @@ function perbaruiRingkasan(){
     ? `Simpan ${jumlah} perubahan`
     : 'Simpan perubahan';
   if(topikKini) tandaiJumlahUbah(topikKini.kunci, jumlah);
+  simpanDraf();
   saring();
 }
 
@@ -761,9 +895,13 @@ $('pgSimpan').addEventListener('click', async () => {
     });
 
     tersimpan = isi;
+    // Titipannya dibuang di sini, bukan lewat perbaruiRingkasan, supaya
+    // penghapusannya benar-benar terjadi sesudah Firestore menerima naskahnya.
+    buangDraf(topikKini.kunci);
     await catatLog(jumlah);
 
     status('Naskah tersimpan. Halaman materinya sudah memakai naskah baru.', 'benar');
+    bersihkanPesan($('pgPesan'));
     perbaruiRingkasan();
   }catch(err){
     console.error('Gagal menyimpan naskah materi', err);

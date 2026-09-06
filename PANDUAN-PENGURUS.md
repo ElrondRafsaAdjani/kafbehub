@@ -822,6 +822,12 @@ Situsnya sedang berstatus aktif. Masuk ke pemeliharaan dulu lewat tab
 Memang begitu sampai pengurus operasional memutuskannya. Buka `/operasional`
 tab **Akun Pengajar**, lalu terima atau tolak barisnya.
 
+**Di `/pengajar`, tiba-tiba keluar sendiri saat sedang mengetik**
+Sesi Firebase berakhir, biasanya karena jaringan mati cukup lama sehingga
+pembaruan token gagal. Naskah yang sedang diketik tidak hilang: masuk lagi,
+buka topik yang sama, dan naskahnya dipasang kembali beserta pemberitahuan.
+Periksa dulu isinya, lalu simpan.
+
 **Masuk ke `/pengajar` malah dilempar ke halaman pendaftaran**
 Akun Firebase-nya sudah jadi tapi baris pengajuannya belum tersimpan, biasanya
 karena jaringan putus saat mendaftar, atau karena mendaftar sebelum aturan
