@@ -38,7 +38,27 @@ const {
   getFirestore, collection, doc, getDoc, setDoc, addDoc, serverTimestamp,
 } = await import(`${SDK}/firebase-firestore.js`);
 
-const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
+/*
+  NAMA "pengajar" PADA APLIKASI FIREBASE INI PENTING, JANGAN DIHAPUS.
+
+  Firebase menyimpan sesi yang sedang masuk di penyimpanan peramban, dan
+  kuncinya disusun dari nama aplikasi ini. Selama /pengajar, /operasional, dan
+  /adminkafbe sama-sama memakai nama bawaan, ketiganya berbagi satu sesi yang
+  sama untuk seluruh situs.
+
+  Akibatnya nyata dan sempat terjadi: pengurus yang membuka /operasional di tab
+  lain akan menemukan dirinya masuk sebagai akun pengajar, lalu halaman itu
+  mengeluarkannya karena bukan admin. Keluar itu berlaku untuk seluruh situs,
+  sehingga tab pengajar yang sedang dipakai mengetik ikut terlempar ke layar
+  masuk, dan naskah yang belum disimpan hilang bersamanya.
+
+  Dengan nama tersendiri, tiap halaman punya sesinya sendiri. Satu orang bisa
+  masuk sebagai pengurus di satu tab dan sebagai pengajar di tab lain tanpa
+  keduanya saling menjatuhkan. Halaman pendaftaran memakai nama yang sama
+  dengan halaman ini, dan itu memang disengaja, supaya akun yang baru dibuat
+  langsung terbawa ke sini.
+*/
+const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG, 'pengajar');
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
@@ -140,6 +160,24 @@ let uidTerbuka = null;
 
 onAuthStateChanged(auth, async (user) => {
   if(!user){
+    /*
+      Sesi berakhir. Kalau itu terjadi selagi halamannya terbuka, pemakainya
+      berhak tahu sebabnya, bukan cuma mendapati dirinya kembali di layar
+      masuk tanpa penjelasan apa pun.
+
+      Naskah yang belum disimpan tidak ikut hilang, sebab dititipkan ke
+      penyimpanan peramban pada tiap ketukan. Itu disebutkan di sini supaya
+      yang bersangkutan tidak mengira pekerjaannya lenyap lalu mengetik ulang.
+    */
+    if(uidTerbuka){
+      diag('Sesi berakhir. Kembali ke layar masuk.');
+      pesan($('pesanMasuk'),
+        'Sesi Anda berakhir, jadi halamannya kembali ke sini.<br><br>'
+        + 'Naskah yang belum sempat disimpan <strong>tidak hilang</strong>. '
+        + 'Masuk lagi, buka topik yang tadi, dan naskahnya akan dipasang kembali.',
+        'hati');
+    }
+
     uidTerbuka = null;
     tampilkanLayar('layarMasuk');
     return;

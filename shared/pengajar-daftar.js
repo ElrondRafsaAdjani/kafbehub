@@ -29,7 +29,7 @@ const {
   getFirestore, doc, getDoc, setDoc, serverTimestamp,
 } = await import(`${SDK}/firebase-firestore.js`);
 
-const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
+const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG, 'pengajar');
 const auth = getAuth(app);
 const db   = getFirestore(app);
 

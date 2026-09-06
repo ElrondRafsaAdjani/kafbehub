@@ -26,7 +26,7 @@ const {
   query, orderBy, limit, startAfter, serverTimestamp,
 } = await import(`${SDK}/firebase-firestore.js`);
 
-const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
+const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG, 'operasional');
 const auth = getAuth(app);
 const db   = getFirestore(app);
 

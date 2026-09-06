@@ -42,7 +42,7 @@ const {
 
 const { pasangDasbor } = await import('./dasbor.js');
 
-const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
+const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG, 'adminkafbe');
 const auth = getAuth(app);
 const db   = getFirestore(app);
 

@@ -823,10 +823,19 @@ Memang begitu sampai pengurus operasional memutuskannya. Buka `/operasional`
 tab **Akun Pengajar**, lalu terima atau tolak barisnya.
 
 **Di `/pengajar`, tiba-tiba keluar sendiri saat sedang mengetik**
-Sesi Firebase berakhir, biasanya karena jaringan mati cukup lama sehingga
-pembaruan token gagal. Naskah yang sedang diketik tidak hilang: masuk lagi,
-buka topik yang sama, dan naskahnya dipasang kembali beserta pemberitahuan.
-Periksa dulu isinya, lalu simpan.
+Naskah yang sedang diketik tidak hilang. Masuk lagi, buka topik yang sama, dan
+naskahnya dipasang kembali beserta pemberitahuan. Periksa isinya, lalu simpan.
+
+Dulu ini terjadi karena ketiga halaman pengurus berbagi satu sesi untuk seluruh
+situs. Membuka `/operasional` di tab lain membuat halaman itu menemukan dirinya
+masuk sebagai akun pengajar, lalu mengeluarkannya karena bukan admin, dan tab
+pengajar yang sedang dipakai ikut terlempar. Sekarang tiap halaman punya
+sesinya sendiri, jadi satu orang bisa masuk sebagai pengurus di satu tab dan
+sebagai pengajar di tab lain tanpa saling menjatuhkan.
+
+Kalau masih terjadi, sebabnya sesi Firebase yang benar-benar berakhir, biasanya
+karena jaringan mati cukup lama sehingga pembaruan token gagal. Layar masuk
+akan menjelaskannya, dan naskahnya tetap bisa dipulihkan dengan cara di atas.
 
 **Masuk ke `/pengajar` malah dilempar ke halaman pendaftaran**
 Akun Firebase-nya sudah jadi tapi baris pengajuannya belum tersimpan, biasanya
