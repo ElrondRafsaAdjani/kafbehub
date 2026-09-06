@@ -87,6 +87,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -126,14 +127,14 @@
   <a class="back-link" href="si.html">← Kembali ke Sistem Informasi</a>
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Sistem Informasi</span>
-    <h2>Menggambarkan Proses Bisnis dengan Flowchart</h2>
-    <p>Studi kasus: siklus pengeluaran (expenditure cycle) Popuri Inc.</p>
+    <h2 data-materi="menggambarkan-proses-bisnis-dengan.judul" data-label="Menggambarkan Proses Bisnis dengan Flowchart">Menggambarkan Proses Bisnis dengan Flowchart</h2>
+    <p data-materi="menggambarkan-proses-bisnis-dengan.1" data-label="Studi kasus: siklus pengeluaran (expenditure cycle) Pop…">Studi kasus: siklus pengeluaran (expenditure cycle) Popuri Inc.</p>
   </div>
 
   <div class="device-gate" id="deviceGate">
     <div class="icon">🖥️</div>
-    <h3>Butuh layar yang lebih lebar</h3>
-    <p>Coba buka halaman ini dari:</p>
+    <h3 data-materi="butuh-layar-yang-lebih.judul" data-label="Butuh layar yang lebih lebar">Butuh layar yang lebih lebar</h3>
+    <p data-materi="butuh-layar-yang-lebih.1" data-label="Coba buka halaman ini dari:">Coba buka halaman ini dari:</p>
     <div class="examples"><span>💻 Laptop</span><span>🖥️ Komputer / PC</span><span>📱 Tablet (mode lanskap)</span></div>
   </div>
 
@@ -695,7 +696,15 @@
         const span = document.createElement('span');
         span.className = 'seg';
         span.dataset.seg = key;
-        span.textContent = DICT[LANG].segs[key] + ' ';
+        /*
+          Dipasang sebagai markup, bukan teks polos, supaya penebalan yang
+          ditulis pengajar benar-benar tampil tebal dan bukan muncul sebagai
+          tulisan <strong> di tengah kalimat.
+
+          Isinya aman: naskah bawaan ditulis di halaman ini, dan naskah dari
+          pengajar sudah disaring shared/materi.js sebelum sampai ke sini.
+        */
+        span.innerHTML = DICT[LANG].segs[key] + ' ';
         narParagraph.appendChild(span);
       });
     }
@@ -737,7 +746,7 @@
 
     function render(){
       const step = STEPS[current];
-      stepBadge.textContent = DICT[LANG].badges[step.badgeKey];
+      stepBadge.innerHTML = DICT[LANG].badges[step.badgeKey];
       progressFill.style.width = (((current+1)/STEPS.length)*100) + '%';
       stepCounter.textContent = (current+1) + ' / ' + STEPS.length;
 
@@ -791,6 +800,26 @@
     }
     btnLangID.addEventListener('click', () => setLang('id'));
     btnLangEN.addEventListener('click', () => setLang('en'));
+
+    /*
+      Naskah boleh diubah pengajar lewat halaman /pengajar.
+
+      Yang didaftarkan hanya narasi proses dan nama tiap langkah, karena itulah
+      bagian yang berisi kalimat. Bentuk bagan, urutan simpul, dan garis
+      penghubungnya tetap milik halaman ini.
+
+      Versi bahasa Inggrisnya tidak ikut didaftarkan. Naskah pengajar memang
+      ditulis dalam bahasa Indonesia, dan menimpa versi Inggris dengan kalimat
+      Indonesia akan membuat halaman ini setengah berganti bahasa.
+    */
+    function gambarUlangNaskah(){
+      buildNarrative();
+      render();
+    }
+    if(window.KafbeMateri){
+      KafbeMateri.daftarPeta('narasi', DICT.id.segs, 'Narasi proses', gambarUlangNaskah);
+      KafbeMateri.daftarPeta('langkah', DICT.id.badges, 'Nama langkah', gambarUlangNaskah);
+    }
 
     applyStaticText();
     buildIntroLists();

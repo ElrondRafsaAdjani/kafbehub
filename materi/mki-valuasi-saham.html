@@ -96,6 +96,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -130,8 +131,8 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Manajemen Keuangan dan Investasi</span>
-    <h2>Valuasi Saham</h2>
-    <p>Harga wajar selembar saham adalah seluruh dividen yang akan diterimanya kelak, setelah ditarik ke nilai hari ini.</p>
+    <h2 data-materi="valuasi-saham.judul" data-label="Valuasi Saham">Valuasi Saham</h2>
+    <p data-materi="valuasi-saham.1" data-label="Harga wajar selembar saham adalah seluruh dividen yang…">Harga wajar selembar saham adalah seluruh dividen yang akan diterimanya kelak, setelah ditarik ke nilai hari ini.</p>
   </div>
 
   <div class="saklar" id="pilihModel">
@@ -165,8 +166,8 @@
   </div>
 
   <div class="kotak-materi">
-    <h3>Ketiga rumusnya berdampingan</h3>
-    <p>Ketiganya menjawab pertanyaan yang sama, dan hanya berbeda pada anggapan tentang perilaku dividennya.</p>
+    <h3 data-materi="ketiga-rumusnya-berdampingan.judul" data-label="Ketiga rumusnya berdampingan">Ketiga rumusnya berdampingan</h3>
+    <p data-materi="ketiga-rumusnya-berdampingan.1" data-label="Ketiganya menjawab pertanyaan yang sama, dan hanya berb…">Ketiganya menjawab pertanyaan yang sama, dan hanya berbeda pada anggapan tentang perilaku dividennya.</p>
 
     <div class="rumus">Zero growth &nbsp; P<sub>0</sub> =
       <span class="pecahan"><span class="atas">D</span><span class="bawah">r</span></span>
@@ -183,7 +184,7 @@
       × (1 + r)<sup>&minus;n</sup>
     </div>
 
-    <p style="margin-top:10px;">
+    <p style="margin-top:10px;" data-materi="ketiga-rumusnya-berdampingan.2" data-label="P0 nilai saham hari ini · D0 dividen periode berjalan ·…">
       <strong>P<sub>0</sub></strong> nilai saham hari ini &nbsp;·&nbsp;
       <strong>D<sub>0</sub></strong> dividen periode berjalan &nbsp;·&nbsp;
       <strong>D<sub>1</sub></strong> dividen periode berikutnya &nbsp;·&nbsp;
@@ -191,13 +192,13 @@
       <strong>g</strong> laju pertumbuhan dividen
     </p>
 
-    <h3 style="margin-top:24px;">Mencari laju pertumbuhannya</h3>
-    <p>Kalau yang diketahui hanya dividen paling awal dan paling akhir, lajunya dicari dengan akar.</p>
+    <h3 style="margin-top:24px;" data-materi="mencari-laju-pertumbuhannya.judul" data-label="Mencari laju pertumbuhannya">Mencari laju pertumbuhannya</h3>
+    <p data-materi="mencari-laju-pertumbuhannya.1" data-label="Kalau yang diketahui hanya dividen paling awal dan pali…">Kalau yang diketahui hanya dividen paling awal dan paling akhir, lajunya dicari dengan akar.</p>
     <div class="rumus">g = <sup>n</sup>√(FV ÷ PV) &minus; 1</div>
   </div>
 
   <div class="kotak-materi">
-    <h3>Dua jenis saham</h3>
+    <h3 data-materi="dua-jenis-saham.judul" data-label="Dua jenis saham">Dua jenis saham</h3>
     <div class="dua">
       <div><b>Common stock</b>
         Kepemilikan atas perusahaan beserta hak atas sebagian labanya. Dividennya tidak dijanjikan,
@@ -213,7 +214,7 @@
         <li>Sebagian bisa ditukar jadi common stock</li><li>Umumnya tanpa hak suara</li></ul>
       </div>
     </div>
-    <p style="margin-top:14px;">Karena dividen preferred stock tetap besarnya dan berlangsung terus, penilaiannya memakai model zero growth.</p>
+    <p style="margin-top:14px;" data-materi="dua-jenis-saham.1" data-label="Karena dividen preferred stock tetap besarnya dan berla…">Karena dividen preferred stock tetap besarnya dan berlangsung terus, penilaiannya memakai model zero growth.</p>
   </div>
 </section>
 

@@ -75,6 +75,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -122,8 +123,8 @@
   <a class="back-link" href="pemi.html">← Kembali ke Pengantar Mikroekonomi</a>
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Pengantar Mikroekonomi</span>
-    <h2>Grafik Supply &amp; Demand</h2>
-    <p>Ikuti cerita si burung hantu KAFBE membangun kurva permintaan dan penawaran, titik demi titik.</p>
+    <h2 data-materi="grafik-supply-dan-demand.judul" data-label="Grafik Supply dan Demand">Grafik Supply &amp; Demand</h2>
+    <p data-materi="grafik-supply-dan-demand.1" data-label="Ikuti cerita si burung hantu KAFBE membangun kurva perm…">Ikuti cerita si burung hantu KAFBE membangun kurva permintaan dan penawaran, titik demi titik.</p>
   </div>
 
   <div class="story-card">
@@ -197,6 +198,18 @@
     { chapter:'eq', reveal:['eqDotOuter','eqDotInner','eqGuideV','eqGuideH','eqLabel'],
       text:'Coba lihat di mana kedua kurva ini bertemu, di situ harga &amp; jumlah barang pas buat pembeli maupun penjual. Ini namanya <strong>Titik Keseimbangan (Equilibrium)</strong>: harga <strong>Rp30.000</strong> dengan <strong>40 unit</strong>.' }
   ];
+
+  /*
+    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+
+    Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
+    disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
+    tidak ikut berubah ketika naskahnya diperbarui.
+  */
+  if(window.KafbeMateri){
+    KafbeMateri.daftarLangkah(STEPS, { label:'Langkah' }, render);
+    KafbeMateri.daftarPeta('bab', CHAPTERS, 'Nama bagian', render);
+  }
 
   // ===================================================================
   // Setup chart (SVG statis, elemen mulai tersembunyi lalu di-reveal)

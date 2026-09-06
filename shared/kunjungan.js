@@ -37,6 +37,25 @@
 (function(){
   'use strict';
 
+  /*
+    Halaman yang dibuka di dalam bingkai tidak dihitung sebagai kunjungan.
+
+    Satu-satunya yang membingkai halaman materi adalah halaman /pengajar, dan
+    itu dilakukannya untuk membaca naskah bawaan halaman, bukan untuk dibaca
+    orang. Tanpa penjagaan ini, seorang pengajar yang membuka sepuluh topik
+    sore itu akan tercatat sebagai sepuluh kunjungan mahasiswa, dan angka di
+    dasbor jadi menghitung pekerjaan pengurus sendiri.
+
+    Pembingkaian dari situs lain sudah ditolak lewat X-Frame-Options, jadi
+    pemeriksaan ini tidak menghilangkan kunjungan yang sah.
+  */
+  try{
+    if(window.top !== window.self) return;
+  }catch(e){
+    // Aksesnya ditolak, berarti memang sedang dibingkai situs lain.
+    return;
+  }
+
   var KUNCI_PERANGKAT = 'kafbe_perangkat';
   var KUNCI_HARI      = 'kafbe_hari_tercatat';
 

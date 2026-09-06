@@ -72,6 +72,7 @@
       <button class="op-tab-btn" data-tab="jadwal" role="tab">Jadwal Permanen</button>
       <button class="op-tab-btn" data-tab="perubahan" role="tab">Perubahan Sementara</button>
       <button class="op-tab-btn" data-tab="pengajar" role="tab">Pengajar</button>
+      <button class="op-tab-btn" data-tab="akunpengajar" role="tab">Akun Pengajar</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
       <button class="op-tab-btn" data-tab="excel" role="tab">Excel</button>
       <button class="op-tab-btn" data-tab="log" role="tab">Log</button>
@@ -377,6 +378,74 @@
       </div>
     </section>
 
+    <!-- ---------- AKUN PENGAJAR ---------- -->
+    <section class="op-panel" id="panel-akunpengajar" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Akun Pengajar</h2>
+          <p>Pengajuan akun dari halaman pengajar. Selama belum diterima di sini, akunnya bisa masuk tapi tidak bisa mengubah naskah materi apa pun.</p>
+        </div>
+      </div>
+
+      <!-- Formulir keputusan. Tersembunyi sampai ada baris yang dipilih dari
+           tabel di bawah, supaya tidak ada tombol simpan yang menganggur tanpa
+           tahu sedang memutuskan siapa. -->
+      <form class="op-form" id="formAkun" hidden>
+        <input type="hidden" id="akUid" />
+
+        <div class="op-panel-kepala">
+          <div>
+            <h3 id="akSiapa"></h3>
+            <p class="op-samar" id="akRincian"></p>
+          </div>
+        </div>
+
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="akStatus">Keputusan</label>
+            <select id="akStatus">
+              <option value="diterima">Terima</option>
+              <option value="ditolak">Tolak</option>
+              <option value="menunggu">Kembalikan ke menunggu</option>
+            </select>
+          </div>
+          <div class="op-field op-lebar" id="akAlasanBungkus">
+            <label for="akAlasan">Alasan penolakan</label>
+            <input type="text" id="akAlasan" maxlength="200" placeholder="Ditulis apa adanya, akan dibaca pendaftarnya" />
+          </div>
+        </div>
+
+        <div class="op-kelompok" id="akWewenang">
+          <label class="op-centang-baris">
+            <input type="checkbox" id="akSemua" />
+            <span>Boleh mengubah naskah semua mata kuliah</span>
+          </label>
+          <p class="op-samar">Kalau tidak dicentang, pilih mata kuliahnya satu per satu di bawah.</p>
+          <div id="akDaftarMk"></div>
+        </div>
+
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan keputusan</button>
+          <button type="button" class="btn btn-ghost op-kecil" id="akBatal">Batal</button>
+        </div>
+        <p class="op-pesan" id="pesanAkun" role="alert"></p>
+      </form>
+
+      <div class="op-saring op-saring-dua">
+        <input type="search" id="cariAkun" placeholder="Cari nama, NRP, atau email…" aria-label="Cari akun pengajar" />
+        <select id="saringStatusAkun" aria-label="Saring status akun">
+          <option value="">Semua status</option>
+          <option value="menunggu">Menunggu</option>
+          <option value="diterima">Diterima</option>
+          <option value="ditolak">Ditolak</option>
+        </select>
+      </div>
+
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelAkun"></table>
+      </div>
+    </section>
+
     <!-- ---------- PENGUMUMAN ---------- -->
     <section class="op-panel" id="panel-pengumuman" hidden>
       <div class="op-panel-kepala">
@@ -604,6 +673,8 @@
               <option value="classroom">Kode Google Classroom</option>
               <option value="koordinator">Koordinator</option>
               <option value="excel">Berkas Excel</option>
+              <option value="akunpengajar">Akun pengajar</option>
+              <option value="materi">Naskah materi</option>
             </select>
           </div>
         </div>
@@ -675,6 +746,7 @@
 </svg>
 
 <script src="firebase-config.js"></script>
+<script src="shared/materi-daftar.js"></script>
 <script type="module" src="shared/operasional.js"></script>
 </body>
 </html>

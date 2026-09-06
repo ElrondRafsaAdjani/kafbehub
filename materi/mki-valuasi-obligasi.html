@@ -93,6 +93,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -127,8 +128,8 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Manajemen Keuangan dan Investasi</span>
-    <h2>Valuasi Obligasi</h2>
-    <p>Menjumlahkan seluruh bunga yang akan diterima, ditambah pokok yang dikembalikan di akhir, setelah semuanya ditarik ke nilai hari ini.</p>
+    <h2 data-materi="valuasi-obligasi.judul" data-label="Valuasi Obligasi">Valuasi Obligasi</h2>
+    <p data-materi="valuasi-obligasi.1" data-label="Menjumlahkan seluruh bunga yang akan diterima, ditambah…">Menjumlahkan seluruh bunga yang akan diterima, ditambah pokok yang dikembalikan di akhir, setelah semuanya ditarik ke nilai hari ini.</p>
   </div>
 
   <div class="story-card">
@@ -156,27 +157,27 @@
   </div>
 
   <div class="kotak-materi">
-    <h3>Rumusnya</h3>
-    <p>Yang barusan dikerjakan langkah demi langkah adalah persamaan ini. Bagian kiri menjumlahkan seluruh bunga, bagian kanan mengurus pokok yang kembali di akhir.</p>
+    <h3 data-materi="rumusnya.judul" data-label="Rumusnya">Rumusnya</h3>
+    <p data-materi="rumusnya.1" data-label="Yang barusan dikerjakan langkah demi langkah adalah per…">Yang barusan dikerjakan langkah demi langkah adalah persamaan ini. Bagian kiri menjumlahkan seluruh bunga, bagian kanan mengurus pokok yang kembali di akhir.</p>
     <div class="rumus">
       B<sub>0</sub> = I ×
       <span class="pecahan"><span class="atas">1 &minus; 1 ÷ (1 + r<sub>d</sub>)<sup>n</sup></span><span class="bawah">r<sub>d</sub></span></span>
       + M ×
       <span class="pecahan"><span class="atas">1</span><span class="bawah">(1 + r<sub>d</sub>)<sup>n</sup></span></span>
     </div>
-    <p style="margin-top:10px;">
+    <p style="margin-top:10px;" data-materi="rumusnya.2" data-label="B0 nilai obligasi hari ini · I bunga per tahun dalam ru…">
       <strong>B<sub>0</sub></strong> nilai obligasi hari ini &nbsp;·&nbsp;
       <strong>I</strong> bunga per tahun dalam rupiah, yaitu M × i &nbsp;·&nbsp;
       <strong>M</strong> nilai par &nbsp;·&nbsp;
       <strong>n</strong> sisa tahun sampai jatuh tempo &nbsp;·&nbsp;
       <strong>r<sub>d</sub></strong> imbal hasil yang diminta pasar
     </p>
-    <p>Bagian pertama itu tidak lain penjumlahan CF₁/(1+r)¹ sampai CFₙ/(1+r)ⁿ yang dipendekkan, karena bunganya sama besar tiap tahun.</p>
+    <p data-materi="rumusnya.3" data-label="Bagian pertama itu tidak lain penjumlahan CF₁/(1+r)¹ sa…">Bagian pertama itu tidak lain penjumlahan CF₁/(1+r)¹ sampai CFₙ/(1+r)ⁿ yang dipendekkan, karena bunganya sama besar tiap tahun.</p>
   </div>
 
   <div class="kotak-materi">
-    <h3>Kenapa harganya bisa di bawah atau di atas par</h3>
-    <p>Bunga yang dijanjikan obligasi sudah dikunci sejak diterbitkan, sedangkan imbal hasil yang diminta pasar terus berubah. Selisih keduanya yang menentukan harga.</p>
+    <h3 data-materi="kenapa-harganya-bisa-di.judul" data-label="Kenapa harganya bisa di bawah atau di atas par">Kenapa harganya bisa di bawah atau di atas par</h3>
+    <p data-materi="kenapa-harganya-bisa-di.1" data-label="Bunga yang dijanjikan obligasi sudah dikunci sejak dite…">Bunga yang dijanjikan obligasi sudah dikunci sejak diterbitkan, sedangkan imbal hasil yang diminta pasar terus berubah. Selisih keduanya yang menentukan harga.</p>
     <table class="syarat">
       <thead><tr><th>Keadaan</th><th>Harga</th><th>Disebut</th><th>Alasannya</th></tr></thead>
       <tbody>
@@ -200,8 +201,8 @@
   </div>
 
   <div class="kotak-materi">
-    <h3>Kalau bunganya dibayar dua kali setahun</h3>
-    <p>Semua angka yang berkaitan dengan satu periode dibelah dua, dan banyaknya periode dikalikan dua. Bentuk persamaannya tidak berubah sama sekali.</p>
+    <h3 data-materi="kalau-bunganya-dibayar-dua.judul" data-label="Kalau bunganya dibayar dua kali setahun">Kalau bunganya dibayar dua kali setahun</h3>
+    <p data-materi="kalau-bunganya-dibayar-dua.1" data-label="Semua angka yang berkaitan dengan satu periode dibelah…">Semua angka yang berkaitan dengan satu periode dibelah dua, dan banyaknya periode dikalikan dua. Bentuk persamaannya tidak berubah sama sekali.</p>
     <div class="rumus">
       B<sub>0</sub> =
       <span class="pecahan"><span class="atas">I</span><span class="bawah">2</span></span>
@@ -213,8 +214,8 @@
   </div>
 
   <div class="kotak-materi">
-    <h3>Yield to Maturity</h3>
-    <p>Kalau harga obligasinya sudah diketahui dan yang dicari justru imbal hasilnya, pertanyaannya dibalik: berapa tingkat pengembalian yang didapat pembeli bila obligasi dipegang sampai jatuh tempo. Perkiraan cepatnya memakai rumus berikut.</p>
+    <h3 data-materi="yield-to-maturity.judul" data-label="Yield to Maturity">Yield to Maturity</h3>
+    <p data-materi="yield-to-maturity.1" data-label="Kalau harga obligasinya sudah diketahui dan yang dicari…">Kalau harga obligasinya sudah diketahui dan yang dicari justru imbal hasilnya, pertanyaannya dibalik: berapa tingkat pengembalian yang didapat pembeli bila obligasi dipegang sampai jatuh tempo. Perkiraan cepatnya memakai rumus berikut.</p>
     <div class="rumus">
       YTM =
       <span class="pecahan">
@@ -222,7 +223,7 @@
         <span class="bawah">(par + N<sub>d</sub>) ÷ 2</span>
       </span>
     </div>
-    <p style="margin-top:10px;"><strong>N<sub>d</sub></strong> adalah nilai pasar dikurangi biaya penerbitan. Pembilangnya menjumlahkan bunga tahunan dengan selisih harga yang tersebar rata sepanjang sisa umurnya, sedangkan penyebutnya memakai harga rata-rata antara sekarang dan saat jatuh tempo.</p>
+    <p style="margin-top:10px;" data-materi="yield-to-maturity.2" data-label="Nd adalah nilai pasar dikurangi biaya penerbitan. Pembi…"><strong>N<sub>d</sub></strong> adalah nilai pasar dikurangi biaya penerbitan. Pembilangnya menjumlahkan bunga tahunan dengan selisih harga yang tersebar rata sepanjang sisa umurnya, sedangkan penyebutnya memakai harga rata-rata antara sekarang dan saat jatuh tempo.</p>
   </div>
 </section>
 
@@ -299,6 +300,18 @@
       `Nilainya <strong>${usd(nilai)}</strong>, di bawah par ${usd(M)}. Obligasi ini dijual <strong>at discount</strong>.
        Sebabnya pasar meminta 10% sementara suratnya cuma menjanjikan 8%, jadi harganya turun sampai selisihnya tertutup.` }
   ];
+
+  /*
+    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+
+    Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
+    disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
+    tidak ikut berubah ketika naskahnya diperbarui.
+  */
+  if(window.KafbeMateri){
+    KafbeMateri.daftarLangkah(LANGKAH, { label:'Langkah' }, tampilkan);
+    KafbeMateri.daftarPeta('bab', BAB, 'Nama bagian', tampilkan);
+  }
 
   /* ---------- Gambar ---------- */
   const W = 640, H = 430;

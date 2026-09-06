@@ -161,6 +161,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -202,17 +203,17 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Manajemen Operasi</span>
-    <h2>Crashing</h2>
-    <p>Mempercepat proyek dengan tambahan biaya paling kecil. Lanjutan langsung dari topik critical path.</p>
+    <h2 data-materi="crashing.judul" data-label="Crashing">Crashing</h2>
+    <p data-materi="crashing.1" data-label="Mempercepat proyek dengan tambahan biaya paling kecil.…">Mempercepat proyek dengan tambahan biaya paling kecil. Lanjutan langsung dari topik critical path.</p>
   </div>
 
-  <p class="catatan-layar">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
+  <p class="catatan-layar" data-materi="crashing.2" data-label="Visualisasinya lebih nyaman dibuka lewat tablet, laptop…">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
 
   <!-- ============ 1. KONSEP ============ -->
   <div class="kotak-materi">
-    <h3>Konsep crashing</h3>
-    <p>Proyek kadang harus selesai lebih cepat daripada jadwal normalnya. Percepatan itu tidak gratis. Menambah tenaga kerja, menambah jam lembur, atau menyewa alat tambahan membuat biaya aktivitas naik. <b>Crashing</b> adalah cara memilih aktivitas mana yang dipercepat supaya target waktu tercapai dengan tambahan biaya sekecil mungkin.</p>
-    <p>Setiap aktivitas punya dua pasang angka. Normal time dengan normal cost adalah keadaan biasa. Crash time dengan crash cost adalah keadaan paling cepat yang masih mungkin, beserta biayanya. Crash time tidak bisa ditembus, jadi sebuah aktivitas punya batas berapa minggu ia bisa dipangkas.</p>
+    <h3 data-materi="konsep-crashing.judul" data-label="Konsep crashing">Konsep crashing</h3>
+    <p data-materi="konsep-crashing.1" data-label="Proyek kadang harus selesai lebih cepat daripada jadwal…">Proyek kadang harus selesai lebih cepat daripada jadwal normalnya. Percepatan itu tidak gratis. Menambah tenaga kerja, menambah jam lembur, atau menyewa alat tambahan membuat biaya aktivitas naik. <b>Crashing</b> adalah cara memilih aktivitas mana yang dipercepat supaya target waktu tercapai dengan tambahan biaya sekecil mungkin.</p>
+    <p data-materi="konsep-crashing.2" data-label="Setiap aktivitas punya dua pasang angka. Normal time de…">Setiap aktivitas punya dua pasang angka. Normal time dengan normal cost adalah keadaan biasa. Crash time dengan crash cost adalah keadaan paling cepat yang masih mungkin, beserta biayanya. Crash time tidak bisa ditembus, jadi sebuah aktivitas punya batas berapa minggu ia bisa dipangkas.</p>
 
     <div class="dua">
       <div><b>Hanya aktivitas kritis yang berguna</b>
@@ -223,8 +224,8 @@
         Percepatan diambil satu minggu demi satu minggu, bukan langsung sekaligus.</div>
     </div>
 
-    <h4>Crash cost per period</h4>
-    <p>Angka ini menunjukkan berapa tambahan biaya untuk mempercepat sebuah aktivitas selama satu minggu. Inilah alat pembanding antar kandidat.</p>
+    <h4 data-materi="crash-cost-per-period.judul" data-label="Crash cost per period">Crash cost per period</h4>
+    <p data-materi="crash-cost-per-period.1" data-label="Angka ini menunjukkan berapa tambahan biaya untuk mempe…">Angka ini menunjukkan berapa tambahan biaya untuk mempercepat sebuah aktivitas selama satu minggu. Inilah alat pembanding antar kandidat.</p>
 
     <div class="rumus">
       <span>Crash cost per period =</span>
@@ -234,18 +235,18 @@
       </span>
     </div>
 
-    <h4>Syarat sebuah aktivitas boleh dipercepat</h4>
-    <p>Aktivitas kritis belum tentu boleh dipercepat. Sebelum biayanya dibandingkan, waktunya diperiksa dulu terhadap permintaan soal. Kalau soal meminta percepatan dua minggu, normal time harus sanggup dikurangi crash time sebanyak dua kali tanpa menjadi negatif.</p>
+    <h4 data-materi="syarat-sebuah-aktivitas-boleh.judul" data-label="Syarat sebuah aktivitas boleh dipercepat">Syarat sebuah aktivitas boleh dipercepat</h4>
+    <p data-materi="syarat-sebuah-aktivitas-boleh.1" data-label="Aktivitas kritis belum tentu boleh dipercepat. Sebelum…">Aktivitas kritis belum tentu boleh dipercepat. Sebelum biayanya dibandingkan, waktunya diperiksa dulu terhadap permintaan soal. Kalau soal meminta percepatan dua minggu, normal time harus sanggup dikurangi crash time sebanyak dua kali tanpa menjadi negatif.</p>
 
     <div class="rumus"><span>normal time − crash time − crash time ≥ 0</span></div>
 
-    <p style="margin-top:14px;">Aktivitas yang hasil pemeriksaannya negatif langsung gugur dan tidak ikut dipertimbangkan, semurah apa pun crash cost per period-nya. Kalau semua kandidat gugur, artinya permintaan percepatan itu memang tidak bisa dipenuhi.</p>
+    <p style="margin-top:14px;" data-materi="syarat-sebuah-aktivitas-boleh.2" data-label="Aktivitas yang hasil pemeriksaannya negatif langsung gu…">Aktivitas yang hasil pemeriksaannya negatif langsung gugur dan tidak ikut dipertimbangkan, semurah apa pun crash cost per period-nya. Kalau semua kandidat gugur, artinya permintaan percepatan itu memang tidak bisa dipenuhi.</p>
   </div>
 
   <!-- ============ 2. CARA MENGERJAKAN ============ -->
   <div class="kotak-materi">
-    <h3>Cara mengerjakan</h3>
-    <p>Urutan ini dipakai setelah critical path dan waktu penyelesaian normalnya sudah ketemu.</p>
+    <h3 data-materi="cara-mengerjakan.judul" data-label="Cara mengerjakan">Cara mengerjakan</h3>
+    <p data-materi="cara-mengerjakan.1" data-label="Urutan ini dipakai setelah critical path dan waktu peny…">Urutan ini dipakai setelah critical path dan waktu penyelesaian normalnya sudah ketemu.</p>
 
     <ol class="langkah-kerja">
       <li><b>Kumpulkan kandidatnya.</b> Hanya aktivitas yang berada di critical path yang boleh dipercepat. Aktivitas lain tidak berpengaruh pada tanggal selesai.</li>
@@ -256,7 +257,7 @@
       <li><b>Ulangi sampai target tercapai.</b> Biaya total baru adalah biaya normal ditambah seluruh tambahan biaya percepatan. Kalau tidak ada kandidat yang lolos pemeriksaan, permintaan percepatannya tidak bisa dipenuhi dan biayanya tetap sebesar biaya normal.</li>
     </ol>
 
-    <h4>Kekeliruan yang sering muncul</h4>
+    <h4 data-materi="kekeliruan-yang-sering-muncul.judul" data-label="Kekeliruan yang sering muncul">Kekeliruan yang sering muncul</h4>
     <div class="dua">
       <div><b>Mempercepat aktivitas yang tidak kritis</b>
         Biaya bertambah tanpa memajukan tanggal selesai. Periksa dulu slack-nya sebelum memilih.</div>
@@ -267,15 +268,15 @@
 
   <!-- ============ 3. SOAL ============ -->
   <div class="kotak-materi">
-    <h3>Soalnya</h3>
-    <p>Soal ini lanjutan dari proyek peningkatan kualitas kemasan milik Perusahaan MJ. Dari topik critical path sudah diketahui critical path-nya Start, A, D, G, Finish dengan waktu penyelesaian normal 21 minggu dan biaya total $3.540.</p>
-    <p><b>Pertanyaannya:</b> kalau perusahaan ingin mempercepat proyek selama dua minggu, aktivitas apa yang harus dipercepat dan berapa biaya total yang baru.</p>
+    <h3 data-materi="soalnya.judul" data-label="Soalnya">Soalnya</h3>
+    <p data-materi="soalnya.1" data-label="Soal ini lanjutan dari proyek peningkatan kualitas kema…">Soal ini lanjutan dari proyek peningkatan kualitas kemasan milik Perusahaan MJ. Dari topik critical path sudah diketahui critical path-nya Start, A, D, G, Finish dengan waktu penyelesaian normal 21 minggu dan biaya total $3.540.</p>
+    <p data-materi="soalnya.2" data-label="Pertanyaannya: kalau perusahaan ingin mempercepat proye…"><b>Pertanyaannya:</b> kalau perusahaan ingin mempercepat proyek selama dua minggu, aktivitas apa yang harus dipercepat dan berapa biaya total yang baru.</p>
 
     <div class="tabel-gulir">
       <table class="ringkas" id="tabelSoal"></table>
     </div>
 
-    <p style="margin:16px 0 0;">Baris yang ditandai adalah aktivitas yang berada di critical path. Hanya baris itu yang perlu diperhatikan, dan kolom crashing time serta crashing cost baru terpakai di sini.</p>
+    <p style="margin:16px 0 0;" data-materi="soalnya.3" data-label="Baris yang ditandai adalah aktivitas yang berada di cri…">Baris yang ditandai adalah aktivitas yang berada di critical path. Hanya baris itu yang perlu diperhatikan, dan kolom crashing time serta crashing cost baru terpakai di sini.</p>
   </div>
 
   <div class="story-card">
@@ -289,7 +290,7 @@
         <svg class="maskot" viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
         <div class="bubble" id="bubbleText"></div>
         <div class="panel-hitung">
-          <h4>Hitungan kandidat</h4>
+          <h4 data-materi="hitungan-kandidat.judul" data-label="Hitungan kandidat">Hitungan kandidat</h4>
           <table class="kandidat" id="tabelKandidat"></table>
           <p class="catatan" id="catatanKandidat">Isinya menyusul mengikuti langkahnya.</p>
         </div>
@@ -310,22 +311,22 @@
 
   <!-- ============ 4. JAWABAN ============ -->
   <div class="kotak-materi">
-    <h3>Jawabannya</h3>
-    <p>Seluruh angka di bawah ini dihitung ulang oleh halaman dari data soal, bukan diketik satu per satu.</p>
+    <h3 data-materi="jawabannya.judul" data-label="Jawabannya">Jawabannya</h3>
+    <p data-materi="jawabannya.1" data-label="Seluruh angka di bawah ini dihitung ulang oleh halaman…">Seluruh angka di bawah ini dihitung ulang oleh halaman dari data soal, bukan diketik satu per satu.</p>
 
-    <h4>Crash cost per period tiap kandidat</h4>
+    <h4 data-materi="crash-cost-per-period.judulb" data-label="Crash cost per period tiap kandidat">Crash cost per period tiap kandidat</h4>
     <div class="tabel-gulir">
       <table class="ringkas" id="tabelJawab"></table>
     </div>
 
-    <h4>Kesimpulannya</h4>
+    <h4 data-materi="kesimpulannya.judul" data-label="Kesimpulannya">Kesimpulannya</h4>
     <div class="jawaban-akhir" id="jawabanAkhir"></div>
 
-    <h4>Kalau menemukan jawaban yang berbeda</h4>
-    <p style="margin:0;">Ada kunci yang beredar dengan jawaban D dipercepat dua kali dan biaya total $3.570. Jawaban itu memakai pembacaan syarat yang berbeda dan tidak sejalan dengan syarat yang dipakai di halaman ini, sebab dengan pemeriksaan di atas D pun hasilnya negatif. Kalau di kelas Anda dipakai syarat yang lain, ikuti yang disepakati pengajarnya dan bandingkan cara pemeriksaannya.</p>
+    <h4 data-materi="kalau-menemukan-jawaban-yang.judul" data-label="Kalau menemukan jawaban yang berbeda">Kalau menemukan jawaban yang berbeda</h4>
+    <p style="margin:0;" data-materi="kalau-menemukan-jawaban-yang.1" data-label="Ada kunci yang beredar dengan jawaban D dipercepat dua…">Ada kunci yang beredar dengan jawaban D dipercepat dua kali dan biaya total $3.570. Jawaban itu memakai pembacaan syarat yang berbeda dan tidak sejalan dengan syarat yang dipakai di halaman ini, sebab dengan pemeriksaan di atas D pun hasilnya negatif. Kalau di kelas Anda dipakai syarat yang lain, ikuti yang disepakati pengajarnya dan bandingkan cara pemeriksaannya.</p>
 
-    <h4>Kembali ke topik sebelumnya</h4>
-    <p style="margin:0 0 16px;">Critical path dan waktu penyelesaian normal yang dipakai di halaman ini berasal dari topik sebelumnya, lengkap dengan cara menggambar jaringan dan menghitung slack-nya.</p>
+    <h4 data-materi="kembali-ke-topik-sebelumnya.judul" data-label="Kembali ke topik sebelumnya">Kembali ke topik sebelumnya</h4>
+    <p style="margin:0 0 16px;" data-materi="kembali-ke-topik-sebelumnya.1" data-label="Critical path dan waktu penyelesaian normal yang dipaka…">Critical path dan waktu penyelesaian normal yang dipakai di halaman ini berasal dari topik sebelumnya, lengkap dengan cara menggambar jaringan dan menghitung slack-nya.</p>
     <a href="mo-lintasan-kritis.html" class="btn btn-ghost">← Buka Critical Path</a>
   </div>
 </section>
@@ -657,6 +658,17 @@
          + 'dikurangi crash time sebanyak ' + TARGET_PERCEPATAN + ' kali tanpa menjadi negatif.',
       pangkas:{}, tampil:barisDan(), soroti:true }
   ];
+
+  /*
+    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+
+    Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
+    disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
+    tidak ikut berubah ketika naskahnya diperbarui.
+  */
+  if(window.KafbeMateri){
+    KafbeMateri.daftarLangkah(LANGKAH, { label:'Langkah' }, tampilkan);
+  }
 
   // Pemeriksaan syarat, satu kandidat untuk satu langkah.
   KANDIDAT.forEach(function(a, i){

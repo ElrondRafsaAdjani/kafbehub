@@ -166,6 +166,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -207,17 +208,17 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Manajemen Operasi</span>
-    <h2>Critical Path</h2>
-    <p>Mengenal konsepnya lebih dulu, lalu cara mengerjakannya, baru masuk ke contoh soal yang digambar langkah demi langkah.</p>
+    <h2 data-materi="critical-path.judul" data-label="Critical Path">Critical Path</h2>
+    <p data-materi="critical-path.1" data-label="Mengenal konsepnya lebih dulu, lalu cara mengerjakannya…">Mengenal konsepnya lebih dulu, lalu cara mengerjakannya, baru masuk ke contoh soal yang digambar langkah demi langkah.</p>
   </div>
 
-  <p class="catatan-layar">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
+  <p class="catatan-layar" data-materi="critical-path.2" data-label="Visualisasinya lebih nyaman dibuka lewat tablet, laptop…">Visualisasinya lebih nyaman dibuka lewat tablet, laptop, atau komputer. Tetap bisa dibuka lewat ponsel.</p>
 
   <!-- ============ 1. KONSEP ============ -->
   <div class="kotak-materi">
-    <h3>Konsep critical path</h3>
-    <p>Sebuah proyek hampir tidak pernah berjalan lurus dari satu aktivitas ke aktivitas berikutnya. Ada aktivitas yang bisa dikerjakan bersamaan, ada pula yang baru boleh dimulai setelah aktivitas lain selesai. Karena bercabang seperti itu, proyek punya beberapa jalur dari awal sampai akhir.</p>
-    <p><b>Critical path</b> adalah jalur yang tidak punya kelonggaran waktu sama sekali. Semua aktivitas di jalur itu harus berjalan tepat waktu, sebab keterlambatan satu hari saja langsung menggeser tanggal selesainya proyek. Jalur inilah yang menentukan lama seluruh proyek.</p>
+    <h3 data-materi="konsep-critical-path.judul" data-label="Konsep critical path">Konsep critical path</h3>
+    <p data-materi="konsep-critical-path.1" data-label="Sebuah proyek hampir tidak pernah berjalan lurus dari s…">Sebuah proyek hampir tidak pernah berjalan lurus dari satu aktivitas ke aktivitas berikutnya. Ada aktivitas yang bisa dikerjakan bersamaan, ada pula yang baru boleh dimulai setelah aktivitas lain selesai. Karena bercabang seperti itu, proyek punya beberapa jalur dari awal sampai akhir.</p>
+    <p data-materi="konsep-critical-path.2" data-label="Critical path adalah jalur yang tidak punya kelonggaran…"><b>Critical path</b> adalah jalur yang tidak punya kelonggaran waktu sama sekali. Semua aktivitas di jalur itu harus berjalan tepat waktu, sebab keterlambatan satu hari saja langsung menggeser tanggal selesainya proyek. Jalur inilah yang menentukan lama seluruh proyek.</p>
 
     <div class="dua">
       <div><b>Kenapa disebut kritis</b>
@@ -226,13 +227,13 @@
         Proyek baru selesai kalau semua jalur sudah selesai. Jalur yang paling lama adalah yang terakhir rampung, jadi jalur itulah yang menahan tanggal selesainya.</div>
     </div>
 
-    <h4>Critical Path Method (CPM)</h4>
-    <p>Critical Path Method adalah cara terstruktur untuk menemukan jalur tersebut. Caranya dengan menggambar aktivitas beserta urutannya menjadi sebuah jaringan, menghitung waktu paling cepat dan paling lambat tiap aktivitas, lalu melihat aktivitas mana yang sama sekali tidak punya kelonggaran.</p>
-    <p>Dari CPM didapat tiga jawaban sekaligus. Pertama, berapa lama proyek selesai kalau berjalan normal. Kedua, aktivitas mana yang tidak boleh terlambat. Ketiga, aktivitas mana yang masih punya kelonggaran, sehingga tenaga dan biaya tidak perlu ditumpuk di situ.</p>
-    <p>CPM menganggap lama tiap aktivitas sudah diketahui dan bersifat pasti. Kalau lama aktivitas masih berupa perkiraan yang bisa meleset, metode yang lebih cocok adalah PERT.</p>
+    <h4 data-materi="critical-path-method-cpm.judul" data-label="Critical Path Method (CPM)">Critical Path Method (CPM)</h4>
+    <p data-materi="critical-path-method-cpm.1" data-label="Critical Path Method adalah cara terstruktur untuk mene…">Critical Path Method adalah cara terstruktur untuk menemukan jalur tersebut. Caranya dengan menggambar aktivitas beserta urutannya menjadi sebuah jaringan, menghitung waktu paling cepat dan paling lambat tiap aktivitas, lalu melihat aktivitas mana yang sama sekali tidak punya kelonggaran.</p>
+    <p data-materi="critical-path-method-cpm.2" data-label="Dari CPM didapat tiga jawaban sekaligus. Pertama, berap…">Dari CPM didapat tiga jawaban sekaligus. Pertama, berapa lama proyek selesai kalau berjalan normal. Kedua, aktivitas mana yang tidak boleh terlambat. Ketiga, aktivitas mana yang masih punya kelonggaran, sehingga tenaga dan biaya tidak perlu ditumpuk di situ.</p>
+    <p data-materi="critical-path-method-cpm.3" data-label="CPM menganggap lama tiap aktivitas sudah diketahui dan…">CPM menganggap lama tiap aktivitas sudah diketahui dan bersifat pasti. Kalau lama aktivitas masih berupa perkiraan yang bisa meleset, metode yang lebih cocok adalah PERT.</p>
 
-    <h4>Arti tiap istilah</h4>
-    <p>Empat angka pada setiap aktivitas selalu ditulis pada posisi yang sama, sehingga bisa dibaca sekilas tanpa perlu dilabeli satu per satu.</p>
+    <h4 data-materi="arti-tiap-istilah.judul" data-label="Arti tiap istilah">Arti tiap istilah</h4>
+    <p data-materi="arti-tiap-istilah.1" data-label="Empat angka pada setiap aktivitas selalu ditulis pada p…">Empat angka pada setiap aktivitas selalu ditulis pada posisi yang sama, sehingga bisa dibaca sekilas tanpa perlu dilabeli satu per satu.</p>
 
     <div class="kotak-contoh">
       <span>ES</span><span>EF</span>
@@ -252,18 +253,18 @@
       </table>
     </div>
 
-    <h4>Rumus yang dipakai</h4>
+    <h4 data-materi="rumus-yang-dipakai.judul" data-label="Rumus yang dipakai">Rumus yang dipakai</h4>
     <div class="rumus">EF = ES + waktu aktivitas</div>
     <div class="rumus">LS = LF − waktu aktivitas</div>
     <div class="rumus">Slack = LS − ES = LF − EF</div>
 
-    <p style="margin-top:14px;">Slack bisa dihitung dengan dua cara itu dan hasilnya selalu sama. Kalau keduanya berbeda, berarti ada salah hitung di langkah sebelumnya, jadi ini sekaligus cara memeriksa pekerjaan sendiri.</p>
+    <p style="margin-top:14px;" data-materi="rumus-yang-dipakai.1" data-label="Slack bisa dihitung dengan dua cara itu dan hasilnya se…">Slack bisa dihitung dengan dua cara itu dan hasilnya selalu sama. Kalau keduanya berbeda, berarti ada salah hitung di langkah sebelumnya, jadi ini sekaligus cara memeriksa pekerjaan sendiri.</p>
   </div>
 
   <!-- ============ 2. CARA MENGERJAKAN ============ -->
   <div class="kotak-materi">
-    <h3>Cara mengerjakan</h3>
-    <p>Urutan ini berlaku untuk soal critical path mana pun, berapa pun jumlah aktivitasnya.</p>
+    <h3 data-materi="cara-mengerjakan.judul" data-label="Cara mengerjakan">Cara mengerjakan</h3>
+    <p data-materi="cara-mengerjakan.1" data-label="Urutan ini berlaku untuk soal critical path mana pun, b…">Urutan ini berlaku untuk soal critical path mana pun, berapa pun jumlah aktivitasnya.</p>
 
     <ol class="langkah-kerja">
       <li><b>Gambar jaringannya.</b> Tiap aktivitas jadi satu kotak, lalu tarik panah dari setiap aktivitas pendahulu ke aktivitas yang mengikutinya. Aktivitas tanpa pendahulu ditarik dari Start, aktivitas yang tidak menjadi pendahulu siapa pun ditarik ke Finish.</li>
@@ -274,7 +275,7 @@
       <li><b>Tandai yang slack-nya nol.</b> Rangkaian aktivitas itulah critical path-nya. Tulis sebagai Start - ... - Finish.</li>
     </ol>
 
-    <h4>Dua hal yang paling sering keliru</h4>
+    <h4 data-materi="dua-hal-yang-paling.judul" data-label="Dua hal yang paling sering keliru">Dua hal yang paling sering keliru</h4>
     <div class="dua">
       <div><b>Hitung maju memakai yang TERBESAR</b>
         Sebuah aktivitas baru bisa mulai kalau semua pendahulunya sudah selesai, jadi
@@ -287,8 +288,8 @@
 
   <!-- ============ 3. SOAL DAN VISUALISASINYA ============ -->
   <div class="kotak-materi">
-    <h3>Soalnya</h3>
-    <p>Perusahaan MJ punya sebuah proyek peningkatan kualitas kemasan. Proyek itu terdiri dari tujuh proses, lengkap dengan waktu dan biayanya seperti pada tabel berikut.</p>
+    <h3 data-materi="soalnya.judul" data-label="Soalnya">Soalnya</h3>
+    <p data-materi="soalnya.1" data-label="Perusahaan MJ punya sebuah proyek peningkatan kualitas…">Perusahaan MJ punya sebuah proyek peningkatan kualitas kemasan. Proyek itu terdiri dari tujuh proses, lengkap dengan waktu dan biayanya seperti pada tabel berikut.</p>
 
     <div class="tabel-gulir">
       <table class="ringkas" id="tabelSoalLengkap"></table>
@@ -304,8 +305,8 @@
         dikerjakan dengan CPM, bukan PERT.</div>
     </div>
 
-    <p style="margin:16px 0 0;">Kolom crashing time dan crashing cost belum dipakai untuk menjawab dua pertanyaan di atas. Dua kolom itu baru diperlukan kalau proyeknya ingin dipercepat, dan soal aslinya memang berlanjut ke sana. Bagian itu dikerjakan di halaman <a href="mo-crashing.html">Crashing</a>, memakai jawaban dari halaman ini.</p>
-    <p style="margin:12px 0 0;">Jaringannya digambar satu aktivitas per langkah, mengikuti urutan pada tabel. Aktivitas yang sedang digambar ikut disorot di tabel kecil sebelah gambar, jadi terlihat jelas kotak mana yang berasal dari baris mana.</p>
+    <p style="margin:16px 0 0;" data-materi="soalnya.2" data-label="Kolom crashing time dan crashing cost belum dipakai unt…">Kolom crashing time dan crashing cost belum dipakai untuk menjawab dua pertanyaan di atas. Dua kolom itu baru diperlukan kalau proyeknya ingin dipercepat, dan soal aslinya memang berlanjut ke sana. Bagian itu dikerjakan di halaman <a href="mo-crashing.html">Crashing</a>, memakai jawaban dari halaman ini.</p>
+    <p style="margin:12px 0 0;" data-materi="soalnya.3" data-label="Jaringannya digambar satu aktivitas per langkah, mengik…">Jaringannya digambar satu aktivitas per langkah, mengikuti urutan pada tabel. Aktivitas yang sedang digambar ikut disorot di tabel kecil sebelah gambar, jadi terlihat jelas kotak mana yang berasal dari baris mana.</p>
   </div>
 
   <div class="story-card">
@@ -319,7 +320,7 @@
         <svg class="maskot" viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
         <div class="bubble" id="bubbleText"></div>
         <div class="panel-soal">
-          <h4>Data soal</h4>
+          <h4 data-materi="data-soal.judul" data-label="Data soal">Data soal</h4>
           <table class="soal" id="tabelSoal"></table>
         </div>
       </div>
@@ -339,21 +340,21 @@
 
   <!-- ============ 4. RINGKASAN ============ -->
   <div class="kotak-materi">
-    <h3>Jawabannya</h3>
-    <p>Seluruh angka pada tabel ini dihitung ulang oleh halaman, bukan diketik satu per satu, jadi tidak mungkin berbeda dengan yang tergambar pada jaringan.</p>
+    <h3 data-materi="jawabannya.judul" data-label="Jawabannya">Jawabannya</h3>
+    <p data-materi="jawabannya.1" data-label="Seluruh angka pada tabel ini dihitung ulang oleh halama…">Seluruh angka pada tabel ini dihitung ulang oleh halaman, bukan diketik satu per satu, jadi tidak mungkin berbeda dengan yang tergambar pada jaringan.</p>
     <div class="tabel-gulir">
       <table class="ringkas" id="tabelRingkas"></table>
     </div>
 
-    <h4>Critical path dan waktu penyelesaian normal</h4>
+    <h4 data-materi="critical-path-dan-waktu.judul" data-label="Critical path dan waktu penyelesaian normal">Critical path dan waktu penyelesaian normal</h4>
     <p id="ringkasKesimpulan" style="margin:0;"></p>
 
-    <h4>Biaya total menyelesaikan proyek</h4>
-    <p style="margin:0;">Selama proyek berjalan normal, tidak ada aktivitas yang dipercepat, jadi biaya totalnya adalah jumlah seluruh normal cost.</p>
+    <h4 data-materi="biaya-total-menyelesaikan-proyek.judul" data-label="Biaya total menyelesaikan proyek">Biaya total menyelesaikan proyek</h4>
+    <p style="margin:0;" data-materi="biaya-total-menyelesaikan-proyek.1" data-label="Selama proyek berjalan normal, tidak ada aktivitas yang…">Selama proyek berjalan normal, tidak ada aktivitas yang dipercepat, jadi biaya totalnya adalah jumlah seluruh normal cost.</p>
     <p id="ringkasBiaya" style="margin:12px 0 0;"></p>
 
-    <h4>Pertanyaan berikutnya</h4>
-    <p style="margin:0 0 16px;">Soal aslinya masih berlanjut. Perusahaan ingin proyeknya selesai dua minggu lebih cepat, dan yang ditanyakan aktivitas mana yang dipercepat beserta biaya totalnya yang baru. Itu materi crashing, memakai jawaban dari halaman ini sebagai titik berangkat.</p>
+    <h4 data-materi="pertanyaan-berikutnya.judul" data-label="Pertanyaan berikutnya">Pertanyaan berikutnya</h4>
+    <p style="margin:0 0 16px;" data-materi="pertanyaan-berikutnya.1" data-label="Soal aslinya masih berlanjut. Perusahaan ingin proyekny…">Soal aslinya masih berlanjut. Perusahaan ingin proyeknya selesai dua minggu lebih cepat, dan yang ditanyakan aktivitas mana yang dipercepat beserta biaya totalnya yang baru. Itu materi crashing, memakai jawaban dari halaman ini sebagai titik berangkat.</p>
     <a href="mo-crashing.html" class="btn btn-gold">Lanjut ke Crashing →</a>
   </div>
 </section>
@@ -724,6 +725,17 @@
          + 'dan untuk itu dipakai <b>crashing</b>. Pembahasannya ada di topik berikutnya.',
       tampil:['papanJalur'], soroti:true }
   ];
+
+  /*
+    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+
+    Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
+    disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
+    tidak ikut berubah ketika naskahnya diperbarui.
+  */
+  if(window.KafbeMateri){
+    KafbeMateri.daftarLangkah(LANGKAH, { label:'Langkah' }, tampilkan);
+  }
 
   var ke = 0;
   var gelembung = document.getElementById('bubbleText');

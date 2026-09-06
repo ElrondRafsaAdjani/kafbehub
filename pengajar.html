@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-src 'self'; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'none';" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pengajar - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="operasional.css">
+<link rel="stylesheet" href="pengajar.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body class="op-body">
+
+<!-- ============ LAYAR MASUK DAN DAFTAR ============ -->
+<section id="layarMasuk" class="op-masuk">
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1 id="judulMasuk">Pengajar KAFBE</h1>
+    <p class="op-sub" id="subMasuk">Halaman pengajar. Masuk untuk mengubah naskah materi kuliah.</p>
+
+    <form id="formMasuk" autocomplete="on">
+      <label for="email">Email pengajar</label>
+      <input type="email" id="email" name="email" required autocomplete="username" placeholder="s130223203@student.ubaya.ac.id" />
+
+      <label for="sandi">Kata sandi</label>
+      <input type="password" id="sandi" name="sandi" required autocomplete="current-password" />
+
+      <button type="submit" class="btn btn-primary op-penuh" id="tombolMasuk">Masuk</button>
+    </form>
+
+    <!-- Pendaftaran akun baru. Yang dibuat di sini adalah pengajuan, bukan
+         akses. Wewenangnya baru ada setelah pengurus operasional menerimanya
+         di tab Akun Pengajar. -->
+    <form id="formDaftar" autocomplete="on" hidden>
+      <label for="dfNama">Nama lengkap</label>
+      <input type="text" id="dfNama" name="nama" required maxlength="80" autocomplete="name" placeholder="Sesuai data asisten" />
+
+      <label for="dfNrp">NRP</label>
+      <input type="text" id="dfNrp" name="nrp" required maxlength="15" inputmode="numeric" placeholder="130223203" />
+
+      <label for="dfEmail">Email student UBAYA</label>
+      <input type="email" id="dfEmail" name="email" required autocomplete="username" placeholder="s130223203@student.ubaya.ac.id" aria-describedby="dfEmailKet" />
+      <p class="pg-keterangan" id="dfEmailKet">Emailnya memakai NRP Anda. NRP 130223001 memakai email s130223001@student.ubaya.ac.id.</p>
+
+      <label for="dfSandi">Kata sandi baru</label>
+      <input type="password" id="dfSandi" name="sandiBaru" required minlength="8" autocomplete="new-password" />
+
+      <label for="dfSandi2">Ulangi kata sandi</label>
+      <input type="password" id="dfSandi2" name="sandiUlang" required minlength="8" autocomplete="new-password" />
+
+      <button type="submit" class="btn btn-primary op-penuh" id="tombolDaftar">Kirim pengajuan</button>
+    </form>
+
+    <p class="op-pesan" id="pesanMasuk" role="alert"></p>
+
+    <!-- Catatan langkah demi langkah saat mencoba masuk. Tersembunyi sampai
+         ada percobaan, dan berguna untuk menunjukkan langkah mana yang gagal
+         tanpa perlu membuka developer tools. -->
+    <details class="op-diagnosa" id="diagnosaBungkus" hidden>
+      <summary>Rincian teknis percobaan masuk</summary>
+      <pre id="diagnosa"></pre>
+    </details>
+
+    <p class="op-catatan" id="catatanMasuk">
+      Belum punya akun?
+      <button type="button" class="pg-tautan" id="keDaftar">Buat akun pengajar</button>
+    </p>
+    <p class="op-catatan" id="catatanDaftar" hidden>
+      Sudah punya akun?
+      <button type="button" class="pg-tautan" id="keMasuk">Kembali ke halaman masuk</button>
+    </p>
+  </div>
+</section>
+
+<!-- ============ MELENGKAPI PENGAJUAN ============ -->
+<!--
+  Terpakai kalau akun Firebase-nya sudah jadi tapi baris pengajuannya belum
+  tersimpan, misalnya karena jaringan putus tepat di antara kedua langkah itu.
+  Tanpa layar ini, akunnya bisa masuk tapi tidak akan pernah punya pengajuan
+  untuk disetujui siapa pun, dan pemakainya tidak punya cara memperbaikinya.
+-->
+<section id="layarLengkapi" class="op-masuk" hidden>
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1>Lengkapi pengajuan</h1>
+    <p class="op-sub">Akun Anda sudah ada, tapi datanya belum terkirim ke pengurus. Isi sekali lagi supaya bisa ditinjau.</p>
+
+    <form id="formLengkapi">
+      <label for="lkNama">Nama lengkap</label>
+      <input type="text" id="lkNama" required maxlength="80" placeholder="Sesuai data asisten" />
+
+      <label for="lkNrp">NRP</label>
+      <input type="text" id="lkNrp" required maxlength="15" inputmode="numeric" placeholder="130223203" />
+
+      <button type="submit" class="btn btn-primary op-penuh" id="tombolLengkapi">Kirim pengajuan</button>
+    </form>
+
+    <p class="op-pesan" id="pesanLengkapi" role="alert"></p>
+    <p class="op-catatan">
+      <button type="button" class="pg-tautan" data-keluar>Keluar dari akun ini</button>
+    </p>
+  </div>
+</section>
+
+<!-- ============ MENUNGGU PERSETUJUAN ============ -->
+<section id="layarTunggu" class="op-masuk" hidden>
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1>Pengajuan sedang ditinjau</h1>
+    <p class="op-sub">Pengurus operasional akan mencocokkan data Anda dengan data asisten, lalu menerima atau menolaknya. Coba masuk lagi nanti.</p>
+
+    <dl class="pg-ringkas" id="ringkasTunggu"></dl>
+
+    <p class="op-catatan">Kalau datanya keliru, hubungi pengurus operasional supaya pengajuannya dihapus, lalu daftar ulang.</p>
+    <button type="button" class="btn btn-ghost op-penuh" data-keluar>Keluar</button>
+  </div>
+</section>
+
+<!-- ============ PENGAJUAN DITOLAK ============ -->
+<section id="layarTolak" class="op-masuk" hidden>
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1>Pengajuan belum diterima</h1>
+    <p class="op-sub" id="alasanTolak">Pengurus operasional belum menyetujui pengajuan ini.</p>
+
+    <p class="op-catatan">Kalau menurut Anda ini keliru, hubungi pengurus operasional. Setelah pengajuan lama dihapus, Anda bisa mendaftar lagi.</p>
+    <button type="button" class="btn btn-ghost op-penuh" data-keluar>Keluar</button>
+  </div>
+</section>
+
+<!-- ============ APLIKASI PENGAJAR ============ -->
+<div id="aplikasi" hidden>
+  <header class="op-nav">
+    <div class="op-nav-dalam">
+      <div class="op-merek">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <span>Pengajar <strong>KAFBE</strong></span>
+      </div>
+      <div class="op-nav-kanan">
+        <span class="op-siapa" id="siapa"></span>
+        <a href="index.html#visualisasi" class="op-tautan-luar" target="_blank" rel="noopener noreferrer">Lihat halaman materi</a>
+        <button class="btn btn-ghost op-kecil" id="tombolKeluar">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="op-wrap">
+    <div class="op-status" id="statusSimpan" role="status" aria-live="polite" hidden></div>
+
+    <div class="pg-tata">
+
+      <!-- ---------- DAFTAR MATA KULIAH DAN TOPIK ---------- -->
+      <aside class="pg-samping">
+        <h2 class="pg-samping-judul">Materi yang boleh Anda ubah</h2>
+        <nav id="daftarTopik" class="pg-daftar" aria-label="Daftar topik materi"></nav>
+        <p class="pg-samping-catatan" id="catatanWewenang"></p>
+      </aside>
+
+      <!-- ---------- PENYUNTING ---------- -->
+      <section class="pg-utama">
+
+        <div class="pg-kosong" id="layarKosong">
+          <svg viewBox="0 0 300 300" class="pg-kosong-owl"><use href="#kafbe-owl"/></svg>
+          <h2>Pilih satu topik dulu</h2>
+          <p>Daftar topik ada di sebelah kiri. Setiap topik dibuka apa adanya dari halaman aslinya, jadi naskah yang tampil di sini persis naskah yang sedang dibaca mahasiswa.</p>
+        </div>
+
+        <div id="penyunting" hidden>
+          <div class="pg-kepala">
+            <div>
+              <span class="pg-kicker" id="pgMatkul"></span>
+              <h2 id="pgJudul"></h2>
+              <p id="pgKeterangan">Yang bisa diubah di sini hanya kalimat dan markup-nya. Grafik, bagan, dan angka model tetap milik halaman aslinya.</p>
+            </div>
+            <div class="pg-kepala-aksi">
+              <a class="btn btn-ghost op-kecil" id="pgTautan" target="_blank" rel="noopener noreferrer">Buka halaman aslinya</a>
+              <button type="button" class="btn btn-primary op-kecil" id="pgSimpan">Simpan perubahan</button>
+            </div>
+          </div>
+
+          <p class="op-pesan" id="pgPesan" role="alert"></p>
+
+          <div class="pg-saring">
+            <input type="search" id="pgCari" placeholder="Cari kalimat atau nama bagian…" aria-label="Cari naskah" />
+            <label class="pg-centang">
+              <input type="checkbox" id="pgHanyaUbah" />
+              <span>Tampilkan yang diubah saja</span>
+            </label>
+          </div>
+
+          <div id="pgIsi"></div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</div>
+
+<!--
+  Bingkai pembaca naskah bawaan.
+
+  Halaman materi dibuka di sini supaya naskah aslinya dibaca langsung dari
+  halaman yang bersangkutan, bukan dari salinan daftar yang ditulis ulang di
+  halaman ini. Salinan seperti itu selalu berakhir tertinggal begitu halaman
+  materinya diperbarui, dan pengajar akan menyunting kalimat yang sudah tidak
+  ada lagi.
+
+  Bingkainya sengaja tidak disembunyikan dengan display:none, melainkan
+  ditaruh di luar layar, sebab sebagian halaman materi mengukur lebar
+  elemennya sendiri saat menggambar dan pengukuran itu gagal pada elemen yang
+  tidak digambar sama sekali.
+-->
+<iframe id="bingkaiMateri" class="pg-bingkai" title="Pembaca naskah bawaan halaman materi" aria-hidden="true" tabindex="-1"></iframe>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g class="eyes-blink">
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<script src="firebase-config.js"></script>
+<script src="shared/materi-daftar.js"></script>
+<script type="module" src="shared/pengajar.js"></script>
+</body>
+</html>

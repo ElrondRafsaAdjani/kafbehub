@@ -117,6 +117,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -150,8 +151,8 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Manajemen Keuangan dan Investasi</span>
-    <h2>Time Value of Money</h2>
-    <p>Uang berpindah nilai saat berpindah waktu. Maju ke depan disebut compounding, mundur ke belakang disebut discounting.</p>
+    <h2 data-materi="time-value-of-money.judul" data-label="Time Value of Money">Time Value of Money</h2>
+    <p data-materi="time-value-of-money.1" data-label="Uang berpindah nilai saat berpindah waktu. Maju ke depa…">Uang berpindah nilai saat berpindah waktu. Maju ke depan disebut compounding, mundur ke belakang disebut discounting.</p>
   </div>
 
   <nav class="lompat">
@@ -161,8 +162,8 @@
 
   <!-- ============ 1. ARAH ============ -->
   <div class="kotak-materi" id="arah">
-    <h3>1. Dua arah perpindahan nilai</h3>
-    <p>Rp1.000.000 hari ini dan Rp1.000.000 tahun depan bukan hal yang sama. Uang yang ada sekarang bisa dibungakan, sedangkan uang yang baru datang tahun depan tidak sempat. Selisih itulah yang dihitung.</p>
+    <h3 data-materi="1-dua-arah-perpindahan.judul" data-label="1. Dua arah perpindahan nilai">1. Dua arah perpindahan nilai</h3>
+    <p data-materi="1-dua-arah-perpindahan.1" data-label="Rp1.000.000 hari ini dan Rp1.000.000 tahun depan bukan…">Rp1.000.000 hari ini dan Rp1.000.000 tahun depan bukan hal yang sama. Uang yang ada sekarang bisa dibungakan, sedangkan uang yang baru datang tahun depan tidak sempat. Selisih itulah yang dihitung.</p>
 
     <div class="saklar">
       <button type="button" data-arah="maju" class="aktif">Compounding, maju ke depan</button>
@@ -201,14 +202,14 @@
       <div><b>Discounting</b>Dari nilai nanti menuju nilai sekarang. Uangnya dibagi (1 + r) tiap tahun, jadi menyusut.</div>
     </div>
 
-    <h4>Contoh: menabung untuk laptop</h4>
+    <h4 data-materi="contoh-menabung-untuk-laptop.judul" data-label="Contoh: menabung untuk laptop">Contoh: menabung untuk laptop</h4>
 
     <div class="soal">
       Laptop yang diincar harganya <b>Rp10.000.000</b> hari ini. Tabungan memberi bunga
       <b>6% setahun</b>. Laptopnya baru akan dibeli <b>lima tahun lagi</b>.
     </div>
 
-    <p style="margin-top:12px;">Dari satu keadaan ini muncul dua pertanyaan yang arah pandangnya
+    <p style="margin-top:12px;" data-materi="contoh-menabung-untuk-laptop.1" data-label="Dari satu keadaan ini muncul dua pertanyaan yang arah p…">Dari satu keadaan ini muncul dua pertanyaan yang arah pandangnya
       berlawanan. Keduanya dijawab rumus yang sama, hanya dibalik.</p>
 
     <div class="tanya">
@@ -230,8 +231,8 @@
 
     <div class="rumus">FV = Rp10.000.000 × (1 + 0,06)<sup>5</sup> = Rp10.000.000 × 1,3382256 = Rp13.382.256</div>
 
-    <h4>Saldo tabungan tahun demi tahun</h4>
-    <p>Dua kolom di bawah tumbuh dengan bunga yang sama, 6% setahun. Yang membedakan hanya
+    <h4 data-materi="saldo-tabungan-tahun-demi.judul" data-label="Saldo tabungan tahun demi tahun">Saldo tabungan tahun demi tahun</h4>
+    <p data-materi="saldo-tabungan-tahun-demi.1" data-label="Dua kolom di bawah tumbuh dengan bunga yang sama, 6% se…">Dua kolom di bawah tumbuh dengan bunga yang sama, 6% setahun. Yang membedakan hanya
       jumlah yang ditaruh di awal.</p>
 
     <div class="tabel-gulir">
@@ -254,11 +255,11 @@
       </table>
     </div>
 
-    <p style="margin-top:10px;">Tiap baris didapat dari baris di atasnya dikalikan 1,06. Contohnya
+    <p style="margin-top:10px;" data-materi="saldo-tabungan-tahun-demi.2" data-label="Tiap baris didapat dari baris di atasnya dikalikan 1,06…">Tiap baris didapat dari baris di atasnya dikalikan 1,06. Contohnya
       Rp7.472.582 × 1,06 = Rp7.920.937, lalu Rp7.920.937 × 1,06 = Rp8.396.193, dan seterusnya
       sampai tahun kelima.</p>
 
-    <h4>Apa yang sebenarnya ditunjukkan angka-angka itu</h4>
+    <h4 data-materi="apa-yang-sebenarnya-ditunjukkan.judul" data-label="Apa yang sebenarnya ditunjukkan angka-angka itu">Apa yang sebenarnya ditunjukkan angka-angka itu</h4>
     <div class="dua">
       <div><b>Tidak perlu Rp10.000.000 hari ini</b>
         Menyisihkan Rp7.472.582 sekarang sudah cukup untuk membeli laptop Rp10.000.000 lima tahun
@@ -268,21 +269,21 @@
         Selisih Rp3.382.256 itulah harga dari memiliki laptop lima tahun lebih awal.</div>
     </div>
 
-    <p style="margin-top:14px;">Perhitungan ini menganggap harga laptopnya tetap Rp10.000.000
+    <p style="margin-top:14px;" data-materi="apa-yang-sebenarnya-ditunjukkan.1" data-label="Perhitungan ini menganggap harga laptopnya tetap Rp10.0…">Perhitungan ini menganggap harga laptopnya tetap Rp10.000.000
       selama lima tahun. Kalau harganya ikut naik, jumlah yang perlu disisihkan hari ini ikut naik.</p>
 
-    <h4>Rumusnya saling kebalikan</h4>
+    <h4 data-materi="rumusnya-saling-kebalikan.judul" data-label="Rumusnya saling kebalikan">Rumusnya saling kebalikan</h4>
     <div class="rumus">FV = PV × (1 + r)<sup>n</sup></div>
     <div class="rumus">PV =
       <span class="pecahan"><span class="atas">FV</span><span class="bawah">(1 + r)<sup>n</sup></span></span>
     </div>
-    <p style="margin-top:6px;">Keduanya persamaan yang sama, hanya dibalik arah pandangnya. Kalau salah satu sudah bisa, yang lain otomatis bisa.</p>
+    <p style="margin-top:6px;" data-materi="rumusnya-saling-kebalikan.1" data-label="Keduanya persamaan yang sama, hanya dibalik arah pandan…">Keduanya persamaan yang sama, hanya dibalik arah pandangnya. Kalau salah satu sudah bisa, yang lain otomatis bisa.</p>
   </div>
 
   <!-- ============ 2. SISI ============ -->
   <div class="kotak-materi" id="sisi">
-    <h3>2. Discount rate dan interest rate</h3>
-    <p>Keduanya sering terasa membingungkan karena angkanya bisa sama persis. Yang membedakan bukan angkanya, melainkan siapa yang memandang dan ke arah mana pandangannya.</p>
+    <h3 data-materi="2-discount-rate-dan.judul" data-label="2. Discount rate dan interest rate">2. Discount rate dan interest rate</h3>
+    <p data-materi="2-discount-rate-dan.1" data-label="Keduanya sering terasa membingungkan karena angkanya bi…">Keduanya sering terasa membingungkan karena angkanya bisa sama persis. Yang membedakan bukan angkanya, melainkan siapa yang memandang dan ke arah mana pandangannya.</p>
 
     <div class="saklar">
       <button type="button" data-sisi="pemberi" class="aktif">Dari sisi pemberi modal</button>
@@ -296,7 +297,7 @@
       <div><b>Penerima modal</b><span id="tekPenerima"></span></div>
     </div>
 
-    <h4>Ringkasnya</h4>
+    <h4 data-materi="ringkasnya.judul" data-label="Ringkasnya">Ringkasnya</h4>
     <div class="tabel-gulir">
       <table class="ringkas">
         <thead><tr><th>Istilah</th><th>Dipakai oleh</th><th>Artinya</th><th>Arah</th></tr></thead>
@@ -323,7 +324,7 @@
       </table>
     </div>
 
-    <p style="margin-top:16px;">Satu angka yang sama bisa disebut biaya oleh yang memakai uang, dan disebut imbal hasil oleh yang menyerahkan uang. Karena itu ketika perusahaan menilai proyek, angka yang dipakai untuk mendiskonto adalah biaya modalnya sendiri.</p>
+    <p style="margin-top:16px;" data-materi="ringkasnya.1" data-label="Satu angka yang sama bisa disebut biaya oleh yang memak…">Satu angka yang sama bisa disebut biaya oleh yang memakai uang, dan disebut imbal hasil oleh yang menyerahkan uang. Karena itu ketika perusahaan menilai proyek, angka yang dipakai untuk mendiskonto adalah biaya modalnya sendiri.</p>
   </div>
 </section>
 

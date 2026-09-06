@@ -128,6 +128,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -161,8 +162,8 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Statistika 2</span>
-    <h2>Nilai Z dan Tabel Z</h2>
-    <p>Mengubah nilai apa pun menjadi nilai z, membaca tabelnya, lalu menghitung peluang dari luas di bawah kurva.</p>
+    <h2 data-materi="nilai-z-dan-tabel.judul" data-label="Nilai Z dan Tabel Z">Nilai Z dan Tabel Z</h2>
+    <p data-materi="nilai-z-dan-tabel.1" data-label="Mengubah nilai apa pun menjadi nilai z, membaca tabelny…">Mengubah nilai apa pun menjadi nilai z, membaca tabelnya, lalu menghitung peluang dari luas di bawah kurva.</p>
   </div>
 
   <nav class="lompat">
@@ -175,18 +176,18 @@
 
   <!-- ============ 1. KONSEP ============ -->
   <div class="kotak-materi" id="konsep">
-    <h3>1. Kenapa harus diubah jadi nilai z</h3>
-    <p>Tinggi badan, nilai ujian, dan berat beras punya satuan yang berbeda-beda, jadi tidak mungkin dibuatkan tabel satu per satu. Nilai z menyeragamkan semuanya menjadi satu pertanyaan: <strong>berapa simpangan baku jaraknya dari rata-rata?</strong></p>
+    <h3 data-materi="1-kenapa-harus-diubah.judul" data-label="1. Kenapa harus diubah jadi nilai z">1. Kenapa harus diubah jadi nilai z</h3>
+    <p data-materi="1-kenapa-harus-diubah.1" data-label="Tinggi badan, nilai ujian, dan berat beras punya satuan…">Tinggi badan, nilai ujian, dan berat beras punya satuan yang berbeda-beda, jadi tidak mungkin dibuatkan tabel satu per satu. Nilai z menyeragamkan semuanya menjadi satu pertanyaan: <strong>berapa simpangan baku jaraknya dari rata-rata?</strong></p>
 
     <div class="rumus">
       Z =
       <span class="pecahan"><span class="atas">x &minus; μ</span><span class="bawah">σ</span></span>
     </div>
-    <p class="ket">
+    <p class="ket" data-materi="1-kenapa-harus-diubah.2" data-label="x = nilai variabel · μ = rata-rata populasi · σ = simpa…">
       <b>x</b> = nilai variabel &nbsp;·&nbsp; <b>μ</b> = rata-rata populasi &nbsp;·&nbsp; <b>σ</b> = simpangan baku populasi
     </p>
 
-    <h4>Geser sendiri angkanya</h4>
+    <h4 data-materi="geser-sendiri-angkanya.judul" data-label="Geser sendiri angkanya">Geser sendiri angkanya</h4>
     <div class="kendali">
       <label>Nilai x <span id="lblX" class="nilai-besar">80</span>
         <input type="range" id="inX" min="20" max="140" step="1" value="80" />
@@ -216,8 +217,8 @@
 
   <!-- ============ 2. CARA MEMBACA TABEL ============ -->
   <div class="kotak-materi" id="membaca">
-    <h3>2. Cara membaca tabel Z</h3>
-    <p>Berikut cara membaca tabel Z, dengan contoh <strong>z = 1,45</strong>.</p>
+    <h3 data-materi="2-cara-membaca-tabel.judul" data-label="2. Cara membaca tabel Z">2. Cara membaca tabel Z</h3>
+    <p data-materi="2-cara-membaca-tabel.1" data-label="Berikut cara membaca tabel Z, dengan contoh z = 1,45.">Berikut cara membaca tabel Z, dengan contoh <strong>z = 1,45</strong>.</p>
 
     <ol class="langkah">
       <li>Pecah nilai z jadi dua bagian: <b>satu angka di belakang koma</b> untuk baris, dan <b>angka keduanya</b> untuk kolom.<br>
@@ -228,15 +229,15 @@
       <li>Artinya luas dari <b>0 sampai 1,45</b> adalah 0,4265, atau <b>42,65%</b> dari seluruh data.</li>
     </ol>
 
-    <p style="margin-top:16px;">Karena tabel hanya memuat z positif, nilai z negatif dibaca dengan angka positifnya. Kurvanya simetris, jadi luas dari &minus;1,45 sampai 0 sama persis dengan luas dari 0 sampai 1,45.</p>
+    <p style="margin-top:16px;" data-materi="2-cara-membaca-tabel.2" data-label="Karena tabel hanya memuat z positif, nilai z negatif di…">Karena tabel hanya memuat z positif, nilai z negatif dibaca dengan angka positifnya. Kurvanya simetris, jadi luas dari &minus;1,45 sampai 0 sama persis dengan luas dari 0 sampai 1,45.</p>
 
     <button type="button" class="btn btn-gold op-kecil" id="tunjukkanContoh" style="margin-top:6px;">Tunjukkan 1,45 di tabel</button>
   </div>
 
   <!-- ============ 3. TABEL Z ============ -->
   <div class="kotak-materi" id="tabel">
-    <h3>3. Tabel Z</h3>
-    <p>Isi tabel ini adalah <strong>luas dari 0 sampai z</strong>. Klik sel mana pun untuk melihat letaknya pada kurva, atau ketik nilai z untuk langsung menemukannya.</p>
+    <h3 data-materi="3-tabel-z.judul" data-label="3. Tabel Z">3. Tabel Z</h3>
+    <p data-materi="3-tabel-z.1" data-label="Isi tabel ini adalah luas dari 0 sampai z. Klik sel man…">Isi tabel ini adalah <strong>luas dari 0 sampai z</strong>. Klik sel mana pun untuk melihat letaknya pada kurva, atau ketik nilai z untuk langsung menemukannya.</p>
 
     <div class="kendali" style="max-width:280px;">
       <label>Cari nilai z
@@ -260,8 +261,8 @@
 
   <!-- ============ 4. LATIHAN ============ -->
   <div class="kotak-materi" id="latihan">
-    <h3>4. Menghitung sendiri</h3>
-    <p>Pilih bentuk soalnya, isi angkanya, lalu lihat langkah pengerjaannya. Tombol di bawah berisi soal-soal dari buku asistensi.</p>
+    <h3 data-materi="4-menghitung-sendiri.judul" data-label="4. Menghitung sendiri">4. Menghitung sendiri</h3>
+    <p data-materi="4-menghitung-sendiri.1" data-label="Pilih bentuk soalnya, isi angkanya, lalu lihat langkah…">Pilih bentuk soalnya, isi angkanya, lalu lihat langkah pengerjaannya. Tombol di bawah berisi soal-soal dari buku asistensi.</p>
 
     <div class="kendali">
       <label>Yang dicari
@@ -298,25 +299,25 @@
 
   <!-- ============ 5. PENDEKATAN ============ -->
   <div class="kotak-materi" id="pendekatan">
-    <h3>5. Poisson dan Binomial yang didekati Normal</h3>
-    <p>Kalau datanya mencacah dan jumlahnya besar, distribusi Poisson dan Binomial bentuknya sudah mirip kurva normal, sehingga boleh dihitung memakai tabel Z yang sama.</p>
+    <h3 data-materi="5-poisson-dan-binomial.judul" data-label="5. Poisson dan Binomial yang didekati Normal">5. Poisson dan Binomial yang didekati Normal</h3>
+    <p data-materi="5-poisson-dan-binomial.1" data-label="Kalau datanya mencacah dan jumlahnya besar, distribusi…">Kalau datanya mencacah dan jumlahnya besar, distribusi Poisson dan Binomial bentuknya sudah mirip kurva normal, sehingga boleh dihitung memakai tabel Z yang sama.</p>
 
-    <h4>Poisson ≈ Normal</h4>
+    <h4 data-materi="poisson-normal.judul" data-label="Poisson ≈ Normal">Poisson ≈ Normal</h4>
     <div class="rumus">
       Z =
       <span class="pecahan"><span class="atas">a ± 0,5 &minus; λ</span><span class="bawah">√λ</span></span>
     </div>
-    <p class="ket"><b>λ</b> = rata-rata</p>
+    <p class="ket" data-materi="poisson-normal.1" data-label="λ = rata-rata"><b>λ</b> = rata-rata</p>
 
-    <h4>Binomial ≈ Normal</h4>
+    <h4 data-materi="binomial-normal.judul" data-label="Binomial ≈ Normal">Binomial ≈ Normal</h4>
     <div class="rumus">
       Z =
       <span class="pecahan"><span class="atas">a ± 0,5 &minus; n·p</span><span class="bawah">√(n·p(1&minus;p))</span></span>
     </div>
-    <p class="ket"><b>n</b> = banyaknya percobaan &nbsp;·&nbsp; <b>p</b> = peluang</p>
+    <p class="ket" data-materi="binomial-normal.1" data-label="n = banyaknya percobaan · p = peluang"><b>n</b> = banyaknya percobaan &nbsp;·&nbsp; <b>p</b> = peluang</p>
 
-    <h4>Kenapa ada ± 0,5</h4>
-    <p>Poisson dan Binomial mencacah dengan bilangan bulat, sedangkan kurva normal menerima nilai pecahan mana pun. Angka <strong>0,5</strong> menambal celah di antara dua bilangan bulat itu, dan disebut <strong>faktor koreksi</strong>.</p>
+    <h4 data-materi="kenapa-ada-0-5.judul" data-label="Kenapa ada ± 0,5">Kenapa ada ± 0,5</h4>
+    <p data-materi="kenapa-ada-0-5.1" data-label="Poisson dan Binomial mencacah dengan bilangan bulat, se…">Poisson dan Binomial mencacah dengan bilangan bulat, sedangkan kurva normal menerima nilai pecahan mana pun. Angka <strong>0,5</strong> menambal celah di antara dua bilangan bulat itu, dan disebut <strong>faktor koreksi</strong>.</p>
     <div class="fakta">
       <div><b>Pakai &minus; 0,5</b>Bila yang dicari termasuk batasnya ke arah kanan, misalnya <strong>P(X ≥ a)</strong>.</div>
       <div><b>Pakai + 0,5</b>Bila yang dicari termasuk batasnya ke arah kiri, misalnya <strong>P(X ≤ a)</strong>.</div>

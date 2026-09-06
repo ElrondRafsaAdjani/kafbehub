@@ -73,6 +73,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -114,8 +115,8 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Statistika 2</span>
-    <h2>Kurva Normal</h2>
-    <p>Dari tinggi badan orang-orang di sekitar kita, titik demi titik, sampai terbentuk kurva normal.</p>
+    <h2 data-materi="kurva-normal.judul" data-label="Kurva Normal">Kurva Normal</h2>
+    <p data-materi="kurva-normal.1" data-label="Dari tinggi badan orang-orang di sekitar kita, titik de…">Dari tinggi badan orang-orang di sekitar kita, titik demi titik, sampai terbentuk kurva normal.</p>
   </div>
 
   <div class="story-card">
@@ -226,6 +227,18 @@
     { bab:'kurva', tampil:['ringkas'], sorot:[],
       teks:'Kurva ini tidak dikarang, melainkan muncul sendiri dari data nyata. Pola yang sama terlihat pada berat badan, nilai ujian, dan ukuran sepatu. Itu sebabnya <strong>distribusi normal</strong> dipakai di mana-mana.' }
   ];
+
+  /*
+    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+
+    Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
+    disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
+    tidak ikut berubah ketika naskahnya diperbarui.
+  */
+  if(window.KafbeMateri){
+    KafbeMateri.daftarLangkah(LANGKAH, { label:'Langkah' }, tampilkan);
+    KafbeMateri.daftarPeta('bab', BAB, 'Nama bagian', tampilkan);
+  }
 
   // ===================================================================
   // Gambar

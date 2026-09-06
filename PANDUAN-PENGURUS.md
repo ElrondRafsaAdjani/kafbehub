@@ -2,15 +2,17 @@
 
 Panduan untuk yang mengelola kafbehub.vercel.app. Tidak perlu bisa coding.
 
-Ada dua halaman pengurus, dengan wewenang terpisah:
+Ada tiga halaman pengurus, dengan wewenang terpisah:
 
 | Halaman | Untuk apa | Daftar wewenang |
 |---|---|---|
 | `/operasional` | Jadwal, perubahan sementara, pengajar, pengumuman | koleksi `admins` |
+| `/pengajar` | Naskah materi kuliah, dibatasi per mata kuliah | koleksi `pengajarakun` |
 | `/adminkafbe` | Naskah situs, status fitur, status situs, catatan versi | koleksi `adminutama` |
 
-Keduanya tidak saling mewarisi. Akun operasional tidak bisa membuka
-`/adminkafbe`. Keduanya juga tidak ditautkan dari mana pun di situs.
+Ketiganya tidak saling mewarisi. Akun operasional tidak bisa membuka
+`/adminkafbe` maupun `/pengajar`. Ketiganya juga tidak ditautkan dari mana pun
+di situs.
 
 ---
 
@@ -594,6 +596,124 @@ sana kalau ingin ikut berganti.
 
 ---
 
+## Bagian 2C - Halaman Pengajar (`/pengajar`)
+
+Halaman untuk asisten dan pengajar yang mengampu mata kuliah. Di sini diubah
+**naskah materi**: kalimat penjelasan pada halaman visualisasi, kalimat tiap
+langkah cerita, dan nama tiap bagian.
+
+Yang **tidak** diubah di sini: grafik, bagan, angka contoh soal, dan cara
+halaman menggambar. Semua itu tetap milik berkas materinya dan hanya bisa
+diubah lewat kode. Jadi kalimatnya boleh dirapikan sesering apa pun tanpa
+risiko merusak gambarnya.
+
+### Cara pengajar mendapat akun
+
+Pengajar mendaftar sendiri. Pengurus operasional yang menyetujui. Tidak ada
+langkah di Firebase Console sama sekali.
+
+1. Pengajar membuka `/pengajar`, menekan **Buat akun pengajar**, lalu mengisi
+   nama lengkap, NRP, email student UBAYA, dan kata sandi barunya.
+2. Akunnya langsung jadi, tapi belum bisa mengubah apa pun. Yang dia lihat
+   adalah layar **Pengajuan sedang ditinjau**.
+3. Pengurus operasional membuka `/operasional` tab **Akun Pengajar**, menilai
+   pengajuannya, lalu menerima atau menolak. Kalau diterima, pengurus sekaligus
+   memilih mata kuliah mana saja yang boleh diubah.
+4. Pengajar masuk lagi, dan sekarang halamannya terbuka.
+
+Email yang diterima hanya email student UBAYA berbentuk
+`s130223203@student.ubaya.ac.id`. Bentuk lain ditolak, dan penolakannya
+dikerjakan aturan Firestore di server, bukan cuma oleh halamannya.
+
+### Wewenangnya dibatasi per mata kuliah
+
+Akun pengajar disimpan di koleksi `pengajarakun`, terpisah dari `admins` maupun
+`adminutama`. Dokumennya menyebut mata kuliah mana saja yang boleh disentuh,
+dan pembatasan itu ditegakkan aturan Firestore di server, bukan sekadar dengan
+menyembunyikan daftarnya di halaman.
+
+Pendaftar hanya boleh membuat baris pengajuan atas namanya sendiri, dengan
+status menunggu dan tanpa satu pun kolom wewenang. Jadi tidak ada cara
+menyetujui diri sendiri, bahkan lewat Console peramban.
+
+### Cara memakainya
+
+1. Buka `/pengajar`, masuk dengan email dan kata sandi akun pengajar.
+2. Pilih topiknya di daftar sebelah kiri. Halaman materinya dibuka diam-diam
+   di latar belakang untuk diambil naskah aslinya, jadi tunggu sebentar.
+3. Ubah kalimatnya di kotak isian. Kotak **Pratinjau** di bawahnya menunjukkan
+   hasil akhirnya, termasuk penebalan dan miring.
+4. Tekan **Simpan perubahan**. Mahasiswa yang membuka halaman materinya
+   sesudah itu langsung membaca naskah yang baru.
+
+Kotak yang isinya sudah berbeda dari naskah asli diberi bingkai kuning dan
+lencana **Diubah**. Tombol **Kembalikan ke naskah asli** mengembalikan satu
+kotak ke naskah bawaan halaman, dan perubahan itu baru berlaku setelah
+disimpan.
+
+### Markup yang boleh dipakai
+
+Naskah boleh memuat HTML sederhana, misalnya `<strong>tebal</strong>`,
+`<em>miring</em>`, `<br>`, daftar `<ul><li>`, dan tautan `<a href="...">`.
+
+Yang tidak boleh akan dibuang sendiri saat naskahnya ditampilkan, termasuk
+`<script>`, `<style>`, dan tautan berskema `javascript:`. Ini bukan untuk
+membatasi pengajar, melainkan supaya akun pengajar yang suatu hari diambil
+alih tidak bisa dipakai menanam apa pun di halaman yang dibaca mahasiswa.
+
+Kelas CSS boleh ditulis dan tetap berlaku, sehingga potongan rumus yang sudah
+ada di halaman bisa dipindah atau disalin tanpa kehilangan bentuknya.
+
+### Naskah yang belum ada di daftar
+
+Panel pengajar hanya menampilkan naskah yang sudah ditandai di berkas
+materinya. Kalau ada kalimat di halaman materi yang tidak muncul di panel,
+kalimat itu belum ditandai, dan penandaannya harus dikerjakan lewat kode.
+Caranya dijelaskan di komentar bagian atas `shared/materi.js`.
+
+Naskah pengantar di halaman daftar mata kuliah, misalnya `/materi/pemi`, tidak
+diatur di sini melainkan di `/adminkafbe` tab **Tampilan Situs**.
+
+### Tab Akun Pengajar di `/operasional`
+
+Di sinilah pengurus operasional memutuskan pengajuan yang masuk. Tabelnya
+memuat nama, NRP, email, status, dan satu kolom **Hasil pencocokan**.
+
+Kolom pencocokan itu membandingkan NRP dan nama pendaftar dengan isi tab
+**Pengajar**, lalu melaporkan tiga hal:
+
+| Warna | Artinya |
+| --- | --- |
+| Hijau | Nama dan NRP cocok dengan data pengajar |
+| Merah | NRP tidak ada di data pengajar, namanya berbeda, atau emailnya tidak sesuai NRP |
+| Kuning | Perlu dilirik, misalnya NRP-nya tidak ketemu tapi ada nama yang sama |
+
+Email student UBAYA dibentuk dari NRP-nya. NRP 130223001 memakai email
+`s130223001@student.ubaya.ac.id`. Kalau keduanya tidak cocok, salah satunya
+pasti keliru, dan keduanya sama-sama menentukan: NRP dipakai mencocokkan dengan
+data pengajar, email dipakai masuk. Karena itu ketidakcocokan ini dihitung
+merah, dan peringatannya sekaligus menyebutkan email yang seharusnya.
+
+Peringatan ini **tidak** menghalangi apa pun. Data pengajar diisi manusia dan
+sering tertinggal di awal semester, jadi penolakan otomatis akan menghambat
+asisten yang sah hanya karena barisnya belum sempat dimasukkan. Yang memutuskan
+tetap pengurus. Kalau ada peringatan merah dan pengurus tetap menerimanya,
+tombol simpannya minta ditekan dua kali supaya keputusan itu benar-benar
+disengaja.
+
+Menerima sekaligus memilih mata kuliahnya. Pengajuan yang diterima tanpa satu
+pun mata kuliah tidak bisa mengubah apa pun, jadi hal itu ditolak formulirnya.
+
+Menolak harus disertai alasan, karena alasannya ditampilkan ke pendaftar di
+halaman `/pengajar`. Kalau orangnya perlu mendaftar ulang, misalnya karena NRP
+yang diisi salah ketik, hapus barisnya lebih dulu. Selama barisnya masih ada,
+pendaftaran ulang dengan akun yang sama akan ditolak.
+
+Semua keputusan di tab ini ikut tercatat di tab **Log** dengan jenis
+**Akun pengajar**.
+
+---
+
 ## Bagian 3 - Mengelola admin
 
 ### Menambah admin operasional baru
@@ -609,10 +729,54 @@ bukan `admins`.
 Satu akun boleh terdaftar di kedua koleksi kalau memang perlu membuka kedua
 halaman. Terdaftar di salah satunya saja tidak memberi akses ke yang lain.
 
+### Menambah akun pengajar (akses `/pengajar`)
+
+**Tidak lewat Firebase Console.** Pengajar mendaftar sendiri di `/pengajar`,
+lalu pengurus operasional menerimanya di tab **Akun Pengajar**. Langkahnya ada
+di Bagian 2C.
+
+Menambah lewat Console tetap mungkin untuk keadaan darurat, misalnya saat belum
+ada satu pun pengurus operasional yang bisa menyetujui. Buat akunnya seperti
+langkah **1.2**, lalu tambahkan dokumen di koleksi **`pengajarakun`** dengan
+Document ID sama dengan User UID, berisi:
+
+| Kolom | Jenis | Isi |
+| --- | --- | --- |
+| `nama` | string | Nama pengajarnya, dipakai pada catatan log |
+| `nrp` | string | NRP-nya |
+| `email` | string | Email akun Firebase-nya |
+| `status` | string | Isi `diterima` |
+| `mk` | array | Kode mata kuliah yang boleh diubah |
+| `semua` | boolean | Isi `true` kalau boleh mengubah semua mata kuliah |
+
+Kolom `mk` diisi kode materi, bukan nama panjangnya dan bukan kode mata kuliah
+di tab Mata Kuliah. Kode yang berlaku sekarang: `pemi`, `mki`, `mo`, `stat2`,
+dan `si`. Daftar lengkapnya beserta topiknya ada di `shared/materi-daftar.js`.
+
+Kolom `semua` boleh tidak ditulis sama sekali. Kalau ditulis `true`, kolom `mk`
+tidak lagi dipakai dan akun itu boleh mengubah naskah mata kuliah mana pun.
+Isian ini disediakan untuk koordinator, supaya daftarnya tidak perlu ditambah
+tiap kali ada mata kuliah baru.
+
 ### Mencabut akses
 
-Hapus dokumennya dari koleksi `admins` (untuk operasional) atau `adminutama`
-(untuk admin situs) di Firestore. Efeknya langsung.
+Untuk operasional dan admin situs, hapus dokumennya dari koleksi `admins` atau
+`adminutama` di Firestore. Efeknya langsung.
+
+Untuk pengajar, buka `/operasional` tab **Akun Pengajar**. Ada tiga pilihan
+dengan akibat yang berbeda:
+
+- **Tolak.** Wewenangnya hilang, barisnya tetap ada, dan orangnya melihat
+  alasan penolakan saat mencoba masuk. Dipakai kalau memang tidak berhak.
+- **Ubah wewenangnya.** Buang centang mata kuliah yang tidak lagi diampu.
+  Dipakai saat kepengurusan berganti sebagian.
+- **Hapus.** Barisnya hilang sama sekali, dan orangnya bisa mendaftar ulang.
+  Dipakai kalau data pengajuannya keliru dan perlu diisi ulang.
+
+Menghapus baris tidak menghapus akun Firebase-nya. Akun itu masih bisa masuk,
+tapi tidak punya wewenang apa pun dan hanya melihat layar pengajuan. Kalau
+akunnya memang harus dimatikan sekalian, nonaktifkan lewat Firebase Console
+pada menu Authentication.
 
 Saat kepengurusan berganti, **cabut akses pengurus lama** dan buatkan akun baru
 untuk penggantinya. Jangan mewariskan akun beserta kata sandinya.
@@ -642,6 +806,41 @@ operasional lalu simpan ulang salah satu data untuk memicu penerbitan ulang.
 **Di `/adminkafbe`, semua kotak isian mati dan tidak bisa diketik**
 Situsnya sedang berstatus aktif. Masuk ke pemeliharaan dulu lewat tab
 **Status Situs**, atau lewat tombol pintas di palang atas halaman.
+
+**Di `/pengajar`, layarnya berhenti di "Pengajuan sedang ditinjau"**
+Memang begitu sampai pengurus operasional memutuskannya. Buka `/operasional`
+tab **Akun Pengajar**, lalu terima atau tolak barisnya.
+
+**Di `/pengajar`, muncul layar "Lengkapi pengajuan"**
+Akun Firebase-nya sudah jadi tapi baris pengajuannya belum tersimpan, biasanya
+karena jaringan putus saat mendaftar. Isi nama dan NRP di layar itu, lalu
+kirim. Tidak perlu membuat akun baru.
+
+**Saat mendaftar muncul "Email ini sudah punya akun"**
+Email itu pernah dipakai mendaftar. Masuk saja memakai kata sandi lama. Kalau
+lupa kata sandinya, minta pengurus mengatur ulang lewat Firebase Console pada
+menu Authentication.
+
+**Saat mendaftar muncul "Pendaftaran akun baru sedang dimatikan"**
+Di Firebase Console, menu Authentication, pembuatan akun baru sedang ditutup.
+Nyalakan lagi kalau pendaftaran pengajar memang sedang dibuka.
+
+**Pendaftar tidak bisa mendaftar ulang setelah ditolak**
+Barisnya masih ada, dan satu akun hanya boleh punya satu baris pengajuan. Hapus
+barisnya di tab **Akun Pengajar**, baru dia bisa mendaftar lagi.
+
+**Di `/pengajar`, daftar mata kuliahnya kosong padahal sudah diterima**
+Saat menerima, mata kuliahnya belum dicentang. Buka barisnya lagi di tab
+**Akun Pengajar**, tekan **Ubah**, lalu centang mata kuliahnya.
+
+**Di `/pengajar`, "halaman materinya belum memuat shared/materi.js"**
+Halaman materi itu belum dipasangi penerap naskah. Jalankan
+`node scripts/periksa-halaman.mjs` untuk tahu halaman mana saja yang kurang.
+
+**Naskah tersimpan di `/pengajar`, tapi halaman materinya masih naskah lama**
+Muat ulang halaman materinya dengan Ctrl+F5. Halaman menyimpan salinan naskah
+di peramban supaya tidak berkedip saat dibuka, dan salinan itu baru diperbarui
+setelah jawaban Firestore yang baru diterima.
 
 **"Akun ini bukan admin utama"**
 Akun itu belum didaftarkan di koleksi `adminutama`. Terdaftar di `admins` saja

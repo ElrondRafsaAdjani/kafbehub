@@ -1,0 +1,259 @@
+/*
+  Gaya khusus halaman pengajar.
+
+  Layar masuk, kepala halaman, tombol, dan pesan galat memakai gaya yang sama
+  dengan halaman operasional lewat operasional.css. Yang ditulis di sini hanya
+  bagian yang memang tidak ada di halaman itu, yaitu tata letak dua kolom dan
+  kotak penyunting naskah.
+
+  Titik henti responsifnya mengikuti nilai yang sudah dipakai situs ini: 900
+  piksel untuk kisi yang berubah jadi satu kolom, dan 820 piksel untuk bagian
+  yang menyusul di bawahnya.
+*/
+
+/* ---------- Layar masuk dan daftar ---------- */
+
+/*
+  Tombol yang tampil seperti tautan. Dibuat dari elemen button, bukan dari
+  <a href="#">, supaya pembaca layar menyebutnya sebagai tombol dan menekan
+  Enter di atasnya tidak mengubah alamat halaman.
+*/
+.pg-tautan{
+  border:none; background:none; padding:0; cursor:pointer;
+  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:inherit;
+  color:var(--owl-dark2); text-decoration:underline;
+}
+.pg-tautan:hover{ color:var(--gold-deep); }
+
+/*
+  Keterangan pendek di bawah kotak isian. Jaraknya dirapatkan ke kotak di
+  atasnya, supaya terbaca sebagai penjelasan isian itu dan bukan sebagai
+  kalimat lepas milik isian berikutnya.
+*/
+.pg-keterangan{
+  margin:-8px 0 14px; font-size:0.78rem; line-height:1.5;
+  color:var(--ink-soft); text-align:left;
+}
+
+/* Ringkasan data pengajuan di layar menunggu. */
+.pg-ringkas{
+  margin:16px 0 4px; padding:14px 16px;
+  background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);
+  text-align:left; font-size:0.86rem; line-height:1.6;
+}
+.pg-ringkas dt{
+  font-size:0.74rem; font-weight:700; letter-spacing:0.03em;
+  text-transform:uppercase; color:var(--ink-soft);
+}
+.pg-ringkas dd{
+  margin:0 0 10px; color:var(--ink); font-weight:600;
+  overflow-wrap:anywhere;
+}
+.pg-ringkas dd:last-child{ margin-bottom:0; }
+
+/* ---------- Tata letak dua kolom ---------- */
+
+.pg-tata{
+  display:grid; grid-template-columns:290px 1fr; gap:22px; align-items:start;
+}
+@media (max-width:900px){
+  .pg-tata{ grid-template-columns:1fr; }
+}
+
+.pg-samping{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius-lg); box-shadow:var(--shadow); padding:20px;
+  position:sticky; top:88px;
+}
+@media (max-width:900px){
+  .pg-samping{ position:static; }
+}
+
+.pg-samping-judul{
+  font-family:'Baloo 2'; font-size:1.02rem; color:var(--owl-dark2); margin-bottom:12px;
+}
+
+.pg-samping-catatan{
+  margin-top:14px; font-size:0.8rem; line-height:1.6; color:var(--ink-soft);
+}
+
+/* ---------- Daftar mata kuliah dan topik ---------- */
+
+.pg-daftar-matkul + .pg-daftar-matkul{ margin-top:16px; }
+
+.pg-matkul-nama{
+  display:flex; align-items:center; gap:8px;
+  font-family:'Baloo 2'; font-weight:700; font-size:0.9rem;
+  color:var(--owl-dark2); margin-bottom:8px;
+}
+
+.pg-topik{
+  display:block; width:100%; text-align:left; cursor:pointer;
+  background:var(--bg); border:1px solid var(--line); border-radius:12px;
+  padding:10px 12px; margin-bottom:6px;
+  font-family:'Plus Jakarta Sans'; font-size:0.86rem; font-weight:600;
+  color:var(--ink); line-height:1.4;
+}
+.pg-topik:hover{ border-color:var(--owl-mid); }
+.pg-topik.aktif{
+  background:var(--owl-dark2); border-color:var(--owl-dark2); color:#fff;
+}
+/* Kuning tua di atas kartu terang, emas terang di atas kartu gelap. Warna
+   --gold-deep sendiri terlalu muda untuk teks sekecil ini di latar terang,
+   kontrasnya cuma sekitar 2,5 banding 1. */
+.pg-topik .pg-tanda{
+  display:block; margin-top:3px; font-size:0.74rem; font-weight:700;
+  color:#8A5A0B;
+}
+.pg-topik.aktif .pg-tanda{ color:var(--gold); }
+
+/* ---------- Kolom penyunting ---------- */
+
+.pg-utama{ min-width:0; }
+
+.pg-kosong{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius-lg); box-shadow:var(--shadow);
+  padding:56px 28px; text-align:center;
+}
+.pg-kosong-owl{ width:96px; margin:0 auto 14px; display:block; }
+.pg-kosong h2{ font-family:'Baloo 2'; font-size:1.25rem; color:var(--owl-dark2); }
+.pg-kosong p{
+  margin:8px auto 0; max-width:52ch; line-height:1.65;
+  font-size:0.9rem; color:var(--ink-soft);
+}
+
+.pg-kepala{
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; margin-bottom:16px;
+}
+.pg-kepala h2{ font-family:'Baloo 2'; font-size:1.35rem; color:var(--owl-dark2); }
+.pg-kepala p{
+  margin-top:5px; max-width:62ch; line-height:1.6;
+  font-size:0.86rem; color:var(--ink-soft);
+}
+.pg-kepala-aksi{ display:flex; gap:8px; flex-wrap:wrap; }
+
+.pg-kicker{
+  display:block; font-family:'Baloo 2'; font-weight:700;
+  font-size:0.78rem; letter-spacing:0.04em; text-transform:uppercase;
+  color:var(--owl-mid);
+}
+
+/* ---------- Penyaring ---------- */
+
+.pg-saring{
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:16px 0 18px;
+}
+.pg-saring input[type=search]{
+  flex:1; min-width:200px;
+  padding:10px 14px; border:1px solid var(--line); border-radius:12px;
+  background:var(--surface); color:var(--ink);
+  font-family:'Plus Jakarta Sans'; font-size:0.88rem;
+}
+.pg-centang{
+  display:inline-flex; align-items:center; gap:7px;
+  font-size:0.84rem; color:var(--ink-soft); cursor:pointer;
+}
+
+/* ---------- Kelompok naskah ---------- */
+
+.pg-kelompok{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius-lg); box-shadow:var(--shadow);
+  padding:22px; margin-bottom:18px;
+}
+.pg-kelompok > h3{
+  font-family:'Baloo 2'; font-size:1.08rem; color:var(--owl-dark2);
+}
+.pg-kelompok > .pg-kelompok-ket{
+  margin:5px 0 16px; max-width:64ch; line-height:1.6;
+  font-size:0.84rem; color:var(--ink-soft);
+}
+
+/* ---------- Satu kotak naskah ---------- */
+
+.pg-medan{
+  border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:14px 16px; margin-bottom:12px; background:var(--bg);
+}
+.pg-medan.pg-berubah{ border-color:var(--gold); background:#FFFBF0; }
+
+.pg-medan-kepala{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:10px; flex-wrap:wrap; margin-bottom:8px;
+}
+.pg-medan-label{
+  font-weight:700; font-size:0.88rem; color:var(--owl-dark2); line-height:1.45;
+}
+.pg-medan-kunci{
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:0.72rem; color:var(--ink-soft);
+}
+
+.pg-lencana{
+  font-family:'Baloo 2'; font-weight:700; font-size:0.72rem;
+  padding:3px 10px; border-radius:100px;
+  background:var(--gold); color:var(--owl-dark2);
+}
+
+.pg-medan textarea{
+  width:100%; min-height:96px; resize:vertical;
+  padding:11px 13px; border:1px solid var(--line); border-radius:12px;
+  background:var(--surface); color:var(--ink);
+  font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:0.82rem; line-height:1.65;
+}
+.pg-medan textarea:focus{ outline:2px solid var(--owl-mid); outline-offset:1px; }
+
+.pg-medan-kaki{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:10px; flex-wrap:wrap; margin-top:8px;
+}
+.pg-medan-kaki .pg-hitung{ font-size:0.76rem; color:var(--ink-soft); }
+
+.pg-mini{
+  border:1px solid var(--line); background:var(--surface); cursor:pointer;
+  border-radius:100px; padding:5px 12px;
+  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.76rem;
+  color:var(--owl-dark2);
+}
+.pg-mini:hover{ border-color:var(--owl-mid); }
+.pg-mini[disabled]{ opacity:0.45; cursor:default; }
+
+/* ---------- Pratinjau ---------- */
+
+/*
+  Pratinjau memakai warna teks dan latar yang sama dengan halaman materi,
+  bukan warna kotak penyunting, supaya yang dilihat pengajar benar-benar
+  mendekati hasil akhirnya.
+*/
+.pg-pratinjau{
+  margin-top:10px; padding:12px 14px;
+  border:1px dashed var(--line); border-radius:12px;
+  background:var(--surface); color:var(--ink);
+  font-size:0.88rem; line-height:1.7;
+}
+.pg-pratinjau:empty{ display:none; }
+.pg-pratinjau strong, .pg-pratinjau b{ color:var(--owl-dark2); }
+.pg-pratinjau p{ margin:0 0 8px; }
+.pg-pratinjau p:last-child{ margin-bottom:0; }
+.pg-pratinjau ul, .pg-pratinjau ol{ margin:0 0 8px; padding-left:20px; }
+
+.pg-pratinjau-label{
+  display:block; margin-bottom:5px;
+  font-size:0.74rem; font-weight:700; letter-spacing:0.03em;
+  text-transform:uppercase; color:var(--ink-soft);
+}
+
+/* ---------- Bingkai pembaca naskah bawaan ---------- */
+
+/*
+  Ditaruh jauh di luar layar, bukan disembunyikan. Halaman materi mengukur
+  lebar elemennya sendiri saat menggambar, dan pengukuran itu selalu nol pada
+  elemen yang display-nya none.
+*/
+.pg-bingkai{
+  position:absolute; left:-10000px; top:0;
+  width:1280px; height:900px; border:0; visibility:hidden;
+}

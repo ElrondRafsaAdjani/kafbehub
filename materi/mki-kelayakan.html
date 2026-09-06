@@ -83,6 +83,12 @@
   .dua > div{background:var(--bg-deep); border-radius:16px; padding:16px 18px; font-size:0.9rem; line-height:1.65; color:var(--ink-soft);}
   .dua b{display:block; color:var(--owl-dark2); font-size:1rem; margin-bottom:4px;}
 </style>
+<!-- Status situs dan naskah materi. Sengaja dimuat di <head> dan tidak
+     ditunda, supaya layar penutup dan naskah pengajar sempat dipasang
+     SEBELUM isi halaman tergambar. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -116,13 +122,13 @@
 
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Manajemen Keuangan dan Investasi</span>
-    <h2>Kelayakan Proyek</h2>
-    <p>Empat cara menilai apakah sebuah proyek pantas dijalankan: Payback Period, NPV, IRR, dan Profitability Index.</p>
+    <h2 data-materi="kelayakan-proyek.judul" data-label="Kelayakan Proyek">Kelayakan Proyek</h2>
+    <p data-materi="kelayakan-proyek.1" data-label="Empat cara menilai apakah sebuah proyek pantas dijalank…">Empat cara menilai apakah sebuah proyek pantas dijalankan: Payback Period, NPV, IRR, dan Profitability Index.</p>
   </div>
 
   <div class="kotak-materi" style="border-left:4px solid var(--gold); margin-top:18px;">
-    <h3>⚠️ Materi ini belum ditayangkan</h3>
-    <p style="margin:0;">Isinya masih menunggu pemeriksaan pengurus, jadi angkanya belum tentu benar. Jangan dijadikan acuan untuk mengerjakan soal.</p>
+    <h3 data-materi="materi-ini-belum-ditayangkan.judul" data-label="⚠️ Materi ini belum ditayangkan">⚠️ Materi ini belum ditayangkan</h3>
+    <p style="margin:0;" data-materi="materi-ini-belum-ditayangkan.1" data-label="Isinya masih menunggu pemeriksaan pengurus, jadi angkan…">Isinya masih menunggu pemeriksaan pengurus, jadi angkanya belum tentu benar. Jangan dijadikan acuan untuk mengerjakan soal.</p>
   </div>
 
   <nav class="lompat">
@@ -136,8 +142,8 @@
 
   <!-- ============ SOAL ============ -->
   <div class="kotak-materi" id="soal">
-    <h3>Soal yang dipakai</h3>
-    <p>Venus Corp. mempertimbangkan dua proyek yang saling meniadakan. Modal awal masing-masing $121.000, batas payback period 2 tahun, dan biaya modal 20%. Angkanya boleh diubah sendiri.</p>
+    <h3 data-materi="soal-yang-dipakai.judul" data-label="Soal yang dipakai">Soal yang dipakai</h3>
+    <p data-materi="soal-yang-dipakai.1" data-label="Venus Corp. mempertimbangkan dua proyek yang saling men…">Venus Corp. mempertimbangkan dua proyek yang saling meniadakan. Modal awal masing-masing $121.000, batas payback period 2 tahun, dan biaya modal 20%. Angkanya boleh diubah sendiri.</p>
 
     <div class="saklar">
       <button type="button" data-proyek="X" class="aktif">Proyek X</button>
@@ -160,8 +166,8 @@
 
   <!-- ============ PAYBACK PERIOD ============ -->
   <div class="kotak-materi" id="pp">
-    <h3>Payback Period</h3>
-    <p>Berapa lama modal awal kembali. Arus kas dikumpulkan tahun demi tahun sampai menutup modalnya. Cara ini mengabaikan nilai waktu uang, jadi tidak pernah dipakai sendirian.</p>
+    <h3 data-materi="payback-period.judul" data-label="Payback Period">Payback Period</h3>
+    <p data-materi="payback-period.1" data-label="Berapa lama modal awal kembali. Arus kas dikumpulkan ta…">Berapa lama modal awal kembali. Arus kas dikumpulkan tahun demi tahun sampai menutup modalnya. Cara ini mengabaikan nilai waktu uang, jadi tidak pernah dipakai sendirian.</p>
 
     <div class="gambar-kotak"><svg id="svgPp" viewBox="0 0 660 260"></svg></div>
     <div class="langkah-hitung" id="hitungPp"></div>
@@ -169,8 +175,8 @@
 
   <!-- ============ NPV ============ -->
   <div class="kotak-materi" id="npv">
-    <h3>Net Present Value</h3>
-    <p>Seluruh arus kas ditarik ke nilai hari ini, lalu dikurangi modal awal. Sisanya adalah tambahan kekayaan yang benar-benar didapat setelah biaya modal terpenuhi.</p>
+    <h3 data-materi="net-present-value.judul" data-label="Net Present Value">Net Present Value</h3>
+    <p data-materi="net-present-value.1" data-label="Seluruh arus kas ditarik ke nilai hari ini, lalu dikura…">Seluruh arus kas ditarik ke nilai hari ini, lalu dikurangi modal awal. Sisanya adalah tambahan kekayaan yang benar-benar didapat setelah biaya modal terpenuhi.</p>
 
     <div class="gambar-kotak"><svg id="svgNpv" viewBox="0 0 660 300"></svg></div>
     <table class="data" id="tabelNpv"></table>
@@ -179,8 +185,8 @@
 
   <!-- ============ IRR ============ -->
   <div class="kotak-materi" id="irr">
-    <h3>Internal Rate of Return</h3>
-    <p>Tingkat diskonto yang membuat NPV tepat nol. Tidak ada rumus langsungnya, jadi dicari dengan coba-coba: ambil dua tingkat diskonto, hitung NPV masing-masing, lalu tarik garis lurus di antaranya untuk menebak di mana NPV menyentuh nol.</p>
+    <h3 data-materi="internal-rate-of-return.judul" data-label="Internal Rate of Return">Internal Rate of Return</h3>
+    <p data-materi="internal-rate-of-return.1" data-label="Tingkat diskonto yang membuat NPV tepat nol. Tidak ada…">Tingkat diskonto yang membuat NPV tepat nol. Tidak ada rumus langsungnya, jadi dicari dengan coba-coba: ambil dua tingkat diskonto, hitung NPV masing-masing, lalu tarik garis lurus di antaranya untuk menebak di mana NPV menyentuh nol.</p>
 
     <div class="kendali">
       <label>Tebakan pertama <span id="lblR1" class="nilai-besar">15%</span>
@@ -191,27 +197,27 @@
       </label>
     </div>
 
-    <h4>Garis bantu interpolasi</h4>
+    <h4 data-materi="garis-bantu-interpolasi.judul" data-label="Garis bantu interpolasi">Garis bantu interpolasi</h4>
     <div class="gambar-kotak"><svg id="svgGaris" viewBox="0 0 660 200"></svg></div>
     <div class="langkah-hitung" id="hitungIrr"></div>
 
-    <h4>Kalau NPV digambar untuk semua tingkat diskonto</h4>
+    <h4 data-materi="kalau-npv-digambar-untuk.judul" data-label="Kalau NPV digambar untuk semua tingkat diskonto">Kalau NPV digambar untuk semua tingkat diskonto</h4>
     <div class="gambar-kotak"><svg id="svgIrr" viewBox="0 0 660 300"></svg></div>
     <p class="catatan" id="catatanIrr"></p>
   </div>
 
   <!-- ============ PI ============ -->
   <div class="kotak-materi" id="pi">
-    <h3>Profitability Index</h3>
-    <p>Nilai sekarang dari seluruh arus kas dibagi modal awal. Menjawab pertanyaan berapa rupiah manfaat yang didapat untuk tiap satu rupiah yang ditanam.</p>
+    <h3 data-materi="profitability-index.judul" data-label="Profitability Index">Profitability Index</h3>
+    <p data-materi="profitability-index.1" data-label="Nilai sekarang dari seluruh arus kas dibagi modal awal.…">Nilai sekarang dari seluruh arus kas dibagi modal awal. Menjawab pertanyaan berapa rupiah manfaat yang didapat untuk tiap satu rupiah yang ditanam.</p>
     <div class="langkah-hitung" id="hitungPi"></div>
-    <p class="catatan">PI dan NPV selalu sepakat: bila NPV di atas nol, PI pasti di atas satu. Bedanya, NPV menyebut jumlah uangnya, sedangkan PI menyebut perbandingannya, sehingga lebih enak dipakai membandingkan proyek yang modalnya berbeda jauh.</p>
+    <p class="catatan" data-materi="profitability-index.2" data-label="PI dan NPV selalu sepakat: bila NPV di atas nol, PI pas…">PI dan NPV selalu sepakat: bila NPV di atas nol, PI pasti di atas satu. Bedanya, NPV menyebut jumlah uangnya, sedangkan PI menyebut perbandingannya, sehingga lebih enak dipakai membandingkan proyek yang modalnya berbeda jauh.</p>
   </div>
 
   <!-- ============ KESIMPULAN ============ -->
   <div class="kotak-materi" id="putusan">
-    <h3>Kesimpulan</h3>
-    <p>Kedua proyek dinilai dengan seluruh alat ukur pada angka yang sedang dipakai di atas.</p>
+    <h3 data-materi="kesimpulan.judul" data-label="Kesimpulan">Kesimpulan</h3>
+    <p data-materi="kesimpulan.1" data-label="Kedua proyek dinilai dengan seluruh alat ukur pada angk…">Kedua proyek dinilai dengan seluruh alat ukur pada angka yang sedang dipakai di atas.</p>
     <table class="putusan" id="tabelPutusan"></table>
     <p class="catatan" id="catatanPutusan"></p>
 

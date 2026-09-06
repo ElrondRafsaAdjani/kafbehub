@@ -116,6 +116,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -163,8 +164,8 @@
   <a class="back-link" href="pemi.html">← Kembali ke Pengantar Mikroekonomi</a>
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Pengantar Mikroekonomi</span>
-    <h2>Elastisitas dan Bentuk Kurvanya</h2>
-    <p>Mulai dari arti elastisitas, rumus dan dua cara menghitung koefisiennya, sampai gambar lima bentuk kurva permintaan dari yang sama sekali tidak peka sampai yang sangat peka.</p>
+    <h2 data-materi="elastisitas-dan-bentuk-kurvanya.judul" data-label="Elastisitas dan Bentuk Kurvanya">Elastisitas dan Bentuk Kurvanya</h2>
+    <p data-materi="elastisitas-dan-bentuk-kurvanya.1" data-label="Mulai dari arti elastisitas, rumus dan dua cara menghit…">Mulai dari arti elastisitas, rumus dan dua cara menghitung koefisiennya, sampai gambar lima bentuk kurva permintaan dari yang sama sekali tidak peka sampai yang sangat peka.</p>
   </div>
 
   <div class="story-card">
@@ -376,6 +377,18 @@
           + blok(mutlak + '= ∞', true)
     }
   ];
+
+  /*
+    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+
+    Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
+    disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
+    tidak ikut berubah ketika naskahnya diperbarui.
+  */
+  if(window.KafbeMateri){
+    KafbeMateri.daftarLangkah(STEPS, { label:'Langkah' }, render);
+    KafbeMateri.daftarPeta('bab', CHAPTERS, 'Nama bagian', render);
+  }
 
   // ===================================================================
   // SETUP GRAFIK

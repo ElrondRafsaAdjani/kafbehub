@@ -24,19 +24,39 @@
      - Field       : nama (string), isi nama orangnya
   Tanpa langkah nomor 3, akun itu bisa login tapi tidak bisa mengubah apa pun.
 
-  DUA TINGKAT WEWENANG, DAN KENAPA DIPISAH:
+  TIGA TINGKAT WEWENANG, DAN KENAPA DIPISAH:
 
-    admins      -> halaman /operasional. Mengelola jadwal, perubahan
-                   sementara, pengajar, dan pengumuman.
-    adminutama  -> halaman /adminkafbe. Mengubah naskah situs, mematikan
-                   fitur, dan menutup seluruh situs untuk pemeliharaan.
+    admins       -> halaman /operasional. Mengelola jadwal, perubahan
+                    sementara, pengajar, dan pengumuman.
+    pengajarakun -> halaman /pengajar. Mengubah naskah materi kuliah, dan
+                    hanya pada mata kuliah yang disebut di dokumennya.
+    adminutama   -> halaman /adminkafbe. Mengubah naskah situs, mematikan
+                    fitur, dan menutup seluruh situs untuk pemeliharaan.
 
-  Keduanya koleksi terpisah dan tidak saling mewarisi. Terdaftar di "admins"
-  tidak memberi akses ke /adminkafbe. Untuk memberi wewenang admin utama,
-  ulangi langkah 1 sampai 3 di atas tapi pakai koleksi "adminutama".
+  Ketiganya koleksi terpisah dan tidak saling mewarisi. Terdaftar di "admins"
+  tidak memberi akses ke /adminkafbe maupun /pengajar. Untuk memberi wewenang
+  lain, ulangi langkah 1 sampai 3 di atas tapi pakai koleksi yang sesuai.
 
   Pemisahan ini disengaja: pengurus operasional berganti tiap kepengurusan dan
-  jumlahnya banyak, sedangkan yang boleh menutup situs sebaiknya sedikit.
+  jumlahnya banyak, pengajar hanya menyentuh naskah mata kuliahnya sendiri, dan
+  yang boleh menutup situs sebaiknya sedikit.
+
+  CARA MENAMBAH AKUN PENGAJAR:
+  Tidak lewat Firebase Console. Pengajar mendaftar sendiri di halaman
+  /pengajar dengan NRP, nama lengkap, dan email student UBAYA, lalu pengurus
+  operasional menerima atau menolaknya di tab "Akun Pengajar". Aturan di bawah
+  memastikan pendaftar tidak bisa menyetujui dirinya sendiri.
+
+  Menambah lewat Console tetap boleh untuk keadaan darurat, misalnya saat
+  belum ada satu pun pengurus yang bisa menyetujui. Dokumennya diisi:
+    - nama   (string) : nama pengajarnya
+    - nrp    (string) : NRP-nya
+    - email  (string) : email akun Firebase-nya
+    - status (string) : isi "diterima"
+    - mk     (array)  : kode mata kuliah yang boleh diubah, misalnya
+                        ["pemi", "stat2"]. Kodenya lihat shared/materi-daftar.js
+    - semua  (boolean, opsional) : isi true kalau boleh mengubah semua mata
+                        kuliah. Kalau diisi true, kolom mk tidak dipakai.
 
   CARA MENCABUT AKSES ADMIN:
   Hapus dokumennya dari koleksi "admins". Efeknya langsung. Menghapus akunnya
@@ -76,6 +96,49 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/adminutama/$(request.auth.uid));
     }
 
+    /*
+      Tingkat tersendiri di samping keduanya: pengajar mata kuliah.
+
+      Bedanya dengan dua tingkat di atas, wewenang pengajar TIDAK berlaku untuk
+      seluruh koleksi, melainkan dibatasi per mata kuliah. Dokumen akunnya
+      menyebut kode mata kuliah mana saja yang boleh disentuh, dan pembatasan
+      itu ditegakkan di sini, bukan sekadar dengan menyaring daftar topik di
+      halaman /pengajar. Daftar di halaman itu bisa dilewati lewat Console
+      peramban; aturan ini tidak bisa.
+
+      Kolom "semua" bernilai true dipakai untuk koordinator yang memang
+      mengurus seluruh mata kuliah, supaya daftar mk-nya tidak perlu ditambah
+      tiap kali ada mata kuliah baru.
+    */
+    function pengajarTerdaftar() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/pengajarakun/$(request.auth.uid));
+    }
+
+    function akunPengajar() {
+      return get(/databases/$(database)/documents/pengajarakun/$(request.auth.uid)).data;
+    }
+
+    /*
+      Punya dokumen saja tidak cukup, sebab dokumennya kini dibuat sendiri oleh
+      yang mendaftar dan statusnya masih menunggu.
+
+      Dokumen yang tidak menyebut status dianggap sudah diterima. Itu hanya
+      berlaku untuk dokumen yang dibuat langsung lewat Firebase Console, karena
+      pendaftaran dari web selalu dipaksa berstatus menunggu oleh aturan di
+      bawah. Jadi bawaan ini tidak bisa dipakai melewati persetujuan.
+    */
+    function pengajarAktif() {
+      return pengajarTerdaftar()
+        && akunPengajar().get('status', 'diterima') == 'diterima';
+    }
+
+    function pengajarBoleh(kode) {
+      return pengajarAktif()
+        && (akunPengajar().get('semua', false) == true
+            || kode in akunPengajar().get('mk', []));
+    }
+
     // ---------- Daftar admin ----------
     // Sengaja tidak bisa ditulis dari web sama sekali, bahkan oleh admin.
     // Penambahan admin hanya lewat Firebase Console, supaya seorang admin yang
@@ -91,6 +154,91 @@ service cloud.firestore {
     match /adminutama/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
+    }
+
+    // ---------- Daftar akun pengajar ----------
+    /*
+      BEDA SENDIRI DARI DUA DAFTAR DI ATAS: koleksi ini boleh ditulis dari web.
+
+      Admin dan admin utama hanya bisa ditambah lewat Firebase Console, sebab
+      jumlahnya sedikit dan wewenangnya luas. Pengajar jumlahnya banyak dan
+      berganti tiap semester, jadi mengharuskan pengurus membuka Firebase
+      Console untuk tiap orang hanya akan berakhir dengan satu akun yang
+      dipakai beramai-ramai. Karena itu pendaftarannya dibuka, tapi
+      persetujuannya tetap di tangan pengurus operasional.
+
+      PEMBAGIAN YANG DIJAGA DI SINI
+
+      Pendaftar hanya boleh MEMBUAT dokumen atas namanya sendiri, dengan
+      status menunggu, dan tanpa satu pun kolom wewenang. Kolom "mk" dan
+      "semua" tidak boleh ikut ditulis sama sekali pada tahap ini.
+
+      Pengurus operasional yang MENGUBAH statusnya dan mengisi wewenangnya.
+      Sebaliknya, pengurus tidak boleh menyunting nama, NRP, maupun email
+      pendaftar, sehingga baris yang disetujui tetap baris yang diajukan.
+
+      Kalau pemisahan ini dilonggarkan, seorang pendaftar bisa membuat
+      dokumennya sendiri lengkap dengan status diterima dan daftar mata kuliah
+      apa pun. Batas wewenang yang bisa ditulis sendiri oleh yang dibatasi
+      tidak membatasi apa pun.
+    */
+    function pengajuanSah(isi) {
+      return isi.keys().hasOnly(['status', 'nrp', 'nama', 'email', 'dibuatPada'])
+        && isi.status == 'menunggu'
+        && isi.nrp is string
+        && isi.nrp.matches('^[0-9]{6,15}$')
+        && isi.nama is string
+        && isi.nama.size() >= 3
+        && isi.nama.size() <= 80
+        && isi.email == request.auth.token.email
+        && isi.email.matches('^s[0-9]{6,15}@student[.]ubaya[.]ac[.]id$');
+    }
+
+    /*
+      Keputusan pengurus. Yang boleh berubah hanya status, wewenang, dan
+      catatan keputusannya. Identitas pendaftar dikunci pada nilai yang sudah
+      tersimpan.
+    */
+    function keputusanSah(lama, baru) {
+      return baru.keys().hasOnly([
+               'status', 'nrp', 'nama', 'email', 'dibuatPada',
+               'mk', 'semua', 'diputusPada', 'diputusOleh', 'alasan'
+             ])
+        && baru.nrp   == lama.nrp
+        && baru.nama  == lama.nama
+        && baru.email == lama.email
+        && baru.status in ['menunggu', 'diterima', 'ditolak']
+        && baru.diputusOleh == request.auth.token.email
+        && baru.get('mk', []) is list
+        && baru.get('mk', []).size() <= 30
+        && baru.get('semua', false) is bool
+        && baru.get('alasan', '') is string
+        && baru.get('alasan', '').size() <= 200;
+    }
+
+    match /pengajarakun/{uid} {
+      /*
+        Pendaftar membaca dokumennya sendiri untuk tahu status pengajuannya,
+        dan pengurus operasional membaca seluruhnya untuk menilai antrean.
+        Selain keduanya, tertutup: isinya nama, NRP, dan email orang.
+      */
+      allow read: if request.auth != null
+                  && (request.auth.uid == uid || adminTerdaftar());
+
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && pengajuanSah(request.resource.data);
+
+      allow update: if adminTerdaftar()
+                    && keputusanSah(resource.data, request.resource.data);
+
+      /*
+        Menghapus hanya oleh pengurus, dan gunanya bukan membersihkan jejak.
+        Selama dokumennya masih ada, orang yang sama tidak bisa mendaftar lagi
+        karena aturan create menolak dokumen yang sudah ada. Menghapus baris
+        yang ditolak itulah cara memberi kesempatan mendaftar ulang.
+      */
+      allow delete: if adminTerdaftar();
     }
 
     // ---------- Dokumen ringkasan untuk halaman publik ----------
@@ -198,6 +346,54 @@ service cloud.firestore {
       allow write: if tulisanAdmin();
     }
 
+    // ---------- Naskah materi kuliah ----------
+    /*
+      Satu dokumen per topik, dengan Document ID sama dengan nama berkas
+      halamannya, misalnya "pemi-elastisitas". Isinya naskah pengganti yang
+      ditulis pengajar lewat halaman /pengajar, dan dibaca setiap mahasiswa
+      yang membuka halaman materinya.
+
+      TIGA HAL YANG DIJAGA DI SINI
+
+      1. Hanya pengajar yang berwenang atas mata kuliahnya yang boleh menulis.
+      2. Nama dokumennya harus diawali kode mata kuliah yang sama dengan isi
+         kolom "kode". Tanpa syarat ini, pengajar Pengantar Mikroekonomi bisa
+         menulis dokumen "stat2-nilai-z" sambil mengisi kodenya "pemi", dan
+         pemeriksaan wewenang di atas akan meloloskannya.
+      3. Bentuk datanya dibatasi, sehingga koleksi ini tidak bisa dipakai
+         sebagai tempat menitipkan data lain.
+
+      Menghapus ditutup untuk semua orang. Mengembalikan naskah ke bawaan
+      halaman dilakukan dengan mengosongkan isinya lewat halaman /pengajar,
+      bukan dengan menghapus dokumennya, sehingga catatan siapa yang terakhir
+      mengubah tidak ikut hilang.
+
+      Yang TIDAK dijaga di sini adalah isi markup-nya. Naskah tetap disaring
+      shared/materi.js di sisi pembaca sebelum dipasang ke halaman.
+    */
+    function materiSah(id, isi) {
+      return isi.keys().hasOnly([
+               'kode', 'naskah', 'langkah', 'peta',
+               'diperbaruiPada', 'diperbaruiOleh'
+             ])
+        && isi.kode is string
+        && id.split('-')[0] == isi.kode
+        && isi.naskah is map
+        && isi.langkah is map
+        && isi.peta is map
+        && isi.diperbaruiOleh == request.auth.token.email;
+    }
+
+    match /materi/{id} {
+      allow read: if true;
+      allow create: if materiSah(id, request.resource.data)
+                    && pengajarBoleh(request.resource.data.kode);
+      allow update: if materiSah(id, request.resource.data)
+                    && pengajarBoleh(request.resource.data.kode)
+                    && pengajarBoleh(resource.data.kode);
+      allow delete: if false;
+    }
+
     // ---------- Data pengajar ----------
     // Nama dan NRP asisten memang sudah diumumkan lewat kanal resmi KAFBE,
     // jadi tidak ada yang perlu dirahasiakan dan aturannya disamakan dengan
@@ -247,6 +443,11 @@ service cloud.firestore {
       ditelusuri justru yang paling mungkin dihapus. Membersihkan catatan lama
       hanya bisa lewat Firebase Console, dan itu memang disengaja.
 
+      Pengajar ikut boleh menambah catatan, karena perubahan naskah materi juga
+      perlu bisa ditelusuri. Membacanya tetap hanya pengurus operasional,
+      sebab catatan ini memuat pekerjaan semua orang, bukan hanya pekerjaan
+      yang menulisnya.
+
       Tidak dibuka untuk publik karena isinya menyebut nama dan email pengurus,
       beserta jam kerja mereka.
 
@@ -257,7 +458,7 @@ service cloud.firestore {
     */
     match /log/{id} {
       allow read: if adminTerdaftar();
-      allow create: if tulisanAdmin()
+      allow create: if (tulisanAdmin() || pengajarAktif())
         && request.resource.data.keys().hasOnly([
              'waktu', 'waktuKlien', 'oleh', 'email', 'aksi', 'jenis', 'ringkas', 'rincian'
            ])

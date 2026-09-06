@@ -102,6 +102,27 @@ textarea{ resize:vertical; }
 .op-aksi{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
 .op-saring{ margin-bottom:14px; max-width:340px; }
 
+/* Dua penyaring berdampingan, dipakai tab Akun Pengajar yang menyaring
+   sekaligus dengan kata kunci dan status. Di layar sempit keduanya menumpuk
+   sendiri karena lebar minimalnya sudah tidak muat berdampingan. */
+.op-saring.op-saring-dua{
+  display:flex; gap:10px; flex-wrap:wrap; max-width:540px;
+}
+.op-saring.op-saring-dua input[type=search]{ flex:1 1 220px; }
+.op-saring.op-saring-dua select{ flex:1 1 150px; }
+
+/* Peringatan hasil pencocokan dengan data pengajar. Ditulis sebagai daftar
+   pendek di dalam sel tabel, bukan sebagai satu kalimat panjang, supaya dua
+   masalah yang berbeda tidak terbaca sebagai satu masalah. */
+.op-periksa{ margin:0; padding-left:16px; font-size:0.8rem; line-height:1.5; }
+.op-periksa li{ margin-bottom:2px; }
+.op-periksa li.salah{ color:#B03B37; }
+/* Kuning tua, bukan --gold-deep. Warna emas itu dipakai untuk lencana dengan
+   latar berwarna, dan di atas latar putih kontrasnya cuma sekitar 2,5 banding
+   1, jauh di bawah syarat 4,5 banding 1 untuk teks sekecil ini. */
+.op-periksa li.hati{ color:#8A5A0B; }
+.op-periksa li.benar{ color:#1E7A44; }
+
 /* Penyaring daftar kelas. Dipisahkan dari baris isian yang sesungguhnya lewat
    latar dan garis, supaya jelas bahwa isinya tidak ikut tersimpan. */
 .op-saring-kelas{
@@ -115,7 +136,11 @@ textarea{ resize:vertical; }
 .op-pesan.tampil{ display:block; }
 .op-pesan.salah{ color:#B03B37; }
 .op-pesan.benar{ color:#1E7A44; }
-.op-pesan.hati{ color:var(--gold-deep); }
+/* Kuning tua, bukan --gold-deep. Emas itu dibuat untuk lencana berlatar warna,
+   dan di atas latar putih kontrasnya cuma sekitar 2,5 banding 1, di bawah
+   syarat 4,5 banding 1. Padahal justru pesan inilah yang paling perlu terbaca:
+   isinya peringatan yang menahan penyimpanan sampai ditekan sekali lagi. */
+.op-pesan.hati{ color:#8A5A0B; }
 .op-pesan ul{ margin:6px 0 0; padding-left:20px; }
 .op-pesan code{
   font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

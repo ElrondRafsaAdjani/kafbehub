@@ -35,7 +35,7 @@ const AKAR = process.cwd();
 
 // Halaman pengurus sengaja tidak mencatat kunjungan dan tidak perlu diperiksa
 // untuk syarat itu.
-const HALAMAN_PENGURUS = new Set(['adminkafbe.html', 'operasional.html']);
+const HALAMAN_PENGURUS = new Set(['adminkafbe.html', 'operasional.html', 'pengajar.html']);
 
 /*
   Halaman yang sengaja dinonaktifkan: tidak ditautkan dari mana pun, diberi
@@ -45,8 +45,14 @@ const HALAMAN_PENGURUS = new Set(['adminkafbe.html', 'operasional.html']);
 
   Kalau suatu hari halaman ini diaktifkan lagi, hapus barisnya dari sini, lalu
   jalankan ulang pemeriksa ini untuk tahu apa saja yang masih perlu dipasang.
+
+  Saat ini kosong. Halaman Kelayakan Proyek dulu ada di sini karena penerap
+  pengaturan situsnya memang belum terpasang, padahal halamannya sudah menyebut
+  data-fitur-halaman. Akibatnya statusnya tidak pernah benar-benar ditegakkan:
+  halaman yang statusnya dimatikan dari /adminkafbe tetap terbuka. Penerapnya
+  sudah dipasang, jadi pengecualiannya tidak diperlukan lagi.
 */
-const SENGAJA_NONAKTIF = new Set(['mki-kelayakan.html']);
+const SENGAJA_NONAKTIF = new Set([]);
 
 function semuaHtml(dir, keluar = []){
   for(const nama of readdirSync(dir)){
@@ -80,11 +86,42 @@ for(const jalur of semuaHtml(AKAR)){
   const kembar = Object.keys(hitung).filter(k => hitung[k] > 1);
   if(kembar.length) lapor(`kunci data-teks dipakai lebih dari sekali: ${kembar.join(', ')}`);
 
-  // 3. Kelengkapan halaman publik
+  // 3. Kunci data-materi kembar
+  //
+  // Alasannya sama dengan data-teks, hanya akibatnya lebih terasa: halaman
+  // /pengajar akan menampilkan satu kotak isian untuk dua elemen berbeda, dan
+  // yang berubah di halaman materinya cuma salah satunya.
+  const hitungMateri = {};
+  for(const m of isi.matchAll(/data-materi="([^"]+)"/g)){
+    hitungMateri[m[1]] = (hitungMateri[m[1]] || 0) + 1;
+  }
+  const kembarMateri = Object.keys(hitungMateri).filter(k => hitungMateri[k] > 1);
+  if(kembarMateri.length){
+    lapor(`kunci data-materi dipakai lebih dari sekali: ${kembarMateri.join(', ')}`);
+  }
+
+  // 4. Kelengkapan halaman publik
   const berkas = nama.split('/').pop();
   if(!HALAMAN_PENGURUS.has(berkas) && !SENGAJA_NONAKTIF.has(berkas)){
     if(!isi.includes('/shared/kunjungan.js')) lapor('pencatat kunjungan belum dipasang');
     if(!isi.includes('/shared/situs.js'))     lapor('penerap pengaturan situs belum dipasang');
+  }
+
+  /*
+    5. Halaman topik materi harus memuat penerap naskah pengajar.
+
+    Tanpa berkas ini, naskah yang disimpan lewat halaman /pengajar tidak akan
+    pernah sampai ke mahasiswa, dan panel pengajarnya sendiri tidak bisa
+    membaca naskah bawaan halaman ini.
+
+    Yang diperiksa hanya halaman topik, dikenali dari nama berkasnya yang
+    memakai tanda hubung, misalnya pemi-elastisitas.html. Halaman daftar mata
+    kuliah seperti pemi.html isinya naskah pengantar dan diubah lewat
+    /adminkafbe memakai data-teks, bukan lewat halaman pengajar.
+  */
+  if(nama.startsWith('materi/') && berkas.includes('-')
+     && !isi.includes('/shared/materi.js')){
+    lapor('penerap naskah materi belum dipasang');
   }
   if(!isi.includes('favicon.svg')) lapor('lambang tab belum dipasang');
 }

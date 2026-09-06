@@ -287,6 +287,9 @@ const data = {
   // tidak pernah ikut diterbitkan ke dokumen publik.
   classroom: [],
   koordinator: [],
+  // Pengajuan akun dari halaman /pengajar. Isinya nama, NRP, dan email orang,
+  // jadi tidak pernah ikut diterbitkan ke dokumen publik.
+  pengajarakun: [],
 };
 
 /*
@@ -318,7 +321,7 @@ async function ambilKoleksi(nama){
 async function muatSemua(){
   status('Memuat data…', 'sibuk');
   try{
-    const [mk, jd, pb, pm, pg, gc, ko] = await Promise.all([
+    const [mk, jd, pb, pm, pg, gc, ko, ap] = await Promise.all([
       ambilKoleksi('matakuliah'),
       ambilKoleksi('jadwal'),
       ambilKoleksi('perubahan'),
@@ -326,6 +329,7 @@ async function muatSemua(){
       ambilKoleksi('pengajar'),
       ambilKoleksi('classroom'),
       ambilKoleksi('koordinator'),
+      ambilKoleksi('pengajarakun'),
     ]);
     data.matakuliah = mk.sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
     data.jadwal = jd;
@@ -334,6 +338,11 @@ async function muatSemua(){
     data.pengajar = pg;
     data.classroom = gc;
     data.koordinator = ko;
+    // Yang menunggu keputusan ditaruh paling atas, sebab itulah satu-satunya
+    // baris yang menuntut pekerjaan dari pengurus.
+    data.pengajarakun = ap.sort((a, b) =>
+      (a.status === 'menunggu' ? 0 : 1) - (b.status === 'menunggu' ? 0 : 1)
+      || String(a.nama || '').localeCompare(String(b.nama || '')));
 
     gambarSemua();
 
@@ -360,6 +369,7 @@ function gambarSemua(){
   gambarPerubahan();
   gambarKelompok();
   gambarPengajar();
+  gambarAkunPengajar();
   gambarPengumuman();
   gambarClassroom();
   gambarKoordinator();
@@ -1463,6 +1473,361 @@ $('formPengajar').addEventListener('submit', async (e) => {
   }catch(err){
     console.error(err);
     status('Gagal menyimpan: ' + err.message, 'salah');
+  }
+});
+
+/* ============================================================
+   7d. Akun pengajar
+   ============================================================
+
+   Pengajuan akun yang dikirim sendiri lewat halaman /pengajar. Yang diputuskan
+   di sini ada dua hal sekaligus: apakah orangnya benar-benar asisten, dan mata
+   kuliah mana saja yang boleh dia ubah naskahnya.
+
+   PENCOCOKAN DENGAN DATA PENGAJAR
+
+   NRP dan nama pendaftar dicocokkan dengan tab Pengajar, lalu hasilnya
+   ditampilkan sebagai peringatan di tabel. Pencocokan ini SENGAJA tidak
+   memblokir apa pun.
+
+   Data pengajar diisi manusia dan sering tertinggal di awal semester, jadi
+   penolakan otomatis akan menghalangi asisten yang sah hanya karena barisnya
+   belum sempat dimasukkan. Yang memutuskan tetap pengurus, dan tugas halaman
+   ini adalah memastikan pengurus melihat ketidakcocokannya sebelum memutuskan.
+*/
+
+const STATUS_AKUN = {
+  menunggu: { label: 'Menunggu', kelas: 'menyusul' },
+  diterima: { label: 'Diterima', kelas: 'pindah'  },
+  ditolak:  { label: 'Ditolak',  kelas: 'libur'   },
+};
+
+// Dokumen yang dibuat langsung lewat Firebase Console boleh tidak menyebut
+// status. Bawaannya sama dengan yang dipakai firestore.rules dan halaman
+// pengajar, supaya ketiganya tidak pernah berbeda pendapat.
+function statusAkun(a){
+  return a.status || 'diterima';
+}
+
+// Perbedaan huruf besar kecil dan spasi berlebih bukan ketidakcocokan yang
+// perlu dilaporkan ke pengurus, jadi diratakan lebih dulu.
+function samakanNama(n){
+  return String(n || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function angkaEmailAkun(email){
+  const m = String(email || '').match(/^s(\d+)@/i);
+  return m ? m[1] : '';
+}
+
+// Email student UBAYA dibentuk dari NRP-nya, jadi email yang seharusnya selalu
+// bisa dihitung. Menyebutkan bentuk yang benar jauh lebih berguna bagi pengurus
+// daripada sekadar memberi tahu bahwa keduanya berbeda.
+function emailSeharusnya(nrp){
+  return 's' + String(nrp || '').trim() + '@student.ubaya.ac.id';
+}
+
+/*
+  Hasil pencocokan satu pengajuan dengan data pengajar.
+
+  Yang dikembalikan: daftar catatan untuk ditampilkan, dan baris pengajar yang
+  NRP-nya cocok supaya pengurus bisa melihat orang ini mengajar apa saja.
+*/
+function periksaAkun(a){
+  const catatan = [];
+  const nrp = String(a.nrp || '').trim();
+  const cocokNrp = data.pengajar.filter(p => String(p.nrp || '').trim() === nrp);
+
+  if(gagalMuat.has('pengajar')){
+    catatan.push({ jenis:'hati', teks:'Data pengajar gagal dimuat, jadi belum bisa dicocokkan.' });
+  }else if(!cocokNrp.length){
+    catatan.push({ jenis:'salah', teks:`NRP ${nrp || '(kosong)'} tidak ada di daftar pengajar.` });
+
+    // Kalau namanya justru ketemu, kemungkinan besar NRP-nya salah ketik, dan
+    // itu jauh lebih berguna diketahui daripada sekadar "tidak ditemukan".
+    const cocokNama = data.pengajar.filter(p => samakanNama(p.nama) === samakanNama(a.nama));
+    if(cocokNama.length){
+      const nrpLain = [...new Set(cocokNama.map(p => p.nrp))].join(', ');
+      catatan.push({ jenis:'hati', teks:`Ada pengajar bernama sama dengan NRP ${nrpLain}.` });
+    }
+  }else{
+    const namaSama = cocokNrp.some(p => samakanNama(p.nama) === samakanNama(a.nama));
+    if(namaSama){
+      catatan.push({ jenis:'benar', teks:'Nama dan NRP cocok dengan data pengajar.' });
+    }else{
+      const namaLain = [...new Set(cocokNrp.map(p => p.nama))].join(', ');
+      catatan.push({ jenis:'salah', teks:`Nama berbeda. Di data pengajar NRP ini bernama ${namaLain}.` });
+    }
+  }
+
+  /*
+    Email student UBAYA memakai NRP-nya sendiri, jadi ketidakcocokan di sini
+    bukan sekadar hal yang perlu dilirik.
+
+    Salah satu dari keduanya pasti keliru, dan keduanya sama-sama menentukan:
+    NRP dipakai mencocokkan dengan data pengajar, email dipakai masuk. Karena
+    itu dihitung sebagai ketidakcocokan berat, sehingga menerimanya pun minta
+    ditekan dua kali.
+  */
+  if(angkaEmailAkun(a.email) !== nrp){
+    catatan.push({
+      jenis: 'salah',
+      teks: nrp
+        ? `Email tidak sesuai NRP. Menurut NRP ${nrp}, emailnya ${emailSeharusnya(nrp)}.`
+        : 'Email tidak bisa dicocokkan karena NRP-nya kosong.'
+    });
+  }
+
+  return { catatan, cocokNrp };
+}
+
+// Mata kuliah materi yang boleh diberikan. Diambil dari daftar yang sama
+// dengan yang dipakai halaman pengajar, supaya kodenya tidak pernah berbeda.
+function daftarMateri(){
+  return Array.isArray(window.KAFBE_MATERI_DAFTAR) ? window.KAFBE_MATERI_DAFTAR : [];
+}
+
+function namaMateri(kode){
+  const m = daftarMateri().find(x => x.kode === kode);
+  return m ? m.nama : kode;
+}
+
+function gambarAkunPengajar(){
+  const t = $('tabelAkun');
+  const q = ($('cariAkun').value || '').trim().toLowerCase();
+  const saringStatus = $('saringStatusAkun').value;
+
+  if(gagalMuat.has('pengajarakun')){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">
+      Pengajuan akun belum bisa dimuat.<br><br>${esc(gagalMuat.get('pengajarakun'))}
+    </td></tr></tbody>`;
+    return;
+  }
+
+  const baris = data.pengajarakun
+    .filter(a => !saringStatus || statusAkun(a) === saringStatus)
+    .filter(a => !q || [a.nama, a.nrp, a.email].join(' ').toLowerCase().includes(q));
+
+  if(baris.length === 0){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">${
+      data.pengajarakun.length
+        ? 'Tidak ada yang cocok dengan penyaringan.'
+        : 'Belum ada yang mendaftar sebagai pengajar.'
+    }</td></tr></tbody>`;
+    return;
+  }
+
+  t.innerHTML = `
+    <thead><tr>
+      <th>Pendaftar</th><th>NRP</th><th>Status</th>
+      <th>Hasil pencocokan</th><th>Wewenang</th><th></th>
+    </tr></thead>
+    <tbody>${baris.map(a => {
+      const s = statusAkun(a);
+      const l = STATUS_AKUN[s] || STATUS_AKUN.menunggu;
+      const { catatan, cocokNrp } = periksaAkun(a);
+
+      const mengajar = cocokNrp.length
+        ? cocokNrp.map(p => `${namaMatkul(p.kode) || p.kode} KP ${p.kp}`).join(', ')
+        : '';
+
+      const wewenang = a.semua === true
+        ? 'Semua mata kuliah'
+        : (Array.isArray(a.mk) && a.mk.length
+            ? a.mk.map(k => esc(namaMateri(k))).join('<br>')
+            : '<span class="op-samar">belum diberi</span>');
+
+      return `<tr>
+        <td>${esc(a.nama || '(tanpa nama)')}<br><span class="op-samar">${esc(a.email || '')}</span></td>
+        <td>${esc(a.nrp || '')}</td>
+        <td><span class="op-lencana ${l.kelas}">${esc(l.label)}</span>${
+          s === 'ditolak' && a.alasan ? `<br><span class="op-samar">${esc(a.alasan)}</span>` : ''
+        }</td>
+        <td>
+          <ul class="op-periksa">${catatan.map(c =>
+            `<li class="${c.jenis}">${esc(c.teks)}</li>`).join('')}</ul>
+          ${mengajar ? `<span class="op-samar">Tercatat mengajar ${esc(mengajar)}</span>` : ''}
+        </td>
+        <td>${wewenang}</td>
+        <td><div class="op-tombol-baris">
+          <button class="op-mini" data-putus-ak="${esc(a.id)}">${
+            s === 'menunggu' ? 'Putuskan' : 'Ubah'
+          }</button>
+          <button class="op-mini op-hapus" data-hapus-ak="${esc(a.id)}">Hapus</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-putus-ak]').forEach(b => b.addEventListener('click', () => {
+    bukaKeputusanAkun(b.dataset.putusAk);
+  }));
+
+  t.querySelectorAll('[data-hapus-ak]').forEach(b => b.addEventListener('click', async () => {
+    const a = data.pengajarakun.find(x => x.id === b.dataset.hapusAk);
+    if(!a) return;
+    if(!confirm(
+      `Hapus pengajuan ${a.nama} (${a.nrp})?\n\n`
+      + 'Akun Firebase-nya tidak ikut terhapus, tapi wewenangnya hilang dan '
+      + 'orang ini bisa mendaftar ulang dari halaman pengajar.')) return;
+    try{
+      status('Menghapus…', 'sibuk');
+      await deleteDoc(doc(db, 'pengajarakun', a.id));
+      await catat('hapus', 'akunpengajar', `${a.nama} · ${a.email}`, `NRP ${a.nrp || 'tidak ada'}`);
+      tutupKeputusanAkun();
+      await muatSemua();
+      status('Pengajuan dihapus.', 'benar');
+    }catch(err){
+      console.error(err);
+      status('Gagal menghapus: ' + err.message, 'salah');
+    }
+  }));
+}
+
+$('cariAkun').addEventListener('input', gambarAkunPengajar);
+$('saringStatusAkun').addEventListener('change', gambarAkunPengajar);
+
+/* ---------- Formulir keputusan ---------- */
+
+function bukaKeputusanAkun(id){
+  const a = data.pengajarakun.find(x => x.id === id);
+  if(!a) return;
+
+  const { cocokNrp } = periksaAkun(a);
+
+  $('akUid').value = a.id;
+  $('akSiapa').textContent = `${a.nama || '(tanpa nama)'} · NRP ${a.nrp || '-'}`;
+  $('akRincian').textContent = a.email
+    + (cocokNrp.length
+        ? ' · tercatat mengajar ' + cocokNrp.map(p => `${namaMatkul(p.kode) || p.kode} KP ${p.kp}`).join(', ')
+        : ' · belum ada di data pengajar');
+
+  $('akStatus').value = statusAkun(a) === 'menunggu' ? 'diterima' : statusAkun(a);
+  $('akAlasan').value = a.alasan || '';
+  $('akSemua').checked = a.semua === true;
+
+  const dipilih = Array.isArray(a.mk) ? a.mk.map(String) : [];
+  const wadah = $('akDaftarMk');
+  wadah.textContent = '';
+  for(const mk of daftarMateri()){
+    const label = document.createElement('label');
+    label.className = 'op-centang-baris';
+    const kotak = document.createElement('input');
+    kotak.type = 'checkbox';
+    kotak.value = mk.kode;
+    kotak.checked = dipilih.includes(mk.kode);
+    const teks = document.createElement('span');
+    teks.textContent = (mk.ikon ? mk.ikon + ' ' : '') + mk.nama;
+    label.appendChild(kotak);
+    label.appendChild(teks);
+    wadah.appendChild(label);
+  }
+
+  bersihkanPesan($('pesanAkun'));
+  $('formAkun').hidden = false;
+  aturTampilanKeputusan();
+  $('akStatus').focus();
+}
+
+function tutupKeputusanAkun(){
+  $('formAkun').hidden = true;
+  $('akUid').value = '';
+  bersihkanPesan($('pesanAkun'));
+}
+
+/*
+  Bagian yang tidak relevan disembunyikan, bukan sekadar dibiarkan menganggur.
+  Kotak alasan hanya berguna saat menolak, dan daftar mata kuliah hanya berguna
+  saat menerima tanpa mencentang "semua mata kuliah".
+*/
+function aturTampilanKeputusan(){
+  const s = $('akStatus').value;
+  $('akAlasanBungkus').hidden = (s !== 'ditolak');
+  $('akWewenang').hidden = (s !== 'diterima');
+  $('akDaftarMk').hidden = $('akSemua').checked;
+}
+
+$('akStatus').addEventListener('change', aturTampilanKeputusan);
+$('akSemua').addEventListener('change', aturTampilanKeputusan);
+$('akBatal').addEventListener('click', tutupKeputusanAkun);
+
+$('formAkun').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanAkun');
+  const a = data.pengajarakun.find(x => x.id === $('akUid').value);
+  if(!a) return;
+
+  const status_ = $('akStatus').value;
+  const semua = $('akSemua').checked;
+  const mk = [...$('akDaftarMk').querySelectorAll('input:checked')].map(x => x.value);
+  const alasan = $('akAlasan').value.trim();
+
+  const salah = [];
+  if(status_ === 'diterima' && !semua && !mk.length){
+    salah.push('Pilih paling sedikit satu mata kuliah, atau centang "semua mata kuliah". '
+      + 'Akun yang diterima tanpa mata kuliah tidak bisa mengubah apa pun.');
+  }
+  if(status_ === 'ditolak' && !alasan){
+    salah.push('Isi alasan penolakan. Alasannya dibaca pendaftar di halaman pengajar.');
+  }
+  if(salah.length){
+    pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah');
+    return;
+  }
+
+  /*
+    Peringatan hasil pencocokan tidak memblokir, tapi menerima pengajuan yang
+    datanya tidak cocok perlu dilakukan dengan sadar, bukan tersenggol. Karena
+    itu penyimpanannya minta ditekan dua kali.
+  */
+  const { catatan } = periksaAkun(a);
+  const berat = catatan.filter(c => c.jenis === 'salah');
+  if(status_ === 'diterima' && berat.length && el.dataset.konfirmasi !== '1'){
+    pesan(el, daftarKesalahan(
+      'Data pendaftar ini tidak cocok dengan data pengajar. Periksa dulu, lalu tekan Simpan keputusan sekali lagi kalau memang benar:',
+      berat.map(c => c.teks)), 'hati');
+    el.dataset.konfirmasi = '1';
+    return;
+  }
+  el.dataset.konfirmasi = '';
+
+  /*
+    Ditulis utuh, bukan digabung. Nama, NRP, dan email disalin apa adanya dari
+    baris yang sudah tersimpan, dan aturan Firestore menolak kalau ketiganya
+    berubah. Jadi keputusan pengurus tidak bisa sekaligus menyunting identitas
+    pendaftarnya, baik sengaja maupun karena salah pencet.
+  */
+  const muatan = {
+    status: status_,
+    nama: a.nama,
+    nrp: a.nrp,
+    email: a.email,
+    mk: status_ === 'diterima' && !semua ? mk : [],
+    semua: status_ === 'diterima' && semua,
+    alasan: status_ === 'ditolak' ? alasan : '',
+    diputusPada: serverTimestamp(),
+    diputusOleh: pemakai.email,
+  };
+  if(a.dibuatPada) muatan.dibuatPada = a.dibuatPada;
+
+  try{
+    status('Menyimpan keputusan…', 'sibuk');
+    await setDoc(doc(db, 'pengajarakun', a.id), muatan);
+    await catat('ubah', 'akunpengajar',
+      `${a.nama} · ${(STATUS_AKUN[status_] || {}).label || status_}`,
+      status_ === 'diterima'
+        ? (semua ? 'Semua mata kuliah' : mk.map(namaMateri).join(', '))
+        : alasan || 'tanpa alasan');
+    tutupKeputusanAkun();
+    await muatSemua();
+    // Sengaja TIDAK memanggil terbitkan(): data akun pengajar tidak boleh ikut
+    // masuk ke dokumen yang dibaca pengunjung.
+    status('Keputusan tersimpan.', 'benar');
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+    pesan(el, err.code === 'permission-denied'
+      ? 'Server menolak perubahan ini. Biasanya berarti aturan Firestore belum diperbarui. Lihat langkah 1.4 di PANDUAN-PENGURUS.md.'
+      : esc(err.message || 'tidak diketahui'), 'salah');
   }
 });
 
@@ -2664,6 +3029,11 @@ const JENIS_LOG = {
   classroom:   'Kode Google Classroom',
   koordinator: 'Koordinator',
   excel:       'Berkas Excel',
+  akunpengajar:'Akun pengajar',
+  // Ditulis dari halaman /pengajar, bukan dari halaman ini. Catatannya tetap
+  // masuk ke daftar yang sama supaya seluruh perubahan bisa ditelusuri di satu
+  // tempat, tanpa perlu ingat halaman mana yang dipakai saat itu.
+  materi:      'Naskah materi',
 };
 
 const AKSI_LOG = {

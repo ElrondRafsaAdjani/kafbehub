@@ -70,6 +70,7 @@
      tampil apa adanya. -->
 <script src="/firebase-config.js"></script>
 <script src="/shared/situs.js"></script>
+<script src="/shared/materi.js"></script>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
@@ -110,8 +111,8 @@
   <a class="back-link" href="pemi.html">← Kembali ke Pengantar Mikroekonomi</a>
   <div class="section-head" style="margin-top:18px;">
     <span class="kicker">Pengantar Mikroekonomi</span>
-    <h2>Shift vs. Movement Along the Curve</h2>
-    <p>Lanjutan dari kurva supply &amp; demand, dua hal yang sering ketuker: kurva yang "bergeser" vs titik yang "bergerak menyusuri" kurva yang sama.</p>
+    <h2 data-materi="shift-vs-movement-along.judul" data-label="Shift vs. Movement Along the Curve">Shift vs. Movement Along the Curve</h2>
+    <p data-materi="shift-vs-movement-along.1" data-label="Lanjutan dari kurva supply dan demand, dua hal yang ser…">Lanjutan dari kurva supply &amp; demand, dua hal yang sering ketuker: kurva yang "bergeser" vs titik yang "bergerak menyusuri" kurva yang sama.</p>
   </div>
 
   <div class="story-card">
@@ -229,6 +230,18 @@
     { chapter:'summary', reveal:[],
       text:'Jadi bedanya: <strong>Movement</strong> = harga barang itu sendiri berubah → titik bergerak sepanjang kurva yang sama. <strong>Shift</strong> = faktor lain yang berubah → kurvanya sendiri berpindah, dan bisa memicu excess demand (shortage) atau excess supply (surplus) sampai pasar ketemu ekuilibrium baru.' }
   ];
+
+  /*
+    Naskah tiap langkah boleh diubah pengajar lewat halaman /pengajar.
+
+    Yang ditimpa hanya medan berisi kalimat. Nama gambar, daftar elemen yang
+    disorot, dan seluruh angka model tetap milik halaman ini, jadi grafiknya
+    tidak ikut berubah ketika naskahnya diperbarui.
+  */
+  if(window.KafbeMateri){
+    KafbeMateri.daftarLangkah(STEPS, { label:'Langkah' }, render);
+    KafbeMateri.daftarPeta('bab', CHAPTERS, 'Nama bagian', render);
+  }
 
   // ===================================================================
   // Chart setup
