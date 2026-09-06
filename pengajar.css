@@ -26,6 +26,15 @@
 .pg-tautan:hover{ color:var(--gold-deep); }
 
 /*
+  Jalan kembali ke layar masuk, dipasang di atas formulir pendaftaran.
+
+  Jaraknya diatur ulang karena .op-catatan dibuat untuk catatan penutup di kaki
+  kartu, sedangkan di sini letaknya menyisip antara keterangan dan isian
+  pertama.
+*/
+.pg-kembali{ margin:-10px 0 20px; }
+
+/*
   Keterangan pendek di bawah kotak isian. Jaraknya dirapatkan ke kotak di
   atasnya, supaya terbaca sebagai penjelasan isian itu dan bukan sebagai
   kalimat lepas milik isian berikutnya.

@@ -25,6 +25,16 @@
     <h1 id="judulMasuk">Pengajar KAFBE</h1>
     <p class="op-sub" id="subMasuk">Halaman pengajar. Masuk untuk mengubah naskah materi kuliah.</p>
 
+    <!-- Jalan kembali ke layar masuk ditaruh DI ATAS formulir, bukan di
+         bawahnya. Formulir pendaftaran tingginya melebihi satu layar ponsel,
+         dan pesan galat masih menambah tingginya lagi, jadi tautan yang
+         ditaruh di bawah tidak akan pernah terlihat justru pada saat paling
+         dibutuhkan, yaitu ketika isiannya perlu diperbaiki. -->
+    <p class="op-catatan pg-kembali" id="catatanDaftar" hidden>
+      Sudah punya akun?
+      <button type="button" class="pg-tautan" id="keMasuk">Kembali ke halaman masuk</button>
+    </p>
+
     <form id="formMasuk" autocomplete="on">
       <label for="email">Email pengajar</label>
       <input type="email" id="email" name="email" required autocomplete="username" placeholder="s130223203@student.ubaya.ac.id" />
@@ -45,8 +55,14 @@
       <label for="dfNrp">NRP</label>
       <input type="text" id="dfNrp" name="nrp" required maxlength="15" inputmode="numeric" placeholder="130223203" />
 
+      <!-- autocomplete="email", bukan "username".
+           Keduanya sama-sama memunculkan saran alamat yang tersimpan, tapi
+           "username" membuat pengelola kata sandi menyangka ini formulir masuk
+           dan sebagian di antaranya lalu mengisi sekaligus mengirim sendiri.
+           Padahal alamat yang tersimpan biasanya email pribadi, bukan email
+           student, sehingga pengiriman itu selalu berakhir dengan penolakan. -->
       <label for="dfEmail">Email student UBAYA</label>
-      <input type="email" id="dfEmail" name="email" required autocomplete="username" placeholder="s130223203@student.ubaya.ac.id" aria-describedby="dfEmailKet" />
+      <input type="email" id="dfEmail" name="emailBaru" required autocomplete="email" placeholder="s130223203@student.ubaya.ac.id" aria-describedby="dfEmailKet" />
       <p class="pg-keterangan" id="dfEmailKet">Emailnya memakai NRP Anda. NRP 130223001 memakai email s130223001@student.ubaya.ac.id.</p>
 
       <label for="dfSandi">Kata sandi baru</label>
@@ -71,10 +87,6 @@
     <p class="op-catatan" id="catatanMasuk">
       Belum punya akun?
       <button type="button" class="pg-tautan" id="keDaftar">Buat akun pengajar</button>
-    </p>
-    <p class="op-catatan" id="catatanDaftar" hidden>
-      Sudah punya akun?
-      <button type="button" class="pg-tautan" id="keMasuk">Kembali ke halaman masuk</button>
     </p>
   </div>
 </section>

@@ -158,9 +158,34 @@ function periksaPengajuan(nama, nrp, email){
   if(nama.length > 80) salah.push('Nama lengkap terlalu panjang.');
   if(!POLA_NRP.test(nrp)) salah.push('NRP harus berupa angka saja, tanpa huruf dan tanpa spasi.');
   if(!POLA_EMAIL.test(email)){
-    salah.push('Email harus email student UBAYA, bentuknya s130223203@student.ubaya.ac.id.');
+    salah.push('Email harus email student UBAYA, bentuknya s130223203@student.ubaya.ac.id. '
+      + 'Alamat pribadi seperti Gmail tidak bisa dipakai.');
   }
   return salah;
+}
+
+/*
+  Mengantar pemakai ke isian yang bermasalah.
+
+  Pesan galat saja tidak cukup ketika formulirnya lebih tinggi dari satu layar
+  ponsel: pesannya tampil di bawah, sedangkan isian yang salah ada di atas, dan
+  keduanya tidak pernah terlihat bersamaan. Isinya sekalian disorot supaya
+  alamat yang telanjur diisikan pengelola kata sandi bisa langsung ditimpa
+  tanpa perlu menghapusnya satu per satu.
+*/
+function antarKeIsian(id){
+  const el = $(id);
+  if(!el) return;
+  el.focus({ preventScroll: true });
+  if(typeof el.select === 'function') el.select();
+  el.scrollIntoView({ block: 'center' });
+}
+
+function isianBermasalah(nama, nrp, email){
+  if(nama.length < 3 || nama.length > 80) return 'dfNama';
+  if(!POLA_NRP.test(nrp)) return 'dfNrp';
+  if(!POLA_EMAIL.test(email)) return 'dfEmail';
+  return '';
 }
 
 /* ---------- Berpindah antara masuk dan daftar ---------- */
@@ -182,6 +207,37 @@ function tampilkanDaftar(daftar){
 
 $('keDaftar').addEventListener('click', () => tampilkanDaftar(true));
 $('keMasuk').addEventListener('click', () => tampilkanDaftar(false));
+
+/* ---------- Menahan pengiriman yang belum diniatkan ---------- */
+
+/*
+  Menekan Enter di tengah formulir memindahkan kursor ke isian berikutnya,
+  bukan mengirim pengajuannya.
+
+  Formulir pendaftaran ini panjang, dan sebagian pengelola kata sandi maupun
+  papan ketik ponsel memperlakukan Enter sebagai "lanjut". Dengan perilaku
+  bawaan peramban, Enter di isian pertama mana pun langsung mengirim seluruh
+  formulir, termasuk saat alamat yang terisi otomatis masih alamat pribadi.
+  Yang dilihat pendaftar cuma penolakan, padahal dia belum merasa mengirim apa
+  pun.
+
+  Isian terakhir dikecualikan. Di situ Enter memang berarti selesai, dan
+  menahannya justru akan terasa seperti tombolnya rusak.
+*/
+function enterPindahIsian(form, idTerakhir){
+  form.addEventListener('keydown', (e) => {
+    if(e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    if(e.target.id === idTerakhir) return;
+
+    e.preventDefault();
+    const isian = [...form.querySelectorAll('input')];
+    const berikut = isian[isian.indexOf(e.target) + 1];
+    if(berikut) berikut.focus();
+  });
+}
+
+enterPindahIsian($('formDaftar'), 'dfSandi2');
+enterPindahIsian($('formLengkapi'), 'lkNrp');
 
 /* ---------- Masuk ---------- */
 
@@ -233,6 +289,9 @@ $('formDaftar').addEventListener('submit', async (e) => {
 
   if(salah.length){
     pesan(el, daftarKesalahan('Belum bisa dikirim:', salah), 'salah');
+    const isian = isianBermasalah(nama, nrp, email)
+      || (sandi.length < 8 ? 'dfSandi' : 'dfSandi2');
+    antarKeIsian(isian);
     return;
   }
 
@@ -255,6 +314,7 @@ $('formDaftar').addEventListener('submit', async (e) => {
       + 'email Anda memang berbeda dari itu.',
       'hati');
     el.dataset.konfirmasi = '1';
+    antarKeIsian('dfEmail');
     return;
   }
   el.dataset.konfirmasi = '';
@@ -314,10 +374,26 @@ $('formLengkapi').addEventListener('submit', async (e) => {
 
   const nama = $('lkNama').value.trim();
   const nrp  = $('lkNrp').value.trim();
+
+  /*
+    Email akun tidak bisa diperbaiki dari layar ini, jadi kalau justru itu yang
+    bermasalah, pemakainya diberi tahu apa adanya. Menyuruh dia mencoba lagi
+    hanya akan membuatnya menekan tombol berulang kali tanpa pernah berhasil.
+  */
+  if(!POLA_EMAIL.test(user.email || '')){
+    pesan(el,
+      `Akun ini memakai email <code>${esc(user.email || 'tidak diketahui')}</code>, `
+      + 'bukan email student UBAYA, jadi pengajuannya tidak bisa dikirim.<br><br>'
+      + 'Keluar dari akun ini, lalu daftar ulang memakai email student UBAYA Anda.',
+      'salah');
+    return;
+  }
+
   const salah = periksaPengajuan(nama, nrp, user.email || '');
 
   if(salah.length){
     pesan(el, daftarKesalahan('Belum bisa dikirim:', salah), 'salah');
+    antarKeIsian(nama.length < 3 || nama.length > 80 ? 'lkNama' : 'lkNrp');
     return;
   }
 
