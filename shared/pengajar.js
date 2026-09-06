@@ -26,10 +26,7 @@
   halaman aslinya sudah tidak ada.
 */
 
-import {
-  POLA_EMAIL, periksaPengajuan, pesanAuth,
-  esc, daftarKesalahan, pesan, bersihkanPesan, antarKeIsian, enterPindahIsian,
-} from './pengajar-akun.js';
+import { pesanAuth, esc, pesan, bersihkanPesan } from './pengajar-akun.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
 
@@ -85,8 +82,6 @@ function diag(teks){
    2. Masuk dan keluar
    ============================================================ */
 
-enterPindahIsian($('formLengkapi'), 'lkNrp');
-
 /* ---------- Masuk ---------- */
 
 $('formMasuk').addEventListener('submit', async (e) => {
@@ -109,76 +104,6 @@ $('formMasuk').addEventListener('submit', async (e) => {
   }
 });
 
-/*
-  Menulis baris pengajuan. Dipakai dua kali: sesudah akun baru dibuat, dan dari
-  layar "Lengkapi pengajuan" kalau penulisan pertamanya gagal.
-
-  Kolom wewenang sengaja tidak ikut ditulis. Aturan Firestore menolak
-  pengajuan yang menyebutnya, sebab wewenang bukan sesuatu yang boleh diisi
-  sendiri oleh yang mengajukan.
-*/
-async function kirimPengajuan(user, nama, nrp){
-  diag('Menulis pengajuan ke pengajarakun/' + user.uid + ' …');
-  await setDoc(doc(db, 'pengajarakun', user.uid), {
-    status: 'menunggu',
-    nama: nama,
-    nrp: nrp,
-    email: user.email,
-    dibuatPada: serverTimestamp()
-  });
-  diag('Pengajuan tersimpan, menunggu keputusan pengurus.');
-}
-
-$('formLengkapi').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const el = $('pesanLengkapi');
-  const tombol = $('tombolLengkapi');
-  bersihkanPesan(el);
-
-  const user = auth.currentUser;
-  if(!user) return;
-
-  const nama = $('lkNama').value.trim();
-  const nrp  = $('lkNrp').value.trim();
-
-  /*
-    Email akun tidak bisa diperbaiki dari layar ini, jadi kalau justru itu yang
-    bermasalah, pemakainya diberi tahu apa adanya. Menyuruh dia mencoba lagi
-    hanya akan membuatnya menekan tombol berulang kali tanpa pernah berhasil.
-  */
-  if(!POLA_EMAIL.test(user.email || '')){
-    pesan(el,
-      `Akun ini memakai email <code>${esc(user.email || 'tidak diketahui')}</code>, `
-      + 'bukan email student UBAYA, jadi pengajuannya tidak bisa dikirim.<br><br>'
-      + 'Keluar dari akun ini, lalu daftar ulang memakai email student UBAYA Anda.',
-      'salah');
-    return;
-  }
-
-  const salah = periksaPengajuan(nama, nrp, user.email || '');
-
-  if(salah.length){
-    pesan(el, daftarKesalahan('Belum bisa dikirim:', salah), 'salah');
-    antarKeIsian(nama.length < 3 || nama.length > 80 ? $('lkNama') : $('lkNrp'));
-    return;
-  }
-
-  tombol.disabled = true;
-  tombol.textContent = 'Mengirim…';
-  try{
-    await kirimPengajuan(user, nama, nrp);
-    await tentukanLayar(user);
-  }catch(err){
-    pesan(el,
-      'Pengajuannya belum tersimpan.<br>'
-      + `Pesan aslinya: <code>${esc(err.message || err.code || 'tidak diketahui')}</code>`,
-      'salah');
-  }finally{
-    tombol.disabled = false;
-    tombol.textContent = 'Kirim pengajuan';
-  }
-});
-
 /* ---------- Keluar ---------- */
 
 function keluar(){
@@ -196,7 +121,7 @@ document.querySelectorAll('[data-keluar]').forEach(b => b.addEventListener('clic
 let pemakai = { nama: '', email: '' };
 let wewenang = { semua: false, mk: [] };
 
-const LAYAR = ['layarMasuk', 'layarLengkapi', 'layarTunggu', 'layarTolak', 'aplikasi'];
+const LAYAR = ['layarMasuk', 'layarTunggu', 'layarTolak', 'aplikasi'];
 
 function tampilkanLayar(id){
   for(const l of LAYAR) $(l).hidden = (l !== id);
@@ -247,11 +172,18 @@ async function tentukanLayar(user){
     return;
   }
 
-  // Akunnya ada, pengajuannya belum. Diantar melengkapi, bukan dikeluarkan.
+  /*
+    Akunnya ada, pengajuannya belum. Diantar melengkapi, bukan dikeluarkan.
+
+    Yang mengerjakannya halaman pendaftaran, memakai formulir yang sama persis,
+    hanya tanpa kotak kata sandi karena akunnya sudah ada. Dulu keadaan ini
+    punya layarnya sendiri di halaman ini, dan layar itu menanyakan ulang nama
+    serta NRP saja, sehingga pendaftaran terasa terpecah menjadi dua formulir
+    berbeda padahal maksudnya satu.
+  */
   if(!profil){
-    $('lkNama').value = '';
-    $('lkNrp').value = '';
-    tampilkanLayar('layarLengkapi');
+    diag('Belum ada pengajuan. Mengantar ke halaman pendaftaran…');
+    location.replace('pengajar-daftar.html');
     return;
   }
 

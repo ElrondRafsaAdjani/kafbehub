@@ -35,6 +35,20 @@
 .pg-kembali{ margin:-10px 0 20px; }
 
 /*
+  Pembungkus yang tidak ikut membentuk kotak sendiri, sehingga sekelompok isian
+  bisa dimunculkan atau dilepas bersama tanpa mengubah jarak antar isian di
+  dalam formulir. Aturan kedua diperlukan karena display di sini mengalahkan
+  bawaan peramban untuk atribut hidden.
+*/
+.pg-bagian{ display:contents; }
+.pg-bagian[hidden]{ display:none; }
+
+/* Kotak yang isinya sudah tetap dan tidak bisa diubah dari sini. */
+.op-kartu-masuk input[readonly]{
+  background:var(--bg); color:var(--ink-soft); cursor:default;
+}
+
+/*
   Keterangan pendek di bawah kotak isian. Jaraknya dirapatkan ke kotak di
   atasnya, supaya terbaca sebagai penjelasan isian itu dan bukan sebagai
   kalimat lepas milik isian berikutnya.

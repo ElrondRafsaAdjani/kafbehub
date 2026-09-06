@@ -40,9 +40,25 @@
     <h1>Daftar akun pengajar</h1>
     <p class="op-sub">Isi data Anda sesuai data asisten. Pengurus operasional yang memutuskan diterima atau tidak.</p>
 
-    <p class="op-catatan pg-kembali">
+    <p class="op-catatan pg-kembali" id="catatanKembali">
       Sudah punya akun?
       <a class="pg-tautan" href="pengajar.html">Kembali ke halaman masuk</a>
+    </p>
+
+    <!--
+      Terpakai kalau akun Firebase-nya sudah jadi tapi baris pengajuannya belum
+      tersimpan, misalnya karena jaringan putus tepat di antara kedua langkah
+      itu. Yang dipakai tetap formulir yang sama, hanya kotak kata sandinya
+      dilepas karena akunnya sudah ada.
+
+      Dulu keadaan ini punya layarnya sendiri di halaman pengajar, dan layar
+      itu menanyakan ulang nama serta NRP saja. Hasilnya pendaftaran terasa
+      terpecah menjadi dua formulir yang berbeda, padahal maksudnya satu.
+    -->
+    <p class="op-catatan pg-kembali" id="catatanLanjutan" hidden>
+      Akun Anda sudah ada, tapi datanya belum terkirim ke pengurus. Lengkapi di
+      bawah ini, lalu kirim sekali lagi.
+      <button type="button" class="pg-tautan" id="keluarLanjutan">Keluar dari akun ini</button>
     </p>
 
     <form id="formDaftar">
@@ -56,12 +72,19 @@
       <input type="email" id="dfEmail" name="emailBaru" required autocomplete="email" placeholder="s130223203@student.ubaya.ac.id" aria-describedby="dfEmailKet" />
       <p class="pg-keterangan" id="dfEmailKet">Emailnya memakai NRP Anda. NRP 130223001 memakai email s130223001@student.ubaya.ac.id.</p>
 
-      <label for="dfSandi">Kata sandi baru</label>
-      <input type="password" id="dfSandi" name="sandiBaru" required minlength="8" autocomplete="new-password" aria-describedby="dfSandiKet" />
-      <p class="pg-keterangan" id="dfSandiKet">Paling sedikit delapan karakter. Jangan pakai kata sandi yang sama dengan akun lain.</p>
+      <!-- Dilepas saat akunnya sudah ada. Memakai display:contents supaya
+           jarak antar isian di dalam formulir tidak berubah gara-gara ada
+           pembungkus tambahan. -->
+      <div class="pg-bagian" id="bagianSandi">
+        <label for="dfSandi">Kata sandi baru</label>
+        <input type="password" id="dfSandi" name="sandiBaru" required minlength="8" autocomplete="new-password" aria-describedby="dfSandiKet" />
+        <p class="pg-keterangan" id="dfSandiKet">Paling sedikit delapan karakter. Jangan pakai kata sandi yang sama dengan akun lain.</p>
 
-      <label for="dfSandi2">Ulangi kata sandi</label>
-      <input type="password" id="dfSandi2" name="sandiUlang" required minlength="8" autocomplete="new-password" />
+        <label for="dfSandi2">Ulangi kata sandi</label>
+        <input type="password" id="dfSandi2" name="sandiUlang" required minlength="8" autocomplete="new-password" />
+      </div>
+
+      <p class="pg-keterangan" id="sandiTersimpan" hidden>Kata sandinya sudah tersimpan dari pendaftaran sebelumnya, jadi tidak perlu diisi lagi.</p>
 
       <button type="submit" class="btn btn-primary op-penuh" id="tombolDaftar">Kirim pengajuan</button>
     </form>

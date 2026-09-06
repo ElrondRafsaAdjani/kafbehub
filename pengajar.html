@@ -63,36 +63,6 @@
   </div>
 </section>
 
-<!-- ============ MELENGKAPI PENGAJUAN ============ -->
-<!--
-  Terpakai kalau akun Firebase-nya sudah jadi tapi baris pengajuannya belum
-  tersimpan, misalnya karena jaringan putus tepat di antara kedua langkah itu.
-  Tanpa layar ini, akunnya bisa masuk tapi tidak akan pernah punya pengajuan
-  untuk disetujui siapa pun, dan pemakainya tidak punya cara memperbaikinya.
--->
-<section id="layarLengkapi" class="op-masuk" hidden>
-  <div class="op-kartu-masuk">
-    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
-    <h1>Lengkapi pengajuan</h1>
-    <p class="op-sub">Akun Anda sudah ada, tapi datanya belum terkirim ke pengurus. Isi sekali lagi supaya bisa ditinjau.</p>
-
-    <form id="formLengkapi">
-      <label for="lkNama">Nama lengkap</label>
-      <input type="text" id="lkNama" required maxlength="80" placeholder="Sesuai data asisten" />
-
-      <label for="lkNrp">NRP</label>
-      <input type="text" id="lkNrp" required maxlength="15" inputmode="numeric" placeholder="130223203" />
-
-      <button type="submit" class="btn btn-primary op-penuh" id="tombolLengkapi">Kirim pengajuan</button>
-    </form>
-
-    <p class="op-pesan" id="pesanLengkapi" role="alert"></p>
-    <p class="op-catatan">
-      <button type="button" class="pg-tautan" data-keluar>Keluar dari akun ini</button>
-    </p>
-  </div>
-</section>
-
 <!-- ============ MENUNGGU PERSETUJUAN ============ -->
 <section id="layarTunggu" class="op-masuk" hidden>
   <div class="op-kartu-masuk">

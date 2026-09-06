@@ -822,10 +822,12 @@ Situsnya sedang berstatus aktif. Masuk ke pemeliharaan dulu lewat tab
 Memang begitu sampai pengurus operasional memutuskannya. Buka `/operasional`
 tab **Akun Pengajar**, lalu terima atau tolak barisnya.
 
-**Di `/pengajar`, muncul layar "Lengkapi pengajuan"**
+**Masuk ke `/pengajar` malah dilempar ke halaman pendaftaran**
 Akun Firebase-nya sudah jadi tapi baris pengajuannya belum tersimpan, biasanya
-karena jaringan putus saat mendaftar. Isi nama dan NRP di layar itu, lalu
-kirim. Tidak perlu membuat akun baru.
+karena jaringan putus saat mendaftar, atau karena mendaftar sebelum aturan
+Firestore sempat dipasang. Formulirnya muncul dengan email yang sudah terkunci
+dan tanpa kotak kata sandi, jadi tinggal mengisi nama dan NRP lalu mengirim.
+Tidak perlu membuat akun baru.
 
 **Saat mendaftar muncul "Email ini sudah punya akun"**
 Email itu pernah dipakai mendaftar. Masuk saja memakai kata sandi lama. Kalau

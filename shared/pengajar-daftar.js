@@ -23,10 +23,10 @@ const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
 
 const { initializeApp } = await import(`${SDK}/firebase-app.js`);
 const {
-  getAuth, createUserWithEmailAndPassword, onAuthStateChanged,
+  getAuth, createUserWithEmailAndPassword, signOut, onAuthStateChanged,
 } = await import(`${SDK}/firebase-auth.js`);
 const {
-  getFirestore, doc, setDoc, serverTimestamp,
+  getFirestore, doc, getDoc, setDoc, serverTimestamp,
 } = await import(`${SDK}/firebase-firestore.js`);
 
 const app  = initializeApp(window.KAFBE_FIREBASE_CONFIG);
@@ -53,16 +53,65 @@ function diag(teks){
 }
 
 /*
-  Yang sudah masuk tidak perlu berada di halaman ini.
+  DUA KEADAAN, SATU FORMULIR.
 
-  Mendaftar lagi hanya akan membuat akun kedua dan mengeluarkan dia dari akun
-  pertamanya tanpa pernah diminta. Halaman pengajar sudah tahu sendiri harus
-  menampilkan apa untuk tiap status pengajuan, jadi urusannya diserahkan ke
-  sana.
+  Keadaan biasa adalah pendaftaran dari nol: belum ada akun, dan keempat isian
+  diisi sekaligus.
+
+  Keadaan kedua muncul kalau akun Firebase-nya sudah jadi tapi baris
+  pengajuannya belum tersimpan, misalnya karena jaringan putus tepat di antara
+  kedua langkah itu. Yang dipakai tetap formulir yang sama, hanya kotak kata
+  sandinya dilepas karena akunnya sudah ada, dan emailnya dikunci pada email
+  akun itu.
+
+  Sebelumnya keadaan kedua punya layarnya sendiri di halaman pengajar, dan
+  layar itu menanyakan ulang nama serta NRP saja. Akibatnya pendaftaran terasa
+  terpecah menjadi dua formulir berbeda, padahal maksudnya satu hal yang sama.
 */
-onAuthStateChanged(auth, (user) => {
-  if(user) location.replace('pengajar.html');
+let akunAda = null;   // diisi kalau sedang melengkapi pengajuan
+
+function pasangModeLanjutan(user){
+  akunAda = user;
+
+  $('bagianSandi').hidden = true;
+  $('sandiTersimpan').hidden = false;
+  $('catatanKembali').hidden = true;
+  $('catatanLanjutan').hidden = false;
+
+  const email = $('dfEmail');
+  email.value = user.email || '';
+  email.readOnly = true;
+
+  $('dfNama').focus();
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if(!user) return;
+
+  /*
+    Yang pengajuannya sudah ada tidak perlu berada di halaman ini. Halaman
+    pengajar sudah tahu sendiri harus menampilkan apa untuk tiap status, jadi
+    urusannya diserahkan ke sana.
+
+    Kalau status pengajuannya gagal diperiksa, halaman pengajar juga yang
+    menjelaskannya, sebab di sanalah pesan galat untuk keadaan itu ditulis.
+  */
+  try{
+    const snap = await getDoc(doc(db, 'pengajarakun', user.uid));
+    if(snap.exists()){ location.replace('pengajar.html'); return; }
+  }catch(err){
+    diag('Gagal memeriksa pengajuan: ' + (err.code || err.message));
+    location.replace('pengajar.html');
+    return;
+  }
+
+  diag('Akun sudah ada tapi pengajuannya belum. Melanjutkan pengisian.');
+  pasangModeLanjutan(user);
 });
+
+$('keluarLanjutan').addEventListener('click', () => signOut(auth).then(() => {
+  location.replace('pengajar.html');
+}));
 
 enterPindahIsian($('formDaftar'), 'dfSandi2');
 
@@ -85,13 +134,17 @@ $('formDaftar').addEventListener('submit', async (e) => {
   const sandi = $('dfSandi').value;
 
   const salah = periksaPengajuan(nama, nrp, email);
-  if(sandi.length < 8) salah.push('Kata sandi minimal delapan karakter.');
-  if(sandi !== $('dfSandi2').value) salah.push('Kedua kata sandi belum sama.');
+
+  // Kata sandi hanya diperiksa saat akunnya memang belum ada.
+  if(!akunAda){
+    if(sandi.length < 8) salah.push('Kata sandi minimal delapan karakter.');
+    if(sandi !== $('dfSandi2').value) salah.push('Kedua kata sandi belum sama.');
+  }
 
   if(salah.length){
     pesan(el, daftarKesalahan('Belum bisa dikirim:', salah), 'salah');
     antarKeIsian(isianBermasalah(nama, nrp, email)
-      || (sandi.length < 8 ? $('dfSandi') : $('dfSandi2')));
+      || (akunAda ? $('dfNama') : (sandi.length < 8 ? $('dfSandi') : $('dfSandi2'))));
     return;
   }
 
@@ -128,36 +181,43 @@ $('formDaftar').addEventListener('submit', async (e) => {
 
     Baris pengajuan hanya boleh ditulis oleh pemilik akunnya sendiri menurut
     aturan Firestore, jadi urutannya memang tidak bisa dibalik. Kalau langkah
-    kedua gagal, akunnya sudah terlanjur jadi, dan halaman pengajar akan
-    mengantar pemakainya ke layar "Lengkapi pengajuan" untuk mengulang langkah
-    itu saja. Karena itu kegagalan di sini pun tetap berakhir dengan berpindah
-    ke halaman pengajar, bukan berhenti di sini tanpa jalan keluar.
+    kedua gagal, akunnya sudah terlanjur jadi. Halaman ini lalu berpindah
+    sendiri ke keadaan melengkapi, dengan isian yang sudah diketik tetap di
+    tempatnya, sehingga percobaan berikutnya tinggal menekan tombolnya lagi.
   */
   try{
-    diag('Membuat akun Firebase untuk ' + email + ' …');
-    const hasil = await createUserWithEmailAndPassword(auth, email, sandi);
-    diag('Akun dibuat. UID: ' + hasil.user.uid);
+    let user = akunAda;
 
-    $('dfSandi').value = '';
-    $('dfSandi2').value = '';
+    if(!user){
+      diag('Membuat akun Firebase untuk ' + email + ' …');
+      const hasil = await createUserWithEmailAndPassword(auth, email, sandi);
+      user = hasil.user;
+      diag('Akun dibuat. UID: ' + user.uid);
 
-    diag('Menulis pengajuan ke pengajarakun/' + hasil.user.uid + ' …');
-    await setDoc(doc(db, 'pengajarakun', hasil.user.uid), {
+      $('dfSandi').value = '';
+      $('dfSandi2').value = '';
+      pasangModeLanjutan(user);
+    }
+
+    diag('Menulis pengajuan ke pengajarakun/' + user.uid + ' …');
+    await setDoc(doc(db, 'pengajarakun', user.uid), {
       status: 'menunggu',
       nama: nama,
       nrp: nrp,
-      email: hasil.user.email,
+      email: user.email,
       dibuatPada: serverTimestamp()
     });
     diag('Pengajuan tersimpan, menunggu keputusan pengurus.');
+
+    location.replace('pengajar.html');
   }catch(err){
     diag('GAGAL: ' + (err.code || err.message));
 
-    // Akun sudah jadi tapi pengajuannya belum tertulis. Halaman pengajar yang
-    // menanganinya, dan pengalihan di atas akan ke sana sendiri.
-    if(auth.currentUser) return;
+    pesan(el, err.code === 'permission-denied'
+      ? 'Server menolak pengajuan ini. Biasanya berarti aturan keamanan '
+        + 'Firestore belum diperbarui. Hubungi pengurus operasional.'
+      : esc(pesanAuth(err.code || '')), 'salah');
 
-    pesan(el, esc(pesanAuth(err.code || '')), 'salah');
     if(err.code === 'auth/email-already-in-use') antarKeIsian($('dfEmail'));
     tombol.disabled = false;
     tombol.textContent = 'Kirim pengajuan';
