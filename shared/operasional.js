@@ -415,6 +415,14 @@ onAuthStateChanged(auth, async (user) => {
         + (ajuan.alasan ? `<br>Alasannya: ${esc(ajuan.alasan)}` : '')
         + '<br><br>Kalau menurut Anda keliru, hubungi pengurus operasional yang masih aktif.',
         'salah');
+    }else if(ajuan && ['dicabut', 'diterima'].includes(ajuan.status)){
+      // Statusnya diterima atau dicabut, tetapi dokumen admins-nya sudah tidak
+      // ada. Keduanya berarti hal yang sama: wewenangnya pernah ada dan kini
+      // sudah dicabut, entah dari web maupun dari Firebase Console.
+      pesan($('pesanMasuk'),
+        'Akun ini <strong>pernah menjadi pengurus</strong>, tetapi wewenangnya sudah dicabut, '
+        + 'jadi halaman ini tidak bisa dibuka lagi. Kalau menurut Anda keliru, hubungi pengurus yang masih aktif.',
+        'salah');
     }else if(ajuan){
       pesan($('pesanMasuk'),
         'Masuk berhasil. Pengajuan Anda <strong>masih menunggu</strong> keputusan pengurus, '
@@ -2172,6 +2180,17 @@ function statusAkunOp(a){
   return a.status || 'menunggu';
 }
 
+// Status "dicabut" hanya ada di antrean pengurus, jadi labelnya ditambahkan
+// di sini tanpa menyentuh daftar status milik akun pengajar.
+const STATUS_AKUN_OP = {
+  ...STATUS_AKUN,
+  dicabut: { label: 'Dicabut', kelas: 'libur' },
+};
+
+function adminAbsolut(a){
+  return a.absolut === true;
+}
+
 function sudahDiangkat(a){
   return data.admins.some(x => x.id === a.id);
 }
@@ -2206,9 +2225,12 @@ function gambarAkunOperasional(){
       <th>Pendaftar</th><th>NRP</th><th>Status</th><th>Diputuskan oleh</th><th></th>
     </tr></thead>
     <tbody>${baris.map(a => {
-      const s = statusAkunOp(a);
-      const l = STATUS_AKUN[s] || STATUS_AKUN.menunggu;
       const diangkat = sudahDiangkat(a);
+      // Baris yang statusnya diterima tetapi dokumen admins-nya sudah tidak
+      // ada berarti dicabut lewat Firebase Console. Ditampilkan apa adanya
+      // sebagai dicabut, bukan diterima, supaya tabelnya tidak berbohong.
+      const s = (statusAkunOp(a) === 'diterima' && !diangkat) ? 'dicabut' : statusAkunOp(a);
+      const l = STATUS_AKUN_OP[s] || STATUS_AKUN_OP.menunggu;
       // Baris yang sudah diangkat tidak punya keputusan lain: dokumennya di
       // "admins" hanya bisa dicabut lewat Console, jadi tombolnya tidak
       // ditawarkan sama sekali daripada menawarkan yang pasti ditolak server.
@@ -2249,7 +2271,7 @@ function gambarAkunOperasional(){
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'adminakun', a.id));
       await catat('hapus', 'akunoperasional', `${a.nama} · ${a.email}`,
-        `Pengajuan berstatus ${(STATUS_AKUN[s] || {}).label || s} dihapus, NRP ${a.nrp || 'tidak ada'}`);
+        `Pengajuan berstatus ${(STATUS_AKUN_OP[s] || {}).label || s} dihapus, NRP ${a.nrp || 'tidak ada'}`);
       tutupKeputusanAkunOp();
       await muatSemua();
       status('Pengajuan dihapus.', 'benar');
@@ -2275,18 +2297,118 @@ function gambarPengurus(){
     t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada pengurus yang terdaftar.</td></tr></tbody>';
     return;
   }
+  // Admin absolut diletakkan paling atas: dialah yang perlu dicari orang
+  // saat ada masalah yang tidak bisa dibereskan pengurus biasa.
+  const urut = [...data.admins].sort((a, b) =>
+    (adminAbsolut(b) ? 1 : 0) - (adminAbsolut(a) ? 1 : 0)
+    || String(a.nama || '').localeCompare(String(b.nama || '')));
+  const uidSaya = auth.currentUser ? auth.currentUser.uid : null;
+
   t.innerHTML = `
-    <thead><tr><th>Nama</th><th>Email</th><th>Diangkat oleh</th><th>Sejak</th></tr></thead>
-    <tbody>${data.admins.map(a => {
+    <thead><tr><th>Nama</th><th>Email</th><th>Tingkat</th><th>Diangkat oleh</th><th>Sejak</th><th></th></tr></thead>
+    <tbody>${urut.map(a => {
       const sejak = a.diputusPada && typeof a.diputusPada.toDate === 'function'
         ? waktuPanjang(a.diputusPada.toDate()) : '';
+      const absolut = adminAbsolut(a);
+      const saya = a.id === uidSaya;
+      /*
+        Tombol cabut tidak ditawarkan untuk diri sendiri dan untuk admin
+        absolut. Keduanya memang ditolak server, jadi menampilkannya hanya akan
+        menawarkan tombol yang pasti gagal.
+      */
+      const tindakan = absolut
+        ? '<span class="op-samar">Tidak bisa dicabut</span>'
+        : (saya
+            ? '<span class="op-samar">Diri sendiri</span>'
+            : `<button class="op-mini op-hapus" data-cabut-admin="${esc(a.id)}">Cabut</button>`);
       return `<tr>
-        <td>${esc(a.nama || '(tanpa nama)')}${a.id === auth.currentUser?.uid ? ' <span class="op-samar">(Anda)</span>' : ''}</td>
+        <td>${esc(a.nama || '(tanpa nama)')}${saya ? ' <span class="op-samar">(Anda)</span>' : ''}</td>
         <td>${esc(a.email || '')}</td>
+        <td>${absolut
+          ? '<span class="op-lencana pindah">Admin absolut</span>'
+          : '<span class="op-lencana menyusul">Pengurus biasa</span>'}</td>
         <td class="op-samar">${esc(a.diputusOleh || 'Firebase Console')}</td>
         <td class="op-samar">${esc(sejak)}</td>
+        <td>${tindakan}</td>
       </tr>`;
     }).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-cabut-admin]').forEach(b => b.addEventListener('click', () => {
+    cabutPengurus(b.dataset.cabutAdmin);
+  }));
+}
+
+/*
+  Mencabut pengurus biasa dari web.
+
+  Diminta dikonfirmasi DUA KALI, dan yang kedua bukan sekadar tombol OK lagi,
+  melainkan mengetik ulang nama orangnya. Tombol OK kedua terlalu mudah
+  ditekan sambil lalu, sedangkan mengetik nama memaksa membaca siapa yang
+  akan dicabut. Akibatnya juga langsung: begitu tersimpan, orang itu tidak
+  bisa lagi membuka halaman ini meski sedang terbuka di perambannya.
+
+  Baris pengajuannya ikut diberi status "dicabut" dalam satu kelompok tulis,
+  supaya antrean dan daftar pengurus tidak pernah saling bertentangan, dan
+  supaya orang itu membaca keterangan yang benar saat mencoba masuk. Baris
+  itu tetap bisa diangkat kembali lewat tombol Putuskan kalau pencabutannya
+  ternyata keliru.
+*/
+async function cabutPengurus(uid){
+  const a = data.admins.find(x => x.id === uid);
+  if(!a) return;
+  if(adminAbsolut(a)){
+    status('Admin absolut tidak bisa dicabut lewat web.', 'salah');
+    return;
+  }
+  if(auth.currentUser && a.id === auth.currentUser.uid){
+    status('Anda tidak bisa mencabut diri sendiri. Minta pengurus lain yang melakukannya.', 'salah');
+    return;
+  }
+
+  const nama = a.nama || a.email || '(tanpa nama)';
+  if(!confirm(
+    `Cabut wewenang pengurus dari ${nama}?\n\n`
+    + 'Begitu tersimpan, orang ini tidak bisa lagi membuka halaman operasional, '
+    + 'bahkan jika halamannya sedang terbuka. Akun Firebase-nya tetap ada, dan '
+    + 'wewenangnya bisa diberikan lagi lewat tombol Putuskan di antrean.')) return;
+
+  const ketikan = prompt(
+    `Konfirmasi kedua. Ketik nama orang itu persis seperti ini untuk melanjutkan:\n\n${nama}`);
+  if(ketikan === null) return;
+  if(ketikan.trim().toLowerCase() !== String(nama).trim().toLowerCase()){
+    status('Nama yang diketik tidak sama. Pencabutan dibatalkan.', 'salah');
+    return;
+  }
+
+  const ajuan = data.adminakun.find(x => x.id === uid);
+  try{
+    status('Mencabut wewenang…', 'sibuk');
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'admins', uid));
+    if(ajuan){
+      const muatan = {
+        status: 'dicabut',
+        nama: ajuan.nama, nrp: ajuan.nrp, email: ajuan.email,
+        alasan: '',
+        diputusPada: serverTimestamp(),
+        diputusOleh: pemakai.email,
+      };
+      if(ajuan.dibuatPada) muatan.dibuatPada = ajuan.dibuatPada;
+      batch.set(doc(db, 'adminakun', uid), muatan);
+    }
+    await batch.commit();
+
+    await catat('hapus', 'akunoperasional', `${nama} · ${a.email || ''}`,
+      'Wewenang pengurus operasional dicabut'
+      + (a.diputusOleh ? `, sebelumnya diangkat oleh ${a.diputusOleh}` : ''));
+    await muatSemua();
+    status(`Wewenang ${nama} sudah dicabut.`, 'benar');
+  }catch(err){
+    console.error(err);
+    status(err.code === 'permission-denied'
+      ? 'Server menolak pencabutan ini. Kalau orangnya admin absolut, memang tidak bisa dicabut dari web. Kalau bukan, aturan Firestore mungkin belum diperbarui.'
+      : 'Gagal mencabut: ' + err.message, 'salah');
+  }
 }
 
 /* ---------- formulir keputusan ---------- */
@@ -2298,6 +2420,8 @@ function bukaKeputusanAkunOp(id){
   $('aoSiapa').textContent = `${a.nama || '(tanpa nama)'} · NRP ${a.nrp || '-'}`;
   $('aoRincian').textContent = a.email || '';
   $('aoStatus').value = statusAkunOp(a) === 'ditolak' ? 'ditolak' : 'diterima';
+  // Baris yang pernah dicabut bisa diangkat kembali dari sini. Aturan
+  // Firestore tetap menuntut nama dan emailnya sama dengan pengajuan aslinya.
   $('aoAlasan').value = a.alasan || '';
   bersihkanPesan($('pesanAkunOp'));
   $('formAkunOp').hidden = false;
@@ -2338,8 +2462,8 @@ $('formAkunOp').addEventListener('submit', async (e) => {
   // minta ditekan dua kali, bukan sekali tersenggol.
   if(status_ === 'diterima' && el.dataset.konfirmasi !== '1'){
     pesan(el,
-      `${esc(a.nama)} akan mendapat wewenang yang sama dengan Anda, termasuk menerima pendaftar lain, `
-      + 'dan pencabutannya hanya bisa lewat Firebase Console. Tekan Simpan keputusan sekali lagi kalau memang benar.',
+      `${esc(a.nama)} akan menjadi pengurus biasa: bisa mengubah semua jadwal, menerima pendaftar lain, `
+      + 'dan mencabut pengurus biasa termasuk Anda. Tekan Simpan keputusan sekali lagi kalau memang benar.',
       'hati');
     el.dataset.konfirmasi = '1';
     return;
@@ -2378,7 +2502,7 @@ $('formAkunOp').addEventListener('submit', async (e) => {
     await batch.commit();
 
     await catat('ubah', 'akunoperasional',
-      `${a.nama} · ${(STATUS_AKUN[status_] || {}).label || status_}`,
+      `${a.nama} · ${(STATUS_AKUN_OP[status_] || {}).label || status_}`,
       status_ === 'diterima'
         ? `Diangkat menjadi pengurus operasional, email ${a.email}, NRP ${a.nrp || 'tidak ada'}`
         : `Alasan: ${alasan}`);

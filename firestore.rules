@@ -66,10 +66,22 @@
                         kuliah. Kalau diisi true, kolom mk tidak dipakai.
 
   CARA MENCABUT AKSES PENGURUS OPERASIONAL:
-  Hanya lewat Firebase Console: hapus dokumennya dari koleksi "admins". Efeknya
-  langsung. Menghapus akunnya di Authentication juga boleh, tapi menghapus
-  dokumen admin sudah cukup. Pencabutan sengaja tidak bisa dilakukan dari web,
-  lihat keterangan di aturan koleksi "admins".
+  Pengurus biasa bisa dicabut dari web: tab "Akun Operasional", daftar
+  "Pengurus aktif", tombol "Cabut". Pencabutannya diminta dikonfirmasi dua
+  kali. Yang tidak bisa dicabut dari web adalah admin absolut, lihat di bawah.
+  Lewat Firebase Console juga tetap bisa: hapus dokumennya dari koleksi
+  "admins", efeknya langsung.
+
+  ADMIN ABSOLUT:
+  Satu atau beberapa pengurus yang tidak bisa dicabut oleh siapa pun lewat web.
+  Ditandai dengan kolom "absolut" bernilai true pada dokumennya di koleksi
+  "admins", dan kolom itu HANYA bisa diisi lewat Firebase Console. Aturan di
+  bawah menolak dokumen admins yang membawa kolom itu saat dibuat dari web, dan
+  menolak semua pengubahan dari web, jadi tidak ada jalan mengangkat diri
+  sendiri menjadi absolut maupun mencopot keabsolutan orang lain.
+
+  Cara menandainya: Firestore Database -> Data -> koleksi "admins" -> buka
+  dokumen pengurusnya -> Add field: absolut (boolean) = true.
 */
 
 rules_version = '2';
@@ -169,10 +181,16 @@ service cloud.firestore {
         3. Kolom diputusOleh harus email akun yang sedang login, sehingga
            setiap pengangkatan tercatat siapa yang menyetujuinya.
 
-      Yang TETAP ditutup adalah mengubah dan menghapus. Mencabut pengurus hanya
-      bisa lewat Firebase Console. Ini pembatas terakhir: akun yang diambil
-      alih bisa menambah orang, tetapi tidak bisa menyingkirkan pengurus lain
-      dan menguasai halaman ini sendirian.
+      MENCABUT dibuka dengan dua pagar. Pengurus tidak bisa mencabut dirinya
+      sendiri, dan tidak bisa mencabut dokumen yang kolom "absolut"-nya true.
+      Kolom itu hanya bisa diisi lewat Firebase Console, karena create dari web
+      menolaknya dan update dari web ditutup sama sekali. Jadi admin absolut
+      adalah pembatas terakhir: akun pengurus biasa yang diambil alih bisa
+      menyingkirkan pengurus biasa lain, tetapi tidak pernah bisa menyingkirkan
+      admin absolut, dan admin absolut selalu bisa membereskannya.
+
+      Mengubah tetap ditutup. Nama dan email pengurus dikunci pada nilai saat
+      diangkat, dan keabsolutan tidak bisa dinyalakan atau dimatikan dari web.
     */
     function pengangkatanSah(uid, isi) {
       let ajuan = get(/databases/$(database)/documents/adminakun/$(uid)).data;
@@ -191,7 +209,10 @@ service cloud.firestore {
                     && request.auth.uid != uid
                     && exists(/databases/$(database)/documents/adminakun/$(uid))
                     && pengangkatanSah(uid, request.resource.data);
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if adminTerdaftar()
+                    && request.auth.uid != uid
+                    && resource.data.get('absolut', false) != true;
     }
 
     // ---------- Pengajuan akun pengurus operasional ----------
@@ -224,7 +245,7 @@ service cloud.firestore {
         && baru.nrp   == lama.nrp
         && baru.nama  == lama.nama
         && baru.email == lama.email
-        && baru.status in ['menunggu', 'diterima', 'ditolak']
+        && baru.status in ['menunggu', 'diterima', 'ditolak', 'dicabut']
         && baru.diputusOleh == request.auth.token.email
         && baru.get('alasan', '') is string
         && baru.get('alasan', '').size() <= 200;

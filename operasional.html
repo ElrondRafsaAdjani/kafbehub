@@ -495,7 +495,7 @@
         <div>
           <h2>Akun Operasional</h2>
           <p>Pengajuan dari tautan "Daftar akun baru" di halaman masuk. Selama belum diterima di sini, akunnya bisa masuk tetapi tidak bisa membuka apa pun.</p>
-          <p><strong>Terima</strong> mengangkatnya menjadi pengurus dengan wewenang yang sama seperti Anda, termasuk menerima pendaftar berikutnya. <strong>Tolak</strong> menutup pintunya dan barisnya tetap ada, sehingga orangnya tidak bisa mendaftar lagi. <strong>Hapus</strong> membuang baris yang belum diangkat, dan itulah yang membuka kesempatan mendaftar ulang.</p>
+          <p><strong>Terima</strong> mengangkatnya menjadi pengurus biasa, dengan wewenang menerima pendaftar berikutnya dan mencabut pengurus biasa lain. <strong>Tolak</strong> menutup pintunya dan barisnya tetap ada, sehingga orangnya tidak bisa mendaftar lagi. <strong>Hapus</strong> membuang baris yang belum diangkat, dan itulah yang membuka kesempatan mendaftar ulang.</p>
         </div>
       </div>
 
@@ -521,7 +521,7 @@
           </div>
         </div>
         <p class="op-catatan" id="aoPeringatan">
-          Pengangkatan tidak bisa dibatalkan dari halaman ini. Mencabut pengurus hanya bisa lewat Firebase Console, jadi pastikan Anda mengenal orang ini.
+          Begitu diangkat, orang ini bisa mengubah semua jadwal, menerima pendaftar lain, dan mencabut pengurus biasa termasuk Anda. Pastikan Anda mengenal orangnya.
         </p>
         <div class="op-aksi">
           <button type="submit" class="btn btn-primary op-kecil">Simpan keputusan</button>
@@ -537,6 +537,7 @@
           <option value="menunggu">Menunggu</option>
           <option value="diterima">Diterima</option>
           <option value="ditolak">Ditolak</option>
+          <option value="dicabut">Dicabut</option>
         </select>
       </div>
 
@@ -548,7 +549,7 @@
 
       <h3>Pengurus aktif</h3>
       <p class="op-catatan">
-        Semua akun yang saat ini bisa membuka halaman ini. Mencabutnya hanya bisa lewat Firebase Console, dengan menghapus dokumennya dari koleksi <code>admins</code>.
+        Semua akun yang saat ini bisa membuka halaman ini. Pengurus biasa bisa dicabut dari sini oleh pengurus lain, dan pencabutannya diminta dikonfirmasi dua kali. <strong>Admin absolut</strong> tidak bisa dicabut oleh siapa pun lewat web; tandanya hanya bisa dipasang lewat Firebase Console.
       </p>
       <div class="op-tabel-bungkus">
         <table class="op-tabel" id="tabelPengurus"></table>

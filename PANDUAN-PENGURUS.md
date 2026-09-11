@@ -341,25 +341,54 @@ keterangan bahwa pengajuannya masih menunggu.
 
 Tiap baris punya tiga tindakan:
 
-- **Terima.** Orang itu langsung menjadi pengurus dengan wewenang yang sama
-  dengan Anda, termasuk menerima pendaftar berikutnya. Karena itu tombolnya
-  minta ditekan dua kali, dan pastikan Anda mengenal orangnya.
+- **Terima.** Orang itu langsung menjadi pengurus biasa: bisa mengubah semua
+  jadwal, menerima pendaftar berikutnya, dan mencabut pengurus biasa lain
+  termasuk Anda. Karena itu tombolnya minta ditekan dua kali, dan pastikan
+  Anda mengenal orangnya.
 - **Tolak.** Wajib disertai alasan, yang akan dibaca pendaftar saat mencoba
   masuk. Barisnya tetap ada, sehingga orang yang sama tidak bisa mendaftar
   lagi dengan email itu.
 - **Hapus.** Membuang baris yang belum diangkat, dan justru itulah yang
   membuka kesempatan mendaftar ulang.
 
-> **Pengangkatan tidak bisa dibatalkan dari web.** Mencabut pengurus hanya
-> bisa lewat Firebase Console, dengan menghapus dokumennya dari koleksi
-> `admins`. Ini disengaja sebagai pembatas terakhir: akun pengurus yang diambil
-> alih bisa menambah orang, tetapi tidak bisa menyingkirkan pengurus lain dan
-> menguasai halaman ini sendirian.
-
 Di bawah antreannya ada daftar **Pengurus aktif**: semua akun yang saat ini
-bisa membuka halaman ini, beserta siapa yang mengangkatnya dan kapan. Akun yang
-dibuat langsung lewat Firebase Console tercatat diangkat oleh "Firebase
-Console".
+bisa membuka halaman ini, beserta tingkatnya, siapa yang mengangkatnya, dan
+kapan. Akun yang dibuat langsung lewat Firebase Console tercatat diangkat oleh
+"Firebase Console".
+
+#### Dua tingkat pengurus
+
+| Tingkat | Siapa | Bisa dicabut dari web? |
+|---|---|---|
+| **Pengurus biasa** | Anggota operasional yang mendaftar dan diterima, biasanya memakai email UBAYA dengan NRP | Ya, oleh pengurus lain |
+| **Admin absolut** | Pemegang tetap, saat ini akun pemilik situs | Tidak, oleh siapa pun |
+
+Wewenang keduanya di halaman ini sama. Bedanya hanya satu: admin absolut tidak
+bisa dicabut lewat web. Ia adalah pembatas terakhir. Akun pengurus biasa yang
+diambil alih bisa mencabut pengurus biasa lain, tetapi tidak pernah bisa
+menyingkirkan admin absolut, sehingga admin absolut selalu bisa membereskannya.
+
+Tanda absolut **hanya bisa dipasang lewat Firebase Console**, tidak dari web:
+buka koleksi `admins`, buka dokumen pengurusnya, lalu tambahkan field
+`absolut` bertipe boolean dengan nilai `true`. Aturan Firestore menolak dokumen
+yang membawa kolom itu saat dibuat dari web, dan menolak semua pengubahan dari
+web, jadi tidak ada jalan mengangkat diri sendiri menjadi absolut.
+
+#### Mencabut pengurus biasa
+
+Tekan **Cabut** pada barisnya di daftar Pengurus aktif. Pencabutannya diminta
+dikonfirmasi dua kali: pertama kotak peringatan, kedua mengetik ulang nama
+orangnya. Yang kedua sengaja bukan sekadar tombol OK lagi, karena tombol OK
+kedua terlalu mudah ditekan sambil lalu.
+
+Akibatnya langsung. Orang itu tidak bisa lagi membuka halaman operasional,
+bahkan jika halamannya sedang terbuka di perambannya, dan saat mencoba masuk ia
+membaca keterangan bahwa wewenangnya sudah dicabut. Baris pengajuannya berubah
+menjadi **Dicabut** dan tetap ada, jadi kalau pencabutannya keliru, wewenangnya
+bisa diberikan lagi lewat tombol **Putuskan** pada baris itu.
+
+Anda tidak bisa mencabut diri sendiri. Kalau memang ingin berhenti, minta
+pengurus lain yang mencabut.
 
 ### Pengumuman
 
@@ -813,10 +842,11 @@ tiap kali ada mata kuliah baru.
 
 ### Mencabut akses
 
-Untuk operasional dan admin situs, hapus dokumennya dari koleksi `admins` atau
-`adminutama` di Firestore. Efeknya langsung. Pencabutan pengurus operasional
-sengaja tidak bisa dilakukan dari web, lihat keterangan di bagian **Akun
-Operasional**.
+Untuk pengurus operasional biasa, buka `/operasional` tab **Akun
+Operasional**, daftar Pengurus aktif, tombol **Cabut**. Lewat Firebase Console
+juga bisa, dengan menghapus dokumennya dari koleksi `admins`. Admin absolut
+hanya bisa dicabut lewat Console. Untuk admin situs, hapus dokumennya dari
+koleksi `adminutama`. Efeknya langsung.
 
 Untuk pengajar, buka `/operasional` tab **Akun Pengajar**. Ada tiga pilihan
 dengan akibat yang berbeda:
