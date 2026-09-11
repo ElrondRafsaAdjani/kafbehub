@@ -66,7 +66,7 @@
                         kuliah. Kalau diisi true, kolom mk tidak dipakai.
 
   CARA MENCABUT AKSES PENGURUS OPERASIONAL:
-  Pengurus biasa bisa dicabut dari web: tab "Akun Operasional", daftar
+  Admin operasional bisa dicabut dari web: tab "Akun Operasional", daftar
   "Pengurus aktif", tombol "Cabut". Pencabutannya diminta dikonfirmasi dua
   kali. Yang tidak bisa dicabut dari web adalah admin absolut, lihat di bawah.
   Lewat Firebase Console juga tetap bisa: hapus dokumennya dari koleksi
@@ -185,8 +185,8 @@ service cloud.firestore {
       sendiri, dan tidak bisa mencabut dokumen yang kolom "absolut"-nya true.
       Kolom itu hanya bisa diisi lewat Firebase Console, karena create dari web
       menolaknya dan update dari web ditutup sama sekali. Jadi admin absolut
-      adalah pembatas terakhir: akun pengurus biasa yang diambil alih bisa
-      menyingkirkan pengurus biasa lain, tetapi tidak pernah bisa menyingkirkan
+      adalah pembatas terakhir: akun admin operasional yang diambil alih bisa
+      menyingkirkan admin operasional lain, tetapi tidak pernah bisa menyingkirkan
       admin absolut, dan admin absolut selalu bisa membereskannya.
 
       Mengubah tetap ditutup. Nama dan email pengurus dikunci pada nilai saat

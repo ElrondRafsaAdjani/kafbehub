@@ -2298,7 +2298,7 @@ function gambarPengurus(){
     return;
   }
   // Admin absolut diletakkan paling atas: dialah yang perlu dicari orang
-  // saat ada masalah yang tidak bisa dibereskan pengurus biasa.
+  // saat ada masalah yang tidak bisa dibereskan admin operasional.
   const urut = [...data.admins].sort((a, b) =>
     (adminAbsolut(b) ? 1 : 0) - (adminAbsolut(a) ? 1 : 0)
     || String(a.nama || '').localeCompare(String(b.nama || '')));
@@ -2326,7 +2326,7 @@ function gambarPengurus(){
         <td>${esc(a.email || '')}</td>
         <td>${absolut
           ? '<span class="op-lencana pindah">Admin absolut</span>'
-          : '<span class="op-lencana menyusul">Pengurus biasa</span>'}</td>
+          : '<span class="op-lencana menyusul">Admin operasional</span>'}</td>
         <td class="op-samar">${esc(a.diputusOleh || 'Firebase Console')}</td>
         <td class="op-samar">${esc(sejak)}</td>
         <td>${tindakan}</td>
@@ -2339,7 +2339,7 @@ function gambarPengurus(){
 }
 
 /*
-  Mencabut pengurus biasa dari web.
+  Mencabut admin operasional dari web.
 
   Diminta dikonfirmasi DUA KALI, dan yang kedua bukan sekadar tombol OK lagi,
   melainkan mengetik ulang nama orangnya. Tombol OK kedua terlalu mudah
@@ -2462,8 +2462,8 @@ $('formAkunOp').addEventListener('submit', async (e) => {
   // minta ditekan dua kali, bukan sekali tersenggol.
   if(status_ === 'diterima' && el.dataset.konfirmasi !== '1'){
     pesan(el,
-      `${esc(a.nama)} akan menjadi pengurus biasa: bisa mengubah semua jadwal, menerima pendaftar lain, `
-      + 'dan mencabut pengurus biasa termasuk Anda. Tekan Simpan keputusan sekali lagi kalau memang benar.',
+      `${esc(a.nama)} akan menjadi admin operasional: bisa mengubah semua jadwal, menerima pendaftar lain, `
+      + 'dan mencabut admin operasional lain termasuk Anda. Tekan Simpan keputusan sekali lagi kalau memang benar.',
       'hati');
     el.dataset.konfirmasi = '1';
     return;

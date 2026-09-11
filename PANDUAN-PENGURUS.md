@@ -341,8 +341,8 @@ keterangan bahwa pengajuannya masih menunggu.
 
 Tiap baris punya tiga tindakan:
 
-- **Terima.** Orang itu langsung menjadi pengurus biasa: bisa mengubah semua
-  jadwal, menerima pendaftar berikutnya, dan mencabut pengurus biasa lain
+- **Terima.** Orang itu langsung menjadi admin operasional: bisa mengubah semua
+  jadwal, menerima pendaftar berikutnya, dan mencabut admin operasional lain
   termasuk Anda. Karena itu tombolnya minta ditekan dua kali, dan pastikan
   Anda mengenal orangnya.
 - **Tolak.** Wajib disertai alasan, yang akan dibaca pendaftar saat mencoba
@@ -360,12 +360,12 @@ kapan. Akun yang dibuat langsung lewat Firebase Console tercatat diangkat oleh
 
 | Tingkat | Siapa | Bisa dicabut dari web? |
 |---|---|---|
-| **Pengurus biasa** | Anggota operasional yang mendaftar dan diterima, biasanya memakai email UBAYA dengan NRP | Ya, oleh pengurus lain |
+| **Admin operasional** | Anggota operasional yang mendaftar dan diterima, biasanya memakai email UBAYA dengan NRP | Ya, oleh pengurus lain |
 | **Admin absolut** | Pemegang tetap, saat ini akun pemilik situs | Tidak, oleh siapa pun |
 
 Wewenang keduanya di halaman ini sama. Bedanya hanya satu: admin absolut tidak
-bisa dicabut lewat web. Ia adalah pembatas terakhir. Akun pengurus biasa yang
-diambil alih bisa mencabut pengurus biasa lain, tetapi tidak pernah bisa
+bisa dicabut lewat web. Ia adalah pembatas terakhir. Akun admin operasional yang
+diambil alih bisa mencabut admin operasional lain, tetapi tidak pernah bisa
 menyingkirkan admin absolut, sehingga admin absolut selalu bisa membereskannya.
 
 Tanda absolut **hanya bisa dipasang lewat Firebase Console**, tidak dari web:
@@ -374,7 +374,7 @@ buka koleksi `admins`, buka dokumen pengurusnya, lalu tambahkan field
 yang membawa kolom itu saat dibuat dari web, dan menolak semua pengubahan dari
 web, jadi tidak ada jalan mengangkat diri sendiri menjadi absolut.
 
-#### Mencabut pengurus biasa
+#### Mencabut admin operasional
 
 Tekan **Cabut** pada barisnya di daftar Pengurus aktif. Pencabutannya diminta
 dikonfirmasi dua kali: pertama kotak peringatan, kedua mengetik ulang nama
