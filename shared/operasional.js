@@ -18,7 +18,8 @@ const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
 
 const { initializeApp } = await import(`${SDK}/firebase-app.js`);
 const {
-  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  signOut, onAuthStateChanged,
 } = await import(`${SDK}/firebase-auth.js`);
 const {
   getFirestore, collection, doc, getDoc, getDocs,
@@ -182,6 +183,10 @@ function pesanAuth(kode){
       return 'Gagal menghubungi server. Periksa koneksi internet Anda.';
     case 'auth/configuration-not-found':
       return 'Metode masuk email dan kata sandi belum diaktifkan di Firebase Console.';
+    case 'auth/email-already-in-use':
+      return 'Email ini sudah punya akun. Masuk dengan kata sandinya, atau hubungi pengurus kalau lupa.';
+    case 'auth/weak-password':
+      return 'Kata sandi terlalu pendek. Pakai paling sedikit 8 karakter.';
     default:
       return 'Tidak bisa masuk (' + kode + ').';
   }
@@ -209,12 +214,142 @@ $('formMasuk').addEventListener('submit', async (e) => {
 
 $('tombolKeluar').addEventListener('click', () => signOut(auth));
 
+/* ---------- pendaftaran pengurus baru ---------- */
+
+/*
+  Pendaftaran berjalan dalam dua langkah yang harus berurutan: membuat akun
+  Firebase, lalu menulis baris pengajuan atas nama akun itu. Aturan Firestore
+  hanya mengizinkan pemilik akun menulis pengajuannya sendiri, jadi urutannya
+  memang tidak bisa dibalik.
+
+  Kalau langkah kedua gagal, akunnya sudah terlanjur jadi. Formulir yang sama
+  lalu berpindah ke keadaan melengkapi: kotak email dan kata sandi dilepas,
+  dan yang tersisa tinggal nama dan NRP. Keadaan yang sama juga dipakai saat
+  akun seperti itu masuk lagi di lain hari.
+*/
+let sedangMendaftar = false;
+let akunLanjutan = null;   // akun yang sudah ada, tinggal pengajuannya
+
+function tampilkanDaftar(buka){
+  $('formMasuk').hidden = buka;
+  $('formDaftar').hidden = !buka;
+  $('catatanMasuk').hidden = buka;
+  $('catatanDaftar').hidden = !buka;
+  bersihkanPesan($('pesanMasuk'));
+  bersihkanPesan($('pesanDaftar'));
+  if(buka) $('dfNama').focus();
+  else $('email').focus();
+}
+
+function pasangModeLanjutan(user){
+  akunLanjutan = user;
+  $('dfBagianAkun').hidden = true;
+  $('dfCatatanLanjutan').hidden = false;
+  $('dfCatatanLanjutan').textContent =
+    `Akun ${user.email} sudah ada, tinggal pengajuannya yang belum tersimpan. Lengkapi nama dan NRP, lalu kirim.`;
+  tampilkanDaftar(true);
+}
+
+function lepasModeLanjutan(){
+  akunLanjutan = null;
+  $('dfBagianAkun').hidden = false;
+  $('dfCatatanLanjutan').hidden = true;
+}
+
+$('bukaDaftar').addEventListener('click', () => { lepasModeLanjutan(); tampilkanDaftar(true); });
+$('bukaMasuk').addEventListener('click', async () => {
+  // Kembali dari keadaan melengkapi berarti meninggalkan akun yang sedang
+  // masuk. Dikeluarkan dulu supaya halaman masuk benar-benar bersih.
+  if(akunLanjutan){
+    try{ await signOut(auth); }catch(err){ console.warn('Gagal keluar', err); }
+  }
+  lepasModeLanjutan();
+  tampilkanDaftar(false);
+});
+
+$('formDaftar').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanDaftar');
+  const tombol = $('tombolDaftar');
+  bersihkanPesan(el);
+
+  const nama = $('dfNama').value.trim().replace(/\s+/g, ' ');
+  const nrp = $('dfNrp').value.trim();
+  const email = akunLanjutan ? akunLanjutan.email : $('dfEmail').value.trim().toLowerCase();
+  const sandi = $('dfSandi').value;
+  const sandi2 = $('dfSandi2').value;
+
+  // Pemeriksaan di sini hanya untuk kenyamanan. Yang benar-benar menolak
+  // pengajuan yang tidak sah adalah aturan Firestore.
+  const salah = [];
+  if(nama.length < 3) salah.push('Nama lengkap paling sedikit 3 huruf.');
+  if(!/^[0-9]{6,15}$/.test(nrp)) salah.push('NRP harus berupa angka, 6 sampai 15 digit.');
+  if(!akunLanjutan){
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) salah.push('Format email tidak benar.');
+    if(sandi.length < 8) salah.push('Kata sandi paling sedikit 8 karakter.');
+    if(sandi !== sandi2) salah.push('Kata sandi dan ulangannya tidak sama.');
+  }
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa dikirim:', salah), 'salah'); return; }
+
+  tombol.disabled = true;
+  tombol.textContent = 'Mengirim…';
+  sedangMendaftar = true;
+
+  try{
+    let user = akunLanjutan;
+    if(!user){
+      diag('Membuat akun Firebase untuk ' + email + ' …');
+      const hasil = await createUserWithEmailAndPassword(auth, email, sandi);
+      user = hasil.user;
+      diag('Akun dibuat. UID: ' + user.uid);
+      $('dfSandi').value = '';
+      $('dfSandi2').value = '';
+      // Kalau langkah berikutnya gagal, formulir sudah dalam keadaan
+      // melengkapi dan percobaan ulang tinggal menekan tombolnya lagi.
+      pasangModeLanjutan(user);
+    }
+
+    diag('Menulis pengajuan ke adminakun/' + user.uid + ' …');
+    await setDoc(doc(db, 'adminakun', user.uid), {
+      status: 'menunggu',
+      nama, nrp,
+      email: user.email,
+      dibuatPada: serverTimestamp(),
+    });
+    diag('Pengajuan tersimpan, menunggu keputusan pengurus.');
+
+    // Akun dikeluarkan lagi: sampai diterima, tidak ada yang bisa dibuka.
+    try{ await signOut(auth); }catch(err){ console.warn('Gagal keluar setelah mendaftar', err); }
+    lepasModeLanjutan();
+    $('formDaftar').reset();
+    tampilkanDaftar(false);
+    pesan($('pesanMasuk'),
+      `Pengajuan atas nama <strong>${esc(nama)}</strong> sudah terkirim. `
+      + 'Tunggu pengurus yang sudah ada menerimanya, lalu masuk seperti biasa dengan email dan kata sandi tadi.',
+      'benar');
+  }catch(err){
+    diag('GAGAL mendaftar: ' + (err.code || err.message));
+    pesan(el, err.code === 'permission-denied'
+      ? 'Server menolak pengajuan ini. Biasanya berarti aturan keamanan Firestore belum diperbarui. Hubungi pengurus operasional.'
+      : esc(pesanAuth(err.code || '')), 'salah');
+  }finally{
+    sedangMendaftar = false;
+    tombol.disabled = false;
+    tombol.textContent = 'Kirim pengajuan';
+  }
+});
+
 onAuthStateChanged(auth, async (user) => {
   if(!user){
     $('layarMasuk').hidden = false;
     $('aplikasi').hidden = true;
     return;
   }
+
+  // Selagi mendaftar, akunnya sudah jadi tetapi pengajuannya belum tertulis.
+  // Kalau sesi baru itu dinilai sekarang, ia terbaca sebagai akun tanpa
+  // pengajuan dan langsung dikeluarkan di tengah pendaftaran.
+  if(sedangMendaftar) return;
 
   diag('Sesi aktif sebagai ' + user.email);
   diag('UID akun ini: ' + user.uid);
@@ -240,20 +375,61 @@ onAuthStateChanged(auth, async (user) => {
     // penjelasan apa pun, dan itu justru yang paling membingungkan.
     if(galat){
       pesan($('pesanMasuk'),
-        'Masuk berhasil, tetapi status admin tidak bisa diperiksa.<br>'
+        'Masuk berhasil, tetapi status pengurus tidak bisa diperiksa.<br>'
         + `Pesan aslinya: <code>${esc(galat.message || galat.code || 'tidak diketahui')}</code><br><br>`
         + 'Biasanya ini berarti aturan keamanan Firestore belum terpasang. '
         + 'Lihat langkah 1.4 di PANDUAN-PENGURUS.md.',
         'salah');
-    }else{
+      try{ await signOut(auth); }
+      catch(err){ console.warn('Gagal keluar setelah penolakan admin', err); }
+      return;
+    }
+
+    /*
+      Akun ini sah, tetapi belum diangkat. Ada tiga kemungkinan, dan pemakai
+      berhak tahu yang mana:
+
+        1. Sudah mengajukan dan masih menunggu keputusan.
+        2. Sudah diputuskan ditolak, beserta alasannya.
+        3. Belum pernah mengajukan, misalnya karena jaringan putus tepat
+           setelah akunnya dibuat. Formulirnya dibuka lagi dalam keadaan
+           melengkapi, tanpa kotak kata sandi, karena akunnya sudah ada.
+
+      Dulu yang ditampilkan di sini adalah petunjuk mengisi Firebase Console.
+      Petunjuk itu tetap ada di rincian teknis, untuk keadaan darurat.
+    */
+    diag('Membaca pengajuan adminakun/' + user.uid + ' …');
+    let ajuan = null;
+    try{
+      const snap = await getDoc(doc(db, 'adminakun', user.uid));
+      if(snap.exists()) ajuan = snap.data();
+      diag('Pengajuan ' + (ajuan ? 'ditemukan, status ' + (ajuan.status || 'menunggu') : 'tidak ada'));
+    }catch(err){
+      diag('GAGAL membaca adminakun: ' + (err.code || err.message));
+    }
+    diag('Untuk pengangkatan darurat lewat Firebase Console, buat dokumen admins/' + user.uid);
+
+    if(ajuan && (ajuan.status || 'menunggu') === 'ditolak'){
       pesan($('pesanMasuk'),
-        'Masuk berhasil, tetapi akun ini belum terdaftar sebagai admin.<br><br>'
-        + 'Di Firestore, koleksi <code>admins</code> harus punya dokumen yang '
-        + '<strong>Document ID-nya persis sama</strong> dengan baris di bawah ini:'
-        + `<br><code class="op-uid">${esc(user.uid)}</code>`
-        + 'Pastikan menggunakan ID itu, <strong>bukan</strong> tombol Auto-ID, dan '
-        + 'UID-nya diletakkan sebagai Document ID, bukan sebagai isi field.',
+        'Pengajuan akun ini <strong>ditolak</strong> oleh pengurus.'
+        + (ajuan.alasan ? `<br>Alasannya: ${esc(ajuan.alasan)}` : '')
+        + '<br><br>Kalau menurut Anda keliru, hubungi pengurus operasional yang masih aktif.',
         'salah');
+    }else if(ajuan){
+      pesan($('pesanMasuk'),
+        'Masuk berhasil. Pengajuan Anda <strong>masih menunggu</strong> keputusan pengurus, '
+        + 'jadi halaman ini belum bisa dibuka. Coba lagi setelah ada kabar dari pengurus.',
+        'hati');
+    }else{
+      // Tidak dikeluarkan: menulis pengajuan butuh akun yang sedang masuk.
+      // Pesannya dipasang SESUDAH formulirnya dibuka, karena membuka formulir
+      // ikut membersihkan pesan lama.
+      pasangModeLanjutan(user);
+      pesan($('pesanDaftar'),
+        'Masuk berhasil, tetapi akun ini belum pernah mengajukan diri sebagai pengurus. '
+        + 'Lengkapi pengajuannya di atas, lalu kirim.',
+        'hati');
+      return;
     }
 
     try{ await signOut(auth); }
@@ -290,6 +466,8 @@ const data = {
   // Pengajuan akun dari halaman /pengajar. Isinya nama, NRP, dan email orang,
   // jadi tidak pernah ikut diterbitkan ke dokumen publik.
   pengajarakun: [],
+  adminakun: [],
+  admins: [],
 };
 
 /*
@@ -321,7 +499,7 @@ async function ambilKoleksi(nama){
 async function muatSemua(){
   status('Memuat data…', 'sibuk');
   try{
-    const [mk, jd, pb, pm, pg, gc, ko, ap] = await Promise.all([
+    const [mk, jd, pb, pm, pg, gc, ko, ap, ao, ad] = await Promise.all([
       ambilKoleksi('matakuliah'),
       ambilKoleksi('jadwal'),
       ambilKoleksi('perubahan'),
@@ -330,6 +508,8 @@ async function muatSemua(){
       ambilKoleksi('classroom'),
       ambilKoleksi('koordinator'),
       ambilKoleksi('pengajarakun'),
+      ambilKoleksi('adminakun'),
+      ambilKoleksi('admins'),
     ]);
     data.matakuliah = mk.sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
     data.jadwal = jd;
@@ -343,6 +523,10 @@ async function muatSemua(){
     data.pengajarakun = ap.sort((a, b) =>
       (a.status === 'menunggu' ? 0 : 1) - (b.status === 'menunggu' ? 0 : 1)
       || String(a.nama || '').localeCompare(String(b.nama || '')));
+    data.adminakun = ao.sort((a, b) =>
+      (a.status === 'menunggu' ? 0 : 1) - (b.status === 'menunggu' ? 0 : 1)
+      || String(a.nama || '').localeCompare(String(b.nama || '')));
+    data.admins = ad.sort((a, b) => String(a.nama || '').localeCompare(String(b.nama || '')));
 
     gambarSemua();
 
@@ -370,6 +554,8 @@ function gambarSemua(){
   gambarKelompok();
   gambarPengajar();
   gambarAkunPengajar();
+  gambarAkunOperasional();
+  gambarPengurus();
   gambarPengumuman();
   gambarClassroom();
   gambarKoordinator();
@@ -411,6 +597,125 @@ document.querySelectorAll('[data-batal]').forEach(btn => {
 function modeUbah(formId, aktif){
   const btn = document.querySelector(`[data-batal="${formId}"]`);
   if(btn) btn.hidden = !aktif;
+}
+
+/* ============================================================
+   4B. Alat bantu catatan log
+   ============================================================ */
+
+/*
+  Catatan "Ubah" harus menyebut apa yang berubah, bukan sekadar bahwa ada yang
+  berubah. Dua fungsi di bawah ini yang menyusun kalimatnya.
+
+  Yang dibandingkan hanya kolom yang disebutkan pemanggil, dan yang ditulis
+  hanya kolom yang isinya memang berbeda. Kolom yang sama tidak ikut disebut,
+  supaya catatan satu perubahan ruang tidak tenggelam di antara lima kolom
+  yang tidak berubah.
+*/
+function bedaKolom(lama, baru, kolom){
+  const out = [];
+  for(const k of kolom){
+    const a = k.ambil ? k.ambil(lama || {}) : (lama ? lama[k.k] : undefined);
+    const b = k.ambil ? k.ambil(baru || {}) : (baru ? baru[k.k] : undefined);
+    const ta = String(a == null ? '' : a).trim();
+    const tb = String(b == null ? '' : b).trim();
+    if(ta === tb) continue;
+    out.push(`${k.label} ${ta || 'kosong'} menjadi ${tb || 'kosong'}`);
+  }
+  return out.join('; ');
+}
+
+const KOLOM_LOG = {
+  matakuliah: [
+    { k:'kode', label:'kode' },
+    { k:'nama', label:'nama' },
+  ],
+  jadwal: [
+    { k:'hari', label:'hari' },
+    { label:'jam', ambil: x => (x.mulai || x.selesai) ? rentangJam(x.mulai, x.selesai) : '' },
+    { k:'ruang', label:'ruang' },
+    { k:'kp', label:'KP' },
+    { k:'kode', label:'kode' },
+  ],
+  pengajar: [
+    { k:'nama', label:'nama' },
+    { k:'nrp', label:'NRP' },
+    { label:'kelas', ambil: x => x.kode ? `${namaMatkul(x.kode) || x.kode} KP ${x.kp}` : '' },
+  ],
+  pengumuman: [
+    { k:'judul', label:'judul' },
+    { label:'isi', ambil: x => String(x.isi || '').slice(0, 80) + (String(x.isi || '').length > 80 ? '…' : '') },
+    { label:'disematkan', ambil: x => x.pin ? 'ya' : 'tidak' },
+    { label:'tayang mulai', ambil: x => x.mulai ? tanggalPanjang(x.mulai) : '' },
+    { label:'tayang sampai', ambil: x => x.selesai ? tanggalPanjang(x.selesai) : '' },
+  ],
+  classroom: [
+    { k:'classroom', label:'kode kelas' },
+    { k:'nama', label:'nama mata kuliah' },
+    { k:'kp', label:'KP' },
+    { k:'kode', label:'kode' },
+  ],
+  koordinator: [
+    { k:'koordinator', label:'koordinator' },
+    { k:'nrp', label:'NRP' },
+    { k:'kontak', label:'kontak' },
+    { k:'nama', label:'nama mata kuliah' },
+  ],
+  perubahan: [
+    { label:'jenis', ambil: x => LABEL_TIPE_LOG[x.tipe] || x.tipe || '' },
+    { label:'tanggal', ambil: x => x.tanggal ? tanggalPanjang(x.tanggal) : '' },
+    { label:'tanggal pengganti', ambil: x => x.tanggalBaru ? tanggalPanjang(x.tanggalBaru) : '' },
+    { label:'jam pengganti', ambil: x => (x.mulaiBaru && x.selesaiBaru) ? rentangJam(x.mulaiBaru, x.selesaiBaru) : '' },
+    { label:'ruang pengganti', ambil: x => x.ruangBaru || '' },
+    { k:'catatan', label:'catatan' },
+  ],
+};
+
+const LABEL_TIPE_LOG = {
+  libur: 'ditiadakan',
+  daring: 'daring',
+  pindah: 'dipindah',
+  menyusul: 'dipindah, jadwal menyusul',
+  ruang: 'pindah ruang',
+};
+
+/*
+  Satu kalimat utuh untuk satu perubahan sementara, disusun menurut jenisnya.
+
+  Bentuk mentahnya, misalnya "jenis ruang", tidak menjawab pertanyaan yang
+  sebenarnya ditanyakan orang yang membaca log: dari ruang mana ke ruang mana,
+  atau dari hari dan jam berapa pindah ke hari dan jam berapa. Kalimat di sini
+  menyebut keduanya, dengan data kelas aslinya diambil dari jadwal permanen.
+*/
+function uraiPerubahan(p){
+  const j = data.jadwal.find(x => x.id === p.jadwalId) || {};
+  const kelas = `${namaMatkul(p.kode) || p.kode} KP ${p.kp}`;
+  const jamAsli = (j.mulai || j.selesai) ? ` ${rentangJam(j.mulai, j.selesai)}` : '';
+  const ruangAsli = j.ruang || 'tanpa ruang';
+  const asal = `${tanggalPanjang(p.tanggal)}${jamAsli} di ${ruangAsli}`;
+
+  const jamBaru = (p.mulaiBaru && p.selesaiBaru) ? rentangJam(p.mulaiBaru, p.selesaiBaru) : '';
+  const tujuanPasti = [
+    p.tanggalBaru ? tanggalPanjang(p.tanggalBaru) : '',
+    jamBaru,
+    p.ruangBaru ? `di ${p.ruangBaru}` : '',
+  ].filter(Boolean).join(' ');
+
+  switch(p.tipe){
+    case 'libur':
+      return `${kelas} ditiadakan pada ${asal}`;
+    case 'daring':
+      return `${kelas} menjadi daring pada ${asal}`;
+    case 'ruang':
+      return `${kelas} pada ${tanggalPanjang(p.tanggal)}${jamAsli} pindah ruang dari ${ruangAsli} ke ${p.ruangBaru || 'ruang yang belum diisi'}`;
+    case 'pindah':
+      return `${kelas} dipindah dari ${asal} ke ${tujuanPasti || 'tujuan yang belum diisi'}`
+        + (p.ruangBaru ? '' : ` di ${ruangAsli}`);
+    case 'menyusul':
+      return `${kelas} dipindah dari ${asal}, penggantinya ${tujuanPasti ? tujuanPasti + ', sisanya menyusul' : 'masih menyusul'}`;
+    default:
+      return `${kelas} pada ${asal}`;
+  }
 }
 
 /* ============================================================
@@ -472,8 +777,7 @@ $('formMatkul').addEventListener('submit', async (e) => {
       const lama = data.matakuliah.find(m => m.id === id);
       await updateDoc(doc(db, 'matakuliah', id), { kode, nama });
       await catat('ubah', 'matakuliah', `${kode} · ${nama}`,
-        lama && (lama.kode !== kode || lama.nama !== nama)
-          ? `Sebelumnya ${lama.kode} · ${lama.nama}` : '');
+        bedaKolom(lama, { kode, nama }, KOLOM_LOG.matakuliah));
       // Kode adalah tali penghubung ke jadwal, jadi jika kode berubah,
       // semua jadwal yang memakainya harus ikut diperbarui. Jika tidak,
       // jadwalnya jadi yatim dan namanya hilang di halaman publik.
@@ -678,9 +982,7 @@ $('formJadwal').addEventListener('submit', async (e) => {
     await catat(isi.id ? 'ubah' : 'tambah', 'jadwal',
       `${namaMatkul(muatan.kode) || muatan.kode} KP ${muatan.kp} · ${muatan.hari} `
       + `${rentangJam(muatan.mulai, muatan.selesai)} · ${muatan.ruang || 'tanpa ruang'}`,
-      lamaJd
-        ? `Sebelumnya ${lamaJd.hari} ${rentangJam(lamaJd.mulai, lamaJd.selesai)} · ${lamaJd.ruang || 'tanpa ruang'}`
-        : '');
+      lamaJd ? bedaKolom(lamaJd, muatan, KOLOM_LOG.jadwal) : '');
     e.target.reset(); $('jdId').value = ''; modeUbah('formJadwal', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -898,9 +1200,8 @@ function gambarPerubahan(){
     try{
       status('Menghapus…', 'sibuk');
       await deleteDoc(doc(db, 'perubahan', p.id));
-      await catat('hapus', 'perubahan',
-        `${namaMatkul(p.kode) || p.kode} KP ${p.kp} · ${tanggalPanjang(p.tanggal)}`,
-        `Jenis ${p.tipe}`);
+      await catat('hapus', 'perubahan', uraiPerubahan(p),
+        'Perubahan ini dibatalkan, kelasnya kembali berjalan seperti jadwal permanen');
       await muatSemua();
       await terbitkan();
     }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
@@ -1065,9 +1366,8 @@ $('formPerubahan').addEventListener('submit', async (e) => {
     const lamaPb = isi.id ? data.perubahan.find(x => x.id === isi.id) : null;
     if(isi.id) await updateDoc(doc(db, 'perubahan', isi.id), muatan);
     else await addDoc(collection(db, 'perubahan'), muatan);
-    await catat(isi.id ? 'ubah' : 'tambah', 'perubahan',
-      `${namaMatkul(muatan.kode) || muatan.kode} KP ${muatan.kp} · ${tanggalPanjang(muatan.tanggal)} · jenis ${muatan.tipe}`,
-      lamaPb ? `Sebelumnya ${tanggalPanjang(lamaPb.tanggal)} · jenis ${lamaPb.tipe}` : (muatan.catatan || ''));
+    await catat(isi.id ? 'ubah' : 'tambah', 'perubahan', uraiPerubahan(muatan),
+      lamaPb ? bedaKolom(lamaPb, muatan, KOLOM_LOG.perubahan) : (muatan.catatan || ''));
     e.target.reset(); $('pbId').value = ''; modeUbah('formPerubahan', false);
     aturTampilanPerubahan(); bersihkanPesan(el);
     await muatSemua();
@@ -1463,7 +1763,7 @@ $('formPengajar').addEventListener('submit', async (e) => {
     else await addDoc(collection(db, 'pengajar'), muatan);
     await catat(isi.id ? 'ubah' : 'tambah', 'pengajar',
       `${muatan.nama} · ${namaMatkul(muatan.kode) || muatan.kode} KP ${muatan.kp}`,
-      lamaPg ? `Sebelumnya ${lamaPg.nama} · ${lamaPg.kode} KP ${lamaPg.kp}` : `NRP ${muatan.nrp || 'tidak ada'}`);
+      lamaPg ? bedaKolom(lamaPg, muatan, KOLOM_LOG.pengajar) : `NRP ${muatan.nrp || 'tidak ada'}`);
     e.target.reset(); $('pgId').value = ''; modeUbah('formPengajar', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -1850,6 +2150,251 @@ $('formAkun').addEventListener('submit', async (e) => {
 });
 
 /* ============================================================
+   7B. Akun operasional
+   ============================================================ */
+
+/*
+  Antrean pendaftar pengurus operasional, dan keputusannya.
+
+  Polanya sengaja disamakan dengan tab Akun Pengajar di atas: yang mendaftar
+  hanya bisa membuat baris atas namanya sendiri, dan yang memutuskan adalah
+  pengurus yang sudah ada. Bedanya, menerima di sini berarti mengangkat orang
+  itu menjadi pengurus dengan wewenang yang persis sama dengan yang menerima,
+  termasuk menerima pendaftar berikutnya.
+
+  Karena itu penerimaannya dibuat sekali jalan. Mencabut pengurus tidak bisa
+  dari halaman ini, hanya lewat Firebase Console. Itu pembatas terakhir yang
+  dipertahankan: akun yang diambil alih bisa menambah orang, tetapi tidak bisa
+  menyingkirkan pengurus lain dan menguasai halaman ini sendirian.
+*/
+
+function statusAkunOp(a){
+  return a.status || 'menunggu';
+}
+
+function sudahDiangkat(a){
+  return data.admins.some(x => x.id === a.id);
+}
+
+function gambarAkunOperasional(){
+  const t = $('tabelAkunOp');
+  const q = ($('cariAkunOp').value || '').trim().toLowerCase();
+  const saringStatus = $('saringStatusAkunOp').value;
+
+  if(gagalMuat.has('adminakun')){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">
+      Pengajuan akun belum bisa dimuat.<br><br>${esc(gagalMuat.get('adminakun'))}
+    </td></tr></tbody>`;
+    return;
+  }
+
+  const baris = data.adminakun
+    .filter(a => !saringStatus || statusAkunOp(a) === saringStatus)
+    .filter(a => !q || [a.nama, a.nrp, a.email].join(' ').toLowerCase().includes(q));
+
+  if(baris.length === 0){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">${
+      data.adminakun.length
+        ? 'Tidak ada yang cocok dengan penyaringan.'
+        : 'Belum ada yang mendaftar sebagai pengurus operasional.'
+    }</td></tr></tbody>`;
+    return;
+  }
+
+  t.innerHTML = `
+    <thead><tr>
+      <th>Pendaftar</th><th>NRP</th><th>Status</th><th>Diputuskan oleh</th><th></th>
+    </tr></thead>
+    <tbody>${baris.map(a => {
+      const s = statusAkunOp(a);
+      const l = STATUS_AKUN[s] || STATUS_AKUN.menunggu;
+      const diangkat = sudahDiangkat(a);
+      // Baris yang sudah diangkat tidak punya keputusan lain: dokumennya di
+      // "admins" hanya bisa dicabut lewat Console, jadi tombolnya tidak
+      // ditawarkan sama sekali daripada menawarkan yang pasti ditolak server.
+      const tindakan = diangkat
+        ? '<span class="op-samar">Sudah menjadi pengurus</span>'
+        : `<div class="op-tombol-baris">
+            <button class="op-mini" data-putus-ao="${esc(a.id)}">${s === 'menunggu' ? 'Putuskan' : 'Ubah'}</button>
+            <button class="op-mini op-hapus" data-hapus-ao="${esc(a.id)}">Hapus</button>
+          </div>`;
+      return `<tr>
+        <td>${esc(a.nama || '(tanpa nama)')}<br><span class="op-samar">${esc(a.email || '')}</span></td>
+        <td>${esc(a.nrp || '')}</td>
+        <td><span class="op-lencana ${l.kelas}">${esc(l.label)}</span>${
+          s === 'ditolak' && a.alasan ? `<br><span class="op-samar">${esc(a.alasan)}</span>` : ''
+        }</td>
+        <td class="op-samar">${esc(a.diputusOleh || '')}</td>
+        <td>${tindakan}</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+
+  t.querySelectorAll('[data-putus-ao]').forEach(b => b.addEventListener('click', () => {
+    bukaKeputusanAkunOp(b.dataset.putusAo);
+  }));
+
+  t.querySelectorAll('[data-hapus-ao]').forEach(b => b.addEventListener('click', async () => {
+    const a = data.adminakun.find(x => x.id === b.dataset.hapusAo);
+    if(!a) return;
+    const s = statusAkunOp(a);
+    const akibat = s === 'ditolak'
+      ? 'Penolakannya ikut terhapus, sehingga orang ini bisa mendaftar lagi. '
+        + 'Jika maksud Anda menutup pintunya, biarkan barisnya dan gunakan Tolak.'
+      : 'Pengajuannya hilang dari antrean tanpa pernah diputuskan, dan orang ini bisa mengajukan lagi.';
+    if(!confirm(
+      `Hapus pengajuan ${a.nama} (${a.nrp})?\n\n${akibat}\n\n`
+      + 'Akun Firebase-nya tidak ikut terhapus. Untuk menutup akunnya sama sekali, '
+      + 'nonaktifkan melalui Firebase Console pada menu Authentication.')) return;
+    try{
+      status('Menghapus…', 'sibuk');
+      await deleteDoc(doc(db, 'adminakun', a.id));
+      await catat('hapus', 'akunoperasional', `${a.nama} · ${a.email}`,
+        `Pengajuan berstatus ${(STATUS_AKUN[s] || {}).label || s} dihapus, NRP ${a.nrp || 'tidak ada'}`);
+      tutupKeputusanAkunOp();
+      await muatSemua();
+      status('Pengajuan dihapus.', 'benar');
+    }catch(err){
+      console.error(err);
+      status('Gagal menghapus: ' + err.message, 'salah');
+    }
+  }));
+}
+
+$('cariAkunOp').addEventListener('input', gambarAkunOperasional);
+$('saringStatusAkunOp').addEventListener('change', gambarAkunOperasional);
+
+function gambarPengurus(){
+  const t = $('tabelPengurus');
+  if(gagalMuat.has('admins')){
+    t.innerHTML = `<tbody><tr><td class="op-kosong">
+      Daftar pengurus belum bisa dimuat.<br><br>${esc(gagalMuat.get('admins'))}
+    </td></tr></tbody>`;
+    return;
+  }
+  if(data.admins.length === 0){
+    t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada pengurus yang terdaftar.</td></tr></tbody>';
+    return;
+  }
+  t.innerHTML = `
+    <thead><tr><th>Nama</th><th>Email</th><th>Diangkat oleh</th><th>Sejak</th></tr></thead>
+    <tbody>${data.admins.map(a => {
+      const sejak = a.diputusPada && typeof a.diputusPada.toDate === 'function'
+        ? waktuPanjang(a.diputusPada.toDate()) : '';
+      return `<tr>
+        <td>${esc(a.nama || '(tanpa nama)')}${a.id === auth.currentUser?.uid ? ' <span class="op-samar">(Anda)</span>' : ''}</td>
+        <td>${esc(a.email || '')}</td>
+        <td class="op-samar">${esc(a.diputusOleh || 'Firebase Console')}</td>
+        <td class="op-samar">${esc(sejak)}</td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
+/* ---------- formulir keputusan ---------- */
+
+function bukaKeputusanAkunOp(id){
+  const a = data.adminakun.find(x => x.id === id);
+  if(!a) return;
+  $('aoUid').value = a.id;
+  $('aoSiapa').textContent = `${a.nama || '(tanpa nama)'} · NRP ${a.nrp || '-'}`;
+  $('aoRincian').textContent = a.email || '';
+  $('aoStatus').value = statusAkunOp(a) === 'ditolak' ? 'ditolak' : 'diterima';
+  $('aoAlasan').value = a.alasan || '';
+  bersihkanPesan($('pesanAkunOp'));
+  $('formAkunOp').hidden = false;
+  aturTampilanKeputusanOp();
+  $('aoStatus').focus();
+}
+
+function tutupKeputusanAkunOp(){
+  $('formAkunOp').hidden = true;
+  $('aoUid').value = '';
+  bersihkanPesan($('pesanAkunOp'));
+}
+
+function aturTampilanKeputusanOp(){
+  const s = $('aoStatus').value;
+  $('aoAlasanBungkus').hidden = (s !== 'ditolak');
+  $('aoPeringatan').hidden = (s !== 'diterima');
+}
+
+$('aoStatus').addEventListener('change', aturTampilanKeputusanOp);
+$('aoBatal').addEventListener('click', tutupKeputusanAkunOp);
+
+$('formAkunOp').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const el = $('pesanAkunOp');
+  const a = data.adminakun.find(x => x.id === $('aoUid').value);
+  if(!a) return;
+
+  const status_ = $('aoStatus').value;
+  const alasan = $('aoAlasan').value.trim();
+
+  if(status_ === 'ditolak' && !alasan){
+    pesan(el, 'Isi alasan penolakan. Alasannya dibaca pendaftar saat mencoba masuk.', 'salah');
+    return;
+  }
+
+  // Mengangkat pengurus tidak bisa dibatalkan dari sini, jadi tombolnya
+  // minta ditekan dua kali, bukan sekali tersenggol.
+  if(status_ === 'diterima' && el.dataset.konfirmasi !== '1'){
+    pesan(el,
+      `${esc(a.nama)} akan mendapat wewenang yang sama dengan Anda, termasuk menerima pendaftar lain, `
+      + 'dan pencabutannya hanya bisa lewat Firebase Console. Tekan Simpan keputusan sekali lagi kalau memang benar.',
+      'hati');
+    el.dataset.konfirmasi = '1';
+    return;
+  }
+  el.dataset.konfirmasi = '';
+
+  /*
+    Identitas disalin apa adanya dari baris yang sudah tersimpan. Aturan
+    Firestore menolak kalau nama, NRP, atau email berubah, dan menolak dokumen
+    "admins" yang nama atau emailnya berbeda dari pengajuannya. Jadi keputusan
+    tidak pernah bisa sekaligus menyunting siapa yang diangkat.
+  */
+  const muatan = {
+    status: status_,
+    nama: a.nama, nrp: a.nrp, email: a.email,
+    alasan: status_ === 'ditolak' ? alasan : '',
+    diputusPada: serverTimestamp(),
+    diputusOleh: pemakai.email,
+  };
+  if(a.dibuatPada) muatan.dibuatPada = a.dibuatPada;
+
+  try{
+    status('Menyimpan keputusan…', 'sibuk');
+    // Keputusan dan pengangkatannya ditulis dalam satu kelompok, supaya tidak
+    // pernah ada keadaan setengah jadi: status diterima tanpa dokumen admins,
+    // atau sebaliknya.
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'adminakun', a.id), muatan);
+    if(status_ === 'diterima'){
+      batch.set(doc(db, 'admins', a.id), {
+        nama: a.nama, email: a.email,
+        diputusOleh: pemakai.email,
+        diputusPada: serverTimestamp(),
+      });
+    }
+    await batch.commit();
+
+    await catat('ubah', 'akunoperasional',
+      `${a.nama} · ${(STATUS_AKUN[status_] || {}).label || status_}`,
+      status_ === 'diterima'
+        ? `Diangkat menjadi pengurus operasional, email ${a.email}, NRP ${a.nrp || 'tidak ada'}`
+        : `Alasan: ${alasan}`);
+    tutupKeputusanAkunOp();
+    await muatSemua();
+    status('Keputusan tersimpan.', 'benar');
+  }catch(err){
+    console.error(err);
+    status('Gagal menyimpan: ' + err.message, 'salah');
+    pesan(el, err.code === 'permission-denied'
+      ? 'Server menolak keputusan ini. Biasanya berarti aturan Firestore belum diperbarui. Lihat langkah 1.4 di PANDUAN-PENGURUS.md.'
+      : esc(err.message || 'tidak diketahui'), 'salah');
+  }
+});
+
+/* ============================================================
    8. Pengumuman
    ============================================================ */
 
@@ -1929,7 +2474,7 @@ $('formPengumuman').addEventListener('submit', async (e) => {
     if(isi.id) await updateDoc(doc(db, 'pengumuman', isi.id), muatan);
     else await addDoc(collection(db, 'pengumuman'), muatan);
     await catat(isi.id ? 'ubah' : 'tambah', 'pengumuman', muatan.judul || '(tanpa judul)',
-      lamaPm && lamaPm.judul !== muatan.judul ? `Sebelumnya "${lamaPm.judul}"` : '');
+      lamaPm ? bedaKolom(lamaPm, muatan, KOLOM_LOG.pengumuman) : '');
     e.target.reset(); $('pmId').value = ''; modeUbah('formPengumuman', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -2194,7 +2739,7 @@ $('formClassroom').addEventListener('submit', async (e) => {
     else await addDoc(collection(db, 'classroom'), muatan);
     await catat(id ? 'ubah' : 'tambah', 'classroom',
       `${muatan.kode} KP ${muatan.kp} · ${muatan.classroom || 'tanpa kode'}`,
-      lamaGc && lamaGc.classroom !== muatan.classroom ? `Sebelumnya ${lamaGc.classroom || 'tanpa kode'}` : '');
+      lamaGc ? bedaKolom(lamaGc, muatan, KOLOM_LOG.classroom) : '');
     e.target.reset(); $('gcId').value = ''; modeUbah('formClassroom', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -2279,8 +2824,7 @@ $('formKoordinator').addEventListener('submit', async (e) => {
     else await addDoc(collection(db, 'koordinator'), muatan);
     await catat(id ? 'ubah' : 'tambah', 'koordinator',
       `${muatan.kode} · ${muatan.koordinator || 'tanpa nama'}`,
-      lamaKo && lamaKo.koordinator !== muatan.koordinator
-        ? `Sebelumnya ${lamaKo.koordinator || 'tanpa nama'}` : '');
+      lamaKo ? bedaKolom(lamaKo, muatan, KOLOM_LOG.koordinator) : '');
     e.target.reset(); $('koId').value = ''; modeUbah('formKoordinator', false);
     bersihkanPesan(el);
     await muatSemua();
@@ -3048,6 +3592,7 @@ const JENIS_LOG = {
   koordinator: 'Koordinator',
   excel:       'Berkas Excel',
   akunpengajar:'Akun pengajar',
+  akunoperasional: 'Akun operasional',
   // Ditulis dari halaman /pengajar, bukan dari halaman ini. Catatannya tetap
   // masuk ke daftar yang sama supaya seluruh perubahan bisa ditelusuri di satu
   // tempat, tanpa perlu ingat halaman mana yang digunakan saat itu.

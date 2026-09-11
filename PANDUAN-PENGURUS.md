@@ -332,6 +332,35 @@ nomor pribadi, jadi keduanya ditutup di aturan keamanan.
 > karena mengikuti kurikulum yang lain. Karena itu kolom kodenya tidak dipaksa
 > cocok dengan daftar Mata Kuliah, dan barisnya tetap tersimpan apa adanya.
 
+### Akun Operasional
+
+Antrean calon pengurus yang mendaftar sendiri lewat tautan **Daftar akun
+baru** di halaman masuk `/operasional`. Pendaftar mengisi nama, NRP, email,
+dan kata sandi. Sampai diterima, akunnya bisa masuk tetapi hanya melihat
+keterangan bahwa pengajuannya masih menunggu.
+
+Tiap baris punya tiga tindakan:
+
+- **Terima.** Orang itu langsung menjadi pengurus dengan wewenang yang sama
+  dengan Anda, termasuk menerima pendaftar berikutnya. Karena itu tombolnya
+  minta ditekan dua kali, dan pastikan Anda mengenal orangnya.
+- **Tolak.** Wajib disertai alasan, yang akan dibaca pendaftar saat mencoba
+  masuk. Barisnya tetap ada, sehingga orang yang sama tidak bisa mendaftar
+  lagi dengan email itu.
+- **Hapus.** Membuang baris yang belum diangkat, dan justru itulah yang
+  membuka kesempatan mendaftar ulang.
+
+> **Pengangkatan tidak bisa dibatalkan dari web.** Mencabut pengurus hanya
+> bisa lewat Firebase Console, dengan menghapus dokumennya dari koleksi
+> `admins`. Ini disengaja sebagai pembatas terakhir: akun pengurus yang diambil
+> alih bisa menambah orang, tetapi tidak bisa menyingkirkan pengurus lain dan
+> menguasai halaman ini sendirian.
+
+Di bawah antreannya ada daftar **Pengurus aktif**: semua akun yang saat ini
+bisa membuka halaman ini, beserta siapa yang mengangkatnya dan kapan. Akun yang
+dibuat langsung lewat Firebase Console tercatat diangkat oleh "Firebase
+Console".
+
 ### Pengumuman
 
 Tampil di halaman utama. Centang **Sematkan** untuk menaruhnya paling atas.
@@ -344,6 +373,13 @@ operasional, lengkap dengan waktu dan pelakunya. Yang tercatat mencakup mata
 kuliah, jadwal permanen beserta ruangnya, perubahan sementara, pengajar,
 pengumuman, kode Google Classroom, koordinator, pembuatan massal, dan
 penyimpanan dari berkas Excel.
+
+Catatan aksi **Ubah** menyebut apa persisnya yang berubah, kolom per kolom,
+misalnya "ruang SGFBE menjadi EC 04.04" atau "hari Kamis menjadi Jumat; jam
+15.45 - 17.20 menjadi 13.00 - 14.40". Kolom yang tidak berubah tidak ikut
+disebut. Perubahan sementara ditulis sebagai satu kalimat utuh, misalnya
+"Statistika II KP A dipindah dari Kamis, 10 September 2026 15.45 - 17.20 di
+SGFBE ke Jumat, 11 September 2026 13.00 - 14.40 di EA 02.05".
 
 Waktunya diambil dari server, bukan dari jam komputer yang dipakai, dan
 ditampilkan dalam waktu Jakarta. Jadi catatannya tetap benar walau ada yang jam
@@ -729,8 +765,14 @@ Semua keputusan di tab ini ikut tercatat di tab **Log** dengan jenis
 
 ### Menambah admin operasional baru
 
-Ulangi langkah **1.2** dan **1.3**. Keduanya harus dikerjakan; melewatkan 1.3
-membuat akun itu bisa masuk tapi tidak bisa mengubah apa pun.
+Calon pengurus mendaftar sendiri lewat tautan **Daftar akun baru** di halaman
+masuk `/operasional`, lalu pengurus yang sudah ada menerimanya di tab **Akun
+Operasional**. Tidak perlu membuka Firebase Console.
+
+Langkah **1.2** dan **1.3** lewat Console tetap bisa dipakai untuk keadaan
+darurat, misalnya saat belum ada satu pun pengurus yang bisa menyetujui.
+Keduanya harus dikerjakan; melewatkan 1.3 membuat akun itu bisa masuk tapi
+tidak bisa mengubah apa pun.
 
 ### Menambah admin utama (akses `/adminkafbe`)
 
@@ -772,7 +814,9 @@ tiap kali ada mata kuliah baru.
 ### Mencabut akses
 
 Untuk operasional dan admin situs, hapus dokumennya dari koleksi `admins` atau
-`adminutama` di Firestore. Efeknya langsung.
+`adminutama` di Firestore. Efeknya langsung. Pencabutan pengurus operasional
+sengaja tidak bisa dilakukan dari web, lihat keterangan di bagian **Akun
+Operasional**.
 
 Untuk pengajar, buka `/operasional` tab **Akun Pengajar**. Ada tiga pilihan
 dengan akibat yang berbeda:

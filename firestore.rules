@@ -16,7 +16,14 @@
   dan bisa ditinjau. Firestore TIDAK membacanya dari sini, jadi setiap kali
   berkas ini diubah, isinya harus ditempel ulang lewat langkah di atas.
 
-  CARA MENAMBAH ADMIN BARU (misalnya adik tingkat yang meneruskan):
+  CARA MENAMBAH PENGURUS OPERASIONAL BARU (misalnya adik tingkat yang meneruskan):
+  Calon pengurus mendaftar sendiri lewat tautan "Daftar akun baru" di halaman
+  masuk /operasional, dengan nama, NRP, email, dan kata sandi. Pengurus yang
+  sudah ada lalu menerima atau menolaknya di tab "Akun Operasional". Sampai
+  diterima, akun itu bisa masuk tetapi tidak bisa membuka apa pun.
+
+  Menambah lewat Firebase Console tetap bisa, untuk keadaan darurat saat belum
+  ada satu pun pengurus yang bisa menyetujui:
   1. Authentication -> Users -> Add user -> isi email dan password
   2. Salin nilai "User UID" yang muncul di daftar
   3. Firestore Database -> Data -> koleksi "admins" -> Add document
@@ -58,9 +65,11 @@
     - semua  (boolean, opsional) : isi true kalau boleh mengubah semua mata
                         kuliah. Kalau diisi true, kolom mk tidak dipakai.
 
-  CARA MENCABUT AKSES ADMIN:
-  Hapus dokumennya dari koleksi "admins". Efeknya langsung. Menghapus akunnya
-  di Authentication juga boleh, tapi menghapus dokumen admin sudah cukup.
+  CARA MENCABUT AKSES PENGURUS OPERASIONAL:
+  Hanya lewat Firebase Console: hapus dokumennya dari koleksi "admins". Efeknya
+  langsung. Menghapus akunnya di Authentication juga boleh, tapi menghapus
+  dokumen admin sudah cukup. Pencabutan sengaja tidak bisa dilakukan dari web,
+  lihat keterangan di aturan koleksi "admins".
 */
 
 rules_version = '2';
@@ -139,13 +148,108 @@ service cloud.firestore {
             || kode in akunPengajar().get('mk', []));
     }
 
-    // ---------- Daftar admin ----------
-    // Sengaja tidak bisa ditulis dari web sama sekali, bahkan oleh admin.
-    // Penambahan admin hanya lewat Firebase Console, supaya seorang admin yang
-    // akunnya diambil alih tidak bisa mengangkat admin baru diam-diam.
+    // ---------- Daftar pengurus operasional ----------
+    /*
+      Dulu koleksi ini tidak bisa ditulis dari web sama sekali, dan alasannya
+      bagus: pengurus yang akunnya diambil alih tidak bisa mengangkat pengurus
+      baru diam-diam. Aturan itu dilonggarkan SATU langkah, dengan sadar, karena
+      pengurus berganti tiap kepengurusan dan mengharuskan buka Firebase Console
+      untuk tiap orang berakhir dengan satu akun yang dipakai beramai-ramai.
+      Akun bersama justru menghapus jejak siapa mengubah apa.
+
+      Yang dibuka hanya MENERIMA pendaftar yang sudah mengajukan diri:
+
+        1. Dokumen hanya bisa dibuat oleh pengurus yang sudah terdaftar, dan
+           bukan untuk dirinya sendiri.
+        2. Harus ada pengajuan di "adminakun" dengan UID yang sama, dan nama
+           serta email yang ditulis harus persis sama dengan pengajuan itu.
+           Jadi pengurus tidak bisa mengangkat akun sembarang yang tidak pernah
+           mendaftar, dan tidak bisa mengubah identitas pendaftar saat
+           menerimanya.
+        3. Kolom diputusOleh harus email akun yang sedang login, sehingga
+           setiap pengangkatan tercatat siapa yang menyetujuinya.
+
+      Yang TETAP ditutup adalah mengubah dan menghapus. Mencabut pengurus hanya
+      bisa lewat Firebase Console. Ini pembatas terakhir: akun yang diambil
+      alih bisa menambah orang, tetapi tidak bisa menyingkirkan pengurus lain
+      dan menguasai halaman ini sendirian.
+    */
+    function pengangkatanSah(uid, isi) {
+      let ajuan = get(/databases/$(database)/documents/adminakun/$(uid)).data;
+      return isi.keys().hasOnly(['nama', 'email', 'diputusOleh', 'diputusPada'])
+        && isi.nama == ajuan.nama
+        && isi.email == ajuan.email
+        && isi.diputusOleh == request.auth.token.email;
+    }
+
     match /admins/{uid} {
-      allow read: if request.auth != null && request.auth.uid == uid;
-      allow write: if false;
+      // Tiap akun membaca dokumennya sendiri saat masuk. Pengurus yang sudah
+      // terdaftar boleh membaca seluruhnya untuk melihat siapa saja yang aktif.
+      allow read: if request.auth != null
+                  && (request.auth.uid == uid || adminTerdaftar());
+      allow create: if adminTerdaftar()
+                    && request.auth.uid != uid
+                    && exists(/databases/$(database)/documents/adminakun/$(uid))
+                    && pengangkatanSah(uid, request.resource.data);
+      allow update, delete: if false;
+    }
+
+    // ---------- Pengajuan akun pengurus operasional ----------
+    /*
+      Antrean pendaftar untuk halaman /operasional. Polanya sama dengan
+      "pengajarakun" di bawah: pendaftar hanya boleh membuat dokumen atas
+      namanya sendiri dengan status menunggu, dan yang memutuskan adalah
+      pengurus yang sudah ada. Identitas pendaftar dikunci pada nilai yang
+      diajukan, jadi keputusan tidak bisa sekaligus menyunting siapa dia.
+
+      Bedanya dari pengajar, tidak ada kolom wewenang sama sekali. Wewenangnya
+      satu dan bulat: masuk ke koleksi "admins" atau tidak.
+    */
+    function pengajuanAdminSah(isi) {
+      return isi.keys().hasOnly(['status', 'nrp', 'nama', 'email', 'dibuatPada'])
+        && isi.status == 'menunggu'
+        && isi.nrp is string
+        && isi.nrp.matches('^[0-9]{6,15}$')
+        && isi.nama is string
+        && isi.nama.size() >= 3
+        && isi.nama.size() <= 80
+        && isi.email == request.auth.token.email;
+    }
+
+    function keputusanAdminSah(lama, baru) {
+      return baru.keys().hasOnly([
+               'status', 'nrp', 'nama', 'email', 'dibuatPada',
+               'diputusPada', 'diputusOleh', 'alasan'
+             ])
+        && baru.nrp   == lama.nrp
+        && baru.nama  == lama.nama
+        && baru.email == lama.email
+        && baru.status in ['menunggu', 'diterima', 'ditolak']
+        && baru.diputusOleh == request.auth.token.email
+        && baru.get('alasan', '') is string
+        && baru.get('alasan', '').size() <= 200;
+    }
+
+    match /adminakun/{uid} {
+      allow read: if request.auth != null
+                  && (request.auth.uid == uid || adminTerdaftar());
+
+      allow create: if request.auth != null
+                    && request.auth.uid == uid
+                    && pengajuanAdminSah(request.resource.data);
+
+      allow update: if adminTerdaftar()
+                    && keputusanAdminSah(resource.data, request.resource.data);
+
+      /*
+        Menghapus hanya untuk baris yang belum diangkat. Selama dokumen di
+        "admins" masih ada, baris pengajuannya ikut dikunci, supaya daftar
+        pengurus aktif dan riwayat pengajuannya tidak bisa saling bertentangan.
+        Menghapus baris yang ditolak adalah cara memberi kesempatan mendaftar
+        ulang, karena aturan create menolak dokumen yang sudah ada.
+      */
+      allow delete: if adminTerdaftar()
+                    && !exists(/databases/$(database)/documents/admins/$(uid));
     }
 
     // ---------- Daftar admin utama ----------

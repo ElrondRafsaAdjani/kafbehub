@@ -36,6 +36,39 @@
 
     <p class="op-pesan" id="pesanMasuk" role="alert"></p>
 
+    <!-- Pendaftaran pengurus baru. Bergantian dengan formulir masuk di atas,
+         supaya kartunya tetap satu dan tidak ada dua tombol kirim yang
+         berdampingan. Pengajuannya baru berlaku setelah diterima pengurus yang
+         sudah ada, di tab Akun Operasional. -->
+    <form id="formDaftar" hidden autocomplete="on">
+      <p class="op-sub op-daftar-judul">Daftar sebagai pengurus operasional</p>
+
+      <label for="dfNama">Nama lengkap</label>
+      <input type="text" id="dfNama" name="namaLengkap" maxlength="80" autocomplete="name" placeholder="Nama sesuai data KAFBE" />
+
+      <label for="dfNrp">NRP</label>
+      <input type="text" id="dfNrp" name="nrp" maxlength="15" inputmode="numeric" autocomplete="off" placeholder="130223203" />
+
+      <div id="dfBagianAkun">
+        <label for="dfEmail">Email</label>
+        <input type="email" id="dfEmail" name="emailBaru" autocomplete="email" placeholder="nama@contoh.com" />
+
+        <label for="dfSandi">Kata sandi baru</label>
+        <input type="password" id="dfSandi" name="sandiBaru" minlength="8" autocomplete="new-password" aria-describedby="dfSandiKet" />
+        <p class="op-catatan op-daftar-ket" id="dfSandiKet">Paling sedikit 8 karakter. Akun ini bisa mengubah jadwal yang dilihat semua mahasiswa, jadi pakailah kata sandi yang panjang.</p>
+
+        <label for="dfSandi2">Ulangi kata sandi</label>
+        <input type="password" id="dfSandi2" name="sandiUlang" minlength="8" autocomplete="new-password" />
+      </div>
+
+      <p class="op-catatan op-daftar-ket" id="dfCatatanLanjutan" hidden>
+        Akun ini sudah ada, tinggal pengajuannya yang belum tersimpan. Lengkapi nama dan NRP, lalu kirim.
+      </p>
+
+      <button type="submit" class="btn btn-primary op-penuh" id="tombolDaftar">Kirim pengajuan</button>
+      <p class="op-pesan" id="pesanDaftar" role="alert"></p>
+    </form>
+
     <!-- Catatan langkah demi langkah saat mencoba masuk. Tersembunyi sampai
          ada percobaan, dan berguna untuk menunjukkan langkah mana yang gagal
          tanpa perlu membuka developer tools. -->
@@ -44,7 +77,15 @@
       <pre id="diagnosa"></pre>
     </details>
 
-    <p class="op-catatan">Lupa kata sandi atau butuh akun baru? Hubungi pengurus yang memegang akses Firebase Console.</p>
+    <p class="op-catatan" id="catatanMasuk">
+      Belum punya akun? <button type="button" class="op-tautan-teks" id="bukaDaftar">Daftar akun baru</button>.
+      Pengajuan Anda diterima atau ditolak oleh pengurus yang sudah ada.
+      Lupa kata sandi? Hubungi pengurus yang memegang akses Firebase Console.
+    </p>
+    <p class="op-catatan" id="catatanDaftar" hidden>
+      Sudah punya akun? <button type="button" class="op-tautan-teks" id="bukaMasuk">Kembali ke halaman masuk</button>.
+      Setelah dikirim, tunggu pengurus yang sudah ada menerima pengajuan Anda. Sampai saat itu, akunnya bisa masuk tetapi belum bisa membuka apa pun.
+    </p>
   </div>
 </section>
 
@@ -73,6 +114,7 @@
       <button class="op-tab-btn" data-tab="perubahan" role="tab">Perubahan Sementara</button>
       <button class="op-tab-btn" data-tab="pengajar" role="tab">Pengajar</button>
       <button class="op-tab-btn" data-tab="akunpengajar" role="tab">Akun Pengajar</button>
+      <button class="op-tab-btn" data-tab="akunoperasional" role="tab">Akun Operasional</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
       <button class="op-tab-btn" data-tab="excel" role="tab">Excel</button>
       <button class="op-tab-btn" data-tab="log" role="tab">Log</button>
@@ -447,6 +489,72 @@
       </div>
     </section>
 
+    <!-- ---------- AKUN OPERASIONAL ---------- -->
+    <section class="op-panel" id="panel-akunoperasional" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Akun Operasional</h2>
+          <p>Pengajuan dari tautan "Daftar akun baru" di halaman masuk. Selama belum diterima di sini, akunnya bisa masuk tetapi tidak bisa membuka apa pun.</p>
+          <p><strong>Terima</strong> mengangkatnya menjadi pengurus dengan wewenang yang sama seperti Anda, termasuk menerima pendaftar berikutnya. <strong>Tolak</strong> menutup pintunya dan barisnya tetap ada, sehingga orangnya tidak bisa mendaftar lagi. <strong>Hapus</strong> membuang baris yang belum diangkat, dan itulah yang membuka kesempatan mendaftar ulang.</p>
+        </div>
+      </div>
+
+      <form class="op-form" id="formAkunOp" hidden>
+        <input type="hidden" id="aoUid" />
+        <div class="op-panel-kepala">
+          <div>
+            <h3 id="aoSiapa"></h3>
+            <p class="op-samar" id="aoRincian"></p>
+          </div>
+        </div>
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="aoStatus">Keputusan</label>
+            <select id="aoStatus">
+              <option value="diterima">Terima, angkat menjadi pengurus</option>
+              <option value="ditolak">Tolak</option>
+            </select>
+          </div>
+          <div class="op-field op-lebar" id="aoAlasanBungkus">
+            <label for="aoAlasan">Alasan penolakan</label>
+            <input type="text" id="aoAlasan" maxlength="200" placeholder="Ditulis apa adanya, akan dibaca pendaftarnya" />
+          </div>
+        </div>
+        <p class="op-catatan" id="aoPeringatan">
+          Pengangkatan tidak bisa dibatalkan dari halaman ini. Mencabut pengurus hanya bisa lewat Firebase Console, jadi pastikan Anda mengenal orang ini.
+        </p>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan keputusan</button>
+          <button type="button" class="btn btn-ghost op-kecil" id="aoBatal">Batal</button>
+        </div>
+        <p class="op-pesan" id="pesanAkunOp" role="alert"></p>
+      </form>
+
+      <div class="op-saring op-saring-dua">
+        <input type="search" id="cariAkunOp" placeholder="Cari nama, NRP, atau email…" aria-label="Cari pengajuan akun operasional" />
+        <select id="saringStatusAkunOp" aria-label="Saring status pengajuan">
+          <option value="">Semua status</option>
+          <option value="menunggu">Menunggu</option>
+          <option value="diterima">Diterima</option>
+          <option value="ditolak">Ditolak</option>
+        </select>
+      </div>
+
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelAkunOp"></table>
+      </div>
+
+      <hr class="op-garis" />
+
+      <h3>Pengurus aktif</h3>
+      <p class="op-catatan">
+        Semua akun yang saat ini bisa membuka halaman ini. Mencabutnya hanya bisa lewat Firebase Console, dengan menghapus dokumennya dari koleksi <code>admins</code>.
+      </p>
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelPengurus"></table>
+      </div>
+    </section>
+
     <!-- ---------- PENGUMUMAN ---------- -->
     <section class="op-panel" id="panel-pengumuman" hidden>
       <div class="op-panel-kepala">
@@ -675,6 +783,7 @@
               <option value="koordinator">Koordinator</option>
               <option value="excel">Berkas Excel</option>
               <option value="akunpengajar">Akun pengajar</option>
+              <option value="akunoperasional">Akun operasional</option>
               <option value="materi">Naskah materi</option>
             </select>
           </div>

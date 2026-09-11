@@ -19,6 +19,18 @@
 .op-penuh{ width:100%; justify-content:center; margin-top:18px; }
 .op-catatan{ font-size:0.78rem; color:var(--ink-soft); line-height:1.55; margin-top:16px; }
 
+/* Tautan di dalam kalimat catatan, misalnya "Daftar akun baru". Dibuat dari
+   tombol supaya bisa dijangkau keyboard, tapi tampil seperti tautan biasa
+   karena kalimatnya memang kalimat, bukan barisan tombol. */
+.op-tautan-teks{
+  background:none; border:none; padding:0; margin:0; cursor:pointer;
+  font:inherit; font-weight:700; color:var(--owl-dark); text-decoration:underline;
+  text-underline-offset:2px;
+}
+.op-tautan-teks:hover{ color:var(--gold-deep); }
+.op-daftar-judul{ margin:0 0 6px; font-weight:700; color:var(--owl-dark2); }
+.op-kartu-masuk .op-daftar-ket{ margin:2px 0 4px; }
+
 .op-diagnosa{ margin-top:16px; text-align:left; }
 .op-diagnosa summary{
   cursor:pointer; font-size:0.78rem; font-weight:700; color:var(--ink-soft);
