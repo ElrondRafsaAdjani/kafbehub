@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://www.googleapis.com https://*.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tebak Kata FBE - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .game-panel{
+    background:linear-gradient(180deg, var(--owl-dark2), var(--owl-dark));
+    border-radius:32px; padding:28px; box-shadow:var(--shadow);
+    display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:28px; align-items:start;
+  }
+  @media (max-width:880px){ .game-panel{grid-template-columns:1fr; padding:20px;} }
+
+  .kolom-main{display:flex; flex-direction:column; align-items:center; gap:14px; min-width:0;}
+
+  /* Saklar mode. Dibuat sebagai dua tombol, bukan tautan, supaya pindah mode
+     tidak memuat ulang halaman dan tidak menghapus tebakan yang sedang jalan. */
+  .saklar-mode{display:inline-flex; background:rgba(255,255,255,0.10); border-radius:100px; padding:4px; gap:4px;}
+  .saklar-mode button{
+    font-family:'Plus Jakarta Sans', system-ui, sans-serif; font-weight:700; font-size:0.85rem;
+    color:#DCEAF2; background:none; border:none; padding:8px 18px; border-radius:100px; cursor:pointer;
+  }
+  .saklar-mode button.aktif{background:var(--gold); color:var(--owl-dark2);}
+
+  .papan{display:grid; gap:6px; justify-content:center;}
+  .baris{display:grid; gap:6px;}
+  .kotak{
+    width:52px; height:52px; display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2', system-ui, sans-serif; font-weight:700; font-size:1.6rem; line-height:1;
+    color:#fff; border:2px solid rgba(255,255,255,0.22); border-radius:10px;
+    background:rgba(255,255,255,0.04); text-transform:uppercase;
+    transition:transform 120ms ease, background-color 160ms ease, border-color 160ms ease;
+  }
+  .kotak.terisi{border-color:rgba(255,255,255,0.55); transform:scale(1.04);}
+  .kotak.benar{background:#3F9B54; border-color:#3F9B54;}
+  .kotak.ada{background:var(--gold-deep); border-color:var(--gold-deep);}
+  .kotak.tidak{background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.08); color:#8FA6BA;}
+  @media (max-width:520px){ .kotak{width:44px; height:44px; font-size:1.35rem;} }
+  @media (max-width:380px){ .kotak{width:38px; height:38px; font-size:1.15rem;} }
+
+  .baris.goyang{animation:goyang 380ms;}
+  @keyframes goyang{
+    0%,100%{transform:translateX(0);} 20%{transform:translateX(-7px);}
+    40%{transform:translateX(7px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .baris.goyang{animation:none;}
+    .kotak{transition:none;}
+  }
+
+  /* margin:0 penting. Tanpa itu margin bawaan <p> menambah jarak sendiri di
+     atas dan di bawah, menyisakan lubang kosong selebar seratus piksel antara
+     papan tebakan dan papan tuts. */
+  .pesan{
+    margin:0; min-height:24px; font-size:0.9rem; font-weight:600; color:var(--gold);
+    text-align:center; line-height:1.4;
+  }
+
+  .tuts{display:flex; flex-direction:column; gap:6px; width:100%; max-width:520px;}
+  .tuts-baris{display:flex; gap:5px; justify-content:center;}
+  .tuts button{
+    font-family:'Plus Jakarta Sans', system-ui, sans-serif; font-weight:700; font-size:0.85rem;
+    flex:1; min-width:0; max-width:44px; height:52px; border:none; border-radius:8px; cursor:pointer;
+    background:#4C6885; color:#fff; text-transform:uppercase; padding:0;
+  }
+  .tuts button.lebar{max-width:74px; font-size:0.7rem; letter-spacing:0.03em;}
+  .tuts button.benar{background:#3F9B54;}
+  .tuts button.ada{background:var(--gold-deep);}
+  .tuts button.tidak{background:#2B415C; color:#7E95AB;}
+  .tuts button:disabled{cursor:default;}
+  @media (max-width:520px){ .tuts button{height:46px; font-size:0.78rem;} }
+
+  .side-panel{color:#fff; display:flex; flex-direction:column; gap:16px; min-width:0;}
+  .side-panel h3{color:#fff; font-size:1.05rem; margin:0 0 8px;}
+  .kotak-info{background:rgba(255,255,255,0.08); border-radius:16px; padding:16px;}
+  .bidang-cap{
+    display:inline-block; background:var(--gold); color:var(--owl-dark2);
+    font-weight:700; font-size:0.78rem; padding:5px 12px; border-radius:100px; margin-bottom:10px;
+  }
+  .definisi{font-size:0.9rem; line-height:1.55; color:#DCEAF2; margin:0;}
+  .definisi.tertutup{color:#8FA6BA; font-style:italic;}
+  .stat-row{display:flex; gap:8px;}
+  .stat-box{flex:1; background:rgba(255,255,255,0.08); border-radius:14px; padding:12px 8px; text-align:center;}
+  .stat-box .num{font-family:'Baloo 2', system-ui, sans-serif; font-weight:700; font-size:1.4rem;}
+  .stat-box .lbl{font-size:0.68rem; color:#B9CBDA; text-transform:uppercase; letter-spacing:0.04em; line-height:1.3;}
+  .cara-main{font-size:0.84rem; color:#B9CBDA; line-height:1.6; margin:0; padding-left:18px;}
+  .cara-main li{margin-bottom:5px;}
+  .contoh-huruf{
+    display:inline-block; width:20px; height:20px; border-radius:4px; vertical-align:-4px;
+    margin-right:2px;
+  }
+  .contoh-benar{background:#3F9B54;} .contoh-ada{background:var(--gold-deep);}
+  /* Warna abu ini nyaris sama gelapnya dengan latar panel, jadi kotaknya perlu
+     garis tepi supaya tetap terlihat sebagai contoh warna, bukan ruang kosong. */
+  .contoh-tidak{background:#2B415C; border:1px solid rgba(255,255,255,0.28);}
+
+  .back-link{font-weight:600; font-size:0.9rem; color:var(--ink-soft); text-decoration:none; display:inline-flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--owl-dark2);}
+
+  /* Tirai hasil. Muncul menutupi papan saat permainan selesai, dan bisa
+     ditutup supaya pemain tetap bisa melihat kembali tebakannya sendiri. */
+  .tirai{
+    position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center;
+    background:rgba(15,37,64,0.72); padding:20px;
+  }
+  .tirai-kotak{
+    background:var(--surface); border-radius:24px; padding:26px; max-width:420px; width:100%;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.5); text-align:center; max-height:88vh; overflow:auto;
+  }
+  .tirai-kotak h3{font-size:1.4rem; margin-bottom:6px;}
+  .tirai-jawaban{
+    font-family:'Baloo 2', system-ui, sans-serif; font-weight:800; font-size:2rem;
+    letter-spacing:0.12em; color:var(--owl-dark2); margin:10px 0 4px;
+  }
+  .tirai-bidang{font-size:0.8rem; font-weight:700; color:var(--gold-deep); text-transform:uppercase; letter-spacing:0.05em;}
+  .tirai-definisi{font-size:0.95rem; color:var(--ink-soft); line-height:1.6; margin:12px 0 18px;}
+  .tirai-tombol{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+</style>
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body data-judul-en="FBE Word Game - KAFBE Hub" data-fitur-halaman="main-santai">
+
+<div id="kafbeNav"></div>
+<script src="/shared/bahasa.js"></script>
+<script src="/shared/nav.js"></script>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <g fill="none" stroke="var(--owl-dark)" stroke-width="6" stroke-linecap="round">
+      <path d="M122 168 q8 10 16 0"/>
+      <path d="M162 168 q8 10 16 0"/>
+      <path d="M112 192 q8 10 16 0"/>
+      <path d="M142 192 q8 10 16 0"/>
+      <path d="M172 192 q8 10 16 0"/>
+      <path d="M122 216 q8 10 16 0"/>
+      <path d="M162 216 q8 10 16 0"/>
+    </g>
+    <g>
+      <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+      <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+      <circle cx="107" cy="118" r="7" fill="#fff"/>
+      <circle cx="177" cy="118" r="7" fill="#fff"/>
+      <circle cx="120" cy="136" r="3" fill="#fff" opacity="0.8"/>
+      <circle cx="190" cy="136" r="3" fill="#fff" opacity="0.8"/>
+    </g>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+    <path d="M115 250 q-4 14 6 18 q6 -2 6 -12 Z" fill="var(--gold)"/>
+    <path d="M185 250 q4 14 -6 18 q-6 -2 -6 -12 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<section class="wrap" style="padding-top:32px;">
+  <a class="back-link" href="../index.html" data-en="← Back to the Hub">← Kembali ke Hub</a>
+
+  <div class="section-head" style="margin-top:18px;" data-bagian="Kepala Halaman">
+    <span class="kicker" data-en="Casual Games" data-teks="wordle.label" data-label="Label bagian">Game Santai</span>
+    <h2 data-en="FBE Word Game 🦉" data-teks="wordle.judul" data-label="Judul halaman">Tebak Kata FBE 🦉</h2>
+    <p data-en="Guess the business and economics term of the day in six tries. One new word every day for everyone." data-teks="wordle.teks" data-label="Keterangan halaman">Tebak istilah bisnis dan ekonomika hari ini dalam enam percobaan. Satu kata baru setiap hari, sama untuk semua pemain.</p>
+  </div>
+
+  <div class="game-panel">
+    <div class="kolom-main">
+      <div class="saklar-mode" role="group" aria-label="Pilih mode permainan">
+        <button type="button" id="modeHarian" class="aktif" data-en="Daily">Harian</button>
+        <button type="button" id="modeLatihan" data-en="Practice">Latihan</button>
+      </div>
+
+      <div class="papan" id="papan" role="group" aria-label="Papan tebakan"></div>
+      <p class="pesan" id="pesan" role="status" aria-live="polite"></p>
+      <div class="tuts" id="tuts"></div>
+    </div>
+
+    <div class="side-panel">
+      <div class="kotak-info">
+        <h3 data-en="Hint">Petunjuk</h3>
+        <span class="bidang-cap" id="bidangCap">—</span>
+        <p class="definisi tertutup" id="definisi">Definisinya terbuka setelah tiga tebakan yang belum tepat.</p>
+        <button class="btn btn-ghost" id="btnPetunjuk" style="margin-top:12px; font-size:0.8rem; padding:8px 16px;" data-en="Reveal the definition now">Buka definisinya sekarang</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="num" id="statMain">0</div>
+          <div class="lbl" data-en="Played">Main</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="statMenang">0%</div>
+          <div class="lbl" data-en="Win rate">Menang</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" id="statRuntun">0</div>
+          <div class="lbl" data-en="Streak">Runtun</div>
+        </div>
+      </div>
+
+      <div class="kotak-info">
+        <h3 data-en="How to play">Cara Main</h3>
+        <ul class="cara-main">
+          <li data-en="Type a word with the same number of letters, then press Enter.">Ketik kata dengan jumlah huruf yang sama, lalu tekan Enter.</li>
+          <li><span class="contoh-huruf contoh-benar"></span> <span data-en="right letter, right position.">huruf benar di posisi yang benar.</span></li>
+          <li><span class="contoh-huruf contoh-ada"></span> <span data-en="the letter exists, but elsewhere.">hurufnya ada, tetapi di posisi lain.</span></li>
+          <li><span class="contoh-huruf contoh-tidak"></span> <span data-en="the letter is not in the word.">hurufnya tidak ada dalam kata itu.</span></li>
+          <li data-en="Every answer is a business or economics term that stands on its own.">Semua jawabannya istilah bisnis atau ekonomika yang berdiri sendiri.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" data-bagian="Penutup">
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA." data-teks="wordle.penutup" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA.</p>
+</footer>
+
+<script src="../main.js"></script>
+<script src="wordle-kata.js"></script>
+<script>
+/*
+  Tebak Kata FBE — permainan menebak istilah bisnis dan ekonomika.
+
+  DUA MODE, DAN KENAPA KEDUANYA ADA
+
+  "Harian" memberi satu kata yang sama untuk semua pemain pada hari yang sama,
+  supaya hasilnya bisa dibandingkan antarteman. "Latihan" mengambil kata acak
+  dan boleh diulang sepuasnya, supaya pemain yang sudah selesai hari itu tidak
+  buntu menunggu besok. Hanya mode Harian yang dihitung ke statistik, sebab
+  mode Latihan bisa diulang sampai menang dan angkanya akan kehilangan arti.
+
+  KENAPA TEBAKAN TIDAK DICOCOKKAN KE KAMUS
+
+  Situs ini tidak memuat kamus bahasa Indonesia, dan memakai bank kata sendiri
+  sebagai penyaring akan menolak tebakan wajar seperti "MOBIL" hanya karena
+  kata itu bukan istilah FBE. Menolak tebakan yang sebenarnya benar jauh lebih
+  menjengkelkan daripada membiarkan orang mengetik huruf asal-asalan, yang
+  ruginya toh ditanggung sendiri: jatah tebakannya berkurang. Jadi yang
+  diperiksa hanya panjang katanya.
+
+  PANJANG KATA TIDAK TETAP
+
+  Bank kata berisi istilah 5 dan 6 huruf. Papan digambar ulang mengikuti
+  panjang kata hari itu, jadi menambah kata 7 huruf pun tidak perlu mengubah
+  berkas ini sama sekali.
+*/
+(function(){
+  'use strict';
+
+  var KATA = window.KafbeWordleKata || [];
+  if(!KATA.length) return;
+
+  var MAKS_BARIS   = 6;
+  var BUKA_SETELAH = 3;   // definisi terbuka sendiri setelah sekian tebakan meleset
+  var KUNCI_MAIN   = 'kafbe_tebakkata_harian';
+  var KUNCI_STAT   = 'kafbe_tebakkata_statistik';
+
+  /*
+    Titik awal penomoran hari. Dipatok pada tanggal tetap supaya nomor hari
+    yang muncul di teks bagikan tidak berubah kalau berkas ini disunting.
+  */
+  var TITIK_AWAL = Date.UTC(2026, 0, 1);
+
+  /* ---------- Penyimpanan yang tidak pernah menjatuhkan halaman ---------- */
+  /*
+    Di mode penyamaran sebagian peramban, localStorage ada tetapi melempar
+    kesalahan begitu ditulis. Kalau itu dibiarkan lolos, seluruh permainan
+    berhenti hanya karena statistiknya gagal disimpan. Di sini kegagalan
+    menyimpan sengaja diabaikan: pemain tetap bisa main, hanya tanpa riwayat.
+  */
+  function baca(kunci){
+    try{
+      var isi = localStorage.getItem(kunci);
+      return isi ? JSON.parse(isi) : null;
+    }catch(e){ return null; }
+  }
+  function tulis(kunci, nilai){
+    try{ localStorage.setItem(kunci, JSON.stringify(nilai)); }catch(e){}
+  }
+
+  /* ---------- Pemilihan kata harian ---------- */
+  /*
+    Daftar kata dikelompokkan per bidang, jadi memakai nomor hari langsung
+    sebagai nomor urut akan menyajikan belasan istilah akuntansi berturut-turut
+    lalu belasan istilah pemasaran. Pengacakan di bawah memakai pembangkit
+    bilangan acak bertaburan tetap, sehingga urutannya tercampur rata namun
+    tetap sama di semua perangkat dan tidak berubah setiap halaman dimuat.
+  */
+  function urutanTetap(n){
+    var urutan = [];
+    for(var i = 0; i < n; i++) urutan.push(i);
+    var benih = 20260918;
+    for(var j = n - 1; j > 0; j--){
+      benih = (benih * 1103515245 + 12345) % 2147483648;
+      var k = benih % (j + 1);
+      var simpan = urutan[j]; urutan[j] = urutan[k]; urutan[k] = simpan;
+    }
+    return urutan;
+  }
+  var URUTAN = urutanTetap(KATA.length);
+
+  function nomorHari(){
+    var kini = new Date();
+    var lokal = Date.UTC(kini.getFullYear(), kini.getMonth(), kini.getDate());
+    return Math.floor((lokal - TITIK_AWAL) / 86400000);
+  }
+  function kataHariIni(){
+    var h = nomorHari();
+    var i = ((h % KATA.length) + KATA.length) % KATA.length;
+    return KATA[URUTAN[i]];
+  }
+
+  /* ---------- Keadaan permainan ---------- */
+  var mode      = 'harian';
+  var soal      = null;   // butir dari bank kata
+  var jawaban   = '';
+  var tebakan   = [];     // kata-kata yang sudah dikirim
+  var ketikan   = '';
+  var selesai   = false;
+  var menang    = false;
+  var bukaDefinisi = false;
+
+  var elPapan   = document.getElementById('papan');
+  var elTuts    = document.getElementById('tuts');
+  var elPesan   = document.getElementById('pesan');
+  var elBidang  = document.getElementById('bidangCap');
+  var elDefinisi= document.getElementById('definisi');
+  var elBtnHint = document.getElementById('btnPetunjuk');
+  var tombolHarian  = document.getElementById('modeHarian');
+  var tombolLatihan = document.getElementById('modeLatihan');
+
+  function inggris(){ return !!(window.KafbeBahasa && window.KafbeBahasa.inggris()); }
+  function dua(id, en){ return inggris() ? en : id; }
+
+  /*
+    Tombol yang baru diklik HARUS dilepaskan fokusnya.
+
+    Peramban menjalankan tombol yang sedang berfokus setiap kali Enter atau
+    Spasi ditekan. Tanpa pelepasan ini, pemain yang menekan tuts di layar atau
+    berpindah mode dengan tetikus akan menemukan Enter berikutnya menekan ulang
+    tombol itu, bukan mengirim tebakannya: tekan "Latihan" lalu ketik sebuah
+    kata, dan Enter justru memulai permainan baru sehingga tebakannya hilang.
+    Ditemukan saat pengujian, bukan dugaan.
+
+    Tombolnya tetap bisa dicapai dengan Tab dan tetap dijalankan dengan Enter;
+    yang berubah hanya fokusnya tidak tertinggal setelah dijalankan.
+  */
+  function lepasFokus(tombol){
+    if(tombol && typeof tombol.blur === 'function') tombol.blur();
+  }
+
+  /* ---------- Penilaian tebakan ---------- */
+  /*
+    Dua lintasan, dan urutannya menentukan benar tidaknya hasil. Huruf yang
+    tepat posisinya dikunci lebih dulu, baru sisanya dicocokkan ke huruf yang
+    belum terpakai. Tanpa lintasan pertama, kata berhuruf kembar seperti
+    "NERACA" akan menandai "A" kedua sebagai kuning padahal "A" di kata itu
+    sudah habis terpakai oleh yang hijau.
+  */
+  function nilai(kata){
+    var hasil = [];
+    var sisa  = {};
+    var i, huruf;
+
+    for(i = 0; i < jawaban.length; i++){
+      if(kata[i] === jawaban[i]){
+        hasil[i] = 'benar';
+      }else{
+        hasil[i] = null;
+        huruf = jawaban[i];
+        sisa[huruf] = (sisa[huruf] || 0) + 1;
+      }
+    }
+    for(i = 0; i < kata.length; i++){
+      if(hasil[i]) continue;
+      huruf = kata[i];
+      if(sisa[huruf] > 0){ hasil[i] = 'ada'; sisa[huruf]--; }
+      else               { hasil[i] = 'tidak'; }
+    }
+    return hasil;
+  }
+
+  /* ---------- Menggambar papan ---------- */
+  /*
+    Papan dibangun dengan createElement, bukan innerHTML. Selain lebih aman,
+    ini menjaga jumlah penanda div di berkas HTML tetap seimbang, yang memang
+    diperiksa oleh scripts/periksa-halaman.mjs.
+  */
+  function gambarPapan(){
+    elPapan.textContent = '';
+    var panjang = jawaban.length;
+
+    for(var b = 0; b < MAKS_BARIS; b++){
+      var baris = document.createElement('div');
+      baris.className = 'baris';
+      baris.style.gridTemplateColumns = 'repeat(' + panjang + ', auto)';
+
+      var isiBaris = tebakan[b] || (b === tebakan.length ? ketikan : '');
+      var penilaian = tebakan[b] ? nilai(tebakan[b]) : null;
+
+      for(var k = 0; k < panjang; k++){
+        var kotak = document.createElement('div');
+        kotak.className = 'kotak';
+        var huruf = isiBaris[k] || '';
+        kotak.textContent = huruf;
+        if(penilaian)   kotak.classList.add(penilaian[k]);
+        else if(huruf)  kotak.classList.add('terisi');
+        baris.appendChild(kotak);
+      }
+      elPapan.appendChild(baris);
+    }
+  }
+
+  /* ---------- Papan tuts ---------- */
+  var BARIS_TUTS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+
+  function gambarTuts(){
+    elTuts.textContent = '';
+
+    for(var r = 0; r < BARIS_TUTS.length; r++){
+      var baris = document.createElement('div');
+      baris.className = 'tuts-baris';
+
+      if(r === 2) baris.appendChild(tombolTuts('ENTER', 'ENTER', true));
+
+      for(var i = 0; i < BARIS_TUTS[r].length; i++){
+        var h = BARIS_TUTS[r][i];
+        baris.appendChild(tombolTuts(h, h, false));
+      }
+
+      if(r === 2) baris.appendChild(tombolTuts('HAPUS', dua('HAPUS', 'DEL'), true));
+      elTuts.appendChild(baris);
+    }
+    warnaiTuts();
+  }
+
+  function tombolTuts(nilaiTuts, teks, lebar){
+    var t = document.createElement('button');
+    t.type = 'button';
+    t.textContent = teks;
+    t.dataset.tuts = nilaiTuts;
+    if(lebar) t.className = 'lebar';
+    t.addEventListener('click', function(){ lepasFokus(t); tekan(nilaiTuts); });
+    return t;
+  }
+
+  /*
+    Warna tuts hanya boleh naik derajat, tidak pernah turun: huruf yang pernah
+    hijau harus tetap hijau meski di tebakan berikutnya muncul di posisi salah.
+    Kalau tidak dikunci begini, pemain kehilangan petunjuk yang sudah dia dapat.
+  */
+  var DERAJAT = { tidak:1, ada:2, benar:3 };
+
+  function warnaiTuts(){
+    var status = {};
+    for(var b = 0; b < tebakan.length; b++){
+      var h = nilai(tebakan[b]);
+      for(var i = 0; i < tebakan[b].length; i++){
+        var huruf = tebakan[b][i];
+        if(!status[huruf] || DERAJAT[h[i]] > DERAJAT[status[huruf]]) status[huruf] = h[i];
+      }
+    }
+    var tombol = elTuts.querySelectorAll('button');
+    for(var t = 0; t < tombol.length; t++){
+      var kunci = tombol[t].dataset.tuts;
+      tombol[t].classList.remove('benar', 'ada', 'tidak');
+      if(status[kunci]) tombol[t].classList.add(status[kunci]);
+    }
+  }
+
+  /* ---------- Petunjuk ---------- */
+  function segarkanPetunjuk(){
+    elBidang.textContent = soal.m;
+    var bolehBuka = bukaDefinisi || selesai || tebakan.length >= BUKA_SETELAH;
+    if(bolehBuka){
+      elDefinisi.textContent = soal.d;
+      elDefinisi.classList.remove('tertutup');
+      elBtnHint.hidden = true;
+    }else{
+      var sisa = BUKA_SETELAH - tebakan.length;
+      elDefinisi.textContent = dua(
+        'Definisinya terbuka setelah ' + sisa + ' tebakan lagi.',
+        'The definition opens after ' + sisa + ' more ' + (sisa === 1 ? 'guess' : 'guesses') + '.'
+      );
+      elDefinisi.classList.add('tertutup');
+      elBtnHint.hidden = false;
+    }
+  }
+
+  /* ---------- Pesan sesaat ---------- */
+  var jamPesan = null;
+  function pesan(teks, tetap){
+    elPesan.textContent = teks;
+    if(jamPesan) clearTimeout(jamPesan);
+    if(!tetap) jamPesan = setTimeout(function(){ elPesan.textContent = ''; }, 2200);
+  }
+
+  function goyangBaris(){
+    var baris = elPapan.children[tebakan.length];
+    if(!baris) return;
+    baris.classList.add('goyang');
+    setTimeout(function(){ baris.classList.remove('goyang'); }, 400);
+  }
+
+  /* ---------- Jalannya permainan ---------- */
+  function tekan(tutsDitekan){
+    if(selesai) return;
+
+    if(tutsDitekan === 'ENTER'){ kirim(); return; }
+    if(tutsDitekan === 'HAPUS'){
+      ketikan = ketikan.slice(0, -1);
+      gambarPapan();
+      return;
+    }
+    if(ketikan.length < jawaban.length && /^[A-Z]$/.test(tutsDitekan)){
+      ketikan += tutsDitekan;
+      gambarPapan();
+    }
+  }
+
+  function kirim(){
+    if(ketikan.length < jawaban.length){
+      pesan(dua('Kurang ' + (jawaban.length - ketikan.length) + ' huruf lagi.',
+                'Needs ' + (jawaban.length - ketikan.length) + ' more letters.'));
+      goyangBaris();
+      return;
+    }
+
+    tebakan.push(ketikan);
+    var benar = (ketikan === jawaban);
+    ketikan = '';
+
+    gambarPapan();
+    warnaiTuts();
+    segarkanPetunjuk();
+
+    if(benar || tebakan.length >= MAKS_BARIS){
+      selesai = true;
+      menang  = benar;
+      if(mode === 'harian'){
+        catatStatistik(benar, tebakan.length);
+        simpanHarian();
+      }
+      segarkanPetunjuk();
+      segarkanStatistik();
+      setTimeout(tampilkanHasil, 420);
+    }else if(mode === 'harian'){
+      simpanHarian();
+    }
+  }
+
+  /* ---------- Statistik ---------- */
+  function statistik(){
+    var s = baca(KUNCI_STAT);
+    if(!s || typeof s !== 'object') s = {};
+    return {
+      main:          s.main          || 0,
+      menang:        s.menang        || 0,
+      runtun:        s.runtun        || 0,
+      runtunTerbaik: s.runtunTerbaik || 0
+    };
+  }
+
+  function catatStatistik(benar, percobaan){
+    var s = statistik();
+    s.main += 1;
+    if(benar){
+      s.menang += 1;
+      s.runtun += 1;
+      if(s.runtun > s.runtunTerbaik) s.runtunTerbaik = s.runtun;
+    }else{
+      s.runtun = 0;
+    }
+    s.percobaanTerakhir = percobaan;
+    tulis(KUNCI_STAT, s);
+  }
+
+  function segarkanStatistik(){
+    var s = statistik();
+    document.getElementById('statMain').textContent = s.main;
+    document.getElementById('statMenang').textContent =
+      (s.main ? Math.round(s.menang / s.main * 100) : 0) + '%';
+    document.getElementById('statRuntun').textContent = s.runtun;
+  }
+
+  /* ---------- Menyimpan permainan harian yang belum selesai ---------- */
+  /*
+    Yang disimpan hanya tebakan dan nomor harinya, bukan jawabannya. Jawaban
+    tetap dihitung ulang dari nomor hari, jadi pemain yang penasaran tidak
+    menemukan kunci jawaban hari ini di penyimpanan peramban.
+  */
+  function simpanHarian(){
+    tulis(KUNCI_MAIN, { hari: nomorHari(), tebakan: tebakan, bukaDefinisi: bukaDefinisi });
+  }
+
+  function muatHarian(){
+    var d = baca(KUNCI_MAIN);
+    if(!d || d.hari !== nomorHari() || !Array.isArray(d.tebakan)) return;
+
+    for(var i = 0; i < d.tebakan.length && i < MAKS_BARIS; i++){
+      if(typeof d.tebakan[i] === 'string' && d.tebakan[i].length === jawaban.length){
+        tebakan.push(d.tebakan[i]);
+      }
+    }
+    bukaDefinisi = !!d.bukaDefinisi;
+    if(tebakan.length){
+      var terakhir = tebakan[tebakan.length - 1];
+      if(terakhir === jawaban){ selesai = true; menang = true; }
+      else if(tebakan.length >= MAKS_BARIS){ selesai = true; menang = false; }
+    }
+  }
+
+  /* ---------- Tirai hasil ---------- */
+  function petakEmoji(){
+    var LAMBANG = { benar:'🟩', ada:'🟨', tidak:'⬜' };
+    var baris = [];
+    for(var b = 0; b < tebakan.length; b++){
+      var h = nilai(tebakan[b]);
+      var s = '';
+      for(var i = 0; i < h.length; i++) s += LAMBANG[h[i]];
+      baris.push(s);
+    }
+    return baris.join('\n');
+  }
+
+  function teksBagikan(){
+    var kepala = 'Tebak Kata FBE #' + nomorHari() + ' ' +
+                 (menang ? tebakan.length : 'X') + '/' + MAKS_BARIS;
+    return kepala + '\n' + petakEmoji() + '\n' + location.origin + location.pathname;
+  }
+
+  function tampilkanHasil(){
+    var tirai = document.createElement('div');
+    tirai.className = 'tirai';
+
+    var kotak = document.createElement('div');
+    kotak.className = 'tirai-kotak';
+
+    var judul = document.createElement('h3');
+    judul.textContent = menang
+      ? dua('Tepat! 🎉', 'Got it! 🎉')
+      : dua('Belum ketemu 😔', 'Not this time 😔');
+    kotak.appendChild(judul);
+
+    var kata = document.createElement('p');
+    kata.className = 'tirai-jawaban';
+    kata.textContent = jawaban;
+    kotak.appendChild(kata);
+
+    var bidang = document.createElement('p');
+    bidang.className = 'tirai-bidang';
+    bidang.textContent = soal.m;
+    kotak.appendChild(bidang);
+
+    var arti = document.createElement('p');
+    arti.className = 'tirai-definisi';
+    arti.textContent = soal.d;
+    kotak.appendChild(arti);
+
+    var tombolWadah = document.createElement('div');
+    tombolWadah.className = 'tirai-tombol';
+
+    if(mode === 'harian'){
+      var bagikan = document.createElement('button');
+      bagikan.className = 'btn btn-gold';
+      bagikan.type = 'button';
+      bagikan.textContent = dua('Salin hasil', 'Copy result');
+      bagikan.addEventListener('click', function(){
+        salin(teksBagikan(), bagikan);
+      });
+      tombolWadah.appendChild(bagikan);
+
+      var keLatihan = document.createElement('button');
+      keLatihan.className = 'btn btn-ghost';
+      keLatihan.type = 'button';
+      keLatihan.textContent = dua('Main mode Latihan', 'Play Practice mode');
+      keLatihan.addEventListener('click', function(){
+        tutup();
+        gantiMode('latihan');
+      });
+      tombolWadah.appendChild(keLatihan);
+    }else{
+      var lagi = document.createElement('button');
+      lagi.className = 'btn btn-gold';
+      lagi.type = 'button';
+      lagi.textContent = dua('Kata berikutnya', 'Next word');
+      lagi.addEventListener('click', function(){
+        tutup();
+        mulaiLatihan();
+      });
+      tombolWadah.appendChild(lagi);
+    }
+
+    var tutupTombol = document.createElement('button');
+    tutupTombol.className = 'btn btn-ghost';
+    tutupTombol.type = 'button';
+    tutupTombol.textContent = dua('Lihat papan', 'See the board');
+    tutupTombol.addEventListener('click', tutup);
+    tombolWadah.appendChild(tutupTombol);
+
+    kotak.appendChild(tombolWadah);
+    tirai.appendChild(kotak);
+    document.body.appendChild(tirai);
+
+    function tutup(){
+      if(tirai.parentNode) tirai.parentNode.removeChild(tirai);
+    }
+    tirai.addEventListener('click', function(e){ if(e.target === tirai) tutup(); });
+  }
+
+  /*
+    Penyalinan dicoba lewat papan klip peramban lebih dulu. Cara itu tidak
+    tersedia pada halaman yang dibuka tanpa HTTPS, jadi ada cara cadangan
+    memakai kotak teks sementara supaya tombolnya tetap berguna di mana pun.
+  */
+  function salin(teks, tombol){
+    function beres(){ tombol.textContent = dua('Tersalin ✓', 'Copied ✓'); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(teks).then(beres, cadangan);
+    }else{
+      cadangan();
+    }
+    function cadangan(){
+      var kotak = document.createElement('textarea');
+      kotak.value = teks;
+      kotak.setAttribute('readonly', '');
+      kotak.style.position = 'fixed';
+      kotak.style.opacity = '0';
+      document.body.appendChild(kotak);
+      kotak.select();
+      try{ document.execCommand('copy'); beres(); }
+      catch(e){ tombol.textContent = dua('Gagal menyalin', 'Copy failed'); }
+      document.body.removeChild(kotak);
+    }
+  }
+
+  /* ---------- Penyiapan tiap mode ---------- */
+  function pasangSoal(butir){
+    soal    = butir;
+    jawaban = butir.k;
+    ketikan = '';
+    selesai = false;
+    menang  = false;
+    gambarPapan();
+    gambarTuts();
+    segarkanPetunjuk();
+    segarkanStatistik();
+  }
+
+  function mulaiHarian(){
+    mode = 'harian';
+    tebakan = [];
+    bukaDefinisi = false;
+    pasangSoal(kataHariIni());
+    muatHarian();
+    gambarPapan();
+    warnaiTuts();
+    segarkanPetunjuk();
+    if(selesai){
+      pesan(dua('Kata hari ini sudah selesai. Coba mode Latihan.',
+                'Today’s word is done. Try Practice mode.'), true);
+    }
+  }
+
+  function mulaiLatihan(){
+    mode = 'latihan';
+    tebakan = [];
+    bukaDefinisi = false;
+    pesan('');
+    pasangSoal(KATA[Math.floor(Math.random() * KATA.length)]);
+  }
+
+  function gantiMode(tujuan){
+    tombolHarian.classList.toggle('aktif', tujuan === 'harian');
+    tombolLatihan.classList.toggle('aktif', tujuan === 'latihan');
+    if(tujuan === 'harian') mulaiHarian();
+    else                    mulaiLatihan();
+  }
+
+  /* ---------- Pemasangan pendengar ---------- */
+  tombolHarian.addEventListener('click',  function(){ lepasFokus(this); gantiMode('harian'); });
+  tombolLatihan.addEventListener('click', function(){ lepasFokus(this); gantiMode('latihan'); });
+
+  elBtnHint.addEventListener('click', function(){
+    lepasFokus(this);
+    bukaDefinisi = true;
+    segarkanPetunjuk();
+    if(mode === 'harian') simpanHarian();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.ctrlKey || e.metaKey || e.altKey) return;
+    if(e.key === 'Enter'){ tekan('ENTER'); return; }
+    if(e.key === 'Backspace'){ tekan('HAPUS'); return; }
+    var h = e.key.toUpperCase();
+    if(/^[A-Z]$/.test(h) && h.length === 1) tekan(h);
+  });
+
+  // Tuts ENTER dan HAPUS bertuliskan bahasa yang sedang dipakai, jadi ikut
+  // digambar ulang saat pengunjung mengganti bahasa.
+  document.addEventListener('bahasaberubah', function(){
+    gambarTuts();
+    segarkanPetunjuk();
+  });
+
+  gantiMode('harian');
+})();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/shared/kunjungan.js"></script>
+</body>
+</html>
