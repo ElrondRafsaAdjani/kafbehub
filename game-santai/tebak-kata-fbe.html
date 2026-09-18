@@ -91,6 +91,7 @@
   .stat-box .num{font-family:'Baloo 2', system-ui, sans-serif; font-weight:700; font-size:1.4rem;}
   .stat-box .lbl{font-size:0.68rem; color:#B9CBDA; text-transform:uppercase; letter-spacing:0.04em; line-height:1.3;}
   .cara-main{font-size:0.84rem; color:#B9CBDA; line-height:1.6; margin:0; padding-left:18px;}
+  .catatan-daftar{font-size:0.8rem; color:#8FA6BA; line-height:1.5; margin:12px 0 0; font-style:italic;}
   .cara-main li{margin-bottom:5px;}
   .contoh-huruf{
     display:inline-block; width:20px; height:20px; border-radius:4px; vertical-align:-4px;
@@ -218,8 +219,9 @@
           <li><span class="contoh-huruf contoh-benar"></span> <span data-en="right letter, right position.">huruf benar di posisi yang benar.</span></li>
           <li><span class="contoh-huruf contoh-ada"></span> <span data-en="the letter exists, but elsewhere.">hurufnya ada, tetapi di posisi lain.</span></li>
           <li><span class="contoh-huruf contoh-tidak"></span> <span data-en="the letter is not in the word.">hurufnya tidak ada dalam kata itu.</span></li>
-          <li data-en="Every answer is a business or economics term that stands on its own.">Semua jawabannya istilah bisnis atau ekonomika yang berdiri sendiri.</li>
+          <li data-en="Guesses must be terms from the list. Made-up words and everyday words are both rejected, and a rejected guess does not use up a try.">Tebakan harus istilah dari daftar. Kata karangan dan kata sehari-hari sama-sama ditolak, dan tebakan yang ditolak tidak memotong jatah percobaan.</li>
         </ul>
+        <p class="catatan-daftar" id="catatanDaftar"></p>
       </div>
     </div>
   </div>
@@ -243,14 +245,20 @@
   buntu menunggu besok. Hanya mode Harian yang dihitung ke statistik, sebab
   mode Latihan bisa diulang sampai menang dan angkanya akan kehilangan arti.
 
-  KENAPA TEBAKAN TIDAK DICOCOKKAN KE KAMUS
+  TEBAKAN HARUS ADA DI BANK KATA
 
-  Situs ini tidak memuat kamus bahasa Indonesia, dan memakai bank kata sendiri
-  sebagai penyaring akan menolak tebakan wajar seperti "MOBIL" hanya karena
-  kata itu bukan istilah FBE. Menolak tebakan yang sebenarnya benar jauh lebih
-  menjengkelkan daripada membiarkan orang mengetik huruf asal-asalan, yang
-  ruginya toh ditanggung sendiri: jatah tebakannya berkurang. Jadi yang
-  diperiksa hanya panjang katanya.
+  Yang boleh dikirim hanya istilah yang ada di bank kata. Kata karangan seperti
+  "NYMPH" dan kata umum seperti "MOBIL" sama-sama ditolak.
+
+  Mulanya yang diperiksa hanya panjang katanya, dengan alasan menolak tebakan
+  wajar itu menjengkelkan. Alasan itu ternyata salah menimbang: kalau huruf
+  asal-asalan boleh dikirim, papan tuts ikut mewarnai huruf dari kata yang
+  tidak pernah mungkin menjadi jawaban, dan permainannya berubah menjadi
+  menyisir abjad satu per satu, bukan mengingat istilah. Penyaringan inilah
+  yang membuat game ini melatih istilah FBE, bukan sekadar menebak huruf.
+
+  Tebakan yang ditolak TIDAK memotong jatah enam percobaan. Penolakan di sini
+  cuma memberi tahu bahwa katanya tidak ada di daftar, bukan menghukum.
 
   PANJANG KATA TIDAK TETAP
 
@@ -312,6 +320,31 @@
     return urutan;
   }
   var URUTAN = urutanTetap(KATA.length);
+
+  /*
+    Daftar tebakan yang sah, dikelompokkan menurut panjang katanya. Dibangun
+    sekali di sini, bukan dicari ulang ke seluruh bank kata setiap kali pemain
+    menekan Enter.
+  */
+  var DAFTAR_SAH = {};
+  (function(){
+    for(var i = 0; i < KATA.length; i++){
+      var k = KATA[i].k;
+      if(!DAFTAR_SAH[k.length]) DAFTAR_SAH[k.length] = {};
+      DAFTAR_SAH[k.length][k] = true;
+    }
+  })();
+
+  function sah(kata){
+    var daftar = DAFTAR_SAH[kata.length];
+    return !!(daftar && daftar[kata]);
+  }
+
+  function jumlahIstilah(panjang){
+    var n = 0, daftar = DAFTAR_SAH[panjang] || {};
+    for(var k in daftar){ if(Object.prototype.hasOwnProperty.call(daftar, k)) n++; }
+    return n;
+  }
 
   function nomorHari(){
     var kini = new Date();
@@ -482,6 +515,22 @@
     }
   }
 
+  /*
+    Jumlah istilah ditulis dari isi bank kata, bukan diketik tangan di HTML.
+    Angka yang diketik tangan akan diam-diam menjadi bohong begitu ada istilah
+    baru ditambahkan, dan tidak ada yang akan ingat memperbaruinya.
+  */
+  function segarkanCatatanDaftar(){
+    var el = document.getElementById('catatanDaftar');
+    if(!el) return;
+    el.textContent = dua(
+      'Daftar saat ini memuat ' + jumlahIstilah(5) + ' istilah berhuruf lima dan ' +
+        jumlahIstilah(6) + ' istilah berhuruf enam.',
+      'The list currently holds ' + jumlahIstilah(5) + ' five-letter and ' +
+        jumlahIstilah(6) + ' six-letter terms.'
+    );
+  }
+
   /* ---------- Petunjuk ---------- */
   function segarkanPetunjuk(){
     elBidang.textContent = soal.m;
@@ -536,6 +585,13 @@
     if(ketikan.length < jawaban.length){
       pesan(dua('Kurang ' + (jawaban.length - ketikan.length) + ' huruf lagi.',
                 'Needs ' + (jawaban.length - ketikan.length) + ' more letters.'));
+      goyangBaris();
+      return;
+    }
+
+    if(!sah(ketikan)){
+      pesan(dua(ketikan + ' tidak ada dalam daftar istilah.',
+                ketikan + ' is not on the term list.'));
       goyangBaris();
       return;
     }
@@ -611,8 +667,17 @@
     var d = baca(KUNCI_MAIN);
     if(!d || d.hari !== nomorHari() || !Array.isArray(d.tebakan)) return;
 
+    /*
+      Tebakan yang dimuat kembali disaring dengan aturan yang sama seperti saat
+      dikirim. Memeriksa panjangnya saja tidak cukup: simpanan dari pemain yang
+      sudah bermain sebelum penyaringan ini ada masih memuat kata karangan, dan
+      isi localStorage memang bisa disunting siapa saja dari peramban. Tanpa
+      saringan ini, baris yang tidak akan pernah bisa dikirim lagi tetap muncul
+      di papan setelah halaman dimuat ulang.
+    */
     for(var i = 0; i < d.tebakan.length && i < MAKS_BARIS; i++){
-      if(typeof d.tebakan[i] === 'string' && d.tebakan[i].length === jawaban.length){
+      if(typeof d.tebakan[i] === 'string' && sah(d.tebakan[i])
+         && d.tebakan[i].length === jawaban.length){
         tebakan.push(d.tebakan[i]);
       }
     }
@@ -815,8 +880,10 @@
   document.addEventListener('bahasaberubah', function(){
     gambarTuts();
     segarkanPetunjuk();
+    segarkanCatatanDaftar();
   });
 
+  segarkanCatatanDaftar();
   gantiMode('harian');
 })();
 </script>
