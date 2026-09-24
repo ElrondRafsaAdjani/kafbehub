@@ -2472,8 +2472,10 @@ $('msBuat').addEventListener('click', async () => {
     $('msCatatan').value = '';
     await muatSemua();
     await terbitkan();
-    pesan(el, `Selesai. ${esc(ringkas)}. <button type="button" class="op-mini" id="msStory">Buat story Instagram</button>`, 'benar');
-    $('msStory').addEventListener('click', () => bukaIg(data.perubahan.filter(p => p.kelompok === kelompok)));
+    // Story perubahan massal dibuat satu per satu, bukan digabung, supaya
+    // tiap kelas mendapat story utuh. Tombolnya ada di tiap baris tabel.
+    pesan(el, `Selesai. ${esc(ringkas)}. Story Instagram tiap kelas dibuat lewat tombol `
+      + '<strong>Story IG</strong> di barisnya pada tabel di bawah.', 'benar');
   }catch(err){
     console.error(err);
     pesan(el, 'Gagal membuat: ' + esc(err.message), 'salah');
@@ -2496,16 +2498,9 @@ function gambarKelompok(){
     <p class="op-catatan">Menghapus kelompok akan membuang seluruh perubahan yang dibuat bersamaan dengannya.</p>
     ${[...peta.entries()].map(([nama, n]) => `<div class="op-kelompok-baris">
       <span><strong>${esc(nama)}</strong> <span class="op-samar">· ${n} perubahan</span></span>
-      <span class="op-tombol-baris">
-        <button class="op-mini" data-ig-kelompok="${esc(nama)}">Story IG</button>
-        <button class="op-mini op-hapus" data-hapus-kelompok="${esc(nama)}">Hapus kelompok</button>
-      </span>
+      <button class="op-mini op-hapus" data-hapus-kelompok="${esc(nama)}">Hapus kelompok</button>
     </div>`).join('')}
   </div>`;
-
-  el.querySelectorAll('[data-ig-kelompok]').forEach(b => b.addEventListener('click', () => {
-    bukaIg(data.perubahan.filter(p => p.kelompok === b.dataset.igKelompok));
-  }));
 
   el.querySelectorAll('[data-hapus-kelompok]').forEach(b => b.addEventListener('click', async () => {
     const nama = b.dataset.hapusKelompok;

@@ -205,9 +205,9 @@ tercentang semua. **Hapus centang** pada kelas yang tidak terdampak, lalu tekan
 isi **catatan khusus** di baris kelas itu; catatan khusus menggantikan
 catatan umum untuk kelas tersebut saja.
 
-Setelah selesai, tombol **Buat story Instagram** muncul untuk langsung
-membuat story dari seluruh perubahan yang baru dibuat. Tombol **Story IG** di
-kotak "Hasil pembuatan massal" melakukan hal yang sama kapan pun.
+Story Instagram untuk perubahan massal **tidak digabung**: tiap kelas dibuat
+story-nya sendiri lewat tombol **Story IG** di barisnya pada tabel
+perubahan.
 
 Beberapa hal yang otomatis dijaga:
 
@@ -232,7 +232,8 @@ diunggah sendiri.
 **Perubahan sementara.** Centang perubahan yang ingin diumumkan, lalu tekan
 **Buat story Instagram**. Kotak centang di kepala tabel mencentang semua
 perubahan yang belum lewat. Bisa juga langsung menekan **Story IG** di satu
-baris, atau di satu kelompok pembuatan massal.
+baris. Perubahan hasil pembuatan massal juga punya tombol ini di tiap
+barisnya, jadi story-nya dibuat per kelas.
 
 **Perpindahan permanen.** Setelah mengubah hari, jam, atau ruang sebuah
 kelas di tab Jadwal Permanen, muncul tombol **Buat story perpindahan
