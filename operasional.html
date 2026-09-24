@@ -9,7 +9,7 @@
 <title>Operasional - KAFBE Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=League+Spartan:wght@700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="operasional.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -116,6 +116,7 @@
       <button class="op-tab-btn" data-tab="akunpengajar" role="tab">Akun Pengajar</button>
       <button class="op-tab-btn" data-tab="akunoperasional" role="tab">Akun Operasional</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
+      <button class="op-tab-btn" data-tab="pr" role="tab">PR</button>
       <button class="op-tab-btn" data-tab="unggahunduh" role="tab">Upload dan Download</button>
       <button class="op-tab-btn" data-tab="log" role="tab">Log</button>
     </nav>
@@ -609,16 +610,15 @@
       </div>
     </section>
 
-    <!-- ---------- UPLOAD DAN DOWNLOAD ---------- -->
-    <section class="op-panel" id="panel-unggahunduh" hidden>
+    <!-- ---------- PR ---------- -->
+    <section class="op-panel" id="panel-pr" hidden>
       <div class="op-panel-kepala">
         <div>
-          <h2>Upload dan Download</h2>
-          <p>Berkas Excel Informasi Kelas Asistensi dan template story Instagram KAFBE.</p>
+          <h2>PR</h2>
+          <p>Template story Instagram KAFBE beserta font dan warna teksnya.</p>
         </div>
       </div>
 
-      <h3>Template story Instagram</h3>
       <p class="op-catatan">
         Story Instagram dibuat dengan menempelkan teks pengumuman ke template yang
         diunggah di sini. Template cukup diunggah <strong>sekali per periode
@@ -626,11 +626,10 @@
         dan template lama otomatis tergantikan.
       </p>
       <p class="op-catatan">
-        Ukurannya <strong>1080 × 1920</strong> (9:16). Semua bagian yang selalu sama,
-        seperti batik, logo, PENGUMUMAN, kartu putih, TERIMA KASIH, dan slogan, sudah
-        ada di gambar template. Bagian tengah kartu putih dikosongkan, sebab judul dan
-        isi pengumuman ditulis di dalam <strong>area teks</strong> (kotak garis
-        putus-putus merah muda di pratinjau).
+        Ukurannya <strong>1080 × 1920</strong> (9:16). Semua hiasan, seperti batik, logo,
+        PENGUMUMAN, kartu putih, ornamen, TERIMA KASIH, dan slogan, sudah ada di gambar
+        template. Yang ditulis hanya teksnya, di dalam <strong>area teks</strong> (kotak
+        garis putus-putus merah muda di pratinjau), jadi bagian itu dikosongkan di template.
       </p>
       <p class="op-catatan" id="tplStatus">Memuat template…</p>
 
@@ -639,6 +638,24 @@
           <div class="op-aksi">
             <label class="btn btn-primary op-kecil op-label-berkas" id="tplLabelUnggah">Upload template <input type="file" id="tplBerkas" accept="image/png,image/jpeg,image/webp" hidden /></label>
             <button type="button" class="btn btn-ghost op-kecil" id="tplUnduh" hidden>Download template</button>
+          </div>
+
+          <h4 class="op-subjudul">Font</h4>
+          <p class="op-catatan">Tulis nama font persis seperti di fonts.google.com. Font primer untuk judul, font sekunder untuk kalimat pembuka dan daftar kelas.</p>
+          <div class="op-baris">
+            <div class="op-field"><label for="tplFontPrimer">Font primer</label>
+              <input type="text" id="tplFontPrimer" placeholder="Lilita One" autocomplete="off" /></div>
+            <div class="op-field"><label for="tplFontSekunder">Font sekunder</label>
+              <input type="text" id="tplFontSekunder" placeholder="Fredoka" autocomplete="off" /></div>
+          </div>
+
+          <h4 class="op-subjudul">Warna teks</h4>
+          <p class="op-catatan">Warna primer untuk seluruh teks biasa. Warna sekunder untuk kata yang diapit tanda bintang, misalnya <code>*SEMENTARA*</code>, dan nama kelas di daftar.</p>
+          <div class="op-baris">
+            <div class="op-field op-sempit"><label for="tplWarnaPrimer">Warna primer</label>
+              <span class="op-warna"><input type="color" id="tplWarnaPrimer" /> <code id="tplKodePrimer"></code></span></div>
+            <div class="op-field op-sempit"><label for="tplWarnaSekunder">Warna sekunder</label>
+              <span class="op-warna"><input type="color" id="tplWarnaSekunder" /> <code id="tplKodeSekunder"></code></span></div>
           </div>
 
           <h4 class="op-subjudul">Area teks (persen dari ukuran gambar)</h4>
@@ -650,9 +667,10 @@
             <div class="op-field op-sempit"><label for="tplSamping">Jarak samping</label>
               <input type="number" id="tplSamping" min="0" max="40" step="0.5" /></div>
           </div>
+
           <div class="op-aksi">
-            <button type="button" class="btn btn-primary op-kecil" id="tplSimpanArea">Simpan area</button>
-            <button type="button" class="btn btn-ghost op-kecil" id="tplAreaBawaan">Kembalikan area awal</button>
+            <button type="button" class="btn btn-primary op-kecil" id="tplSimpan">Simpan pengaturan</button>
+            <button type="button" class="btn btn-ghost op-kecil" id="tplPengaturanAwal">Kembalikan pengaturan awal</button>
           </div>
           <p class="op-pesan" id="pesanTemplate" role="alert"></p>
         </div>
@@ -661,10 +679,17 @@
           <div class="op-template-kosong" id="tplKosong">Pratinjau muncul setelah template diunggah.</div>
         </div>
       </div>
+    </section>
 
-      <hr class="op-garis" />
+    <!-- ---------- UPLOAD DAN DOWNLOAD ---------- -->
+    <section class="op-panel" id="panel-unggahunduh" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Upload dan Download</h2>
+          <p>Berkas Excel Informasi Kelas Asistensi.</p>
+        </div>
+      </div>
 
-      <h3>Excel Informasi Kelas Asistensi</h3>
       <p class="op-catatan">Menarik data dari berkas Informasi Kelas Asistensi, dan mengunduh kembali isi terkini sebagai berkas Excel. Lembar Rekap Jumlah Ngajar tidak dibaca dan tidak ditulis.</p>
 
       <h4 class="op-subjudul">Download</h4>
@@ -925,7 +950,7 @@
               <input type="text" id="igJudulTeks" /></div>
       <div class="op-field"><label for="igIsiTeks">Kalimat pembuka</label>
               <textarea id="igIsiTeks" rows="6"></textarea></div>
-      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, ditulis berwarna emas. Daftar kelas di bawahnya disusun otomatis dari data.</p>
+      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, ditulis dengan warna sekunder (diatur di tab PR). Daftar kelas di bawahnya disusun otomatis dari data.</p>
       <p class="op-catatan">Periksa dulu isinya, lalu unduh atau salin gambarnya dan unggah sendiri sebagai story. Di ponsel, tombol Bagikan bisa langsung membuka Instagram.</p>
       <div class="op-aksi">
         <button type="button" class="btn btn-primary op-kecil" id="igUnduhSemua" hidden>Unduh semua</button>

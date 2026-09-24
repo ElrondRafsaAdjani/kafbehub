@@ -216,8 +216,7 @@ satu per satu, yaitu persoalan yang justru ingin dihindari.
 
 Perubahan jadwal bisa langsung dijadikan story pengumuman untuk Instagram
 KAFBE. Teks pengumumannya ditempelkan ke **template yang diunggah tim** di tab
-Upload dan Download, jadi story baru bisa dibuat setelah template periode itu
-diunggah. Daftar kelas yang berubah ditulis langsung di story, jadi tidak
+**PR**, jadi story baru bisa dibuat setelah template periode itu diunggah. Daftar kelas yang berubah ditulis langsung di story, jadi tidak
 perlu lagi menempelkan tangkapan layar tabel Excel. Situs ini tidak
 mengunggah apa pun ke Instagram. Gambarnya diunduh atau disalin, lalu
 diunggah sendiri.
@@ -233,23 +232,29 @@ permanen** yang sudah memuat jadwal lama dan jadwal barunya. Tombol
 **Story IG** di tiap baris tabel juga bisa dipakai, tetapi tanpa jadwal lama.
 
 Di jendela pratinjau, judul dan kalimat pembuka masih bisa disunting. Kata
-yang diapit tanda bintang, misalnya `*PERMANEN*`, ditulis berwarna emas.
+yang diapit tanda bintang, misalnya `*PERMANEN*`, ditulis dengan warna sekunder.
 Lalu tekan **Unduh** atau **Salin**. Di ponsel, **Bagikan** membuka menu
 bagikan, jadi gambarnya bisa langsung dikirim ke Instagram. Bila kelasnya
 terlalu banyak untuk satu story, story dibagi otomatis dan diberi nomor.
 
-**Template.** Diunggah **sekali per periode kepengurusan** di tab **Upload
-dan Download**, lalu dipakai untuk semua story selama periode itu. Periode
-berikutnya cukup mengunggah template baru; template lama otomatis
-tergantikan (ada konfirmasi dulu sebelum menimpa).
+**Tab PR.** Template diunggah **sekali per periode kepengurusan** di tab
+**PR**, lalu dipakai untuk semua story selama periode itu. Periode berikutnya
+cukup mengunggah template baru; template lama otomatis tergantikan (ada
+konfirmasi dulu sebelum menimpa).
 
 - Template berukuran 1080 × 1920 (PNG atau JPG) dan sudah memuat semua
-  bagian yang selalu sama: batik, logo, PENGUMUMAN, kartu putih, TERIMA
-  KASIH, dan slogan. Bagian tengah kartu putih dikosongkan, karena judul,
-  kalimat pembuka, dan daftar kelas ditulis otomatis di situ
-- **Area teks** mengatur di mana teks itu ditulis, dalam persen dari ukuran
-  gambar. Pratinjau di sebelahnya menandai area itu dengan garis
-  putus-putus. Tekan **Simpan area** setelah pas. Cukup diatur sekali
+  hiasan: batik, logo, PENGUMUMAN, kartu putih, ornamen, TERIMA KASIH, dan
+  slogan. Situs hanya menulis teks (judul, kalimat pembuka, daftar kelas),
+  jadi bagian itu dikosongkan di template
+- **Font primer** dipakai untuk judul dan **font sekunder** untuk kalimat
+  pembuka serta daftar kelas. Tulis namanya persis seperti di
+  fonts.google.com. Saat ini: Lilita One dan Fredoka
+- **Warna primer** dipakai untuk seluruh teks biasa, **warna sekunder** untuk
+  kata yang diapit `*...*` dan nama kelas di daftar. Saat ini: `#13192f` dan
+  `#be8f41`
+- **Area teks** mengatur di mana teks ditulis, dalam persen dari ukuran
+  gambar. Pratinjau di sebelahnya menandai area itu dengan garis putus-putus
+- Tekan **Simpan pengaturan** setelah semuanya pas. Cukup diatur sekali
   setiap kali template diganti
 - **Download template** mengunduh template yang sedang dipakai, misalnya
   untuk disunting desainer periode berikutnya
@@ -279,11 +284,6 @@ bentrok.
 > memakainya, dan isinya tidak ikut ditulis ke dokumen yang dibaca pengunjung.
 
 ### Upload dan Download
-
-Tab ini berisi dua hal: template story Instagram (dijelaskan di bagian
-**Story Instagram** di atas) dan berkas Excel Informasi Kelas Asistensi.
-
-#### Excel
 
 Tab ini menjembatani berkas **Informasi Kelas Asistensi** yang tiap semester
 disusun pengurus dengan data yang dipakai situs.

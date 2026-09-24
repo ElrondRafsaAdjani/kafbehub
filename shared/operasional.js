@@ -590,7 +590,7 @@ document.querySelectorAll('.op-tab-btn').forEach(btn => {
     // Catatan log baru diambil saat tabnya benar-benar dibuka. Pengurus yang
     // hanya mengubah satu jadwal tidak perlu ikut menanggung pembacaannya.
     if(btn.dataset.tab === 'log' && !logSudahDimuat) muatLog(false);
-    if(btn.dataset.tab === 'unggahunduh') segarkanTabTemplate();
+    if(btn.dataset.tab === 'pr') segarkanTabTemplate();
   });
 });
 
@@ -1275,7 +1275,7 @@ function gambarPerubahan(){
    menjadi kalimat pengumuman untuk mahasiswa, lalu diserahkan ke
    shared/gambar-ig.js untuk ditulis di template story. Tampilan gambarnya
    sendiri diatur di berkas itu, dan template-nya dikelola di tab
-   "Upload dan Download".
+   PR.
 
    Kalimat yang disusun di sini hanya usulan awal. Judul dan kalimat
    pembukanya masih bisa disunting di jendela pratinjau sebelum diunduh.
@@ -1406,15 +1406,15 @@ function kontenPermanen(j, lama){
 
 /*
   Story hanya bisa dibuat di atas template yang diunggah tim. Bila belum ada,
-  pengurus diarahkan ke tab Upload dan Download, alih-alih diberi gambar
+  pengurus diarahkan ke tab PR, alih-alih diberi gambar
   dengan latar yang bukan milik KAFBE.
 */
 async function templateSiap(){
   await siapkanTemplateIg();
   if(adaTemplate()) return true;
   if(confirm('Belum ada template story Instagram untuk periode ini.\n\n'
-    + 'Buka tab Upload dan Download untuk mengunggahnya sekarang?')){
-    document.querySelector('.op-tab-btn[data-tab="unggahunduh"]').click();
+    + 'Buka tab PR untuk mengunggahnya sekarang?')){
+    document.querySelector('.op-tab-btn[data-tab="pr"]').click();
   }
   return false;
 }
@@ -1433,14 +1433,14 @@ async function bukaStoryPermanen(j, lama){
     `kafbe-story-permanen-${String(namaMatkul(j.kode) || j.kode).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${j.kp}`);
 }
 
-/* ---------- Template story (tab Upload dan Download) ----------
+/* ---------- Template story (tab PR) ----------
 
    Firestore tidak punya tempat khusus untuk berkas, dan Firebase Storage
    mensyaratkan paket berbayar. Jadi gambar template disimpan sebagai teks
    base64 di koleksi templateig, dipotong-potong karena satu dokumen Firestore
    paling besar 1 MB:
 
-     templateig/story            { potongan, area, namaBerkas, oleh, diunggah }
+     templateig/story            { potongan, area, font, warna, namaBerkas, oleh, diunggah }
      templateig/story-potongan-0 { isi: '...' }
      templateig/story-potongan-1 { isi: '...' }
 
@@ -1476,7 +1476,7 @@ async function ambilTemplateIg(){
     catch(err){ console.error(err); dataUrl = ''; }
   }
   templateIg = { meta, dataUrl, gambar };
-  aturTemplate({ gambar, area: meta.area });
+  aturTemplate({ gambar, area: meta.area, font: meta.font, warna: meta.warna });
   return templateIg;
 }
 
@@ -1508,28 +1508,45 @@ const CONTOH_STORY = {
   }],
 };
 
-function areaDariIsian(){
+// Seluruh pengaturan di tab PR: area teks, font, dan warna.
+function pengaturanDariIsian(){
   const angka = (id, bawaan) => {
     const n = Number($(id).value);
     return Number.isFinite(n) && $(id).value !== '' ? n : bawaan;
   };
   const b = TEMPLATE.areaBawaan;
   const samping = angka('tplSamping', b.kiri);
-  return { atas: angka('tplAtas', b.atas), bawah: angka('tplBawah', b.bawah), kiri: samping, kanan: samping };
+  return {
+    area: { atas: angka('tplAtas', b.atas), bawah: angka('tplBawah', b.bawah), kiri: samping, kanan: samping },
+    font: {
+      primer:   $('tplFontPrimer').value.trim()   || TEMPLATE.fontBawaan.primer,
+      sekunder: $('tplFontSekunder').value.trim() || TEMPLATE.fontBawaan.sekunder,
+    },
+    warna: { primer: $('tplWarnaPrimer').value, sekunder: $('tplWarnaSekunder').value },
+  };
 }
 
-function isiIsianArea(area){
-  const a = { ...TEMPLATE.areaBawaan, ...(area || {}) };
+function isiIsianPengaturan(m){
+  const a = { ...TEMPLATE.areaBawaan, ...(m?.area || {}) };
+  const f = { ...TEMPLATE.fontBawaan, ...(m?.font || {}) };
+  const w = { ...TEMPLATE.warnaBawaan, ...(m?.warna || {}) };
   $('tplAtas').value = a.atas; $('tplBawah').value = a.bawah; $('tplSamping').value = a.kiri;
+  $('tplFontPrimer').value = f.primer; $('tplFontSekunder').value = f.sekunder;
+  $('tplWarnaPrimer').value = w.primer; $('tplWarnaSekunder').value = w.sekunder;
+  $('tplKodePrimer').textContent = w.primer; $('tplKodeSekunder').textContent = w.sekunder;
 }
 
+// Beberapa pratinjau bisa diminta berturut-turut saat mengetik; hanya yang
+// terakhir yang dipasang.
+let nomorPratinjau = 0;
 async function gambarPratinjauTemplate(){
   const ada = adaTemplate();
   $('tplPratinjau').hidden = !ada;
   $('tplKosong').hidden = ada;
   if(!ada) return;
+  const nomor = ++nomorPratinjau;
   const [kanvas] = await buatStory(CONTOH_STORY, { panduan: true });
-  $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
+  if(nomor === nomorPratinjau) $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
 }
 
 async function segarkanTabTemplate(ulang = false){
@@ -1552,40 +1569,51 @@ async function segarkanTabTemplate(ulang = false){
       : '<strong>Belum ada template.</strong> Story Instagram belum bisa dibuat sampai template diunggah.';
   $('tplUnduh').hidden = !unggahan;
   $('tplLabelUnggah').firstChild.textContent = unggahan ? 'Ganti template ' : 'Upload template ';
-  isiIsianArea(m.area);
+  isiIsianPengaturan(m);
   await gambarPratinjauTemplate();
 }
 
-['tplAtas', 'tplBawah', 'tplSamping'].forEach(id => $(id).addEventListener('input', () => {
-  aturTemplate({ gambar: templateIg?.gambar || null, area: areaDariIsian() });
-  gambarPratinjauTemplate();
-}));
+let jedaPratinjau = null;
+function pratinjauDariIsian(){
+  const { area, font, warna } = pengaturanDariIsian();
+  $('tplKodePrimer').textContent = warna.primer;
+  $('tplKodeSekunder').textContent = warna.sekunder;
+  aturTemplate({ gambar: templateIg?.gambar || null, area, font, warna });
+  // Nama font diketik huruf demi huruf; pratinjaunya ditunda sebentar supaya
+  // tidak memesan font setengah jadi ke Google Fonts di setiap ketukan.
+  clearTimeout(jedaPratinjau);
+  jedaPratinjau = setTimeout(gambarPratinjauTemplate, 500);
+}
 
-$('tplSimpanArea').addEventListener('click', async () => {
+['tplAtas', 'tplBawah', 'tplSamping', 'tplFontPrimer', 'tplFontSekunder', 'tplWarnaPrimer', 'tplWarnaSekunder']
+  .forEach(id => $(id).addEventListener('input', pratinjauDariIsian));
+
+$('tplSimpan').addEventListener('click', async () => {
   const el = $('pesanTemplate');
-  const area = areaDariIsian();
+  const { area, font, warna } = pengaturanDariIsian();
   if(!(area.atas >= 0 && area.bawah <= 100 && area.atas + 10 <= area.bawah
        && area.kiri >= 0 && area.kiri <= 40)){
     pesan(el, 'Batas area tidak masuk akal. Atas harus lebih kecil dari bawah (selisih minimal 10), dan samping 0 sampai 40.', 'salah');
     return;
   }
   try{
-    await setDoc(doc(db, 'templateig', 'story'), { area }, { merge: true });
-    await catat('ubah', 'template story', 'Area teks template story diubah',
-      `atas ${area.atas}%, bawah ${area.bawah}%, samping ${area.kiri}%`);
+    await setDoc(doc(db, 'templateig', 'story'), { area, font, warna }, { merge: true });
+    await catat('ubah', 'template story', 'Pengaturan template story diubah',
+      `area ${area.atas}-${area.bawah}% samping ${area.kiri}%; font ${font.primer} / ${font.sekunder}; `
+      + `warna ${warna.primer} / ${warna.sekunder}`);
     await segarkanTabTemplate(true);
-    pesan(el, 'Area teks tersimpan.', 'benar');
+    pesan(el, 'Pengaturan tersimpan dan berlaku untuk semua story berikutnya.', 'benar');
   }catch(err){
     console.error(err);
-    pesan(el, 'Gagal menyimpan area: ' + esc(err.message), 'salah');
+    pesan(el, 'Gagal menyimpan pengaturan: ' + esc(err.message)
+      + (err.code ? ` <span class="op-samar">(kode: ${esc(err.code)})</span>` : ''), 'salah');
   }
 });
 
-$('tplAreaBawaan').addEventListener('click', () => {
-  isiIsianArea(TEMPLATE.areaBawaan);
-  aturTemplate({ gambar: templateIg?.gambar || null, area: areaDariIsian() });
-  gambarPratinjauTemplate();
-  pesan($('pesanTemplate'), 'Area dikembalikan ke pengaturan awal. Tekan Simpan area untuk menyimpannya.', 'hati');
+$('tplPengaturanAwal').addEventListener('click', () => {
+  isiIsianPengaturan({});
+  pratinjauDariIsian();
+  pesan($('pesanTemplate'), 'Area, font, dan warna dikembalikan ke pengaturan awal. Tekan Simpan pengaturan untuk menyimpannya.', 'hati');
 });
 
 $('tplUnduh').addEventListener('click', async () => {
@@ -1661,7 +1689,7 @@ $('tplBerkas').addEventListener('change', async e => {
     langkah = 'menyimpan info template';
     await setDoc(doc(db, 'templateig', 'story'), {
       potongan: potongan.length,
-      area: areaDariIsian(),
+      ...pengaturanDariIsian(),
       namaBerkas: berkas.name,
       oleh: pemakai.nama || pemakai.email || '',
       diunggah: serverTimestamp(),
@@ -1679,7 +1707,7 @@ $('tplBerkas').addEventListener('change', async e => {
     const rasio = img.width / img.height;
     pesan(el, Math.abs(rasio - w / h) > 0.02
       ? `Template tersimpan, tetapi ukurannya ${img.width} × ${img.height}, bukan 9:16, jadi bagian tepinya terpotong. Periksa pratinjaunya.`
-      : 'Template tersimpan. Periksa pratinjaunya, lalu sesuaikan area teks bila perlu.',
+      : 'Template tersimpan. Periksa pratinjaunya, lalu sesuaikan area teks, font, dan warna bila perlu.',
       Math.abs(rasio - w / h) > 0.02 ? 'hati' : 'benar');
   }catch(err){
     console.error(err);

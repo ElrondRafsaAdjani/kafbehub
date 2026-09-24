@@ -474,3 +474,9 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
   padding:20px; text-align:center; font-size:0.85rem; color:var(--ink-soft);
   border:1px dashed var(--line); border-radius:14px; background:var(--bg);
 }
+.op-warna{ display:flex; align-items:center; gap:10px; }
+.op-warna input[type=color]{
+  width:48px; height:40px; padding:3px; cursor:pointer;
+  border:1px solid var(--line); border-radius:10px; background:var(--surface);
+}
+.op-warna code{ font-size:0.82rem; color:var(--ink-soft); }
