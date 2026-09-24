@@ -1448,9 +1448,12 @@ async function bukaStoryPermanen(j, lama){
    biasanya cukup dua atau tiga potongan.
 */
 
-const UKURAN_POTONGAN = 800000;
+// Jauh di bawah batas 1 MB per dokumen, supaya tiap penulisan kecil dan
+// tidak terhenti di jaringan yang lambat.
+const UKURAN_POTONGAN = 250000;
 let templateIg = null;        // { meta, dataUrl, gambar }
 let janjiTemplateIg = null;
+let galatTemplateIg = null;   // kegagalan terakhir saat membaca template
 
 function muatGambarDari(src){
   return new Promise((res, rej) => {
@@ -1480,8 +1483,10 @@ async function ambilTemplateIg(){
 // Template hanya diambil sekali per kunjungan, kecuali diminta ulang.
 function siapkanTemplateIg(ulang = false){
   if(ulang || !janjiTemplateIg){
+    galatTemplateIg = null;
     janjiTemplateIg = ambilTemplateIg().catch(err => {
       console.error(err);
+      galatTemplateIg = err;
       janjiTemplateIg = null;
       aturTemplate({});
       return null;
@@ -1539,7 +1544,12 @@ async function segarkanTabTemplate(ulang = false){
   $('tplStatus').innerHTML = unggahan
     ? `Template periode ini: <strong>${esc(m.namaBerkas || 'template story')}</strong>`
       + `${m.oleh ? `, diunggah oleh ${esc(m.oleh)}` : ''}${esc(waktu)}.`
-    : '<strong>Belum ada template.</strong> Story Instagram belum bisa dibuat sampai template diunggah.';
+    : galatTemplateIg
+      ? `<strong>Template tidak bisa dibaca:</strong> ${esc(galatTemplateIg.message)}`
+        + (galatTemplateIg.code ? ` (kode: ${esc(galatTemplateIg.code)})` : '')
+        + (galatTemplateIg.code === 'permission-denied'
+          ? '. Pastikan isi firestore.rules terbaru sudah ditempel dan di-Publish.' : '')
+      : '<strong>Belum ada template.</strong> Story Instagram belum bisa dibuat sampai template diunggah.';
   $('tplUnduh').hidden = !unggahan;
   $('tplLabelUnggah').firstChild.textContent = unggahan ? 'Ganti template ' : 'Upload template ';
   isiIsianArea(m.area);
@@ -1597,7 +1607,8 @@ $('tplBerkas').addEventListener('change', async e => {
   const berkas = e.target.files[0];
   e.target.value = '';
   if(!berkas) return;
-  if(!/^image\/(png|jpeg|webp)$/.test(berkas.type)){
+  // Sebagian sistem tidak mengisi jenis berkas, jadi ekstensinya ikut dilihat.
+  if(!/^image\/(png|jpeg|webp)$/.test(berkas.type) && !/\.(png|jpe?g|webp)$/i.test(berkas.name)){
     pesan(el, 'Berkasnya harus gambar PNG, JPG, atau WEBP.', 'salah');
     return;
   }
@@ -1605,6 +1616,9 @@ $('tplBerkas').addEventListener('change', async e => {
     `Ganti template yang sekarang (${templateIg.meta.namaBerkas || 'template lama'}) dengan ${berkas.name}?\n\n`
     + 'Template lama akan terhapus. Unduh dulu bila masih ingin menyimpannya.')) return;
 
+  // Langkah yang sedang berjalan ikut disebut bila gagal, supaya penyebabnya
+  // bisa dilacak tanpa membuka Console peramban.
+  let langkah = 'membaca berkas';
   try{
     status('Mengunggah template…', 'sibuk');
     // Dibaca sebagai data URL, bukan blob URL: aturan keamanan halaman ini
@@ -1616,6 +1630,7 @@ $('tplBerkas').addEventListener('change', async e => {
       r.readAsDataURL(berkas);
     }));
 
+    langkah = 'menyiapkan gambar';
     const { w, h } = TEMPLATE;
     const kanvas = document.createElement('canvas');
     kanvas.width = w; kanvas.height = h;
@@ -1627,7 +1642,7 @@ $('tplBerkas').addEventListener('change', async e => {
 
     let mutu = 0.9;
     let dataUrl = kanvas.toDataURL('image/jpeg', mutu);
-    while(dataUrl.length > 3000000 && mutu > 0.5){
+    while(dataUrl.length > 1500000 && mutu > 0.5){
       mutu -= 0.1;
       dataUrl = kanvas.toDataURL('image/jpeg', mutu);
     }
@@ -1640,8 +1655,10 @@ $('tplBerkas').addEventListener('change', async e => {
     // 10 MB. Dokumen utamanya ditulis paling akhir, jadi selama unggahan
     // belum selesai, template lama tetap dipakai utuh.
     for(let i = 0; i < potongan.length; i++){
+      langkah = `menyimpan bagian ${i + 1} dari ${potongan.length}`;
       await setDoc(doc(db, 'templateig', `story-potongan-${i}`), { isi: potongan[i] });
     }
+    langkah = 'menyimpan info template';
     await setDoc(doc(db, 'templateig', 'story'), {
       potongan: potongan.length,
       area: areaDariIsian(),
@@ -1649,11 +1666,13 @@ $('tplBerkas').addEventListener('change', async e => {
       oleh: pemakai.nama || pemakai.email || '',
       diunggah: serverTimestamp(),
     });
+    langkah = 'menghapus sisa template lama';
     for(let i = potongan.length; i < lama; i++){
       await deleteDoc(doc(db, 'templateig', `story-potongan-${i}`));
     }
 
     await catat('ubah', 'template story', 'Template story Instagram diganti', berkas.name);
+    langkah = 'memuat ulang template';
     await segarkanTabTemplate(true);
     $('statusSimpan').hidden = true;
 
@@ -1665,7 +1684,11 @@ $('tplBerkas').addEventListener('change', async e => {
   }catch(err){
     console.error(err);
     status('Gagal mengunggah template.', 'salah');
-    pesan(el, 'Gagal mengunggah template: ' + esc(err.message), 'salah');
+    const izin = err.code === 'permission-denied'
+      ? ' Aturan Firestore belum mengizinkan koleksi templateig. Pastikan isi firestore.rules terbaru sudah ditempel dan di-Publish (langkah 1.4 di PANDUAN-PENGURUS.md).'
+      : '';
+    pesan(el, `Gagal mengunggah template saat ${esc(langkah)}: ${esc(err.message)}`
+      + (err.code ? ` <span class="op-samar">(kode: ${esc(err.code)})</span>` : '') + esc(izin), 'salah');
   }
 });
 
