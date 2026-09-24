@@ -9,7 +9,7 @@
 <title>Operasional - KAFBE Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=League+Spartan:wght@700&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,900&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=League+Spartan:wght@700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="operasional.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -620,24 +620,25 @@
 
       <h3>Template story Instagram</h3>
       <p class="op-catatan">
-        Template dipakai sebagai latar story yang dibuat dari tab Perubahan Sementara dan
-        Jadwal Permanen. Ukurannya <strong>1080 × 1920</strong> (9:16). Bagian tengah kartu
-        putih dikosongkan, sebab judul dan isi pengumuman ditulis otomatis di dalam
-        <strong>area teks</strong> (kotak garis putus-putus merah muda di pratinjau).
-        Bagian yang selalu sama, seperti PENGUMUMAN, logo, TERIMA KASIH, dan slogan,
-        sudah menjadi bagian dari gambar template.
+        Story Instagram dibuat dengan menempelkan teks pengumuman ke template yang
+        diunggah di sini. Template cukup diunggah <strong>sekali per periode
+        kepengurusan</strong>; periode berikutnya tinggal mengunggah template baru,
+        dan template lama otomatis tergantikan.
+      </p>
+      <p class="op-catatan">
+        Ukurannya <strong>1080 × 1920</strong> (9:16). Semua bagian yang selalu sama,
+        seperti batik, logo, PENGUMUMAN, kartu putih, TERIMA KASIH, dan slogan, sudah
+        ada di gambar template. Bagian tengah kartu putih dikosongkan, sebab judul dan
+        isi pengumuman ditulis di dalam <strong>area teks</strong> (kotak garis
+        putus-putus merah muda di pratinjau).
       </p>
       <p class="op-catatan" id="tplStatus">Memuat template…</p>
 
       <div class="op-template">
         <div class="op-template-kiri">
           <div class="op-aksi">
-            <button type="button" class="btn btn-ghost op-kecil" id="tplUnduh">Download template</button>
-            <label class="btn btn-primary op-kecil op-label-berkas">
-              Upload template
-              <input type="file" id="tplBerkas" accept="image/png,image/jpeg,image/webp" hidden />
-            </label>
-            <button type="button" class="btn btn-ghost op-kecil" id="tplBawaan" hidden>Pakai template bawaan</button>
+            <label class="btn btn-primary op-kecil op-label-berkas" id="tplLabelUnggah">Upload template <input type="file" id="tplBerkas" accept="image/png,image/jpeg,image/webp" hidden /></label>
+            <button type="button" class="btn btn-ghost op-kecil" id="tplUnduh" hidden>Download template</button>
           </div>
 
           <h4 class="op-subjudul">Area teks (persen dari ukuran gambar)</h4>
@@ -651,11 +652,14 @@
           </div>
           <div class="op-aksi">
             <button type="button" class="btn btn-primary op-kecil" id="tplSimpanArea">Simpan area</button>
-            <button type="button" class="btn btn-ghost op-kecil" id="tplAreaBawaan">Area bawaan</button>
+            <button type="button" class="btn btn-ghost op-kecil" id="tplAreaBawaan">Kembalikan area awal</button>
           </div>
           <p class="op-pesan" id="pesanTemplate" role="alert"></p>
         </div>
-        <img class="op-template-pratinjau" id="tplPratinjau" alt="Pratinjau template story dengan contoh isi" />
+        <div>
+          <img class="op-template-pratinjau" id="tplPratinjau" alt="Pratinjau template story dengan contoh isi" hidden />
+          <div class="op-template-kosong" id="tplKosong">Pratinjau muncul setelah template diunggah.</div>
+        </div>
       </div>
 
       <hr class="op-garis" />

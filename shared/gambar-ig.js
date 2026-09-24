@@ -20,16 +20,17 @@
 
   TEMPLATE
 
-  Ada dua kemungkinan latar:
+  Latarnya selalu template yang diunggah tim di tab "Upload dan Download"
+  (disimpan di Firestore, koleksi templateig). Template diunggah sekali dan
+  dipakai sepanjang satu periode kepengurusan; periode berikutnya cukup
+  mengunggah template baru untuk menggantikannya.
 
-    1. Template unggahan. Diunggah di tab "Upload dan Download" dan disimpan di
-       Firestore (koleksi templateig). Gambar itu dipakai apa adanya sebagai
-       latar, dan judul serta isi pengumuman ditulis di dalam "area teks" yang
-       batasnya diatur di tab yang sama. Jadi di template, bagian tengah kartu
-       putih harus dikosongkan.
-    2. Template bawaan, digambar oleh kode di bawah dengan meniru susunan
-       template KAFBE: latar biru tua bermotif, pita PENGUMUMAN, kartu putih,
-       ornamen emas, TERIMA KASIH, dan slogan di pojok kanan bawah.
+  Berkas ini tidak menggambar hiasan apa pun di luar area teks. Semua bagian
+  yang selalu sama, seperti batik, logo, pita PENGUMUMAN, kartu putih,
+  TERIMA KASIH, dan slogan, sudah ada di gambar template. Yang ditulis di sini
+  hanya judul, kalimat pembuka, dan daftar kelas, di dalam "area teks" yang
+  batasnya diatur di tab yang sama. Jadi di template, bagian tengah kartu
+  putih harus dikosongkan.
 
   Font dimuat lewat Google Fonts di operasional.html. Untuk menggantinya, ubah
   tautan itu dan TEMPLATE.font di bawah.
@@ -46,24 +47,14 @@ export const TEMPLATE = {
   font: {
     judul:  '"League Spartan"',
     isi:    '"Montserrat"',
-    slogan: '"Cinzel Decorative"',
   },
 
   warna: {
-    latar:       '#151B36',
-    latarTepi:   '#0C1024',
-    motif:       'rgba(201,151,59,0.30)',
-    kartu:       '#FFFFFF',
-    pita:        '#1B1B1D',
     tinta:       '#1C1F3A',
     tintaLembut: '#5D6278',
     emas:        '#C8923A',
     kotak:       '#F7F1E4',
-    putih:       '#FFFFFF',
   },
-
-  logo:   '/ikon-ponsel.svg',
-  slogan: ['Be A Blessing By', 'Giving The Best'],
 };
 
 /* ============================================================
@@ -74,31 +65,17 @@ let tpl = { gambar: null, area: { ...TEMPLATE.areaBawaan } };
 
 /*
   Dipanggil oleh operasional.js setelah template dari Firestore dimuat.
-  gambar: HTMLImageElement atau null untuk template bawaan.
+  gambar: HTMLImageElement, atau null bila belum ada template yang diunggah.
 */
 export function aturTemplate({ gambar = null, area = null } = {}){
   tpl = { gambar, area: { ...TEMPLATE.areaBawaan, ...(area || {}) } };
 }
 
+export const adaTemplate = () => !!tpl.gambar;
+
 /* ============================================================
    Alat bantu penggambaran
    ============================================================ */
-
-const muatGambar = (() => {
-  const simpanan = new Map();
-  return src => {
-    if(!src) return Promise.resolve(null);
-    if(!simpanan.has(src)){
-      simpanan.set(src, new Promise(res => {
-        const img = new Image();
-        img.onload = () => res(img);
-        img.onerror = () => res(null);
-        img.src = src;
-      }));
-    }
-    return simpanan.get(src);
-  };
-})();
 
 // Kanvas tidak menunggu font web termuat. Tanpa ini, gambar pertama bisa
 // tergambar dengan font cadangan sistem.
@@ -111,8 +88,6 @@ async function siapkanFont(){
       document.fonts.load(`600 30px ${f.isi}`),
       document.fonts.load(`700 40px ${f.isi}`),
       document.fonts.load(`800 40px ${f.isi}`),
-      document.fonts.load(`italic 900 70px ${f.isi}`),
-      document.fonts.load(`700 44px ${f.slogan}`),
     ]);
   }catch{ /* tetap lanjut dengan font yang ada */ }
 }
@@ -152,25 +127,6 @@ function ornamen(ctx, cx, cy, lebar, s = 1){
   ctx.moveTo(cx, cy - d); ctx.lineTo(cx + d, cy); ctx.lineTo(cx, cy + d); ctx.lineTo(cx - d, cy);
   ctx.closePath();
   ctx.fill();
-  ctx.restore();
-}
-
-// Motif bunga sederhana sebagai pengganti batik pada template bawaan.
-function motif(ctx, cx, cy, r){
-  ctx.save();
-  ctx.strokeStyle = TEMPLATE.warna.motif;
-  ctx.lineWidth = 3;
-  for(const k of [1, 0.72, 0.46, 0.22]){
-    ctx.beginPath(); ctx.arc(cx, cy, r * k, 0, Math.PI * 2); ctx.stroke();
-  }
-  for(let i = 0; i < 12; i++){
-    const a = i * Math.PI / 6;
-    ctx.save();
-    ctx.translate(cx + Math.cos(a) * r * 0.86, cy + Math.sin(a) * r * 0.86);
-    ctx.rotate(a);
-    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.2, r * 0.08, 0, 0, Math.PI * 2); ctx.stroke();
-    ctx.restore();
-  }
   ctx.restore();
 }
 
@@ -227,69 +183,7 @@ function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, warnaBiasa){
    Latar
    ============================================================ */
 
-function gambarLatarBawaan(ctx, logo){
-  const { w, h } = TEMPLATE;
-  const c = TEMPLATE.warna;
-  const f = TEMPLATE.font;
-
-  const g = ctx.createRadialGradient(w / 2, h / 2, 200, w / 2, h / 2, h * 0.75);
-  g.addColorStop(0, c.latar);
-  g.addColorStop(1, c.latarTepi);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, w, h);
-
-  motif(ctx, 60, 330, 230);
-  motif(ctx, 1040, 820, 180);
-  motif(ctx, 90, 1560, 280);
-  motif(ctx, 960, 1720, 150);
-  motif(ctx, 700, 70, 120);
-
-  if(logo){
-    ctx.save();
-    ctx.beginPath(); ctx.arc(w - 72 - 48, 98, 48, 0, Math.PI * 2); ctx.clip();
-    ctx.drawImage(logo, w - 72 - 96, 50, 96, 96);
-    ctx.restore();
-  }
-
-  // Kartu putih
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.35)';
-  ctx.shadowBlur = 40;
-  ctx.fillStyle = c.kartu;
-  kotakBulat(ctx, 108, 250, w - 216, 1400, 80);
-  ctx.fill();
-  ctx.restore();
-
-  // Pita PENGUMUMAN
-  ctx.fillStyle = c.pita;
-  kotakBulat(ctx, 190, 170, w - 380, 140, 56);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-  ctx.lineWidth = 3;
-  kotakBulat(ctx, 202, 182, w - 404, 116, 48);
-  ctx.stroke();
-  ctx.fillStyle = c.putih;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = `italic 900 76px ${f.isi}`;
-  ctx.fillText('PENGUMUMAN', w / 2, 243);
-
-  ornamen(ctx, w / 2, 372, 300);
-
-  ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = c.tinta;
-  ctx.font = `800 66px ${f.isi}`;
-  ctx.fillText('TERIMA KASIH', w / 2, 1580);
-
-  ctx.textAlign = 'right';
-  ctx.fillStyle = c.putih;
-  ctx.font = `700 46px ${f.slogan}`;
-  TEMPLATE.slogan.forEach((t, i) => ctx.fillText(t, w - 64, 1760 + i * 62));
-  ctx.textAlign = 'left';
-}
-
-function gambarLatar(ctx, logo){
-  if(!tpl.gambar){ gambarLatarBawaan(ctx, logo); return; }
+function gambarLatar(ctx){
   const { w, h } = TEMPLATE;
   const img = tpl.gambar;
   const r = Math.max(w / img.width, h / img.height);
@@ -437,8 +331,8 @@ function bagiHalaman(ctx, konten, area){
   di tab Upload dan Download, tidak untuk gambar yang diunduh).
 */
 export async function buatStory(konten, opsi = {}){
+  if(!tpl.gambar) throw new Error('Belum ada template story. Upload dulu di tab Upload dan Download.');
   await siapkanFont();
-  const logo = tpl.gambar ? null : await muatGambar(TEMPLATE.logo);
   const area = hitungArea();
   const ukur = document.createElement('canvas').getContext('2d');
   const { kepala, halaman } = bagiHalaman(ukur, konten, area);
@@ -447,7 +341,7 @@ export async function buatStory(konten, opsi = {}){
     const kanvas = document.createElement('canvas');
     kanvas.width = TEMPLATE.w; kanvas.height = TEMPLATE.h;
     const ctx = kanvas.getContext('2d');
-    gambarLatar(ctx, logo);
+    gambarLatar(ctx);
 
     if(opsi.panduan){
       ctx.save();
@@ -479,16 +373,6 @@ export async function buatStory(konten, opsi = {}){
     }
     return kanvas;
   });
-}
-
-// Latar bawaan tanpa isi, untuk diunduh sebagai titik awal desain template.
-export async function kanvasLatarBawaan(){
-  await siapkanFont();
-  const logo = await muatGambar(TEMPLATE.logo);
-  const kanvas = document.createElement('canvas');
-  kanvas.width = TEMPLATE.w; kanvas.height = TEMPLATE.h;
-  gambarLatarBawaan(kanvas.getContext('2d'), logo);
-  return kanvas;
 }
 
 /* ============================================================
@@ -576,8 +460,7 @@ async function gambarUlang(){
   const bagi = bisaBagikanBerkas();
   const banyak = kini.kanvas.length > 1;
   const n = (kini.konten.daftar || []).length;
-  $('igRingkas').textContent = `${n ? n + ' kelas · ' : ''}${kini.kanvas.length} gambar story 1080 × 1920`
-    + (tpl.gambar ? ' · template unggahan' : ' · template bawaan');
+  $('igRingkas').textContent = `${n ? n + ' kelas · ' : ''}${kini.kanvas.length} gambar story 1080 × 1920`;
   $('igUnduhSemua').hidden = !banyak;
   $('igBagikanSemua').hidden = !(banyak && bagi);
 

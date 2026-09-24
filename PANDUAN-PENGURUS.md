@@ -215,10 +215,12 @@ satu per satu, yaitu persoalan yang justru ingin dihindari.
 #### Story Instagram
 
 Perubahan jadwal bisa langsung dijadikan story pengumuman untuk Instagram
-KAFBE, memakai template story KAFBE. Daftar kelas yang berubah ditulis
-langsung di story, jadi tidak perlu lagi menempelkan tangkapan layar tabel
-Excel. Situs ini tidak mengunggah apa pun ke Instagram. Gambarnya diunduh
-atau disalin, lalu diunggah sendiri.
+KAFBE. Teks pengumumannya ditempelkan ke **template yang diunggah tim** di tab
+Upload dan Download, jadi story baru bisa dibuat setelah template periode itu
+diunggah. Daftar kelas yang berubah ditulis langsung di story, jadi tidak
+perlu lagi menempelkan tangkapan layar tabel Excel. Situs ini tidak
+mengunggah apa pun ke Instagram. Gambarnya diunduh atau disalin, lalu
+diunggah sendiri.
 
 **Perubahan sementara.** Centang perubahan yang ingin diumumkan, lalu tekan
 **Buat story Instagram**. Kotak centang di kepala tabel mencentang semua
@@ -236,16 +238,21 @@ Lalu tekan **Unduh** atau **Salin**. Di ponsel, **Bagikan** membuka menu
 bagikan, jadi gambarnya bisa langsung dikirim ke Instagram. Bila kelasnya
 terlalu banyak untuk satu story, story dibagi otomatis dan diberi nomor.
 
-**Template.** Dikelola di tab **Upload dan Download**:
+**Template.** Diunggah **sekali per periode kepengurusan** di tab **Upload
+dan Download**, lalu dipakai untuk semua story selama periode itu. Periode
+berikutnya cukup mengunggah template baru; template lama otomatis
+tergantikan (ada konfirmasi dulu sebelum menimpa).
 
-- **Download template** mengunduh template yang sedang dipakai, untuk
-  disunting desainer
-- **Upload template** memasang gambar 1080 × 1920 (PNG atau JPG). Kosongkan
-  bagian tengah kartu putih, karena judul dan isi ditulis otomatis di situ
-- **Area teks** mengatur di mana judul dan isi ditulis, dalam persen dari
-  ukuran gambar. Pratinjau di sebelahnya menandai area itu dengan garis
-  putus-putus. Tekan **Simpan area** setelah pas
-- **Pakai template bawaan** menghapus template unggahan
+- Template berukuran 1080 × 1920 (PNG atau JPG) dan sudah memuat semua
+  bagian yang selalu sama: batik, logo, PENGUMUMAN, kartu putih, TERIMA
+  KASIH, dan slogan. Bagian tengah kartu putih dikosongkan, karena judul,
+  kalimat pembuka, dan daftar kelas ditulis otomatis di situ
+- **Area teks** mengatur di mana teks itu ditulis, dalam persen dari ukuran
+  gambar. Pratinjau di sebelahnya menandai area itu dengan garis
+  putus-putus. Tekan **Simpan area** setelah pas. Cukup diatur sekali
+  setiap kali template diganti
+- **Download template** mengunduh template yang sedang dipakai, misalnya
+  untuk disunting desainer periode berikutnya
 
 Template disimpan di koleksi Firestore `templateig`. Aturan aksesnya ada di
 `firestore.rules`, jadi setelah pembaruan ini isi berkas itu perlu ditempel

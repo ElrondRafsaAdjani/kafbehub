@@ -14,7 +14,7 @@
 
 import { bacaBerkas, susunBerkas, unduhBlob } from './excel.js';
 import {
-  bukaStory, buatStory, aturTemplate, kanvasLatarBawaan, unduhBlobSebagai, TEMPLATE,
+  bukaStory, buatStory, aturTemplate, adaTemplate, unduhBlobSebagai, TEMPLATE,
 } from './gambar-ig.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
@@ -1404,16 +1404,31 @@ function kontenPermanen(j, lama){
   };
 }
 
+/*
+  Story hanya bisa dibuat di atas template yang diunggah tim. Bila belum ada,
+  pengurus diarahkan ke tab Upload dan Download, alih-alih diberi gambar
+  dengan latar yang bukan milik KAFBE.
+*/
+async function templateSiap(){
+  await siapkanTemplateIg();
+  if(adaTemplate()) return true;
+  if(confirm('Belum ada template story Instagram untuk periode ini.\n\n'
+    + 'Buka tab Upload dan Download untuk mengunggahnya sekarang?')){
+    document.querySelector('.op-tab-btn[data-tab="unggahunduh"]').click();
+  }
+  return false;
+}
+
 async function bukaIg(daftar){
   if(daftar.length === 0) return;
-  await siapkanTemplateIg();
+  if(!await templateSiap()) return;
   const tgl = daftar.map(p => p.tanggal).sort();
   const awal = tgl[0], akhir = tgl[tgl.length - 1];
   bukaStory(kontenSementara(daftar), `kafbe-story-${awal}${awal === akhir ? '' : '-sd-' + akhir}`);
 }
 
 async function bukaStoryPermanen(j, lama){
-  await siapkanTemplateIg();
+  if(!await templateSiap()) return;
   bukaStory(kontenPermanen(j, lama),
     `kafbe-story-permanen-${String(namaMatkul(j.kode) || j.kode).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${j.kp}`);
 }
@@ -1504,6 +1519,10 @@ function isiIsianArea(area){
 }
 
 async function gambarPratinjauTemplate(){
+  const ada = adaTemplate();
+  $('tplPratinjau').hidden = !ada;
+  $('tplKosong').hidden = ada;
+  if(!ada) return;
   const [kanvas] = await buatStory(CONTOH_STORY, { panduan: true });
   $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
 }
@@ -1518,10 +1537,11 @@ async function segarkanTabTemplate(ulang = false){
     waktu = ` pada ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
   }
   $('tplStatus').innerHTML = unggahan
-    ? `Memakai <strong>template unggahan</strong>${m.namaBerkas ? ` (${esc(m.namaBerkas)})` : ''}`
+    ? `Template periode ini: <strong>${esc(m.namaBerkas || 'template story')}</strong>`
       + `${m.oleh ? `, diunggah oleh ${esc(m.oleh)}` : ''}${esc(waktu)}.`
-    : 'Memakai <strong>template bawaan</strong>. Belum ada template yang diunggah.';
-  $('tplBawaan').hidden = !unggahan;
+    : '<strong>Belum ada template.</strong> Story Instagram belum bisa dibuat sampai template diunggah.';
+  $('tplUnduh').hidden = !unggahan;
+  $('tplLabelUnggah').firstChild.textContent = unggahan ? 'Ganti template ' : 'Upload template ';
   isiIsianArea(m.area);
   await gambarPratinjauTemplate();
 }
@@ -1555,7 +1575,7 @@ $('tplAreaBawaan').addEventListener('click', () => {
   isiIsianArea(TEMPLATE.areaBawaan);
   aturTemplate({ gambar: templateIg?.gambar || null, area: areaDariIsian() });
   gambarPratinjauTemplate();
-  pesan($('pesanTemplate'), 'Area dikembalikan ke bawaan. Tekan Simpan area untuk menyimpannya.', 'hati');
+  pesan($('pesanTemplate'), 'Area dikembalikan ke pengaturan awal. Tekan Simpan area untuk menyimpannya.', 'hati');
 });
 
 $('tplUnduh').addEventListener('click', async () => {
@@ -1569,9 +1589,6 @@ $('tplUnduh').addEventListener('click', async () => {
     for(let i = 0; i < biner.length; i++) byte[i] = biner.charCodeAt(i);
     const tipe = (kepala.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
     unduhBlobSebagai(new Blob([byte], { type: tipe }), 'template-story-kafbe.jpg');
-  }else{
-    const kanvas = await kanvasLatarBawaan();
-    kanvas.toBlob(b => unduhBlobSebagai(b, 'template-story-kafbe-bawaan.png'), 'image/png');
   }
 });
 
@@ -1584,6 +1601,9 @@ $('tplBerkas').addEventListener('change', async e => {
     pesan(el, 'Berkasnya harus gambar PNG, JPG, atau WEBP.', 'salah');
     return;
   }
+  if(templateIg?.gambar && !confirm(
+    `Ganti template yang sekarang (${templateIg.meta.namaBerkas || 'template lama'}) dengan ${berkas.name}?\n\n`
+    + 'Template lama akan terhapus. Unduh dulu bila masih ingin menyimpannya.')) return;
 
   try{
     status('Mengunggah template…', 'sibuk');
@@ -1649,21 +1669,6 @@ $('tplBerkas').addEventListener('change', async e => {
   }
 });
 
-$('tplBawaan').addEventListener('click', async () => {
-  const el = $('pesanTemplate');
-  if(!confirm('Hapus template unggahan dan kembali memakai template bawaan?')) return;
-  try{
-    const lama = templateIg?.meta?.potongan || 0;
-    await setDoc(doc(db, 'templateig', 'story'), { potongan: 0 }, { merge: true });
-    for(let i = 0; i < lama; i++) await deleteDoc(doc(db, 'templateig', `story-potongan-${i}`));
-    await catat('hapus', 'template story', 'Template story unggahan dihapus', 'Kembali memakai template bawaan');
-    await segarkanTabTemplate(true);
-    pesan(el, 'Kembali memakai template bawaan.', 'benar');
-  }catch(err){
-    console.error(err);
-    pesan(el, 'Gagal menghapus template: ' + esc(err.message), 'salah');
-  }
-});
 
 function periksaPerubahan(isi){
   const salah = [];

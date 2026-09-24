@@ -469,3 +469,8 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
   .op-template-pratinjau{ max-width:280px; }
 }
 .op-ig-teks .op-field{ flex:0 0 auto; }
+.op-template-kosong{
+  aspect-ratio:9 / 16; display:flex; align-items:center; justify-content:center;
+  padding:20px; text-align:center; font-size:0.85rem; color:var(--ink-soft);
+  border:1px dashed var(--line); border-radius:14px; background:var(--bg);
+}
