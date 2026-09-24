@@ -641,7 +641,7 @@
           </div>
 
           <h4 class="op-subjudul">Font</h4>
-          <p class="op-catatan">Dipilih dari seluruh Google Fonts. Font primer untuk header dan footer, font sekunder untuk body. Di bawah tiap pilihan ada contoh tulisannya.</p>
+          <p class="op-catatan">Dipilih dari seluruh Google Fonts. Font primer untuk header dan footer, font sekunder untuk body dan daftar kelas. Di bawah tiap pilihan ada contoh tulisannya.</p>
           <div class="op-baris">
             <div class="op-field"><label for="tplFontPrimer">Font primer</label>
               <select id="tplFontPrimer"><option>Memuat daftar font…</option></select>
@@ -652,7 +652,7 @@
           </div>
 
           <h4 class="op-subjudul">Ukuran dan spasi (satuan sama dengan Canva)</h4>
-          <p class="op-catatan">Angkanya bisa disalin langsung dari Canva. Ukuran dalam pt seperti di Canva (pada desain 1080 × 1920, 1 pt = 1,33 px), spasi baris seperti <em>Line spacing</em> (misalnya 1.4), dan spasi huruf seperti <em>Letter spacing</em> (misalnya 0 atau 50). Ketebalan yang tidak tersedia pada font itu diganti yang terdekat. Bila body lebih panjang dari kotaknya, hurufnya diperkecil otomatis.</p>
+          <p class="op-catatan">Angkanya bisa disalin langsung dari Canva. Ukuran dalam pt seperti di Canva (pada desain 1080 × 1920, 1 pt = 1,33 px), spasi baris seperti <em>Line spacing</em> (misalnya 1.4), dan spasi huruf seperti <em>Letter spacing</em> (misalnya 0 atau 50). Ketebalan yang tidak tersedia pada font itu diganti yang terdekat. Bila daftar kelas lebih panjang dari kotaknya, hurufnya diperkecil otomatis.</p>
           <div class="op-tipo">
             <div class="op-tipo-baris">
               <strong>Header</strong>
@@ -664,10 +664,16 @@
             <div class="op-tipo-baris">
               <strong>Body</strong>
               <label class="op-tipo-sel"><span>Ukuran (pt)</span><input type="number" id="tpl-body-ukuran" min="8" max="150" step="0.1" /></label>
-              <label class="op-tipo-sel"><span>Daftar kelas (pt)</span><input type="number" id="tpl-body-ukuranDaftar" min="8" max="150" step="0.1" /></label>
               <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-body-spasiBaris" min="0.5" max="3" step="0.05" /></label>
               <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-body-spasiHuruf" min="-200" max="800" step="5" /></label>
               <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-body-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
+            </div>
+            <div class="op-tipo-baris">
+              <strong>Daftar kelas</strong>
+              <label class="op-tipo-sel"><span>Ukuran (pt)</span><input type="number" id="tpl-daftar-ukuran" min="8" max="150" step="0.1" /></label>
+              <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-daftar-spasiBaris" min="0.5" max="3" step="0.05" /></label>
+              <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-daftar-spasiHuruf" min="-200" max="800" step="5" /></label>
+              <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-daftar-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
             </div>
             <div class="op-tipo-baris">
               <strong>Footer</strong>
@@ -701,7 +707,7 @@
           <label class="op-centang-sebaris"><input type="checkbox" id="tplKotakAktif" /> Tampilkan kotak di belakang tiap kelas</label>
 
           <h4 class="op-subjudul">Posisi</h4>
-          <p class="op-catatan">Seperti di Canva: header, body, dan footer adalah tiga kotak terpisah di pratinjau. Seret kotaknya untuk memindahkan, seret sisi kiri/kanan untuk mengubah lebar, dan sisi bawah body untuk mengubah tingginya. Posisi yang disimpan di sini menjadi posisi awal semua story.</p>
+          <p class="op-catatan">Seperti di Canva: header, body, daftar kelas, dan footer adalah empat elemen terpisah di pratinjau. Seret elemennya untuk memindahkan, seret sisi kiri/kanan untuk mengubah lebar, dan sisi bawah daftar kelas untuk mengubah tingginya. Posisi yang disimpan di sini menjadi posisi awal semua story.</p>
 
           <div class="op-aksi">
             <button type="button" class="btn btn-primary op-kecil" id="tplSimpan">Simpan pengaturan</button>
@@ -983,14 +989,16 @@
   </div>
   <div class="op-ig-susun">
     <div class="op-ig-teks">
-      <p class="op-catatan">Seperti di Canva: header, body, dan footer adalah tiga kotak teks terpisah. Sunting tulisannya di sini, lalu seret kotaknya di pratinjau untuk memindahkan, atau seret sisi kiri/kanan untuk mengubah lebarnya.</p>
+      <p class="op-catatan">Seperti di Canva: header, body, daftar kelas, dan footer adalah empat elemen terpisah. Sunting tulisannya di sini, lalu seret elemennya di pratinjau untuk memindahkan, atau seret sisi kiri/kanan untuk mengubah lebarnya.</p>
       <div class="op-field"><label for="igTeksHeader">Header</label>
         <textarea id="igTeksHeader" rows="2"></textarea></div>
       <div class="op-field"><label for="igTeksBody">Body</label>
-        <textarea id="igTeksBody" rows="12"></textarea></div>
+        <textarea id="igTeksBody" rows="5"></textarea></div>
+      <div class="op-field"><label for="igTeksDaftar">Daftar kelas</label>
+        <textarea id="igTeksDaftar" rows="8"></textarea></div>
       <div class="op-field"><label for="igTeksFooter">Footer</label>
         <input type="text" id="igTeksFooter" placeholder="Kosongkan bila TERIMA KASIH sudah ada di template" /></div>
-      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, memakai warna sekunder. Di body, baris kosong memisahkan paragraf: paragraf pertama kalimat pembuka, paragraf berikutnya daftar kelas (diberi kotak bila diaktifkan di tab PR).</p>
+      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, memakai warna sekunder. Di daftar kelas, baris kosong memisahkan kelas; tiap kelas diberi kotak sendiri bila diaktifkan di tab PR.</p>
       <div class="op-aksi">
         <button type="button" class="btn btn-ghost op-kecil" id="igPosisiAwal">Kembalikan posisi awal</button>
         <button type="button" class="btn btn-primary op-kecil" id="igUnduhSemua" hidden>Unduh semua</button>

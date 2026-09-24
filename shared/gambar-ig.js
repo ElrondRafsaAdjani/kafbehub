@@ -2,11 +2,12 @@
   Pembuat gambar Story Instagram (SG) untuk pengumuman perubahan jadwal.
 
   Cara kerjanya meniru Canva: di atas template story yang diunggah tim ada
-  TIGA kotak teks yang berdiri sendiri, masing-masing bisa digeser, dilebarkan,
+  EMPAT elemen yang berdiri sendiri, masing-masing bisa digeser, dilebarkan,
   dan disunting tulisannya:
 
     header : judul, misalnya JADWAL PERPINDAHAN SEMENTARA
-    body   : kalimat pembuka lalu daftar kelas yang berubah
+    body   : kalimat pembuka
+    daftar : daftar kelas yang berubah, tiap kelas dalam kotak berwarna
     footer : misalnya TERIMA KASIH (boleh kosong bila sudah ada di template)
 
   Isi awalnya disusun dari data jadwal oleh operasional.js. Dulu jadwal
@@ -18,10 +19,8 @@
 
   ATURAN PENULISAN
     - *kata*          ditulis dengan warna sekunder
-    - baris kosong    memisahkan paragraf di body. Paragraf pertama adalah
-                      kalimat pembuka; paragraf berikutnya adalah daftar kelas,
-                      ditulis sedikit lebih kecil dan (bila diaktifkan) diberi
-                      kotak berwarna di belakangnya
+    - baris kosong    di daftar kelas memisahkan kelas; tiap kelas diberi
+                      kotak berwarna sendiri (bila diaktifkan)
 
   TEMPLATE DAN PENGATURAN
 
@@ -32,8 +31,8 @@
   slogan sudah ada di gambar template, jadi yang digambar di sini hanya teks
   dan kotak daftar kelas.
 
-  Di tab PR diatur posisi awal ketiga kotak teks, ukuran hurufnya, font
-  primer (header dan footer) dan sekunder (body) dari Google Fonts
+  Di tab PR diatur posisi awal keempat elemen, ukuran hurufnya, font
+  primer (header dan footer) dan sekunder (body dan daftar) dari Google Fonts
   (lihat shared/daftar-font.js), warna primer dan sekunder, warna kotak, dan
   teks footer bawaan. Posisi yang digeser di jendela story hanya berlaku
   untuk story itu.
@@ -43,9 +42,9 @@ export const TEMPLATE = {
   w: 1080,
   h: 1920,
 
-  // Posisi dan lebar dalam persen dari ukuran gambar. Body punya tinggi
-  // sendiri (h): bila isinya melebihi tinggi itu, hurufnya diperkecil, lalu
-  // bila masih belum muat, daftar kelasnya dibagi ke beberapa gambar.
+  // Posisi dan lebar dalam persen dari ukuran gambar. Daftar kelas punya
+  // tinggi sendiri (h): bila isinya melebihi tinggi itu, hurufnya diperkecil,
+  // lalu bila masih belum muat, kelasnya dibagi ke beberapa gambar.
   //
   // Ukuran, spasi baris, dan spasi huruf memakai satuan yang SAMA DENGAN
   // CANVA, supaya angka dari desain Canva bisa disalin apa adanya:
@@ -56,10 +55,10 @@ export const TEMPLATE = {
   //   spasiHuruf  : per seribu em (Canva: Letter spacing, mis. 0 atau 50)
   //   tebal       : ketebalan font; bila tidak tersedia, dipakai yang
   //                 terdekat (Lilita One hanya punya 400)
-  //   ukuranDaftar: ukuran daftar kelas di body, juga dalam pt
   elemenBawaan: {
     header: { x: 15, y: 20.5, w: 70, ukuran: 60, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400 },
-    body:   { x: 12, y: 33, w: 76, h: 44, ukuran: 35, ukuranDaftar: 30, spasiBaris: 1.4, spasiHuruf: 0, tebal: 600 },
+    body:   { x: 12, y: 33, w: 76, ukuran: 35, spasiBaris: 1.4, spasiHuruf: 0, tebal: 600 },
+    daftar: { x: 12, y: 52, w: 76, h: 25, ukuran: 30, spasiBaris: 1.4, spasiHuruf: 0, tebal: 600 },
     footer: { x: 15, y: 80, w: 70, ukuran: 54.7, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400 },
   },
   fontBawaan:   { primer: 'Lilita One', sekunder: 'Fredoka' },
@@ -68,7 +67,7 @@ export const TEMPLATE = {
   footerTeksBawaan: '',
 };
 
-export const NAMA_ELEMEN = ['header', 'body', 'footer'];
+export const NAMA_ELEMEN = ['header', 'body', 'daftar', 'footer'];
 
 // Satu poin Canva dalam piksel gambar 1080 x 1920.
 const PT = 4 / 3;
@@ -79,11 +78,30 @@ const PT = 4 / 3;
   dalam piksel, jadi diubah dulu ke poin supaya tampilannya tidak berubah.
 */
 export function elemenDariMeta(meta){
-  const el = lengkapiElemen(meta?.elemen);
-  if(meta?.elemen && meta.satuanUkuran !== 'pt'){
+  const asal = meta?.elemen;
+  const el = lengkapiElemen(asal);
+  if(asal && meta.satuanUkuran !== 'pt'){
     for(const n of NAMA_ELEMEN){
-      if(meta.elemen[n]?.ukuran) el[n].ukuran = Math.round(meta.elemen[n].ukuran / PT * 10) / 10;
+      if(asal[n]?.ukuran) el[n].ukuran = Math.round(asal[n].ukuran / PT * 10) / 10;
     }
+  }
+  /*
+    Dulu kalimat pembuka dan daftar kelas satu elemen "body" yang tingginya
+    mencakup keduanya. Bila pengaturan lama itu yang tersimpan, daftar kelas
+    diletakkan di bagian bawah kotak body lama dengan lebar yang sama.
+  */
+  if(asal?.body && !asal.daftar){
+    const b = asal.body;
+    const h = Number(b.h) || 44;
+    el.daftar = {
+      ...el.daftar, x: b.x ?? el.daftar.x, w: b.w ?? el.daftar.w,
+      y: Math.round(((b.y ?? el.body.y) + h * 0.45) * 10) / 10, h: Math.round(h * 0.55 * 10) / 10,
+      spasiBaris: b.spasiBaris ?? el.daftar.spasiBaris, spasiHuruf: b.spasiHuruf ?? el.daftar.spasiHuruf,
+      tebal: b.tebal ?? el.daftar.tebal,
+    };
+    if(b.ukuranDaftar) el.daftar.ukuran = b.ukuranDaftar;
+    delete el.body.h;
+    delete el.body.ukuranDaftar;
   }
   return el;
 }
@@ -273,7 +291,7 @@ function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, jarak = 0){
 }
 
 /* ============================================================
-   Susunan ketiga kotak teks
+   Susunan keempat elemen
    ============================================================ */
 
 /*
@@ -326,76 +344,66 @@ function susunSatuBaris(ctx, teks, el, fontNama){
   return { blok, r };
 }
 
-// Paragraf body: yang pertama kalimat pembuka, sisanya daftar kelas.
+// Paragraf daftar kelas: satu paragraf (dipisah baris kosong) = satu kelas.
 function pecahParagraf(teks){
   return String(teks || '').split(/\n[ \t]*\n+/).map(p => p.replace(/^\n+|\n+$/g, '')).filter(p => p.trim());
 }
 
-function susunBody(ctx, paragraf, el, s){
+/*
+  Daftar kelas: tiap kelas satu kotak berwarna (bila diaktifkan), disusun
+  ke bawah di dalam kotak elemen "daftar". Elemen ini punya tinggi sendiri
+  (h): bila isinya melebihi tinggi itu, hurufnya diperkecil, lalu bila masih
+  belum muat, kelasnya dibagi ke beberapa gambar. Header, body, dan footer
+  sama di tiap gambar.
+*/
+function susunDaftar(ctx, paragraf, el, s){
   const r = persenKePx(el);
-  const f = tpl.font.sekunder;
-  const gPembuka = gayaElemen(el, f, s);
-  const gDaftar = gayaElemen(el, f, s, el.ukuranDaftar || el.ukuran);
+  const g = gayaElemen(el, tpl.font.sekunder, s);
   const kotak = tpl.kotak.aktif;
   const pad = kotak ? 22 * s : 0;
-  const bagian = paragraf.map((p, i) => {
-    if(i === 0){
-      const blok = susunBlok(ctx, p, gPembuka, r.w);
-      return { blok, pad: 0, tinggi: blok.tinggi, kotak: false };
-    }
-    const blok = susunBlok(ctx, p, gDaftar, r.w - pad * 2);
+  const bagian = paragraf.map(p => {
+    const blok = susunBlok(ctx, p, g, r.w - pad * 2);
     return { blok, pad, tinggi: blok.tinggi + pad * 2, kotak };
   });
-  return { bagian, jarakPembuka: gPembuka.px * 0.6, jarakDaftar: kotak ? 16 * s : gDaftar.px * 0.5, r, s };
+  return { bagian, jarak: kotak ? 16 * s : g.px * 0.5, r, s };
 }
 
-function tinggiBody(susun, bagian){
-  if(!bagian.length) return 0;
-  let t = bagian[0].tinggi;
-  for(let i = 1; i < bagian.length; i++){
-    t += (i === 1 ? susun.jarakPembuka : susun.jarakDaftar) + bagian[i].tinggi;
-  }
-  return t;
+function tinggiDaftar(susun, bagian){
+  return bagian.reduce((n, b) => n + b.tinggi, 0) + susun.jarak * Math.max(0, bagian.length - 1);
 }
 
-/*
-  Diutamakan seluruh body muat dalam satu gambar, bila perlu dengan huruf
-  diperkecil. Bila tetap tidak muat, daftar kelas dibagi ke beberapa gambar,
-  dengan kalimat pembuka, header, dan footer yang sama di tiap gambar.
-*/
-function bagiBody(ctx, teks, el){
+function bagiDaftar(ctx, teks, el){
   const paragraf = pecahParagraf(teks);
   const batas = persenKePx(el).h;
   for(const s of [1, 0.92, 0.85, 0.78, 0.72, 0.66]){
-    const susun = susunBody(ctx, paragraf, el, s);
-    if(tinggiBody(susun, susun.bagian) <= batas) return { susun, halaman: [susun.bagian] };
+    const susun = susunDaftar(ctx, paragraf, el, s);
+    if(tinggiDaftar(susun, susun.bagian) <= batas) return { susun, halaman: [susun.bagian] };
   }
-  const susun = susunBody(ctx, paragraf, el, 0.72);
-  const [pembuka, ...daftar] = susun.bagian;
-  if(!daftar.length) return { susun, halaman: [susun.bagian] };
+  const susun = susunDaftar(ctx, paragraf, el, 0.72);
   const halaman = [];
-  let kini = [pembuka];
-  for(const b of daftar){
-    if(kini.length > 1 && tinggiBody(susun, [...kini, b]) > batas){ halaman.push(kini); kini = [pembuka]; }
+  let kini = [];
+  for(const b of susun.bagian){
+    if(kini.length && tinggiDaftar(susun, [...kini, b]) > batas){ halaman.push(kini); kini = []; }
     kini.push(b);
   }
-  halaman.push(kini);
+  if(kini.length) halaman.push(kini);
 
   // Ratakan jumlah kelas per gambar bila masih muat, supaya gambar terakhir
   // tidak hanya berisi satu kelas.
-  const per = Math.ceil(daftar.length / halaman.length);
+  const semua = susun.bagian;
+  const per = Math.ceil(semua.length / halaman.length);
   const rata = [];
-  for(let i = 0; i < daftar.length; i += per) rata.push([pembuka, ...daftar.slice(i, i + per)]);
-  const pakai = rata.length === halaman.length && rata.every(h => tinggiBody(susun, h) <= batas) ? rata : halaman;
-  return { susun, halaman: pakai };
+  for(let i = 0; i < semua.length; i += per) rata.push(semua.slice(i, i + per));
+  const pakai = rata.length === halaman.length && rata.every(h => tinggiDaftar(susun, h) <= batas) ? rata : halaman;
+  return { susun, halaman: pakai.length ? pakai : [[]] };
 }
 
-function gambarBody(ctx, susun, bagian){
+function gambarDaftar(ctx, susun, bagian){
   const { r } = susun;
   const cx = r.x + r.w / 2;
   let y = r.y;
   bagian.forEach((b, i) => {
-    if(i > 0) y += i === 1 ? susun.jarakPembuka : susun.jarakDaftar;
+    if(i > 0) y += susun.jarak;
     if(b.kotak){
       ctx.fillStyle = tpl.kotak.warna;
       ctx.beginPath();
@@ -419,8 +427,8 @@ function gambarLatar(ctx){
 /*
   Menghasilkan daftar kanvas story.
 
-  teks   : { header, body, footer }
-  elemen : posisi ketiga kotak (bawaan: posisi dari tab PR)
+  teks   : { header, body, daftar, footer }
+  elemen : posisi keempat kotak (bawaan: posisi dari tab PR)
 
   Tiap kanvas membawa kanvas.tataLetak, yaitu kotak yang benar-benar dipakai
   tiap elemen dalam piksel, untuk menempatkan penanda seret di pratinjau.
@@ -432,13 +440,17 @@ export async function buatStory(teks, elemen = tpl.elemen){
   const ukur = document.createElement('canvas').getContext('2d');
 
   const header = susunSatuBaris(ukur, teks.header, el.header, tpl.font.primer);
+  const body = susunSatuBaris(ukur, teks.body, el.body, tpl.font.sekunder);
   const footer = susunSatuBaris(ukur, teks.footer, el.footer, tpl.font.primer);
-  const { susun, halaman } = bagiBody(ukur, teks.body, el.body);
+  const { susun, halaman } = bagiDaftar(ukur, teks.daftar, el.daftar);
 
+  const tinggi = x => Math.max(x.blok.tinggi, x.blok.tinggiBaris);
+  const kosong = t => !String(t || '').trim();
   const tataLetak = {
-    header: { ...header.r, h: Math.max(header.blok.tinggi, header.blok.tinggiBaris) },
-    body:   { ...susun.r },
-    footer: { ...footer.r, h: Math.max(footer.blok.tinggi, footer.blok.tinggiBaris), kosong: !String(teks.footer || '').trim() },
+    header: { ...header.r, h: tinggi(header), kosong: kosong(teks.header) },
+    body:   { ...body.r, h: tinggi(body), kosong: kosong(teks.body) },
+    daftar: { ...susun.r, kosong: kosong(teks.daftar) },
+    footer: { ...footer.r, h: tinggi(footer), kosong: kosong(teks.footer) },
   };
 
   return halaman.map((bagian, i) => {
@@ -446,9 +458,8 @@ export async function buatStory(teks, elemen = tpl.elemen){
     kanvas.width = TEMPLATE.w; kanvas.height = TEMPLATE.h;
     const ctx = kanvas.getContext('2d');
     gambarLatar(ctx);
-    gambarBlok(ctx, header.blok, header.r.x + header.r.w / 2, header.r.y);
-    gambarBody(ctx, susun, bagian);
-    gambarBlok(ctx, footer.blok, footer.r.x + footer.r.w / 2, footer.r.y);
+    for(const x of [header, body, footer]) gambarBlok(ctx, x.blok, x.r.x + x.r.w / 2, x.r.y);
+    gambarDaftar(ctx, susun, bagian);
 
     if(halaman.length > 1){
       const f = tpl.font.sekunder;
@@ -464,7 +475,7 @@ export async function buatStory(teks, elemen = tpl.elemen){
 }
 
 /*
-  Mengubah isi pengumuman yang disusun operasional.js menjadi teks ketiga
+  Mengubah isi pengumuman yang disusun operasional.js menjadi teks keempat
   kotak. konten = { judul, isi, daftar: [{ judul, baris: [{ teks }] }] }
 */
 export function keTeksStory(konten){
@@ -474,7 +485,8 @@ export function keTeksStory(konten){
   ].filter(Boolean).join('\n'));
   return {
     header: String(konten.judul || '').toUpperCase(),
-    body: [konten.isi || '', ...daftar].filter(Boolean).join('\n\n'),
+    body: konten.isi || '',
+    daftar: daftar.join('\n\n'),
     footer: tpl.footerTeks,
   };
 }
@@ -484,9 +496,9 @@ export function keTeksStory(konten){
    ============================================================
 
    Dipasang di atas gambar pratinjau, baik di tab PR maupun di jendela story.
-   Ketiga kotak teks tampil sebagai bingkai: seret bagian dalamnya untuk
+   Keempat elemen tampil sebagai bingkai: seret bagian dalamnya untuk
    memindahkan, seret pegangan kiri/kanan untuk mengubah lebar, dan pegangan
-   bawah body untuk mengubah tingginya. Mengeklik bingkai memilih elemen itu
+   bawah daftar kelas untuk mengubah tingginya. Mengeklik bingkai memilih elemen itu
    (misalnya untuk memusatkan kotak isiannya).
 
    opsi = {
@@ -496,7 +508,7 @@ export function keTeksStory(konten){
      pilih(nama)      : dipanggil saat bingkai diklik
    }
 */
-const LABEL_ELEMEN = { header: 'Header', body: 'Body', footer: 'Footer' };
+const LABEL_ELEMEN = { header: 'Header', body: 'Body', daftar: 'Daftar kelas', footer: 'Footer' };
 
 export function pasangPenyunting(bingkai, opsi){
   bingkai.classList.add('op-penyunting');
@@ -510,7 +522,7 @@ export function pasangPenyunting(bingkai, opsi){
     el.innerHTML = `<span class="op-el-label">${LABEL_ELEMEN[nama]}</span>
       <span class="op-el-sisi kiri" data-sisi="kiri"></span>
       <span class="op-el-sisi kanan" data-sisi="kanan"></span>
-      ${nama === 'body' ? '<span class="op-el-sisi bawah" data-sisi="bawah"></span>' : ''}`;
+      ${nama === 'daftar' ? '<span class="op-el-sisi bawah" data-sisi="bawah"></span>' : ''}`;
     el.hidden = true;
     bingkai.appendChild(el);
     kotak[nama] = el;
@@ -529,11 +541,13 @@ export function pasangPenyunting(bingkai, opsi){
     const { w, h } = TEMPLATE;
     for(const n of NAMA_ELEMEN){
       const k = kotak[n], e = elemen[n], t = tataLetak[n];
-      k.hidden = n === 'footer' && t.kosong;
+      // Elemen kosong disembunyikan, kecuali daftar kelas yang kotaknya
+      // tetap perlu terlihat supaya bisa ditempatkan.
+      k.hidden = n !== 'daftar' && t.kosong;
       k.style.left = e.x + '%';
       k.style.top = e.y + '%';
       k.style.width = e.w + '%';
-      k.style.height = (n === 'body' ? e.h : t.h / h * 100) + '%';
+      k.style.height = (n === 'daftar' ? e.h : t.h / h * 100) + '%';
     }
   }
 
@@ -600,7 +614,7 @@ export function pasangPenyunting(bingkai, opsi){
 const $ = id => document.getElementById(id);
 const keBlob = kanvas => new Promise(res => kanvas.toBlob(res, 'image/png'));
 
-const ID_TEKS = { header: 'igTeksHeader', body: 'igTeksBody', footer: 'igTeksFooter' };
+const ID_TEKS = { header: 'igTeksHeader', body: 'igTeksBody', daftar: 'igTeksDaftar', footer: 'igTeksFooter' };
 
 let kini = { elemen: null, kanvas: [], namaDasar: 'kafbe-story' };
 let jedaGambar = null;
@@ -668,9 +682,7 @@ function bisaBagikanBerkas(){
   }catch{ return false; }
 }
 
-const teksDialog = () => ({
-  header: $(ID_TEKS.header).value, body: $(ID_TEKS.body).value, footer: $(ID_TEKS.footer).value,
-});
+const teksDialog = () => Object.fromEntries(NAMA_ELEMEN.map(n => [n, $(ID_TEKS[n]).value]));
 
 function tombolAksi(i, banyak, bagi){
   const aksi = document.createElement('div');
@@ -764,7 +776,7 @@ function pasang(){
 
 /*
   Membuka jendela story. konten disusun operasional.js (lihat keTeksStory).
-  Ketiga teks bisa disunting dan posisinya digeser sebelum gambar diunduh;
+  Keempat teks bisa disunting dan posisinya digeser sebelum gambar diunduh;
   perubahan posisi di sini hanya berlaku untuk story ini.
 */
 export function bukaStory(konten, namaDasar){

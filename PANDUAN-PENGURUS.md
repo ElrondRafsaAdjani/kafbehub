@@ -231,19 +231,18 @@ kelas di tab Jadwal Permanen, muncul tombol **Buat story perpindahan
 permanen** yang sudah memuat jadwal lama dan jadwal barunya. Tombol
 **Story IG** di tiap baris tabel juga bisa dipakai, tetapi tanpa jadwal lama.
 
-**Jendela story bekerja seperti Canva.** Header (judul), body (kalimat
-pembuka dan daftar kelas), dan footer (misalnya TERIMA KASIH) adalah tiga
-kotak teks terpisah:
+**Jendela story bekerja seperti Canva.** Ada empat elemen terpisah: header
+(judul), body (kalimat pembuka), daftar kelas (tiap kelas dalam kotak
+berwarna), dan footer (misalnya TERIMA KASIH):
 
-- Tulisan ketiganya bisa disunting di kotak isian sebelah kiri. Isinya sudah
-  disusun otomatis dari data jadwal
-- Di pratinjau, seret kotaknya untuk memindahkan, seret pegangan kiri/kanan
-  untuk mengubah lebar, dan pegangan bawah body untuk mengubah tingginya.
-  Mengeklik kotak di pratinjau langsung membuka isian tulisannya
+- Tulisan keempatnya bisa disunting di kotak isian sebelah kiri. Isinya
+  sudah disusun otomatis dari data jadwal
+- Di pratinjau, seret elemennya untuk memindahkan, seret pegangan kiri/kanan
+  untuk mengubah lebar, dan pegangan bawah daftar kelas untuk mengubah
+  tingginya. Mengeklik elemen di pratinjau langsung membuka isian tulisannya
 - Kata yang diapit tanda bintang, misalnya `*PERMANEN*`, memakai warna
-  sekunder. Di body, baris kosong memisahkan paragraf: paragraf pertama
-  kalimat pembuka, paragraf berikutnya daftar kelas (diberi kotak berwarna
-  bila diaktifkan)
+  sekunder. Di daftar kelas, baris kosong memisahkan kelas; tiap kelas
+  diberi kotak sendiri bila diaktifkan
 - Posisi yang digeser di sini hanya berlaku untuk story itu. **Kembalikan
   posisi awal** memakai lagi posisi dari tab PR
 
@@ -262,7 +261,8 @@ konfirmasi dulu sebelum menimpa).
   hanya menulis teks (judul, kalimat pembuka, daftar kelas, dan footer bila
   diisi), jadi bagian itu dikosongkan di template
 - **Font** dipilih dari daftar seluruh Google Fonts, lengkap dengan contoh
-  tulisannya. Font primer untuk header dan footer, font sekunder untuk body.
+  tulisannya. Font primer untuk header dan footer, font sekunder untuk body
+  dan daftar kelas.
   Saat ini: Lilita One dan Fredoka
 - **Ukuran dan spasi** tiap elemen memakai satuan yang sama dengan Canva,
   jadi angkanya bisa disalin langsung dari desain Canva:
@@ -275,17 +275,18 @@ konfirmasi dulu sebelum menimpa).
     0 atau 50
   - *Ketebalan*; bila tidak tersedia pada font itu, dipakai yang terdekat
     (Lilita One hanya punya 400)
-  - Body punya ukuran sendiri untuk *daftar kelas*
-  - Bila body lebih panjang dari kotaknya, hurufnya diperkecil otomatis.
-    Kalau tulisan body tampak lebih kecil dari angka yang diisi, tarik
-    pegangan bawah body supaya kotaknya lebih tinggi
+  - Header, body, daftar kelas, dan footer masing-masing punya pengaturan
+    sendiri
+  - Bila daftar kelas lebih panjang dari kotaknya, hurufnya diperkecil
+    otomatis. Kalau tulisannya tampak lebih kecil dari angka yang diisi,
+    tarik pegangan bawah daftar kelas supaya kotaknya lebih tinggi
 - **Teks footer bawaan**, misalnya TERIMA KASIH, tetap bisa diubah di tiap
   story. Kosongkan bila tulisan itu sudah ada di gambar template
 - **Warna** primer untuk seluruh teks biasa, sekunder untuk kata yang diapit
   `*...*`, serta warna kotak di belakang tiap kelas (kotaknya bisa
   dimatikan). Kode hex bisa diketik langsung. Saat ini: `#13192f` dan
   `#be8f41`
-- **Posisi** ketiga kotak teks diatur dengan menyeretnya di pratinjau, sama
+- **Posisi** keempat elemen diatur dengan menyeretnya di pratinjau, sama
   seperti di jendela story. Yang disimpan di sini menjadi posisi awal semua
   story
 - Tekan **Simpan pengaturan** setelah semuanya pas. Cukup diatur sekali

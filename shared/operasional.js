@@ -1511,15 +1511,13 @@ const CONTOH_STORY = {
   }],
 };
 
-// Posisi dan ukuran ketiga kotak teks yang sedang diatur di tab PR. Posisi
+// Posisi dan ukuran keempat elemen yang sedang diatur di tab PR. Posisi
 // diubah dengan menyeret di pratinjau, ukuran huruf lewat kotak isian.
 let elemenPR = lengkapiElemen({});
 
 // Isian ukuran dan spasi per elemen, dengan id tpl-<elemen>-<kolom>.
-const ISIAN_TIPOGRAFI = [
-  ...['header', 'body', 'footer'].flatMap(n => ['ukuran', 'spasiBaris', 'spasiHuruf', 'tebal'].map(k => [n, k])),
-  ['body', 'ukuranDaftar'],
-];
+const ISIAN_TIPOGRAFI = ['header', 'body', 'daftar', 'footer']
+  .flatMap(n => ['ukuran', 'spasiBaris', 'spasiHuruf', 'tebal'].map(k => [n, k]));
 
 // Seluruh pengaturan di tab PR. Bentuknya sama dengan yang disimpan di
 // templateig/story dan yang diterima aturTemplate().
@@ -1706,20 +1704,19 @@ $('tplSimpan').addEventListener('click', async () => {
   const atur = pengaturanDariIsian();
   const { elemen, font, warna, footerTeks } = atur;
   const salah = [];
-  for(const n of ['header', 'body', 'footer']){
+  for(const n of ['header', 'body', 'daftar', 'footer']){
     const e = elemen[n];
     if(!(e.ukuran >= 8 && e.ukuran <= 150)) salah.push(`Ukuran ${n} harus antara 8 dan 150 pt.`);
     if(!(e.spasiBaris >= 0.5 && e.spasiBaris <= 3)) salah.push(`Spasi baris ${n} harus antara 0.5 dan 3.`);
     if(!(e.spasiHuruf >= -200 && e.spasiHuruf <= 800)) salah.push(`Spasi huruf ${n} harus antara -200 dan 800.`);
   }
-  if(!(elemen.body.ukuranDaftar >= 8 && elemen.body.ukuranDaftar <= 150)) salah.push('Ukuran daftar kelas harus antara 8 dan 150 pt.');
   if(PASANGAN_WARNA.some(([, h]) => $(h).classList.contains('op-salah-isi'))) salah.push('Ada kode warna yang belum benar. Tulis enam digit, misalnya #13192f.');
   if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
 
   try{
     await setDoc(doc(db, 'templateig', 'story'), atur, { merge: true });
     await catat('ubah', 'template story', 'Pengaturan template story diubah',
-      `font ${font.primer} / ${font.sekunder}; ukuran ${elemen.header.ukuran}/${elemen.body.ukuran}/${elemen.footer.ukuran}; `
+      `font ${font.primer} / ${font.sekunder}; ukuran ${elemen.header.ukuran}/${elemen.body.ukuran}/${elemen.daftar.ukuran}/${elemen.footer.ukuran}; `
       + `warna ${warna.primer} / ${warna.sekunder}; footer "${footerTeks.slice(0, 60)}"`);
     await segarkanTabTemplate(true);
     pesan(el, 'Pengaturan tersimpan dan berlaku untuk semua story berikutnya.', 'benar');
