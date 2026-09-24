@@ -662,15 +662,24 @@
       <div class="op-panel-kepala">
         <div>
           <h2>PR</h2>
-          <p>Template story Instagram KAFBE beserta font dan warna teksnya.</p>
+          <p>Template story Instagram KAFBE beserta font dan warna teksnya, diatur terpisah untuk tiap jenis pengumuman.</p>
         </div>
       </div>
+
+      <div class="op-subtab" role="tablist" aria-label="Jenis pengumuman">
+        <button type="button" class="op-subtab-btn active" data-jenis-pr="sementara" role="tab">Perpindahan jadwal sementara</button>
+        <button type="button" class="op-subtab-btn" data-jenis-pr="permanen" role="tab">Perpindahan jadwal permanen</button>
+        <button type="button" class="op-subtab-btn" data-jenis-pr="ruang" role="tab">Perpindahan ruangan sementara</button>
+        <button type="button" class="op-subtab-btn" data-jenis-pr="online" role="tab">Kelas online</button>
+      </div>
+      <h3 class="op-subjudul" id="tplJudulJenis">Perpindahan jadwal sementara</h3>
 
       <p class="op-catatan">
         Story Instagram dibuat dengan menempelkan teks pengumuman ke template yang
         diunggah di sini. Template cukup diunggah <strong>sekali per periode
         kepengurusan</strong>; periode berikutnya tinggal mengunggah template baru,
-        dan template lama otomatis tergantikan.
+        dan template lama otomatis tergantikan. Pengumuman kelas ditiadakan dan
+        campuran beberapa jenis memakai template perpindahan jadwal sementara.
       </p>
       <p class="op-catatan">
         Ukurannya <strong>1080 × 1920</strong> (9:16). Semua hiasan, seperti batik, logo,
@@ -686,6 +695,11 @@
             <label class="btn btn-primary op-kecil op-label-berkas" id="tplLabelUnggah">Upload template <input type="file" id="tplBerkas" accept="image/png,image/jpeg,image/webp" hidden /></label>
             <button type="button" class="btn btn-ghost op-kecil" id="tplUnduh" hidden>Download template</button>
           </div>
+          <div class="op-salin">
+            <label for="tplSalinDari">Salin template dan pengaturan dari</label>
+            <select id="tplSalinDari"></select>
+            <button type="button" class="btn btn-ghost op-kecil" id="tplSalin">Salin</button>
+          </div>
 
           <h4 class="op-subjudul">Font</h4>
           <p class="op-catatan">Dipilih dari seluruh Google Fonts. Font primer untuk header dan footer, font sekunder untuk body dan daftar kelas. Di bawah tiap pilihan ada contoh tulisannya.</p>
@@ -699,7 +713,7 @@
           </div>
 
           <h4 class="op-subjudul">Ukuran dan spasi (satuan sama dengan Canva)</h4>
-          <p class="op-catatan">Angkanya bisa disalin langsung dari Canva. Ukuran dalam pt seperti di Canva (pada desain 1080 × 1920, 1 pt = 1,33 px), spasi baris seperti <em>Line spacing</em> (misalnya 1.4), dan spasi huruf seperti <em>Letter spacing</em> (misalnya 0 atau 50). Ketebalan yang tidak tersedia pada font itu diganti yang terdekat. Bila daftar kelas lebih panjang dari kotaknya, hurufnya diperkecil otomatis.</p>
+          <p class="op-catatan">Angkanya bisa disalin langsung dari Canva. Ukuran dalam pt seperti di Canva (pada desain 1080 × 1920, 1 pt = 1,33 px), spasi baris seperti <em>Line spacing</em> (misalnya 1.4), dan spasi huruf seperti <em>Letter spacing</em> (misalnya 0 atau 50). Ketebalan yang tidak tersedia pada font itu diganti yang terdekat. Garis tepi (outline) dalam piksel pada gambar 1080 × 1920; isi 0 bila tanpa garis tepi. Bila daftar kelas lebih panjang dari kotaknya, hurufnya diperkecil otomatis.</p>
           <div class="op-tipo">
             <div class="op-tipo-baris">
               <strong>Header</strong>
@@ -707,6 +721,8 @@
               <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-header-spasiBaris" min="0.5" max="3" step="0.05" /></label>
               <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-header-spasiHuruf" min="-200" max="800" step="5" /></label>
               <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-header-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
+              <label class="op-tipo-sel"><span>Garis tepi (px)</span><input type="number" id="tpl-header-garis" min="0" max="40" step="0.5" /></label>
+              <label class="op-tipo-sel op-tipo-warna"><span>Warna garis</span><span class="op-warna"><input type="color" id="tpl-header-warnaGaris" aria-label="Warna garis tepi header" /><input type="text" id="tpl-header-hexGaris" maxlength="7" spellcheck="false" autocomplete="off" /></span></label>
             </div>
             <div class="op-tipo-baris">
               <strong>Body</strong>
@@ -714,6 +730,8 @@
               <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-body-spasiBaris" min="0.5" max="3" step="0.05" /></label>
               <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-body-spasiHuruf" min="-200" max="800" step="5" /></label>
               <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-body-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
+              <label class="op-tipo-sel"><span>Garis tepi (px)</span><input type="number" id="tpl-body-garis" min="0" max="40" step="0.5" /></label>
+              <label class="op-tipo-sel op-tipo-warna"><span>Warna garis</span><span class="op-warna"><input type="color" id="tpl-body-warnaGaris" aria-label="Warna garis tepi body" /><input type="text" id="tpl-body-hexGaris" maxlength="7" spellcheck="false" autocomplete="off" /></span></label>
             </div>
             <div class="op-tipo-baris">
               <strong>Daftar kelas</strong>
@@ -721,6 +739,8 @@
               <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-daftar-spasiBaris" min="0.5" max="3" step="0.05" /></label>
               <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-daftar-spasiHuruf" min="-200" max="800" step="5" /></label>
               <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-daftar-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
+              <label class="op-tipo-sel"><span>Garis tepi (px)</span><input type="number" id="tpl-daftar-garis" min="0" max="40" step="0.5" /></label>
+              <label class="op-tipo-sel op-tipo-warna"><span>Warna garis</span><span class="op-warna"><input type="color" id="tpl-daftar-warnaGaris" aria-label="Warna garis tepi daftar" /><input type="text" id="tpl-daftar-hexGaris" maxlength="7" spellcheck="false" autocomplete="off" /></span></label>
             </div>
             <div class="op-tipo-baris">
               <strong>Footer</strong>
@@ -728,6 +748,8 @@
               <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-footer-spasiBaris" min="0.5" max="3" step="0.05" /></label>
               <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-footer-spasiHuruf" min="-200" max="800" step="5" /></label>
               <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-footer-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
+              <label class="op-tipo-sel"><span>Garis tepi (px)</span><input type="number" id="tpl-footer-garis" min="0" max="40" step="0.5" /></label>
+              <label class="op-tipo-sel op-tipo-warna"><span>Warna garis</span><span class="op-warna"><input type="color" id="tpl-footer-warnaGaris" aria-label="Warna garis tepi footer" /><input type="text" id="tpl-footer-hexGaris" maxlength="7" spellcheck="false" autocomplete="off" /></span></label>
             </div>
           </div>
 
@@ -756,6 +778,8 @@
             <div class="op-field op-sempit"><label for="tplHexTegasGaris">Perpindahan · garis tepi</label>
               <span class="op-warna"><input type="color" id="tplWarnaTegasGaris" aria-label="Pilih warna garis tepi teks perpindahan" />
               <input type="text" id="tplHexTegasGaris" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
+            <div class="op-field op-sempit"><label for="tplGarisTegas">Perpindahan · tebal garis (px)</label>
+              <input type="number" id="tplGarisTegas" min="0" max="40" step="0.5" /></div>
           </div>
 
           <h4 class="op-subjudul">Posisi</h4>

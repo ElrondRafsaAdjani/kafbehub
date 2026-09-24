@@ -253,9 +253,19 @@ bagikan, jadi gambarnya bisa langsung dikirim ke Instagram. Bila daftar
 kelasnya terlalu panjang untuk satu story, story dibagi otomatis dan diberi
 nomor.
 
-**Tab PR.** Template diunggah **sekali per periode kepengurusan** di tab
-**PR**, lalu dipakai untuk semua story selama periode itu. Periode berikutnya
-cukup mengunggah template baru; template lama otomatis tergantikan (ada
+**Tab PR.** Tab ini punya empat sub-tab, satu untuk tiap jenis pengumuman:
+**Perpindahan jadwal sementara**, **Perpindahan jadwal permanen**,
+**Perpindahan ruangan sementara**, dan **Kelas online**. Tiap sub-tab punya
+template dan pengaturannya sendiri. Pengumuman kelas ditiadakan dan
+campuran beberapa jenis memakai template perpindahan jadwal sementara.
+Jenis yang belum punya template sendiri juga memakai template itu, dan
+**Salin template dan pengaturan dari** menyalin template beserta seluruh
+pengaturan dari jenis lain supaya tidak perlu diatur dari nol.
+
+Template diunggah **sekali per periode kepengurusan**, lalu dipakai untuk
+semua story selama periode itu. Periode berikutnya cukup mengunggah template
+baru; template lama otomatis tergantikan (ada konfirmasi dulu sebelum
+menimpa).
 konfirmasi dulu sebelum menimpa).
 
 - Template berukuran 1080 × 1920 (PNG atau JPG) dan sudah memuat semua
@@ -277,6 +287,8 @@ konfirmasi dulu sebelum menimpa).
     0 atau 50
   - *Ketebalan*; bila tidak tersedia pada font itu, dipakai yang terdekat
     (Lilita One hanya punya 400)
+  - *Garis tepi* (outline) dalam piksel pada gambar 1080 × 1920, dengan
+    warnanya sendiri. Isi 0 bila tanpa garis tepi
   - Header, body, daftar kelas, dan footer masing-masing punya pengaturan
     sendiri
   - Bila daftar kelas lebih panjang dari kotaknya, hurufnya diperkecil
@@ -286,8 +298,9 @@ konfirmasi dulu sebelum menimpa).
   story. Kosongkan bila tulisan itu sudah ada di gambar template
 - **Warna** primer untuk seluruh teks biasa, sekunder untuk kata yang
   diapit `*...*`. **Teks perpindahan** (jadwal yang berubah, `**...**`)
-  punya dua warna sendiri: warna isi dan warna garis tepi. Awalnya sama
-  dengan warna sekunder dan primer. Kode hex bisa diketik langsung
+  punya dua warna sendiri, warna isi dan warna garis tepi, serta tebal garis
+  tepinya (0 berarti tanpa garis). Awalnya sama dengan warna sekunder dan
+  primer, dengan garis 3 px. Kode hex bisa diketik langsung
 - **Posisi** keempat elemen diatur dengan menyeretnya di pratinjau, sama
   seperti di jendela story. Yang disimpan di sini menjadi posisi awal semua
   story

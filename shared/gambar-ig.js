@@ -48,6 +48,9 @@ export const TEMPLATE = {
   //
   // Ukuran, spasi baris, dan spasi huruf memakai satuan yang SAMA DENGAN
   // CANVA, supaya angka dari desain Canva bisa disalin apa adanya:
+  //   garis       : tebal garis tepi (outline) dalam piksel yang terlihat
+  //                 pada gambar 1080 x 1920; 0 berarti tanpa garis tepi
+  //   warnaGaris  : warna garis tepi itu
   //   ukuran      : poin (pt). Pada desain 1080 px, 1 pt = 4/3 px, jadi
   //                 ukuran 60 di Canva tergambar 80 px. Inilah sebab angka
   //                 yang sama dulu tampak jauh lebih kecil di sini.
@@ -56,11 +59,14 @@ export const TEMPLATE = {
   //   tebal       : ketebalan font; bila tidak tersedia, dipakai yang
   //                 terdekat (Lilita One hanya punya 400)
   elemenBawaan: {
-    header: { x: 15, y: 20.5, w: 70, ukuran: 60, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400 },
-    body:   { x: 12, y: 33, w: 76, ukuran: 35, spasiBaris: 1.4, spasiHuruf: 0, tebal: 600 },
-    daftar: { x: 12, y: 52, w: 76, h: 25, ukuran: 30, spasiBaris: 1.4, spasiHuruf: 0, tebal: 600 },
-    footer: { x: 15, y: 80, w: 70, ukuran: 54.7, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400 },
+    header: { x: 15, y: 20.5, w: 70, ukuran: 60, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400, garis: 0, warnaGaris: '#13192f' },
+    body:   { x: 12, y: 33, w: 76, ukuran: 35, spasiBaris: 1.4, spasiHuruf: 0, tebal: 600, garis: 0, warnaGaris: '#13192f' },
+    daftar: { x: 12, y: 52, w: 76, h: 25, ukuran: 30, spasiBaris: 1.4, spasiHuruf: 0, tebal: 600, garis: 0, warnaGaris: '#13192f' },
+    footer: { x: 15, y: 80, w: 70, ukuran: 54.7, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400, garis: 0, warnaGaris: '#13192f' },
   },
+  // Tebal garis tepi teks tegas (jadwal yang berubah), dalam piksel yang
+  // terlihat pada gambar 1080 x 1920.
+  garisTegasBawaan: 3,
   fontBawaan:   { primer: 'Lilita One', sekunder: 'Fredoka' },
   // tegasIsi dan tegasGaris: isi dan garis tepi teks tegas (**...**), yaitu
   // jadwal yang berubah. Awalnya sama dengan warna sekunder dan primer.
@@ -136,13 +142,15 @@ function susunTpl(isi){
     font:   lengkapi(isi.font, TEMPLATE.fontBawaan),
     warna:  lengkapi(isi.warna, TEMPLATE.warnaBawaan),
     footerTeks: typeof isi.footerTeks === 'string' ? isi.footerTeks : TEMPLATE.footerTeksBawaan,
+    garisTegas: Number.isFinite(Number(isi.garisTegas)) && isi.garisTegas !== '' && isi.garisTegas != null
+      ? Number(isi.garisTegas) : TEMPLATE.garisTegasBawaan,
   };
 }
 
 /*
   Dipanggil oleh operasional.js setelah template dari Firestore dimuat, dan
   setiap kali isian di tab PR berubah (untuk pratinjau).
-  isi: { gambar, elemen, font, warna, footerTeks }
+  isi: { gambar, elemen, font, warna, footerTeks, garisTegas }
 */
 export function aturTemplate(isi = {}){
   tpl = susunTpl(isi);
@@ -295,11 +303,14 @@ function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, jarak = 0, blok = null){
     ctx.font = tegas ? blok.fontTegas : fontBiasa;
     ctx.fillStyle = k.tegas ? tpl.warna.tegasIsi : k.sorot ? tpl.warna.sekunder : tpl.warna.primer;
     // Garis tepi digambar lebih dulu lalu ditimpa isi hurufnya, jadi yang
-    // terlihat hanya bagian luar garis, seperti outline di Canva.
+    // terlihat hanya bagian luar garis, seperti outline di Canva. Karena
+    // separuh garis tertutup isi huruf, lebarnya dua kali tebal yang diminta.
+    const garis = tegas ? blok.garisTegas : (blok?.garis || 0);
+    const warnaGaris = tegas ? tpl.warna.tegasGaris : blok?.warnaGaris;
     const tulis = (t, xt) => {
-      if(tegas){
-        ctx.strokeStyle = tpl.warna.tegasGaris;
-        ctx.lineWidth = blok.garisTepi;
+      if(garis > 0){
+        ctx.strokeStyle = warnaGaris;
+        ctx.lineWidth = garis * 2;
         ctx.lineJoin = 'round';
         ctx.strokeText(t, xt, y);
       }
@@ -338,7 +349,8 @@ function susunBlok(ctx, teks, gaya, lebar){
   const garisDasar = (tinggiBaris - (naik + turun)) / 2 + naik;
   return {
     baris, lebarSpasi, jarak, font: gaya.font, fontTegas: gaya.fontTegas || gaya.font,
-    garisTepi: gaya.px * 0.14, tinggiBaris, garisDasar, tinggi: baris.length * tinggiBaris,
+    garis: gaya.garis || 0, warnaGaris: gaya.warnaGaris, garisTegas: gaya.garisTegas || 0,
+    tinggiBaris, garisDasar, tinggi: baris.length * tinggiBaris,
   };
 }
 
@@ -360,6 +372,10 @@ function gayaElemen(el, fontNama, s = 1, ukuran = el.ukuran){
     // Kata tegas memakai ketebalan paling tebal yang tersedia.
     fontTegas: `${ketebalan(fontNama, 800)} ${px}px ${css(fontNama)}`,
     px, spasiBaris: el.spasiBaris, spasiHuruf: el.spasiHuruf,
+    // Garis tepi ikut mengecil bila hurufnya diperkecil supaya muat.
+    garis: (Number(el.garis) || 0) * s,
+    warnaGaris: el.warnaGaris || tpl.warna.primer,
+    garisTegas: (Number(tpl.garisTegas) || 0) * s,
   };
 }
 

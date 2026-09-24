@@ -466,7 +466,8 @@ service cloud.firestore {
       allow write: if tulisanAdmin();
     }
 
-    // Template story Instagram yang diunggah di tab "PR", beserta font dan warnanya.
+    // Template story Instagram yang diunggah di tab "PR" (satu dokumen per jenis
+    // pengumuman, misalnya story dan story-permanen), beserta pengaturannya.
     // Gambarnya disimpan sebagai potongan teks base64 (lihat
     // shared/operasional.js). Hanya pengurus yang memakainya, jadi tidak
     // dibuka untuk publik.

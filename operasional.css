@@ -542,3 +542,17 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 .op-tipo-sel{ display:flex; flex-direction:column; gap:4px; flex:1 1 90px; min-width:84px; }
 .op-tipo-sel span{ font-size:0.72rem; font-weight:700; color:var(--ink-soft); }
 .op-tipo-sel input, .op-tipo-sel select{ padding:8px 10px; }
+
+/* Sub-tab jenis pengumuman di tab PR. */
+.op-subtab{ display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 14px; padding:5px; background:var(--bg); border:1px solid var(--line); border-radius:14px; }
+.op-subtab-btn{
+  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.84rem; cursor:pointer;
+  padding:9px 14px; border-radius:10px; border:none; background:none; color:var(--ink-soft);
+}
+.op-subtab-btn:hover{ color:var(--owl-dark2); background:var(--surface); }
+.op-subtab-btn.active{ background:var(--surface); color:var(--owl-dark2); box-shadow:0 1px 4px rgba(15,37,64,0.12); }
+.op-salin{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:12px; font-size:0.8rem; color:var(--ink-soft); }
+.op-salin select{ width:auto; flex:0 1 260px; padding:8px 10px; }
+.op-tipo-warna{ flex:1 1 150px; }
+.op-tipo-warna .op-warna input[type=text]{ width:90px; padding:8px; }
+.op-tipo-warna .op-warna input[type=color]{ width:40px; height:36px; }

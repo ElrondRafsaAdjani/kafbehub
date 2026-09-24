@@ -1413,26 +1413,40 @@ function kontenPermanen(j, lama){
   pengurus diarahkan ke tab PR, alih-alih diberi gambar
   dengan latar yang bukan milik KAFBE.
 */
-async function templateSiap(){
-  await siapkanTemplateIg();
-  if(adaTemplate()) return true;
-  if(confirm('Belum ada template story Instagram untuk periode ini.\n\n'
+async function templateSiap(jenis){
+  const pakai = await templateUntuk(jenis);
+  if(pakai){
+    aturTemplate({ ...pakai.t.meta, gambar: pakai.t.gambar });
+    return true;
+  }
+  aturTemplate({});
+  if(confirm(`Belum ada template story Instagram untuk ${JENIS_TEMPLATE[jenis].nama.toLowerCase()}.\n\n`
     + 'Buka tab PR untuk mengunggahnya sekarang?')){
+    jenisPR = jenis;
     document.querySelector('.op-tab-btn[data-tab="pr"]').click();
   }
   return false;
 }
 
+// Jenis template untuk sekumpulan perubahan sementara. Ditiadakan dan
+// campuran beberapa jenis memakai template perpindahan jadwal sementara.
+function jenisSementara(daftar){
+  const tipe = new Set(daftar.map(p => p.tipe));
+  if(tipe.size === 1 && tipe.has('ruang')) return 'ruang';
+  if(tipe.size === 1 && tipe.has('daring')) return 'online';
+  return 'sementara';
+}
+
 async function bukaIg(daftar){
   if(daftar.length === 0) return;
-  if(!await templateSiap()) return;
+  if(!await templateSiap(jenisSementara(daftar))) return;
   const tgl = daftar.map(p => p.tanggal).sort();
   const awal = tgl[0], akhir = tgl[tgl.length - 1];
   bukaStory(kontenSementara(daftar), `kafbe-story-${awal}${awal === akhir ? '' : '-sd-' + akhir}`);
 }
 
 async function bukaStoryPermanen(j, lama){
-  if(!await templateSiap()) return;
+  if(!await templateSiap('permanen')) return;
   bukaStory(kontenPermanen(j, lama),
     `kafbe-story-permanen-${String(namaMatkul(j.kode) || j.kode).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${j.kp}`);
 }
@@ -1449,6 +1463,10 @@ async function bukaStoryPermanen(j, lama){
      templateig/story-potongan-0 { isi: '...' }
      templateig/story-potongan-1 { isi: '...' }
 
+   Itu untuk jenis perpindahan jadwal sementara. Jenis lain memakai nama
+   dokumen sendiri dengan susunan yang sama (lihat JENIS_TEMPLATE di bawah),
+   misalnya templateig/story-permanen dan templateig/story-permanen-potongan-0.
+
    Gambarnya diperkecil dulu ke 1080 x 1920 dan dijadikan JPEG, jadi
    biasanya cukup dua atau tiga potongan.
 */
@@ -1456,9 +1474,27 @@ async function bukaStoryPermanen(j, lama){
 // Jauh di bawah batas 1 MB per dokumen, supaya tiap penulisan kecil dan
 // tidak terhenti di jaringan yang lambat.
 const UKURAN_POTONGAN = 250000;
-let templateIg = null;        // { meta, dataUrl, gambar }
-let janjiTemplateIg = null;
-let galatTemplateIg = null;   // kegagalan terakhir saat membaca template
+
+/*
+  Tiap jenis pengumuman punya template dan pengaturannya sendiri, diatur di
+  sub-tab tab PR. Template jenis "sementara" memakai dokumen templateig/story
+  yang sudah ada sejak sebelum ada sub-tab, jadi tidak perlu dipindahkan.
+
+  Jenis yang belum punya template sendiri memakai template perpindahan
+  jadwal sementara, supaya story tetap bisa dibuat.
+*/
+const JENIS_TEMPLATE = {
+  sementara: { nama: 'Perpindahan jadwal sementara', dok: 'story' },
+  permanen:  { nama: 'Perpindahan jadwal permanen', dok: 'story-permanen' },
+  ruang:     { nama: 'Perpindahan ruangan sementara', dok: 'story-ruang' },
+  online:    { nama: 'Kelas online', dok: 'story-online' },
+};
+const dokTemplate = jenis => JENIS_TEMPLATE[jenis].dok;
+
+let jenisPR = 'sementara';    // sub-tab yang sedang dibuka di tab PR
+let templateIg = null;        // { meta, dataUrl, gambar } milik jenisPR
+const janjiTemplate = {};     // jenis -> Promise
+const galatTemplate = {};     // jenis -> kegagalan terakhir saat membaca
 
 function muatGambarDari(src){
   return new Promise((res, rej) => {
@@ -1469,48 +1505,85 @@ function muatGambarDari(src){
   });
 }
 
-async function ambilTemplateIg(){
-  const snap = await getDoc(doc(db, 'templateig', 'story'));
+async function ambilTemplateIg(jenis){
+  const dok = dokTemplate(jenis);
+  const snap = await getDoc(doc(db, 'templateig', dok));
   const meta = snap.exists() ? snap.data() : {};
   let dataUrl = '', gambar = null;
   if(meta.potongan > 0){
     const bagian = await Promise.all(Array.from({ length: meta.potongan }, (_, i) =>
-      getDoc(doc(db, 'templateig', `story-potongan-${i}`))));
+      getDoc(doc(db, 'templateig', `${dok}-potongan-${i}`))));
     dataUrl = bagian.map(b => (b.exists() ? b.data().isi : '')).join('');
     try{ gambar = await muatGambarDari(dataUrl); }
     catch(err){ console.error(err); dataUrl = ''; }
   }
-  templateIg = { meta, dataUrl, gambar };
-  aturTemplate({ ...meta, gambar });
-  return templateIg;
+  return { meta, dataUrl, gambar };
 }
 
-// Template hanya diambil sekali per kunjungan, kecuali diminta ulang.
-function siapkanTemplateIg(ulang = false){
-  if(ulang || !janjiTemplateIg){
-    galatTemplateIg = null;
-    janjiTemplateIg = ambilTemplateIg().catch(err => {
+// Template tiap jenis hanya diambil sekali per kunjungan, kecuali diminta ulang.
+function siapkanTemplateIg(jenis, ulang = false){
+  if(ulang || !janjiTemplate[jenis]){
+    delete galatTemplate[jenis];
+    janjiTemplate[jenis] = ambilTemplateIg(jenis).catch(err => {
       console.error(err);
-      galatTemplateIg = err;
-      janjiTemplateIg = null;
-      aturTemplate({});
+      galatTemplate[jenis] = err;
+      delete janjiTemplate[jenis];
       return null;
     });
   }
-  return janjiTemplateIg;
+  return janjiTemplate[jenis];
 }
 
+// Template yang dipakai untuk membuat story jenis tertentu, dengan cadangan
+// template perpindahan jadwal sementara.
+async function templateUntuk(jenis){
+  const t = await siapkanTemplateIg(jenis);
+  if(t?.gambar) return { t, jenis };
+  if(jenis !== 'sementara'){
+    const c = await siapkanTemplateIg('sementara');
+    if(c?.gambar) return { t: c, jenis: 'sementara', cadangan: true };
+  }
+  return null;
+}
+
+// Contoh isi pratinjau tiap sub-tab, satu perubahan saja.
 const CONTOH_STORY = {
-  judul: 'Jadwal Perpindahan Sementara',
-  isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Akuntansi Keuangan Menengah I KP B*, '
-    + 'khusus pada *Kamis, 2 Oktober 2026*, perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
-  daftar: [{
-    judul: 'Akuntansi Keuangan Menengah I KP B',
-    baris: [
-      { teks: 'Semula: **Kam, 2 Okt · 13.00 - 14.40 · FG 06.02**', gaya: 'lembut' },
-      { teks: 'Menjadi: **Jum, 3 Okt · 17.00 - 18.40 · EA 02.05**', gaya: 'tebal' },
-    ],
-  }],
+  sementara: {
+    judul: 'Jadwal Perpindahan Sementara',
+    isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Akuntansi Keuangan Menengah I KP B*, '
+      + 'khusus pada *Kamis, 2 Oktober 2026*, perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
+    daftar: [{ judul: 'Akuntansi Keuangan Menengah I KP B', baris: [
+      { teks: 'Semula: **Kam, 2 Okt · 13.00 - 14.40 · FG 06.02**' },
+      { teks: 'Menjadi: **Jum, 3 Okt · 17.00 - 18.40 · EA 02.05**' },
+    ] }],
+  },
+  permanen: {
+    judul: 'Jadwal Perpindahan Permanen',
+    isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Analisis dan Visualisasi Data Bisnis KP B1*, '
+      + 'ruangan akan dipindah *PERMANEN* sebagai berikut:',
+    daftar: [{ baris: [
+      { teks: 'Semula: **Senin, 18.30 - 20.20 di EA 01.03**' },
+      { teks: 'Menjadi: **Senin, 18.30 - 20.20 di EA 02.05**' },
+    ] }],
+  },
+  ruang: {
+    judul: 'Perpindahan Ruang Sementara',
+    isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Akuntansi Keuangan Menengah I KP B*, '
+      + 'khusus pada *Kamis, 2 Oktober 2026*, ruangan perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
+    daftar: [{ judul: 'Akuntansi Keuangan Menengah I KP B', baris: [
+      { teks: 'Semula: **Kam, 2 Okt · 13.00 - 14.40 · FG 06.02**' },
+      { teks: 'Menjadi: **ruang TF 02.02**' },
+    ] }],
+  },
+  online: {
+    judul: 'Perkuliahan Online',
+    isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Akuntansi Keuangan Menengah I KP B*, '
+      + 'khusus pada *Kamis, 2 Oktober 2026*, perkuliahan dilaksanakan secara *ONLINE* sebagai berikut:',
+    daftar: [{ judul: 'Akuntansi Keuangan Menengah I KP B', baris: [
+      { teks: 'Kam, 2 Okt · 13.00 - 14.40 · FG 06.02' },
+      { teks: '**Online (daring)**' },
+    ] }],
+  },
 };
 
 // Posisi dan ukuran keempat elemen yang sedang diatur di tab PR. Posisi
@@ -1519,7 +1592,7 @@ let elemenPR = lengkapiElemen({});
 
 // Isian ukuran dan spasi per elemen, dengan id tpl-<elemen>-<kolom>.
 const ISIAN_TIPOGRAFI = ['header', 'body', 'daftar', 'footer']
-  .flatMap(n => ['ukuran', 'spasiBaris', 'spasiHuruf', 'tebal'].map(k => [n, k]));
+  .flatMap(n => ['ukuran', 'spasiBaris', 'spasiHuruf', 'tebal', 'garis'].map(k => [n, k]));
 
 // Seluruh pengaturan di tab PR. Bentuknya sama dengan yang disimpan di
 // templateig/story dan yang diterima aturTemplate().
@@ -1530,7 +1603,9 @@ function pengaturanDariIsian(){
   };
   const elemen = lengkapiElemen(elemenPR);
   for(const [n, k] of ISIAN_TIPOGRAFI) elemen[n][k] = angka(`tpl-${n}-${k}`, elemen[n][k]);
+  for(const n of NAMA_ELEMEN_PR) elemen[n].warnaGaris = $(`tpl-${n}-warnaGaris`).value;
   return {
+    garisTegas: angka('tplGarisTegas', TEMPLATE.garisTegasBawaan),
     // Ukuran disimpan dalam satuan Canva (pt); lihat elemenDariMeta.
     satuanUkuran: SATUAN_UKURAN,
     elemen,
@@ -1545,11 +1620,13 @@ function pengaturanDariIsian(){
 
 // Kotak warna dan kotak kode hex selalu seiring: mengubah salah satunya
 // mengubah yang lain. Kode hex yang belum lengkap diabaikan sampai benar.
+const NAMA_ELEMEN_PR = ['header', 'body', 'daftar', 'footer'];
 const PASANGAN_WARNA = [
   ['tplWarnaPrimer', 'tplHexPrimer'],
   ['tplWarnaSekunder', 'tplHexSekunder'],
   ['tplWarnaTegasIsi', 'tplHexTegasIsi'],
   ['tplWarnaTegasGaris', 'tplHexTegasGaris'],
+  ...NAMA_ELEMEN_PR.map(n => [`tpl-${n}-warnaGaris`, `tpl-${n}-hexGaris`]),
 ];
 function aturWarna(idWarna, idHex, nilai){
   $(idWarna).value = nilai;
@@ -1562,6 +1639,8 @@ function isiIsianPengaturan(m){
   const f = ambil('font', 'fontBawaan'), w = ambil('warna', 'warnaBawaan');
   elemenPR = elemenDariMeta(m);
   for(const [n, k] of ISIAN_TIPOGRAFI) $(`tpl-${n}-${k}`).value = elemenPR[n][k];
+  for(const n of NAMA_ELEMEN_PR) aturWarna(`tpl-${n}-warnaGaris`, `tpl-${n}-hexGaris`, elemenPR[n].warnaGaris);
+  $('tplGarisTegas').value = m?.garisTegas ?? TEMPLATE.garisTegasBawaan;
   pilihFont('tplFontPrimer', f.primer); pilihFont('tplFontSekunder', f.sekunder);
   aturWarna('tplWarnaPrimer', 'tplHexPrimer', w.primer);
   aturWarna('tplWarnaSekunder', 'tplHexSekunder', w.sekunder);
@@ -1638,7 +1717,7 @@ async function gambarPratinjauTemplate(){
   if(!ada) return;
   const nomor = ++nomorPratinjau;
   // Cukup satu perubahan sebagai contoh, seperti pengumuman pada umumnya.
-  const teks = keTeksStory(CONTOH_STORY);
+  const teks = keTeksStory(CONTOH_STORY[jenisPR]);
   const [kanvas] = await buatStory(teks);
   if(nomor !== nomorPratinjau) return;
   $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
@@ -1646,9 +1725,17 @@ async function gambarPratinjauTemplate(){
 }
 
 async function segarkanTabTemplate(ulang = false){
-  const [t] = await Promise.all([siapkanTemplateIg(ulang), isiPilihanFont()]);
+  const jenis = jenisPR;
+  document.querySelectorAll('[data-jenis-pr]').forEach(b =>
+    b.classList.toggle('active', b.dataset.jenisPr === jenis));
+  $('tplJudulJenis').textContent = JENIS_TEMPLATE[jenis].nama;
+  const [t] = await Promise.all([siapkanTemplateIg(jenis, ulang), isiPilihanFont()]);
+  if(jenis !== jenisPR) return;   // sub-tab sudah berganti selagi memuat
+  templateIg = t;
+  const galatTemplateIg = galatTemplate[jenis];
   const m = t?.meta || {};
   const unggahan = !!t?.gambar;
+  const cadangan = !unggahan && jenis !== 'sementara' && !galatTemplateIg;
   let waktu = '';
   if(m.diunggah?.toDate){
     const d = m.diunggah.toDate();
@@ -1662,7 +1749,9 @@ async function segarkanTabTemplate(ulang = false){
         + (galatTemplateIg.code ? ` (kode: ${esc(galatTemplateIg.code)})` : '')
         + (galatTemplateIg.code === 'permission-denied'
           ? '. Pastikan isi firestore.rules terbaru sudah ditempel dan di-Publish.' : '')
-      : '<strong>Belum ada template.</strong> Story Instagram belum bisa dibuat sampai template diunggah.';
+      : cadangan
+        ? '<strong>Belum ada template khusus untuk jenis ini.</strong> Sampai diunggah, story jenis ini memakai template Perpindahan jadwal sementara. Unggah template baru, atau salin dari jenis lain di bawah.'
+        : '<strong>Belum ada template.</strong> Story Instagram belum bisa dibuat sampai template diunggah.';
   $('tplUnduh').hidden = !unggahan;
   $('tplLabelUnggah').firstChild.textContent = unggahan ? 'Ganti template ' : 'Upload template ';
   isiIsianPengaturan(m);
@@ -1676,7 +1765,7 @@ function pratinjauDariIsian(){
   jedaPratinjau = setTimeout(gambarPratinjauTemplate, 400);
 }
 
-[...ISIAN_TIPOGRAFI.map(([n, k]) => `tpl-${n}-${k}`), 'tplFooterTeks']
+[...ISIAN_TIPOGRAFI.map(([n, k]) => `tpl-${n}-${k}`), 'tplFooterTeks', 'tplGarisTegas']
   .forEach(id => $(id).addEventListener('input', pratinjauDariIsian));
 
 ['tplFontPrimer', 'tplFontSekunder'].forEach(id => $(id).addEventListener('change', () => {
@@ -1714,13 +1803,15 @@ $('tplSimpan').addEventListener('click', async () => {
     if(!(e.ukuran >= 8 && e.ukuran <= 150)) salah.push(`Ukuran ${n} harus antara 8 dan 150 pt.`);
     if(!(e.spasiBaris >= 0.5 && e.spasiBaris <= 3)) salah.push(`Spasi baris ${n} harus antara 0.5 dan 3.`);
     if(!(e.spasiHuruf >= -200 && e.spasiHuruf <= 800)) salah.push(`Spasi huruf ${n} harus antara -200 dan 800.`);
+    if(!(e.garis >= 0 && e.garis <= 40)) salah.push(`Garis tepi ${n} harus antara 0 dan 40 px.`);
   }
+  if(!(atur.garisTegas >= 0 && atur.garisTegas <= 40)) salah.push('Garis tepi teks perpindahan harus antara 0 dan 40 px.');
   if(PASANGAN_WARNA.some(([, h]) => $(h).classList.contains('op-salah-isi'))) salah.push('Ada kode warna yang belum benar. Tulis enam digit, misalnya #13192f.');
   if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
 
   try{
-    await setDoc(doc(db, 'templateig', 'story'), atur, { merge: true });
-    await catat('ubah', 'template story', 'Pengaturan template story diubah',
+    await setDoc(doc(db, 'templateig', dokTemplate(jenisPR)), atur, { merge: true });
+    await catat('ubah', 'template story', `Pengaturan template story diubah: ${JENIS_TEMPLATE[jenisPR].nama}`,
       `font ${font.primer} / ${font.sekunder}; ukuran ${elemen.header.ukuran}/${elemen.body.ukuran}/${elemen.daftar.ukuran}/${elemen.footer.ukuran}; `
       + `warna ${warna.primer} / ${warna.sekunder}; footer "${footerTeks.slice(0, 60)}"`);
     await segarkanTabTemplate(true);
@@ -1739,7 +1830,7 @@ $('tplPengaturanAwal').addEventListener('click', () => {
 });
 
 $('tplUnduh').addEventListener('click', async () => {
-  const t = await siapkanTemplateIg();
+  const t = await siapkanTemplateIg(jenisPR);
   if(t?.gambar && t.dataUrl){
     // Tidak memakai fetch(dataUrl), karena connect-src halaman ini tidak
     // mengizinkan data:.
@@ -1748,13 +1839,17 @@ $('tplUnduh').addEventListener('click', async () => {
     const byte = new Uint8Array(biner.length);
     for(let i = 0; i < biner.length; i++) byte[i] = biner.charCodeAt(i);
     const tipe = (kepala.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
-    unduhBlobSebagai(new Blob([byte], { type: tipe }), 'template-story-kafbe.jpg');
+    unduhBlobSebagai(new Blob([byte], { type: tipe }), `template-story-kafbe-${jenisPR}.jpg`);
   }
 });
 
 $('tplBerkas').addEventListener('change', async e => {
   const el = $('pesanTemplate');
   const berkas = e.target.files[0];
+  // Jenisnya dikunci di awal, supaya berpindah sub-tab selagi mengunggah
+  // tidak membuat template tersimpan di jenis yang salah.
+  const jenisUnggah = jenisPR;
+  const dok = dokTemplate(jenisUnggah);
   e.target.value = '';
   if(!berkas) return;
   // Sebagian sistem tidak mengisi jenis berkas, jadi ekstensinya ikut dilihat.
@@ -1806,10 +1901,10 @@ $('tplBerkas').addEventListener('change', async e => {
     // belum selesai, template lama tetap dipakai utuh.
     for(let i = 0; i < potongan.length; i++){
       langkah = `menyimpan bagian ${i + 1} dari ${potongan.length}`;
-      await setDoc(doc(db, 'templateig', `story-potongan-${i}`), { isi: potongan[i] });
+      await setDoc(doc(db, 'templateig', `${dok}-potongan-${i}`), { isi: potongan[i] });
     }
     langkah = 'menyimpan info template';
-    await setDoc(doc(db, 'templateig', 'story'), {
+    await setDoc(doc(db, 'templateig', dok), {
       potongan: potongan.length,
       ...pengaturanDariIsian(),
       namaBerkas: berkas.name,
@@ -1818,10 +1913,10 @@ $('tplBerkas').addEventListener('change', async e => {
     });
     langkah = 'menghapus sisa template lama';
     for(let i = potongan.length; i < lama; i++){
-      await deleteDoc(doc(db, 'templateig', `story-potongan-${i}`));
+      await deleteDoc(doc(db, 'templateig', `${dok}-potongan-${i}`));
     }
 
-    await catat('ubah', 'template story', 'Template story Instagram diganti', berkas.name);
+    await catat('ubah', 'template story', `Template story diganti: ${JENIS_TEMPLATE[jenisUnggah].nama}`, berkas.name);
     langkah = 'memuat ulang template';
     await segarkanTabTemplate(true);
     $('statusSimpan').hidden = true;
@@ -1842,6 +1937,69 @@ $('tplBerkas').addEventListener('change', async e => {
   }
 });
 
+
+/* ---------- Sub-tab jenis pengumuman dan salin pengaturan ---------- */
+
+document.querySelectorAll('[data-jenis-pr]').forEach(b => b.addEventListener('click', () => {
+  if(jenisPR === b.dataset.jenisPr) return;
+  jenisPR = b.dataset.jenisPr;
+  bersihkanPesan($('pesanTemplate'));
+  isiPilihanSalin();
+  segarkanTabTemplate();
+}));
+
+function isiPilihanSalin(){
+  $('tplSalinDari').innerHTML = Object.entries(JENIS_TEMPLATE)
+    .filter(([k]) => k !== jenisPR)
+    .map(([k, v]) => `<option value="${k}">${esc(v.nama)}</option>`).join('');
+}
+isiPilihanSalin();
+
+/*
+  Menyalin template (gambar dan seluruh pengaturannya) dari jenis lain ke
+  sub-tab yang sedang dibuka, supaya tiap jenis tidak perlu diatur dari nol.
+*/
+$('tplSalin').addEventListener('click', async () => {
+  const el = $('pesanTemplate');
+  const dari = $('tplSalinDari').value;
+  const ke = jenisPR;
+  const sumber = await siapkanTemplateIg(dari);
+  if(!sumber?.gambar){
+    pesan(el, `${esc(JENIS_TEMPLATE[dari].nama)} belum punya template untuk disalin.`, 'salah');
+    return;
+  }
+  if(!confirm(`Salin template dan seluruh pengaturan ${JENIS_TEMPLATE[dari].nama} ke ${JENIS_TEMPLATE[ke].nama}?`
+    + (templateIg?.gambar ? '\n\nTemplate dan pengaturan yang sekarang akan tertimpa.' : ''))) return;
+
+  try{
+    status('Menyalin template…', 'sibuk');
+    const dok = dokTemplate(ke);
+    const lama = (await siapkanTemplateIg(ke))?.meta?.potongan || 0;
+    const { potongan: jumlah, ...pengaturan } = sumber.meta;
+    const potongan = [];
+    for(let i = 0; i < sumber.dataUrl.length; i += UKURAN_POTONGAN) potongan.push(sumber.dataUrl.slice(i, i + UKURAN_POTONGAN));
+    for(let i = 0; i < potongan.length; i++){
+      await setDoc(doc(db, 'templateig', `${dok}-potongan-${i}`), { isi: potongan[i] });
+    }
+    await setDoc(doc(db, 'templateig', dok), {
+      ...pengaturan,
+      potongan: potongan.length,
+      oleh: pemakai.nama || pemakai.email || '',
+      diunggah: serverTimestamp(),
+    });
+    for(let i = potongan.length; i < lama; i++) await deleteDoc(doc(db, 'templateig', `${dok}-potongan-${i}`));
+    await catat('ubah', 'template story', `Template story disalin ke ${JENIS_TEMPLATE[ke].nama}`,
+      `Dari ${JENIS_TEMPLATE[dari].nama}`);
+    $('statusSimpan').hidden = true;
+    await segarkanTabTemplate(true);
+    pesan(el, `Tersalin dari ${esc(JENIS_TEMPLATE[dari].nama)}. Sesuaikan lalu tekan Simpan pengaturan bila perlu.`, 'benar');
+  }catch(err){
+    console.error(err);
+    status('Gagal menyalin template.', 'salah');
+    pesan(el, 'Gagal menyalin template: ' + esc(err.message)
+      + (err.code ? ` <span class="op-samar">(kode: ${esc(err.code)})</span>` : ''), 'salah');
+  }
+});
 
 function periksaPerubahan(isi){
   const salah = [];
