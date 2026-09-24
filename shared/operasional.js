@@ -1619,14 +1619,6 @@ async function contohFont(id){
    posisinya menjadi posisi awal untuk semua story berikutnya setelah
    disimpan. Contoh teksnya memakai teks footer yang sedang diisi.
 */
-const CONTOH_DAFTAR_KEDUA = {
-  judul: 'Ekonomi Mikro KP A',
-  baris: [
-    { teks: 'Senin, 5 Okt · 07.30 - 10.00 · TC 2.1', gaya: 'lembut' },
-    { teks: 'Online (daring)', gaya: 'tebal' },
-  ],
-};
-
 const penyuntingPR = pasangPenyunting($('tplKanvas'), {
   ambil: () => elemenPR,
   ubah: e => { elemenPR = e; },
@@ -1642,7 +1634,8 @@ async function gambarPratinjauTemplate(){
   $('tplKosong').hidden = ada;
   if(!ada) return;
   const nomor = ++nomorPratinjau;
-  const teks = keTeksStory({ ...CONTOH_STORY, daftar: [...CONTOH_STORY.daftar, CONTOH_DAFTAR_KEDUA] });
+  // Cukup satu perubahan sebagai contoh, seperti pengumuman pada umumnya.
+  const teks = keTeksStory(CONTOH_STORY);
   const [kanvas] = await buatStory(teks);
   if(nomor !== nomorPratinjau) return;
   $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
