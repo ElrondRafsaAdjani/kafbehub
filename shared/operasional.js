@@ -2372,14 +2372,20 @@ $('msTampilkan').addEventListener('click', () => {
 
   const baris = massalKandidat.map(k => {
     const j = data.jadwal.find(x => x.id === k.jadwalId);
-    return `<label class="op-centang-baris">
-      <input type="checkbox" data-massal="${esc(k.jadwalId)}" checked />
-      <span>
-        <strong>${esc(namaMatkul(j.kode) || j.kode)}</strong> KP ${esc(j.kp)}
-        <span class="op-samar">· ${esc(j.hari)} ${esc(rentangJam(j.mulai, j.selesai))} · ${esc(j.ruang || 'tanpa ruang')}
-        · ${k.tanggalList.length} tanggal</span>
-      </span>
-    </label>`;
+    // Kotak catatan sengaja di luar <label>, supaya mengetik di dalamnya
+    // tidak ikut mencentang atau melepas centang kelasnya.
+    return `<div class="op-massal-baris">
+      <label class="op-centang-baris">
+        <input type="checkbox" data-massal="${esc(k.jadwalId)}" checked />
+        <span>
+          <strong>${esc(namaMatkul(j.kode) || j.kode)}</strong> KP ${esc(j.kp)}
+          <span class="op-samar">· ${esc(j.hari)} ${esc(rentangJam(j.mulai, j.selesai))} · ${esc(j.ruang || 'tanpa ruang')}
+          · ${k.tanggalList.length} tanggal</span>
+        </span>
+      </label>
+      <input type="text" class="op-massal-catatan" data-catatan-massal="${esc(k.jadwalId)}" maxlength="160"
+        placeholder="Catatan khusus kelas ini (opsional)" aria-label="Catatan khusus ${esc(namaMatkul(j.kode) || j.kode)} KP ${esc(j.kp)}" />
+    </div>`;
   }).join('');
 
   const jumlahTercentang = massalKandidat.length;
@@ -2404,6 +2410,8 @@ $('msBuat').addEventListener('click', async () => {
   const el = $('pesanMassal');
   const tipe = $('msTipe').value;
   const catatan = $('msCatatan').value.trim();
+  // Catatan khusus per kelas menggantikan catatan umum bila diisi.
+  const catatanKelas = id => ($('msDaftar').querySelector(`[data-catatan-massal="${CSS.escape(id)}"]`)?.value || '').trim() || catatan;
   const terpilih = [...$('msDaftar').querySelectorAll('[data-massal]:checked')].map(c => c.dataset.massal);
 
   if(terpilih.length === 0){ pesan(el, 'Belum ada kelas yang dicentang.', 'salah'); return; }
@@ -2448,7 +2456,7 @@ $('msBuat').addEventListener('click', async () => {
       for(const { j, tgl } of akanDibuat.slice(i, i + BATAS)){
         batch.set(doc(collection(db, 'perubahan')), {
           tipe, jadwalId: j.id, kode: j.kode, kp: j.kp,
-          tanggal: tgl, catatan,
+          tanggal: tgl, catatan: catatanKelas(j.id),
           tanggalBaru: '', mulaiBaru: '', selesaiBaru: '', ruangBaru: '',
           kelompok,
         });
@@ -2464,7 +2472,8 @@ $('msBuat').addEventListener('click', async () => {
     $('msCatatan').value = '';
     await muatSemua();
     await terbitkan();
-    pesan(el, `Selesai. ${ringkas}.`, 'benar');
+    pesan(el, `Selesai. ${esc(ringkas)}. <button type="button" class="op-mini" id="msStory">Buat story Instagram</button>`, 'benar');
+    $('msStory').addEventListener('click', () => bukaIg(data.perubahan.filter(p => p.kelompok === kelompok)));
   }catch(err){
     console.error(err);
     pesan(el, 'Gagal membuat: ' + esc(err.message), 'salah');

@@ -561,3 +561,9 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 .op-penanda{ margin-top:10px; font-size:0.8rem; color:var(--ink-soft); }
 .op-penanda summary{ cursor:pointer; font-weight:700; color:var(--owl-dark2); }
 .op-penanda ul{ margin:8px 0 0 18px; line-height:1.7; }
+
+/* Baris kelas pada pembuatan massal, dengan kotak catatan khusus. */
+.op-massal-baris{ display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--line); padding-right:12px; flex-wrap:wrap; }
+.op-massal-baris:last-child{ border-bottom:none; }
+.op-massal-baris .op-centang-baris{ flex:1 1 320px; border-bottom:none; }
+.op-massal-catatan{ flex:1 1 220px; max-width:320px; padding:7px 10px !important; font-size:0.82rem !important; }

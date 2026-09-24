@@ -201,6 +201,14 @@ Semua kelas yang jatuh pada rentang itu muncul sebagai daftar centang, sudah
 tercentang semua. **Hapus centang** pada kelas yang tidak terdampak, lalu tekan
 **Buat sekaligus**.
 
+**Catatan umum** dipakai semua kelas. Bila satu kelas butuh catatan lain,
+isi **catatan khusus** di baris kelas itu; catatan khusus menggantikan
+catatan umum untuk kelas tersebut saja.
+
+Setelah selesai, tombol **Buat story Instagram** muncul untuk langsung
+membuat story dari seluruh perubahan yang baru dibuat. Tombol **Story IG** di
+kotak "Hasil pembuatan massal" melakukan hal yang sama kapan pun.
+
 Beberapa hal yang otomatis dijaga:
 
 - Kelas yang **sudah punya perubahan sendiri** pada tanggal itu dilewati, tidak
