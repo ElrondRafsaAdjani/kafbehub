@@ -19,8 +19,8 @@
 
   ATURAN PENULISAN
     - *kata*          ditulis dengan warna sekunder
-    - **kata**        ditulis tegas: isi warna sekunder, tebal, bergaris tepi
-                      warna primer (untuk jadwal yang berubah)
+    - **kata**        ditulis tegas: tebal, dengan warna isi dan warna garis
+                      tepi sendiri (untuk jadwal yang berubah)
     - baris kosong    di daftar kelas memisahkan kelas
 
   TEMPLATE DAN PENGATURAN
@@ -62,7 +62,9 @@ export const TEMPLATE = {
     footer: { x: 15, y: 80, w: 70, ukuran: 54.7, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400 },
   },
   fontBawaan:   { primer: 'Lilita One', sekunder: 'Fredoka' },
-  warnaBawaan:  { primer: '#13192f', sekunder: '#be8f41' },
+  // tegasIsi dan tegasGaris: isi dan garis tepi teks tegas (**...**), yaitu
+  // jadwal yang berubah. Awalnya sama dengan warna sekunder dan primer.
+  warnaBawaan:  { primer: '#13192f', sekunder: '#be8f41', tegasIsi: '#be8f41', tegasGaris: '#13192f' },
   footerTeksBawaan: '',
 };
 
@@ -233,8 +235,8 @@ async function siapkanFont(){
 
 /*
   *kata*   : warna sekunder
-  **kata** : "tegas", yaitu isi warna sekunder, tebal, dan bergaris tepi
-             warna primer. Dipakai untuk jadwal yang berubah di daftar kelas.
+  **kata** : "tegas", yaitu tebal dengan warna isi dan warna garis tepi
+             sendiri (diatur di tab PR). Dipakai untuk jadwal yang berubah.
 */
 function tokenKaya(teks){
   const out = [];
@@ -291,12 +293,12 @@ function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, jarak = 0, blok = null){
     if(k.spasi) x += lebarSpasi;
     const tegas = k.tegas && blok;
     ctx.font = tegas ? blok.fontTegas : fontBiasa;
-    ctx.fillStyle = (k.sorot || k.tegas) ? tpl.warna.sekunder : tpl.warna.primer;
+    ctx.fillStyle = k.tegas ? tpl.warna.tegasIsi : k.sorot ? tpl.warna.sekunder : tpl.warna.primer;
     // Garis tepi digambar lebih dulu lalu ditimpa isi hurufnya, jadi yang
     // terlihat hanya bagian luar garis, seperti outline di Canva.
     const tulis = (t, xt) => {
       if(tegas){
-        ctx.strokeStyle = tpl.warna.primer;
+        ctx.strokeStyle = tpl.warna.tegasGaris;
         ctx.lineWidth = blok.garisTepi;
         ctx.lineJoin = 'round';
         ctx.strokeText(t, xt, y);

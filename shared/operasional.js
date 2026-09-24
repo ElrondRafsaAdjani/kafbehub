@@ -1535,7 +1535,10 @@ function pengaturanDariIsian(){
     satuanUkuran: SATUAN_UKURAN,
     elemen,
     font: { primer: $('tplFontPrimer').value, sekunder: $('tplFontSekunder').value },
-    warna: { primer: $('tplWarnaPrimer').value, sekunder: $('tplWarnaSekunder').value },
+    warna: {
+      primer: $('tplWarnaPrimer').value, sekunder: $('tplWarnaSekunder').value,
+      tegasIsi: $('tplWarnaTegasIsi').value, tegasGaris: $('tplWarnaTegasGaris').value,
+    },
     footerTeks: $('tplFooterTeks').value.trim(),
   };
 }
@@ -1545,6 +1548,8 @@ function pengaturanDariIsian(){
 const PASANGAN_WARNA = [
   ['tplWarnaPrimer', 'tplHexPrimer'],
   ['tplWarnaSekunder', 'tplHexSekunder'],
+  ['tplWarnaTegasIsi', 'tplHexTegasIsi'],
+  ['tplWarnaTegasGaris', 'tplHexTegasGaris'],
 ];
 function aturWarna(idWarna, idHex, nilai){
   $(idWarna).value = nilai;
@@ -1560,6 +1565,8 @@ function isiIsianPengaturan(m){
   pilihFont('tplFontPrimer', f.primer); pilihFont('tplFontSekunder', f.sekunder);
   aturWarna('tplWarnaPrimer', 'tplHexPrimer', w.primer);
   aturWarna('tplWarnaSekunder', 'tplHexSekunder', w.sekunder);
+  aturWarna('tplWarnaTegasIsi', 'tplHexTegasIsi', w.tegasIsi);
+  aturWarna('tplWarnaTegasGaris', 'tplHexTegasGaris', w.tegasGaris);
   $('tplFooterTeks').value = typeof m?.footerTeks === 'string' ? m.footerTeks : TEMPLATE.footerTeksBawaan;
 }
 

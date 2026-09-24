@@ -739,7 +739,7 @@
           </div>
 
           <h4 class="op-subjudul">Warna</h4>
-          <p class="op-catatan">Warna primer untuk seluruh teks biasa. Warna sekunder untuk kata yang diapit tanda bintang, misalnya <code>*SEMENTARA*</code>, dan nama kelas di daftar. Jadwal yang berubah (diapit dua bintang, <code>**…**</code>) ditulis tebal dengan isi warna sekunder dan garis tepi warna primer. Kode hex bisa diketik langsung.</p>
+          <p class="op-catatan">Warna primer untuk seluruh teks biasa. Warna sekunder untuk kata yang diapit tanda bintang, misalnya <code>*SEMENTARA*</code>, dan nama kelas di daftar. Kode hex bisa diketik langsung.</p>
           <div class="op-baris">
             <div class="op-field op-sempit"><label for="tplHexPrimer">Warna primer</label>
               <span class="op-warna"><input type="color" id="tplWarnaPrimer" aria-label="Pilih warna primer" />
@@ -747,6 +747,15 @@
             <div class="op-field op-sempit"><label for="tplHexSekunder">Warna sekunder</label>
               <span class="op-warna"><input type="color" id="tplWarnaSekunder" aria-label="Pilih warna sekunder" />
               <input type="text" id="tplHexSekunder" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
+          </div>
+          <p class="op-catatan">Warna teks perpindahan, yaitu jadwal yang berubah (diapit dua bintang, <code>**…**</code>), yang ditulis tebal dengan garis tepi.</p>
+          <div class="op-baris">
+            <div class="op-field op-sempit"><label for="tplHexTegasIsi">Perpindahan · isi</label>
+              <span class="op-warna"><input type="color" id="tplWarnaTegasIsi" aria-label="Pilih warna isi teks perpindahan" />
+              <input type="text" id="tplHexTegasIsi" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
+            <div class="op-field op-sempit"><label for="tplHexTegasGaris">Perpindahan · garis tepi</label>
+              <span class="op-warna"><input type="color" id="tplWarnaTegasGaris" aria-label="Pilih warna garis tepi teks perpindahan" />
+              <input type="text" id="tplHexTegasGaris" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
           </div>
 
           <h4 class="op-subjudul">Posisi</h4>

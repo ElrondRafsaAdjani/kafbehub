@@ -242,7 +242,7 @@ KASIH):
   tingginya. Mengeklik elemen di pratinjau langsung membuka isian tulisannya
 - Kata yang diapit tanda bintang, misalnya `*PERMANEN*`, memakai warna
   sekunder. Yang diapit dua bintang, misalnya `**TF 02.02**`, ditulis tegas:
-  tebal, isi warna sekunder, dan bergaris tepi warna primer. Jadwal semula
+  tebal, dengan warna isi dan warna garis tepi teks perpindahan dari tab PR. Jadwal semula
   dan jadwal baru di daftar kelas otomatis ditulis tegas. Di daftar kelas,
   baris kosong memisahkan kelas
 - Posisi yang digeser di sini hanya berlaku untuk story itu. **Kembalikan
@@ -284,9 +284,10 @@ konfirmasi dulu sebelum menimpa).
     tarik pegangan bawah daftar kelas supaya kotaknya lebih tinggi
 - **Teks footer bawaan**, misalnya TERIMA KASIH, tetap bisa diubah di tiap
   story. Kosongkan bila tulisan itu sudah ada di gambar template
-- **Warna** primer untuk seluruh teks biasa dan garis tepi jadwal yang
-  berubah, sekunder untuk kata yang diapit `*...*` dan isi jadwal yang
-  berubah. Kode hex bisa diketik langsung. Saat ini: `#13192f` dan `#be8f41`
+- **Warna** primer untuk seluruh teks biasa, sekunder untuk kata yang
+  diapit `*...*`. **Teks perpindahan** (jadwal yang berubah, `**...**`)
+  punya dua warna sendiri: warna isi dan warna garis tepi. Awalnya sama
+  dengan warna sekunder dan primer. Kode hex bisa diketik langsung
 - **Posisi** keempat elemen diatur dengan menyeretnya di pratinjau, sama
   seperti di jendela story. Yang disimpan di sini menjadi posisi awal semua
   story
