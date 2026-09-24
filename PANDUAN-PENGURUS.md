@@ -87,9 +87,9 @@ Punya akun saja **belum cukup**. Wewenangnya ditentukan di sini.
 
 1. Buka <https://kafbehub.vercel.app/operasional>
 2. Masuk dengan akun tadi
-3. Tab **Excel** → unggah berkas Informasi Kelas Asistensi semester berjalan
+3. Tab **Upload dan Download** → unggah berkas Informasi Kelas Asistensi semester berjalan
 
-Cara kerjanya dijelaskan di bagian **Excel** di bawah. Perubahan sementara
+Cara kerjanya dijelaskan di bagian **Upload dan Download** di bawah. Perubahan sementara
 tidak ada di berkas itu, jadi masukkan manual lewat tabnya sendiri.
 
 ---
@@ -212,28 +212,44 @@ kotak **"Hasil pembuatan massal"**. Satu tombol di situ menghapus seluruh
 anggotanya sekaligus. Tanpa itu, membatalkan berarti menghapus puluhan baris
 satu per satu, yaitu persoalan yang justru ingin dihindari.
 
-#### Gambar untuk Instagram (post dan story)
+#### Story Instagram
 
-Perubahan sementara bisa langsung dijadikan gambar pengumuman untuk
-Instagram KAFBE. Situs ini tidak mengunggah apa pun ke Instagram. Gambarnya
-diunduh atau disalin, lalu diunggah sendiri.
+Perubahan jadwal bisa langsung dijadikan story pengumuman untuk Instagram
+KAFBE, memakai template story KAFBE. Daftar kelas yang berubah ditulis
+langsung di story, jadi tidak perlu lagi menempelkan tangkapan layar tabel
+Excel. Situs ini tidak mengunggah apa pun ke Instagram. Gambarnya diunduh
+atau disalin, lalu diunggah sendiri.
 
-1. Centang perubahan yang ingin diumumkan di tabel perubahan. Kotak centang
-   di kepala tabel mencentang semua perubahan yang belum lewat. Bisa juga
-   langsung menekan **Gambar IG** di satu baris, atau di satu kelompok
-   pembuatan massal.
-2. Tekan **Buat gambar Instagram**.
-3. Pilih **Post feed (4:5)** atau **Story / SG (9:16)**.
-4. Tekan **Unduh** atau **Salin**. Di ponsel, **Bagikan** membuka menu
-   bagikan, jadi gambarnya bisa langsung dikirim ke Instagram.
+**Perubahan sementara.** Centang perubahan yang ingin diumumkan, lalu tekan
+**Buat story Instagram**. Kotak centang di kepala tabel mencentang semua
+perubahan yang belum lewat. Bisa juga langsung menekan **Story IG** di satu
+baris, atau di satu kelompok pembuatan massal.
 
-Bila perubahannya terlalu banyak untuk satu gambar, gambarnya dibagi
-otomatis dan diberi nomor (1/3, 2/3, dan seterusnya). Untuk post, unggah
-semuanya sebagai satu carousel.
+**Perpindahan permanen.** Setelah mengubah hari, jam, atau ruang sebuah
+kelas di tab Jadwal Permanen, muncul tombol **Buat story perpindahan
+permanen** yang sudah memuat jadwal lama dan jadwal barunya. Tombol
+**Story IG** di tiap baris tabel juga bisa dipakai, tetapi tanpa jadwal lama.
 
-Tampilan gambar (warna, font, latar, logo, dan teks kaki) diatur di bagian
-`TEMPLATE` pada `shared/gambar-ig.js`. Cara memasang template dari desainer
-dijelaskan di komentar awal berkas itu.
+Di jendela pratinjau, judul dan kalimat pembuka masih bisa disunting. Kata
+yang diapit tanda bintang, misalnya `*PERMANEN*`, ditulis berwarna emas.
+Lalu tekan **Unduh** atau **Salin**. Di ponsel, **Bagikan** membuka menu
+bagikan, jadi gambarnya bisa langsung dikirim ke Instagram. Bila kelasnya
+terlalu banyak untuk satu story, story dibagi otomatis dan diberi nomor.
+
+**Template.** Dikelola di tab **Upload dan Download**:
+
+- **Download template** mengunduh template yang sedang dipakai, untuk
+  disunting desainer
+- **Upload template** memasang gambar 1080 × 1920 (PNG atau JPG). Kosongkan
+  bagian tengah kartu putih, karena judul dan isi ditulis otomatis di situ
+- **Area teks** mengatur di mana judul dan isi ditulis, dalam persen dari
+  ukuran gambar. Pratinjau di sebelahnya menandai area itu dengan garis
+  putus-putus. Tekan **Simpan area** setelah pas
+- **Pakai template bawaan** menghapus template unggahan
+
+Template disimpan di koleksi Firestore `templateig`. Aturan aksesnya ada di
+`firestore.rules`, jadi setelah pembaruan ini isi berkas itu perlu ditempel
+ulang di Firebase Console (langkah 1.4).
 
 ### Pengajar
 
@@ -255,7 +271,12 @@ bentrok.
 > **Data ini tidak tampil ke mahasiswa.** Hanya halaman operasional yang
 > memakainya, dan isinya tidak ikut ditulis ke dokumen yang dibaca pengunjung.
 
-### Excel
+### Upload dan Download
+
+Tab ini berisi dua hal: template story Instagram (dijelaskan di bagian
+**Story Instagram** di atas) dan berkas Excel Informasi Kelas Asistensi.
+
+#### Excel
 
 Tab ini menjembatani berkas **Informasi Kelas Asistensi** yang tiap semester
 disusun pengurus dengan data yang dipakai situs.
@@ -1042,7 +1063,7 @@ yang disimpan atau dihapus, tidak pernah ikut dirangkum ke `publik/terkini`,
 dan aturannya hanya mengizinkan menambah, tidak mengubah maupun menghapus.
 
 Dua koleksi lain juga di luar aliran itu, yaitu `classroom` dan `koordinator`.
-Keduanya diisi lewat tab Excel, tidak pernah ikut dirangkum ke
+Keduanya diisi lewat tab Upload dan Download, tidak pernah ikut dirangkum ke
 `publik/terkini`, dan aturan keamanannya menutup pembacaan untuk siapa pun yang
 bukan admin. Isinya kunci masuk kelas daring dan kontak pribadi pengurus.
 

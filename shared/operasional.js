@@ -13,7 +13,9 @@
 */
 
 import { bacaBerkas, susunBerkas, unduhBlob } from './excel.js';
-import { bukaGambarIg } from './gambar-ig.js';
+import {
+  bukaStory, buatStory, aturTemplate, kanvasLatarBawaan, unduhBlobSebagai, TEMPLATE,
+} from './gambar-ig.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
 
@@ -588,6 +590,7 @@ document.querySelectorAll('.op-tab-btn').forEach(btn => {
     // Catatan log baru diambil saat tabnya benar-benar dibuka. Pengurus yang
     // hanya mengubah satu jadwal tidak perlu ikut menanggung pembacaannya.
     if(btn.dataset.tab === 'log' && !logSudahDimuat) muatLog(false);
+    if(btn.dataset.tab === 'unggahunduh') segarkanTabTemplate();
   });
 });
 
@@ -880,6 +883,7 @@ function gambarJadwal(){
       <td>${esc(j.kp)}</td>
       <td>${esc(j.ruang || '—')}</td>
       <td><div class="op-tombol-baris">
+        <button class="op-mini" data-story-jd="${esc(j.id)}" title="Buat story Instagram perpindahan permanen">Story IG</button>
         <button class="op-mini" data-ubah-jd="${esc(j.id)}">Ubah</button>
         <button class="op-mini op-hapus" data-hapus-jd="${esc(j.id)}">Hapus</button>
       </div></td>
@@ -893,6 +897,11 @@ function gambarJadwal(){
     $('jdSelesai').value = j.selesai; $('jdRuang').value = j.ruang || '';
     modeUbah('formJadwal', true);
     $('jdKode').focus();
+  }));
+
+  t.querySelectorAll('[data-story-jd]').forEach(b => b.addEventListener('click', () => {
+    const j = data.jadwal.find(x => x.id === b.dataset.storyJd);
+    if(j) bukaStoryPermanen(j, null);
   }));
 
   t.querySelectorAll('[data-hapus-jd]').forEach(b => b.addEventListener('click', () => {
@@ -996,6 +1005,18 @@ $('formJadwal').addEventListener('submit', async (e) => {
     bersihkanPesan(el);
     await muatSemua();
     await terbitkan();
+
+    // Jadwal yang pindah hari, jam, atau ruang biasanya perlu diumumkan.
+    // Jadwal lamanya hanya diketahui saat ini, jadi tawarannya muncul di sini.
+    const pindah = lamaJd && (lamaJd.hari !== muatan.hari || lamaJd.mulai !== muatan.mulai
+      || lamaJd.selesai !== muatan.selesai || samakanRuang(lamaJd.ruang) !== samakanRuang(muatan.ruang));
+    if(pindah){
+      const lama = { ...lamaJd };
+      const baru = { ...muatan };
+      pesan(el, 'Jadwal tersimpan. <button type="button" class="op-mini" id="jdStoryBaru">'
+        + 'Buat story perpindahan permanen</button>', 'benar');
+      $('jdStoryBaru').addEventListener('click', () => bukaStoryPermanen(baru, lama));
+    }
   }catch(err){
     console.error(err);
     status('Gagal menyimpan: ' + err.message, 'salah');
@@ -1184,13 +1205,13 @@ function gambarPerubahan(){
                       menyusul:'Menyusul', ruang:'Ganti ruang' }[p.tipe] || p.tipe;
       return `<tr${lewat ? ' style="opacity:.55"' : ''}>
         <td class="op-kolom-centang"><input type="checkbox" data-pilih-pb="${esc(p.id)}"
-          ${igPilih.has(p.id) ? 'checked' : ''} aria-label="Pilih untuk gambar Instagram" /></td>
+          ${igPilih.has(p.id) ? 'checked' : ''} aria-label="Pilih untuk story Instagram" /></td>
         <td>${esc(tanggalPanjang(p.tanggal))}${lewat ? '<br><span class="op-samar">sudah lewat</span>' : ''}</td>
         <td><span class="op-lencana ${esc(p.tipe)}">${esc(label)}</span></td>
         <td>${esc(p.kode)} KP ${esc(p.kp)}${j ? '' : '<br><span class="op-samar">kelas sudah dihapus</span>'}</td>
         <td>${ket}</td>
         <td><div class="op-tombol-baris">
-          <button class="op-mini" data-ig-pb="${esc(p.id)}" title="Buat gambar Instagram untuk perubahan ini">Gambar IG</button>
+          <button class="op-mini" data-ig-pb="${esc(p.id)}" title="Buat story Instagram untuk perubahan ini">Story IG</button>
           <button class="op-mini" data-ubah-pb="${esc(p.id)}">Ubah</button>
           <button class="op-mini op-hapus" data-hapus-pb="${esc(p.id)}">Hapus</button>
         </div></td>
@@ -1247,12 +1268,17 @@ function gambarPerubahan(){
 }
 
 /* ============================================================
-   7b-2. Gambar Instagram
+   7b-2. Story Instagram
    ============================================================
 
-   Perubahan yang dicentang disusun menjadi kalimat pendek untuk mahasiswa,
-   lalu diserahkan ke shared/gambar-ig.js untuk ditempel ke template post
-   atau story. Tampilan gambarnya sendiri diatur di berkas itu.
+   Perubahan yang dicentang, atau jadwal permanen yang baru dipindah, disusun
+   menjadi kalimat pengumuman untuk mahasiswa, lalu diserahkan ke
+   shared/gambar-ig.js untuk ditulis di template story. Tampilan gambarnya
+   sendiri diatur di berkas itu, dan template-nya dikelola di tab
+   "Upload dan Download".
+
+   Kalimat yang disusun di sini hanya usulan awal. Judul dan kalimat
+   pembukanya masih bisa disunting di jendela pratinjau sebelum diunduh.
 */
 
 const igPilih = new Set();
@@ -1260,10 +1286,10 @@ const igPilih = new Set();
 function perbaruiBilahIg(){
   const n = igPilih.size;
   $('igDariCentang').disabled = n === 0;
-  $('igDariCentang').textContent = n ? `Buat gambar Instagram (${n})` : 'Buat gambar Instagram';
+  $('igDariCentang').textContent = n ? `Buat story Instagram (${n})` : 'Buat story Instagram';
   $('igJumlahCentang').textContent = n
     ? `${n} perubahan dicentang.`
-    : 'Centang perubahan untuk dijadikan gambar Instagram (post atau story).';
+    : 'Centang perubahan untuk dijadikan story Instagram.';
 }
 
 $('igDariCentang').addEventListener('click', () => {
@@ -1278,58 +1304,366 @@ function tanggalRingkas(iso){
   return `${HARI_PENDEK[hariDariTanggal(iso)] || ''}, ${d} ${BULAN[m-1].slice(0, 3)}`;
 }
 
-function butirIg(p){
+function butirSementara(p){
   const j = data.jadwal.find(x => x.id === p.jadwalId) || {};
   const jamAsli = (j.mulai || j.selesai) ? rentangJam(j.mulai, j.selesai) : '';
   const ruangAsli = String(j.ruang || '').trim();
   const jamBaru = (p.mulaiBaru && p.selesaiBaru) ? rentangJam(p.mulaiBaru, p.selesaiBaru) : '';
+  const asal = [tanggalRingkas(p.tanggal), jamAsli, ruangAsli].filter(Boolean).join(' · ');
 
-  const detail = [];
+  let hasil;
   switch(p.tipe){
-    case 'libur':
-      detail.push('Kelas tidak berlangsung pada tanggal ini');
-      break;
-    case 'daring':
-      detail.push('Kelas berlangsung online (daring)');
-      break;
-    case 'ruang':
-      detail.push(`Pindah ke ruang ${p.ruangBaru || '(menyusul)'}`);
-      break;
+    case 'libur':  hasil = 'Ditiadakan'; break;
+    case 'daring': hasil = 'Online (daring)'; break;
+    case 'ruang':  hasil = `Menjadi: ruang ${p.ruangBaru || 'menyusul'}`; break;
     case 'pindah':
-      detail.push(`Diganti ${[tanggalPanjang(p.tanggalBaru), jamBaru].filter(Boolean).join(', ')}`
-        + ` di ${p.ruangBaru || ruangAsli || 'ruang yang sama'}`);
+      hasil = 'Menjadi: ' + [tanggalRingkas(p.tanggalBaru), jamBaru, p.ruangBaru || ruangAsli]
+        .filter(Boolean).join(' · ');
       break;
     case 'menyusul': {
       const kapan = p.tanggalBaru
-        ? [tanggalPanjang(p.tanggalBaru), jamBaru].filter(Boolean).join(', ')
+        ? [tanggalRingkas(p.tanggalBaru), jamBaru].filter(Boolean).join(' · ')
         : 'tanggal dan jam menyusul';
-      detail.push(`Jadwal pengganti: ${kapan}`);
-      detail.push(`Ruang: ${p.ruangBaru || 'menyusul'}`);
+      hasil = `Pengganti: ${kapan} · ${p.ruangBaru || 'ruang menyusul'}`;
       break;
     }
+    default: hasil = p.tipe;
   }
 
+  const pindahan = p.tipe === 'pindah' || p.tipe === 'menyusul' || p.tipe === 'ruang';
   return {
-    tipe: p.tipe,
-    judul: namaMatkul(p.kode) || p.kode,
-    tanggalPendek: tanggalRingkas(p.tanggal),
-    info: [`KP ${p.kp}`, jamAsli, ruangAsli].filter(Boolean).join(' · '),
-    detail,
-    catatan: p.catatan || '',
+    judul: `${namaMatkul(p.kode) || p.kode} KP ${p.kp}`,
+    baris: [
+      { teks: (pindahan ? 'Semula: ' : '') + asal, gaya: 'lembut' },
+      { teks: hasil, gaya: 'tebal' },
+      ...(p.catatan ? [{ teks: p.catatan, gaya: 'catatan' }] : []),
+    ],
     urut: `${p.tanggal} ${j.mulai || ''} ${p.kode} ${p.kp}`,
-    tanggal: p.tanggal,
   };
 }
 
-function bukaIg(daftar){
-  if(daftar.length === 0) return;
-  const butir = daftar.map(butirIg).sort((a, b) => a.urut.localeCompare(b.urut));
-  const awal = butir[0].tanggal, akhir = butir[butir.length - 1].tanggal;
-  const subjudul = awal === akhir
-    ? tanggalPanjang(awal)
-    : `${tanggalRingkas(awal)} s/d ${tanggalRingkas(akhir)} ${akhir.slice(0, 4)}`;
-  bukaGambarIg(butir, subjudul, `kafbe-perubahan-${awal}${awal === akhir ? '' : '-sd-' + akhir}`);
+function kontenSementara(daftar){
+  const urut = [...daftar].sort((a, b) =>
+    butirSementara(a).urut.localeCompare(butirSementara(b).urut));
+  const tipe = new Set(urut.map(p => p.tipe === 'menyusul' ? 'pindah' : p.tipe));
+  const kelas = new Set(urut.map(p => `${p.kode}|${p.kp}`));
+  const tanggal = new Set(urut.map(p => p.tanggal));
+  const satuTipe = tipe.size === 1 ? [...tipe][0] : 'campur';
+
+  const judul = {
+    libur:  'Perkuliahan Ditiadakan',
+    daring: 'Perkuliahan Online',
+    ruang:  'Perpindahan Ruang Sementara',
+    pindah: 'Jadwal Perpindahan Sementara',
+    campur: 'Perubahan Jadwal Sementara',
+  }[satuTipe];
+
+  const kerja = {
+    libur:  'perkuliahan *DITIADAKAN* sebagai berikut:',
+    daring: 'perkuliahan dilaksanakan secara *ONLINE* sebagai berikut:',
+    ruang:  'ruangan perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
+    pindah: 'perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
+    campur: 'terdapat perubahan jadwal *SEMENTARA* sebagai berikut:',
+  }[satuTipe];
+
+  const p0 = urut[0];
+  const siapa = kelas.size === 1
+    ? `kelas *${namaMatkul(p0.kode) || p0.kode} KP ${p0.kp}*`
+    : 'kelas-kelas berikut';
+  const kapan = tanggal.size === 1 ? `, khusus pada *${tanggalPanjang(p0.tanggal)}*` : '';
+
+  return {
+    judul,
+    isi: `Diharapkan bagi mahasiswa yang mengambil ${siapa}${kapan}, ${kerja}`,
+    daftar: urut.map(butirSementara),
+  };
 }
+
+function teksJadwal(j){
+  return `${j.hari}, ${rentangJam(j.mulai, j.selesai)} di ${j.ruang || 'ruang menyusul'}`;
+}
+
+// lama boleh kosong, misalnya bila story dibuat dari tombol di tabel dan
+// jadwal sebelumnya tidak diketahui.
+function kontenPermanen(j, lama){
+  const waktu = lama && (lama.hari !== j.hari || lama.mulai !== j.mulai || lama.selesai !== j.selesai);
+  const ruang = lama && samakanRuang(lama.ruang) !== samakanRuang(j.ruang);
+  const apa = ruang && !waktu ? 'ruangan'
+    : waktu && ruang ? 'jadwal dan ruangan kelas'
+    : 'jadwal kelas';
+  return {
+    judul: 'Jadwal Perpindahan Permanen',
+    isi: `Diharapkan bagi mahasiswa yang mengambil kelas *${namaMatkul(j.kode) || j.kode} KP ${j.kp}*, `
+      + `${apa} akan dipindah *PERMANEN* sebagai berikut:`,
+    daftar: [{
+      baris: [
+        ...(lama ? [{ teks: `Semula: ${teksJadwal(lama)}`, gaya: 'lembut' }] : []),
+        { teks: `${lama ? 'Menjadi: ' : ''}*${teksJadwal(j)}*`, gaya: 'tebal' },
+      ],
+    }],
+  };
+}
+
+async function bukaIg(daftar){
+  if(daftar.length === 0) return;
+  await siapkanTemplateIg();
+  const tgl = daftar.map(p => p.tanggal).sort();
+  const awal = tgl[0], akhir = tgl[tgl.length - 1];
+  bukaStory(kontenSementara(daftar), `kafbe-story-${awal}${awal === akhir ? '' : '-sd-' + akhir}`);
+}
+
+async function bukaStoryPermanen(j, lama){
+  await siapkanTemplateIg();
+  bukaStory(kontenPermanen(j, lama),
+    `kafbe-story-permanen-${String(namaMatkul(j.kode) || j.kode).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${j.kp}`);
+}
+
+/* ---------- Template story (tab Upload dan Download) ----------
+
+   Firestore tidak punya tempat khusus untuk berkas, dan Firebase Storage
+   mensyaratkan paket berbayar. Jadi gambar template disimpan sebagai teks
+   base64 di koleksi templateig, dipotong-potong karena satu dokumen Firestore
+   paling besar 1 MB:
+
+     templateig/story            { potongan, area, namaBerkas, oleh, diunggah }
+     templateig/story-potongan-0 { isi: '...' }
+     templateig/story-potongan-1 { isi: '...' }
+
+   Gambarnya diperkecil dulu ke 1080 x 1920 dan dijadikan JPEG, jadi
+   biasanya cukup dua atau tiga potongan.
+*/
+
+const UKURAN_POTONGAN = 800000;
+let templateIg = null;        // { meta, dataUrl, gambar }
+let janjiTemplateIg = null;
+
+function muatGambarDari(src){
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = () => rej(new Error('gambar tidak bisa dibaca'));
+    img.src = src;
+  });
+}
+
+async function ambilTemplateIg(){
+  const snap = await getDoc(doc(db, 'templateig', 'story'));
+  const meta = snap.exists() ? snap.data() : {};
+  let dataUrl = '', gambar = null;
+  if(meta.potongan > 0){
+    const bagian = await Promise.all(Array.from({ length: meta.potongan }, (_, i) =>
+      getDoc(doc(db, 'templateig', `story-potongan-${i}`))));
+    dataUrl = bagian.map(b => (b.exists() ? b.data().isi : '')).join('');
+    try{ gambar = await muatGambarDari(dataUrl); }
+    catch(err){ console.error(err); dataUrl = ''; }
+  }
+  templateIg = { meta, dataUrl, gambar };
+  aturTemplate({ gambar, area: meta.area });
+  return templateIg;
+}
+
+// Template hanya diambil sekali per kunjungan, kecuali diminta ulang.
+function siapkanTemplateIg(ulang = false){
+  if(ulang || !janjiTemplateIg){
+    janjiTemplateIg = ambilTemplateIg().catch(err => {
+      console.error(err);
+      janjiTemplateIg = null;
+      aturTemplate({});
+      return null;
+    });
+  }
+  return janjiTemplateIg;
+}
+
+const CONTOH_STORY = {
+  judul: 'Jadwal Perpindahan Sementara',
+  isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Akuntansi Keuangan Menengah I KP B*, '
+    + 'khusus pada *Kamis, 2 Oktober 2026*, perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
+  daftar: [{
+    judul: 'Akuntansi Keuangan Menengah I KP B',
+    baris: [
+      { teks: 'Semula: Kam, 2 Okt · 13.00 - 14.40 · FG 06.02', gaya: 'lembut' },
+      { teks: 'Menjadi: Jum, 3 Okt · 17.00 - 18.40 · EA 02.05', gaya: 'tebal' },
+    ],
+  }],
+};
+
+function areaDariIsian(){
+  const angka = (id, bawaan) => {
+    const n = Number($(id).value);
+    return Number.isFinite(n) && $(id).value !== '' ? n : bawaan;
+  };
+  const b = TEMPLATE.areaBawaan;
+  const samping = angka('tplSamping', b.kiri);
+  return { atas: angka('tplAtas', b.atas), bawah: angka('tplBawah', b.bawah), kiri: samping, kanan: samping };
+}
+
+function isiIsianArea(area){
+  const a = { ...TEMPLATE.areaBawaan, ...(area || {}) };
+  $('tplAtas').value = a.atas; $('tplBawah').value = a.bawah; $('tplSamping').value = a.kiri;
+}
+
+async function gambarPratinjauTemplate(){
+  const [kanvas] = await buatStory(CONTOH_STORY, { panduan: true });
+  $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
+}
+
+async function segarkanTabTemplate(ulang = false){
+  const t = await siapkanTemplateIg(ulang);
+  const m = t?.meta || {};
+  const unggahan = !!t?.gambar;
+  let waktu = '';
+  if(m.diunggah?.toDate){
+    const d = m.diunggah.toDate();
+    waktu = ` pada ${d.getDate()} ${BULAN[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  $('tplStatus').innerHTML = unggahan
+    ? `Memakai <strong>template unggahan</strong>${m.namaBerkas ? ` (${esc(m.namaBerkas)})` : ''}`
+      + `${m.oleh ? `, diunggah oleh ${esc(m.oleh)}` : ''}${esc(waktu)}.`
+    : 'Memakai <strong>template bawaan</strong>. Belum ada template yang diunggah.';
+  $('tplBawaan').hidden = !unggahan;
+  isiIsianArea(m.area);
+  await gambarPratinjauTemplate();
+}
+
+['tplAtas', 'tplBawah', 'tplSamping'].forEach(id => $(id).addEventListener('input', () => {
+  aturTemplate({ gambar: templateIg?.gambar || null, area: areaDariIsian() });
+  gambarPratinjauTemplate();
+}));
+
+$('tplSimpanArea').addEventListener('click', async () => {
+  const el = $('pesanTemplate');
+  const area = areaDariIsian();
+  if(!(area.atas >= 0 && area.bawah <= 100 && area.atas + 10 <= area.bawah
+       && area.kiri >= 0 && area.kiri <= 40)){
+    pesan(el, 'Batas area tidak masuk akal. Atas harus lebih kecil dari bawah (selisih minimal 10), dan samping 0 sampai 40.', 'salah');
+    return;
+  }
+  try{
+    await setDoc(doc(db, 'templateig', 'story'), { area }, { merge: true });
+    await catat('ubah', 'template story', 'Area teks template story diubah',
+      `atas ${area.atas}%, bawah ${area.bawah}%, samping ${area.kiri}%`);
+    await segarkanTabTemplate(true);
+    pesan(el, 'Area teks tersimpan.', 'benar');
+  }catch(err){
+    console.error(err);
+    pesan(el, 'Gagal menyimpan area: ' + esc(err.message), 'salah');
+  }
+});
+
+$('tplAreaBawaan').addEventListener('click', () => {
+  isiIsianArea(TEMPLATE.areaBawaan);
+  aturTemplate({ gambar: templateIg?.gambar || null, area: areaDariIsian() });
+  gambarPratinjauTemplate();
+  pesan($('pesanTemplate'), 'Area dikembalikan ke bawaan. Tekan Simpan area untuk menyimpannya.', 'hati');
+});
+
+$('tplUnduh').addEventListener('click', async () => {
+  const t = await siapkanTemplateIg();
+  if(t?.gambar && t.dataUrl){
+    // Tidak memakai fetch(dataUrl), karena connect-src halaman ini tidak
+    // mengizinkan data:.
+    const [kepala, isi] = t.dataUrl.split(',');
+    const biner = atob(isi);
+    const byte = new Uint8Array(biner.length);
+    for(let i = 0; i < biner.length; i++) byte[i] = biner.charCodeAt(i);
+    const tipe = (kepala.match(/data:([^;]+)/) || [])[1] || 'image/jpeg';
+    unduhBlobSebagai(new Blob([byte], { type: tipe }), 'template-story-kafbe.jpg');
+  }else{
+    const kanvas = await kanvasLatarBawaan();
+    kanvas.toBlob(b => unduhBlobSebagai(b, 'template-story-kafbe-bawaan.png'), 'image/png');
+  }
+});
+
+$('tplBerkas').addEventListener('change', async e => {
+  const el = $('pesanTemplate');
+  const berkas = e.target.files[0];
+  e.target.value = '';
+  if(!berkas) return;
+  if(!/^image\/(png|jpeg|webp)$/.test(berkas.type)){
+    pesan(el, 'Berkasnya harus gambar PNG, JPG, atau WEBP.', 'salah');
+    return;
+  }
+
+  try{
+    status('Mengunggah template…', 'sibuk');
+    // Dibaca sebagai data URL, bukan blob URL: aturan keamanan halaman ini
+    // (Content-Security-Policy img-src) hanya mengizinkan 'self' dan data:.
+    const img = await muatGambarDari(await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = () => rej(new Error('berkas tidak bisa dibaca'));
+      r.readAsDataURL(berkas);
+    }));
+
+    const { w, h } = TEMPLATE;
+    const kanvas = document.createElement('canvas');
+    kanvas.width = w; kanvas.height = h;
+    const ctx = kanvas.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, w, h);
+    const r = Math.max(w / img.width, h / img.height);
+    ctx.drawImage(img, (w - img.width * r) / 2, (h - img.height * r) / 2, img.width * r, img.height * r);
+
+    let mutu = 0.9;
+    let dataUrl = kanvas.toDataURL('image/jpeg', mutu);
+    while(dataUrl.length > 3000000 && mutu > 0.5){
+      mutu -= 0.1;
+      dataUrl = kanvas.toDataURL('image/jpeg', mutu);
+    }
+
+    const potongan = [];
+    for(let i = 0; i < dataUrl.length; i += UKURAN_POTONGAN) potongan.push(dataUrl.slice(i, i + UKURAN_POTONGAN));
+    const lama = templateIg?.meta?.potongan || 0;
+
+    // Potongan ditulis satu per satu karena satu transaksi Firestore dibatasi
+    // 10 MB. Dokumen utamanya ditulis paling akhir, jadi selama unggahan
+    // belum selesai, template lama tetap dipakai utuh.
+    for(let i = 0; i < potongan.length; i++){
+      await setDoc(doc(db, 'templateig', `story-potongan-${i}`), { isi: potongan[i] });
+    }
+    await setDoc(doc(db, 'templateig', 'story'), {
+      potongan: potongan.length,
+      area: areaDariIsian(),
+      namaBerkas: berkas.name,
+      oleh: pemakai.nama || pemakai.email || '',
+      diunggah: serverTimestamp(),
+    });
+    for(let i = potongan.length; i < lama; i++){
+      await deleteDoc(doc(db, 'templateig', `story-potongan-${i}`));
+    }
+
+    await catat('ubah', 'template story', 'Template story Instagram diganti', berkas.name);
+    await segarkanTabTemplate(true);
+    $('statusSimpan').hidden = true;
+
+    const rasio = img.width / img.height;
+    pesan(el, Math.abs(rasio - w / h) > 0.02
+      ? `Template tersimpan, tetapi ukurannya ${img.width} × ${img.height}, bukan 9:16, jadi bagian tepinya terpotong. Periksa pratinjaunya.`
+      : 'Template tersimpan. Periksa pratinjaunya, lalu sesuaikan area teks bila perlu.',
+      Math.abs(rasio - w / h) > 0.02 ? 'hati' : 'benar');
+  }catch(err){
+    console.error(err);
+    status('Gagal mengunggah template.', 'salah');
+    pesan(el, 'Gagal mengunggah template: ' + esc(err.message), 'salah');
+  }
+});
+
+$('tplBawaan').addEventListener('click', async () => {
+  const el = $('pesanTemplate');
+  if(!confirm('Hapus template unggahan dan kembali memakai template bawaan?')) return;
+  try{
+    const lama = templateIg?.meta?.potongan || 0;
+    await setDoc(doc(db, 'templateig', 'story'), { potongan: 0 }, { merge: true });
+    for(let i = 0; i < lama; i++) await deleteDoc(doc(db, 'templateig', `story-potongan-${i}`));
+    await catat('hapus', 'template story', 'Template story unggahan dihapus', 'Kembali memakai template bawaan');
+    await segarkanTabTemplate(true);
+    pesan(el, 'Kembali memakai template bawaan.', 'benar');
+  }catch(err){
+    console.error(err);
+    pesan(el, 'Gagal menghapus template: ' + esc(err.message), 'salah');
+  }
+});
 
 function periksaPerubahan(isi){
   const salah = [];
@@ -1682,7 +2016,7 @@ function gambarKelompok(){
     ${[...peta.entries()].map(([nama, n]) => `<div class="op-kelompok-baris">
       <span><strong>${esc(nama)}</strong> <span class="op-samar">· ${n} perubahan</span></span>
       <span class="op-tombol-baris">
-        <button class="op-mini" data-ig-kelompok="${esc(nama)}">Gambar IG</button>
+        <button class="op-mini" data-ig-kelompok="${esc(nama)}">Story IG</button>
         <button class="op-mini op-hapus" data-hapus-kelompok="${esc(nama)}">Hapus kelompok</button>
       </span>
     </div>`).join('')}

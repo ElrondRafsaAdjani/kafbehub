@@ -9,7 +9,7 @@
 <title>Operasional - KAFBE Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=League+Spartan:wght@700&family=Montserrat:ital,wght@0,500;0,600;0,700;0,800;1,900&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="operasional.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -116,7 +116,7 @@
       <button class="op-tab-btn" data-tab="akunpengajar" role="tab">Akun Pengajar</button>
       <button class="op-tab-btn" data-tab="akunoperasional" role="tab">Akun Operasional</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
-      <button class="op-tab-btn" data-tab="excel" role="tab">Excel</button>
+      <button class="op-tab-btn" data-tab="unggahunduh" role="tab">Upload dan Download</button>
       <button class="op-tab-btn" data-tab="log" role="tab">Log</button>
     </nav>
 
@@ -368,8 +368,8 @@
       <div id="daftarKelompok"></div>
 
       <div class="op-ig-bilah">
-        <span class="op-samar" id="igJumlahCentang">Centang perubahan untuk dijadikan gambar Instagram (post atau story).</span>
-        <button type="button" class="btn btn-gold op-kecil" id="igDariCentang" disabled>Buat gambar Instagram</button>
+        <span class="op-samar" id="igJumlahCentang">Centang perubahan untuk dijadikan story Instagram.</span>
+        <button type="button" class="btn btn-gold op-kecil" id="igDariCentang" disabled>Buat story Instagram</button>
       </div>
 
       <div class="op-tabel-bungkus">
@@ -609,16 +609,61 @@
       </div>
     </section>
 
-    <!-- ---------- EXCEL ---------- -->
-    <section class="op-panel" id="panel-excel" hidden>
+    <!-- ---------- UPLOAD DAN DOWNLOAD ---------- -->
+    <section class="op-panel" id="panel-unggahunduh" hidden>
       <div class="op-panel-kepala">
         <div>
-          <h2>Excel</h2>
-          <p>Menarik data dari berkas Informasi Kelas Asistensi, dan mengunduh kembali isi terkini sebagai berkas Excel. Lembar Rekap Jumlah Ngajar tidak dibaca dan tidak ditulis.</p>
+          <h2>Upload dan Download</h2>
+          <p>Berkas Excel Informasi Kelas Asistensi dan template story Instagram KAFBE.</p>
         </div>
       </div>
 
-      <h3>Unduh</h3>
+      <h3>Template story Instagram</h3>
+      <p class="op-catatan">
+        Template dipakai sebagai latar story yang dibuat dari tab Perubahan Sementara dan
+        Jadwal Permanen. Ukurannya <strong>1080 × 1920</strong> (9:16). Bagian tengah kartu
+        putih dikosongkan, sebab judul dan isi pengumuman ditulis otomatis di dalam
+        <strong>area teks</strong> (kotak garis putus-putus merah muda di pratinjau).
+        Bagian yang selalu sama, seperti PENGUMUMAN, logo, TERIMA KASIH, dan slogan,
+        sudah menjadi bagian dari gambar template.
+      </p>
+      <p class="op-catatan" id="tplStatus">Memuat template…</p>
+
+      <div class="op-template">
+        <div class="op-template-kiri">
+          <div class="op-aksi">
+            <button type="button" class="btn btn-ghost op-kecil" id="tplUnduh">Download template</button>
+            <label class="btn btn-primary op-kecil op-label-berkas">
+              Upload template
+              <input type="file" id="tplBerkas" accept="image/png,image/jpeg,image/webp" hidden />
+            </label>
+            <button type="button" class="btn btn-ghost op-kecil" id="tplBawaan" hidden>Pakai template bawaan</button>
+          </div>
+
+          <h4 class="op-subjudul">Area teks (persen dari ukuran gambar)</h4>
+          <div class="op-baris">
+            <div class="op-field op-sempit"><label for="tplAtas">Batas atas</label>
+              <input type="number" id="tplAtas" min="0" max="90" step="0.5" /></div>
+            <div class="op-field op-sempit"><label for="tplBawah">Batas bawah</label>
+              <input type="number" id="tplBawah" min="10" max="100" step="0.5" /></div>
+            <div class="op-field op-sempit"><label for="tplSamping">Jarak samping</label>
+              <input type="number" id="tplSamping" min="0" max="40" step="0.5" /></div>
+          </div>
+          <div class="op-aksi">
+            <button type="button" class="btn btn-primary op-kecil" id="tplSimpanArea">Simpan area</button>
+            <button type="button" class="btn btn-ghost op-kecil" id="tplAreaBawaan">Area bawaan</button>
+          </div>
+          <p class="op-pesan" id="pesanTemplate" role="alert"></p>
+        </div>
+        <img class="op-template-pratinjau" id="tplPratinjau" alt="Pratinjau template story dengan contoh isi" />
+      </div>
+
+      <hr class="op-garis" />
+
+      <h3>Excel Informasi Kelas Asistensi</h3>
+      <p class="op-catatan">Menarik data dari berkas Informasi Kelas Asistensi, dan mengunduh kembali isi terkini sebagai berkas Excel. Lembar Rekap Jumlah Ngajar tidak dibaca dan tidak ditulis.</p>
+
+      <h4 class="op-subjudul">Download</h4>
       <p class="op-catatan">
         Berkasnya disusun dari data yang sedang tersimpan, jadi setiap perubahan yang
         dilakukan di halaman ini sudah ikut di dalamnya. Excel lama tidak perlu disunting
@@ -631,7 +676,7 @@
 
       <hr class="op-garis" />
 
-      <h3>Unggah</h3>
+      <h4 class="op-subjudul">Upload</h4>
       <p class="op-catatan">
         Berkas dibandingkan dulu dengan data yang ada di web, dan hasilnya ditampilkan
         baris per baris dengan tanda warna: hijau untuk yang ditambahkan, kuning untuk
@@ -861,26 +906,31 @@
   </symbol>
 </svg>
 
-<!-- ---------- GAMBAR INSTAGRAM ---------- -->
+<!-- ---------- STORY INSTAGRAM ---------- -->
 <dialog class="op-dialog-ig" id="dialogIg" aria-labelledby="igJudul">
   <div class="op-dialog-kepala">
     <div>
-      <h2 id="igJudul">Gambar untuk Instagram</h2>
+      <h2 id="igJudul">Story Instagram</h2>
       <p class="op-samar" id="igRingkas"></p>
     </div>
     <button type="button" class="op-mini" id="igTutup" aria-label="Tutup">Tutup</button>
   </div>
-  <div class="op-ig-format" role="group" aria-label="Format gambar">
-    <button type="button" class="op-ig-pilih" data-ig-format="post">Post feed (4:5)</button>
-    <button type="button" class="op-ig-pilih" data-ig-format="story">Story / SG (9:16)</button>
+  <div class="op-ig-susun">
+    <div class="op-ig-teks">
+      <div class="op-field"><label for="igJudulTeks">Judul</label>
+              <input type="text" id="igJudulTeks" /></div>
+      <div class="op-field"><label for="igIsiTeks">Kalimat pembuka</label>
+              <textarea id="igIsiTeks" rows="6"></textarea></div>
+      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, ditulis berwarna emas. Daftar kelas di bawahnya disusun otomatis dari data.</p>
+      <p class="op-catatan">Periksa dulu isinya, lalu unduh atau salin gambarnya dan unggah sendiri sebagai story. Di ponsel, tombol Bagikan bisa langsung membuka Instagram.</p>
+      <div class="op-aksi">
+        <button type="button" class="btn btn-primary op-kecil" id="igUnduhSemua" hidden>Unduh semua</button>
+        <button type="button" class="btn btn-ghost op-kecil" id="igBagikanSemua" hidden>Bagikan semua</button>
+      </div>
+      <p class="op-pesan" id="igPesan" role="status"></p>
+    </div>
+    <div class="op-ig-pratinjau" id="igPratinjau"></div>
   </div>
-  <p class="op-catatan">Periksa dulu isinya, lalu unduh atau salin gambarnya dan unggah sendiri di Instagram. Di ponsel, tombol Bagikan bisa langsung membuka Instagram.</p>
-  <div class="op-ig-pratinjau" id="igPratinjau"></div>
-  <div class="op-aksi">
-    <button type="button" class="btn btn-primary op-kecil" id="igUnduhSemua" hidden>Unduh semua</button>
-    <button type="button" class="btn btn-ghost op-kecil" id="igBagikanSemua" hidden>Bagikan semua</button>
-  </div>
-  <p class="op-pesan" id="igPesan" role="status"></p>
 </dialog>
 
 <script src="firebase-config.js"></script>

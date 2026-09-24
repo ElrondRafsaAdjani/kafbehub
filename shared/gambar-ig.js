@@ -1,81 +1,87 @@
 /*
-  Pembuat gambar Instagram untuk perubahan jadwal sementara.
+  Pembuat gambar Story Instagram (SG) untuk pengumuman perubahan jadwal.
 
-  Admin operasional mencentang satu atau beberapa perubahan, lalu berkas ini
-  menempelkannya ke template KAFBE dan menghasilkan gambar siap unggah:
+  Admin operasional memilih perubahan sementara, atau baru saja memindah
+  jadwal permanen, lalu berkas ini menuliskan pengumumannya ke template story
+  KAFBE berukuran 1080 x 1920:
 
-    - Post feed  1080 x 1350 (rasio 4:5, ukuran terbesar yang diterima feed)
-    - Story / SG 1080 x 1920 (rasio 9:16)
+    PENGUMUMAN
+    [judul, misalnya JADWAL PERPINDAHAN SEMENTARA]
+    [kalimat pembuka, bagian bertanda *...* berwarna emas]
+    [daftar kelas yang berubah, satu kotak per kelas]
+    TERIMA KASIH
 
-  Tidak ada yang dikirim ke Instagram dari sini. Gambarnya hanya diunduh,
-  disalin ke papan klip, atau dibagikan lewat menu bagikan ponsel, lalu
-  diunggah sendiri oleh pengurus. Dengan begitu tidak perlu kunci akses
-  Instagram apa pun di situs ini.
+  Dulu jadwal pengganti ditempel sebagai tangkapan layar tabel Excel. Karena
+  datanya kini sudah ada di KAFBE Hub, daftar itu ditulis langsung sebagai
+  teks, jadi tetap terbaca di layar ponsel.
 
-  MENGGANTI DESAIN
+  Tidak ada yang dikirim ke Instagram dari sini. Gambar diunduh, disalin, atau
+  dibagikan lewat menu bagikan ponsel, lalu diunggah sendiri oleh pengurus.
 
-  Seluruh tampilan diatur dari objek TEMPLATE di bawah. Begitu template,
-  font, dan design guideline resmi KAFBE tersedia:
+  TEMPLATE
 
-    1. Font: muat lewat <link> Google Fonts atau @font-face di operasional.html,
-       lalu tulis nama keluarganya di TEMPLATE.font.
-    2. Latar: simpan gambar latar dari desainer (PNG/JPG, ukuran persis
-       1080x1350 dan 1080x1920) di folder yang sama dengan situs, lalu isi
-       TEMPLATE.latar.post dan TEMPLATE.latar.story dengan jalurnya. Bila
-       diisi, gradasi dan hiasan bawaan tidak digambar lagi.
-    3. Area isi: sesuaikan TEMPLATE.ukuran[...].atas / .bawah dan
-       TEMPLATE.samping supaya kartu tidak menimpa hiasan di latar.
-    4. Warna: TEMPLATE.warna dan TEMPLATE.jenis.
+  Ada dua kemungkinan latar:
 
-  Area atas dan bawah Story sengaja dikosongkan cukup lebar, karena bagian
-  itu tertutup nama akun dan kolom balasan di aplikasi Instagram.
+    1. Template unggahan. Diunggah di tab "Upload dan Download" dan disimpan di
+       Firestore (koleksi templateig). Gambar itu dipakai apa adanya sebagai
+       latar, dan judul serta isi pengumuman ditulis di dalam "area teks" yang
+       batasnya diatur di tab yang sama. Jadi di template, bagian tengah kartu
+       putih harus dikosongkan.
+    2. Template bawaan, digambar oleh kode di bawah dengan meniru susunan
+       template KAFBE: latar biru tua bermotif, pita PENGUMUMAN, kartu putih,
+       ornamen emas, TERIMA KASIH, dan slogan di pojok kanan bawah.
+
+  Font dimuat lewat Google Fonts di operasional.html. Untuk menggantinya, ubah
+  tautan itu dan TEMPLATE.font di bawah.
 */
 
 export const TEMPLATE = {
-  ukuran: {
-    post:  { w: 1080, h: 1350, atas: 80,  bawah: 70,  nama: 'Post feed (4:5)' },
-    story: { w: 1080, h: 1920, atas: 230, bawah: 280, nama: 'Story / SG (9:16)' },
-  },
-  samping: 72,
+  w: 1080,
+  h: 1920,
+
+  // Area teks dalam persen dari lebar dan tinggi gambar. Dipakai bila belum
+  // ada pengaturan area yang disimpan di tab "Upload dan Download".
+  areaBawaan: { atas: 22, bawah: 79, kiri: 15, kanan: 15 },
 
   font: {
-    judul: '"Baloo 2"',
-    isi:   '"Plus Jakarta Sans"',
+    judul:  '"League Spartan"',
+    isi:    '"Montserrat"',
+    slogan: '"Cinzel Decorative"',
   },
 
   warna: {
-    latarAtas:  '#16294A',
-    latarBawah: '#1F3A63',
-    hiasan:     'rgba(111,168,201,0.16)',
-    aksen:      '#F0B93D',
-    judul:      '#FFFFFF',
-    subjudul:   '#B7DAE8',
-    kartu:      '#FFFFFF',
-    tinta:      '#0F2540',
-    tintaLembut:'#4C6885',
-    kaki:       '#CFE7F0',
+    latar:       '#151B36',
+    latarTepi:   '#0C1024',
+    motif:       'rgba(201,151,59,0.30)',
+    kartu:       '#FFFFFF',
+    pita:        '#1B1B1D',
+    tinta:       '#1C1F3A',
+    tintaLembut: '#5D6278',
+    emas:        '#C8923A',
+    kotak:       '#F7F1E4',
+    putih:       '#FFFFFF',
   },
 
-  // Jalur gambar latar dari desainer. Kosongkan (null) untuk memakai latar bawaan.
-  latar: { post: null, story: null },
-
-  logo:     '/ikon-ponsel.svg',
-  merek:    'KAFBE HUB',
-  judul:    'Info Perubahan Jadwal',
-  kaki:     'Jadwal lengkap: kafbehub.vercel.app/jadwal',
-  akun:     '@ka.fbe.ubaya',
-
-  jenis: {
-    libur:    { label: 'Ditiadakan',  latar: '#FBE3E2', teks: '#B03B37' },
-    daring:   { label: 'Online',      latar: '#EDE7F8', teks: '#5B3FA0' },
-    pindah:   { label: 'Dipindah',    latar: '#E1F5E9', teks: '#1E7A44' },
-    menyusul: { label: 'Dipindah',    latar: '#FDEEDB', teks: '#8A5A0B' },
-    ruang:    { label: 'Ganti ruang', latar: '#E7EDF1', teks: '#3F5A70' },
-  },
+  logo:   '/ikon-ponsel.svg',
+  slogan: ['Be A Blessing By', 'Giving The Best'],
 };
 
 /* ============================================================
-   Penggambaran
+   Keadaan template yang sedang dipakai
+   ============================================================ */
+
+let tpl = { gambar: null, area: { ...TEMPLATE.areaBawaan } };
+
+/*
+  Dipanggil oleh operasional.js setelah template dari Firestore dimuat.
+  gambar: HTMLImageElement atau null untuk template bawaan.
+*/
+export function aturTemplate({ gambar = null, area = null } = {}){
+  tpl = { gambar, area: { ...TEMPLATE.areaBawaan, ...(area || {}) } };
+}
+
+/* ============================================================
+   Alat bantu penggambaran
    ============================================================ */
 
 const muatGambar = (() => {
@@ -86,7 +92,7 @@ const muatGambar = (() => {
       simpanan.set(src, new Promise(res => {
         const img = new Image();
         img.onload = () => res(img);
-        img.onerror = () => res(null);   // gambar gagal dimuat bukan alasan untuk batal
+        img.onerror = () => res(null);
         img.src = src;
       }));
     }
@@ -99,16 +105,14 @@ const muatGambar = (() => {
 async function siapkanFont(){
   const f = TEMPLATE.font;
   try{
-    // Tunggu lembar gaya font selesai terbaca dulu. Sebelum itu, load()
-    // untuk keluarga yang belum dikenal langsung selesai tanpa memuat apa pun.
     await document.fonts.ready;
     await Promise.all([
-      document.fonts.load(`800 60px ${f.judul}`),
-      document.fonts.load(`700 40px ${f.judul}`),
-      document.fonts.load(`800 24px ${f.isi}`),
-      document.fonts.load(`700 28px ${f.isi}`),
-      document.fonts.load(`600 28px ${f.isi}`),
-      document.fonts.load(`500 24px ${f.isi}`),
+      document.fonts.load(`700 80px ${f.judul}`),
+      document.fonts.load(`600 30px ${f.isi}`),
+      document.fonts.load(`700 40px ${f.isi}`),
+      document.fonts.load(`800 40px ${f.isi}`),
+      document.fonts.load(`italic 900 70px ${f.isi}`),
+      document.fonts.load(`700 44px ${f.slogan}`),
     ]);
   }catch{ /* tetap lanjut dengan font yang ada */ }
 }
@@ -124,305 +128,378 @@ function kotakBulat(ctx, x, y, w, h, r){
   ctx.closePath();
 }
 
-// Memecah teks menjadi baris-baris yang muat dalam lebar tertentu.
-function pecahBaris(ctx, teks, lebar, maks = Infinity){
-  const kata = String(teks || '').split(/\s+/).filter(Boolean);
-  const baris = [];
-  let kini = '';
-  for(const k of kata){
-    const coba = kini ? kini + ' ' + k : k;
-    if(ctx.measureText(coba).width <= lebar || !kini){ kini = coba; continue; }
-    baris.push(kini);
-    kini = k;
-  }
-  if(kini) baris.push(kini);
-  if(baris.length > maks){
-    const sisa = baris.slice(0, maks);
-    let akhir = sisa[maks - 1];
-    while(akhir && ctx.measureText(akhir + '…').width > lebar) akhir = akhir.slice(0, -1);
-    sisa[maks - 1] = akhir + '…';
-    return sisa;
-  }
-  return baris;
-}
-
-/*
-  Satu kartu dihitung dulu tata letaknya (tinggi dan baris-barisnya) sebelum
-  digambar, supaya pembagian ke beberapa halaman bisa diputuskan lebih dulu.
-*/
-function susunKartu(ctx, butir, lebar, s){
-  const f = TEMPLATE.font;
-  const pad = 30 * s;
-  const dalam = lebar - pad * 2;
-  const baris = [];
-
-  ctx.font = `700 ${42 * s}px ${f.judul}`;
-  for(const t of pecahBaris(ctx, butir.judul, dalam, 2)){
-    baris.push({ teks: t, font: ctx.font, warna: TEMPLATE.warna.tinta, tinggi: 48 * s });
-  }
-
-  ctx.font = `600 ${26 * s}px ${f.isi}`;
-  for(const t of pecahBaris(ctx, butir.info, dalam)){
-    baris.push({ teks: t, font: ctx.font, warna: TEMPLATE.warna.tintaLembut, tinggi: 36 * s });
-  }
-
-  for(const d of butir.detail || []){
-    ctx.font = `700 ${28 * s}px ${f.isi}`;
-    const pecah = pecahBaris(ctx, d, dalam - 34 * s);
-    pecah.forEach((t, i) => baris.push({
-      teks: t, font: ctx.font, warna: TEMPLATE.warna.tinta, tinggi: 38 * s,
-      panah: i === 0, geser: 34 * s, jarakAtas: i === 0 ? 8 * s : 0,
-    }));
-  }
-
-  if(butir.catatan){
-    ctx.font = `500 ${24 * s}px ${f.isi}`;
-    pecahBaris(ctx, butir.catatan, dalam, 3).forEach((t, i) => baris.push({
-      teks: t, font: ctx.font, warna: TEMPLATE.warna.tintaLembut, tinggi: 34 * s,
-      jarakAtas: i === 0 ? 8 * s : 0,
-    }));
-  }
-
-  const lencana = 42 * s;
-  const tinggi = pad + lencana + 14 * s
-    + baris.reduce((n, b) => n + b.tinggi + (b.jarakAtas || 0), 0) + pad - 6 * s;
-  return { butir, baris, tinggi, pad, lencana, s };
-}
-
-function gambarKartu(ctx, k, x, y, lebar){
-  const { butir, baris, tinggi, pad, lencana, s } = k;
-  const jenis = TEMPLATE.jenis[butir.tipe] || { label: butir.tipe, latar: '#E7EDF1', teks: '#3F5A70' };
-
+// Garis emas dengan belah ketupat di tengah, seperti ornamen di template.
+function ornamen(ctx, cx, cy, lebar, s = 1){
+  const w = TEMPLATE.warna;
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.22)';
-  ctx.shadowBlur = 24 * s;
-  ctx.shadowOffsetY = 8 * s;
-  ctx.fillStyle = TEMPLATE.warna.kartu;
-  kotakBulat(ctx, x, y, lebar, tinggi, 28 * s);
+  ctx.strokeStyle = w.emas;
+  ctx.fillStyle = w.emas;
+  ctx.lineWidth = 3 * s;
+  const d = 13 * s;
+  for(const arah of [-1, 1]){
+    ctx.beginPath();
+    ctx.moveTo(cx + arah * (d + 14 * s), cy);
+    ctx.lineTo(cx + arah * lebar / 2, cy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx + arah * (d + 26 * s), cy, 5 * s, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx + arah * lebar / 2, cy, 4 * s, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - d); ctx.lineTo(cx + d, cy); ctx.lineTo(cx, cy + d); ctx.lineTo(cx - d, cy);
+  ctx.closePath();
   ctx.fill();
   ctx.restore();
+}
 
-  // Garis warna jenis di sisi kiri kartu
+// Motif bunga sederhana sebagai pengganti batik pada template bawaan.
+function motif(ctx, cx, cy, r){
   ctx.save();
-  kotakBulat(ctx, x, y, lebar, tinggi, 28 * s);
-  ctx.clip();
-  ctx.fillStyle = jenis.teks;
-  ctx.fillRect(x, y, 10 * s, tinggi);
-  ctx.restore();
-
-  // Lencana jenis perubahan
-  const f = TEMPLATE.font;
-  ctx.font = `800 ${22 * s}px ${f.isi}`;
-  const labelTeks = (butir.label || jenis.label).toUpperCase();
-  const lebarLencana = ctx.measureText(labelTeks).width + 32 * s;
-  let cy = y + pad;
-  ctx.fillStyle = jenis.latar;
-  kotakBulat(ctx, x + pad, cy, lebarLencana, lencana, lencana / 2);
-  ctx.fill();
-  ctx.fillStyle = jenis.teks;
-  ctx.textBaseline = 'middle';
-  ctx.fillText(labelTeks, x + pad + 16 * s, cy + lencana / 2 + 1 * s);
-
-  // Tanggal ringkas di kanan lencana
-  if(butir.tanggalPendek){
-    ctx.font = `800 ${24 * s}px ${f.isi}`;
-    ctx.fillStyle = TEMPLATE.warna.tintaLembut;
-    ctx.textAlign = 'right';
-    ctx.fillText(butir.tanggalPendek, x + lebar - pad, cy + lencana / 2 + 1 * s);
-    ctx.textAlign = 'left';
+  ctx.strokeStyle = TEMPLATE.warna.motif;
+  ctx.lineWidth = 3;
+  for(const k of [1, 0.72, 0.46, 0.22]){
+    ctx.beginPath(); ctx.arc(cx, cy, r * k, 0, Math.PI * 2); ctx.stroke();
   }
+  for(let i = 0; i < 12; i++){
+    const a = i * Math.PI / 6;
+    ctx.save();
+    ctx.translate(cx + Math.cos(a) * r * 0.86, cy + Math.sin(a) * r * 0.86);
+    ctx.rotate(a);
+    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.2, r * 0.08, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  ctx.restore();
+}
 
-  cy += lencana + 14 * s;
-  ctx.textBaseline = 'alphabetic';
-  for(const b of baris){
-    cy += (b.jarakAtas || 0) + b.tinggi;
-    ctx.font = b.font;
-    ctx.fillStyle = b.warna;
-    const tx = x + pad + (b.geser || 0);
-    if(b.panah){
-      ctx.fillStyle = jenis.teks;
-      ctx.fillText('→', x + pad, cy - 9 * s);
-      ctx.fillStyle = b.warna;
+/* ---------- Teks berwarna: *kata* ditulis emas ---------- */
+
+function tokenKaya(teks){
+  const out = [];
+  let emas = false;
+  for(const bag of String(teks || '').split(/(\*)/)){
+    if(bag === '*'){ emas = !emas; continue; }
+    for(const t of bag.split(/(\s+)/)){
+      if(!t) continue;
+      if(/^\s+$/.test(t)){
+        const n = (t.match(/\n/g) || []).length;
+        out.push(n ? { br: n } : { spasi: true });
+      }else out.push({ k: t, emas });
     }
-    ctx.fillText(b.teks, tx, cy - 9 * s);
+  }
+  return out;
+}
+
+function barisKaya(ctx, teks, lebar){
+  const baris = [];
+  let kini = [], lebarKini = 0, spasi = false;
+  const lebarSpasi = ctx.measureText(' ').width;
+  const tutup = () => { baris.push({ kata: kini, lebar: lebarKini }); kini = []; lebarKini = 0; spasi = false; };
+
+  for(const t of tokenKaya(teks)){
+    if(t.br){ tutup(); for(let i = 1; i < t.br; i++) baris.push({ kata: [], lebar: 0 }); continue; }
+    if(t.spasi){ spasi = kini.length > 0; continue; }
+    const w = ctx.measureText(t.k).width;
+    const tambah = (spasi ? lebarSpasi : 0) + w;
+    if(kini.length && lebarKini + tambah > lebar) tutup();
+    const pakaiSpasi = kini.length > 0 && spasi;
+    kini.push({ ...t, w, spasi: pakaiSpasi });
+    lebarKini += (pakaiSpasi ? lebarSpasi : 0) + w;
+    spasi = false;
+  }
+  if(kini.length) tutup();
+  return { baris, lebarSpasi };
+}
+
+function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, warnaBiasa){
+  let x = cx - b.lebar / 2;
+  for(const k of b.kata){
+    if(k.spasi) x += lebarSpasi;
+    ctx.fillStyle = k.emas ? TEMPLATE.warna.emas : warnaBiasa;
+    ctx.fillText(k.k, x, y);
+    x += k.w;
   }
 }
 
-function gambarLatar(ctx, uk, latarImg){
-  const { w, h } = uk;
-  if(latarImg){
-    // Seperti object-fit: cover
-    const r = Math.max(w / latarImg.width, h / latarImg.height);
-    const lw = latarImg.width * r, lh = latarImg.height * r;
-    ctx.drawImage(latarImg, (w - lw) / 2, (h - lh) / 2, lw, lh);
-    return;
-  }
-  const g = ctx.createLinearGradient(0, 0, 0, h);
-  g.addColorStop(0, TEMPLATE.warna.latarAtas);
-  g.addColorStop(1, TEMPLATE.warna.latarBawah);
+/* ============================================================
+   Latar
+   ============================================================ */
+
+function gambarLatarBawaan(ctx, logo){
+  const { w, h } = TEMPLATE;
+  const c = TEMPLATE.warna;
+  const f = TEMPLATE.font;
+
+  const g = ctx.createRadialGradient(w / 2, h / 2, 200, w / 2, h / 2, h * 0.75);
+  g.addColorStop(0, c.latar);
+  g.addColorStop(1, c.latarTepi);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
 
-  ctx.fillStyle = TEMPLATE.warna.hiasan;
-  ctx.beginPath(); ctx.arc(w + 60, 120, 320, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(-80, h - 80, 260, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = TEMPLATE.warna.aksen;
-  ctx.beginPath(); ctx.arc(w - 96, h - 54, 14, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(110, 60 + uk.atas * 0.4, 9, 0, Math.PI * 2); ctx.fill();
-}
-
-// Tinggi kepala dan kaki yang dipakai tiap halaman, dipisah supaya bisa
-// dihitung sebelum kartunya disusun.
-const TINGGI_KEPALA = 250;
-const TINGGI_KAKI = 110;
-
-function gambarKepala(ctx, uk, logo, subjudul, halaman){
-  const x = TEMPLATE.samping;
-  let y = uk.atas;
-  const f = TEMPLATE.font;
+  motif(ctx, 60, 330, 230);
+  motif(ctx, 1040, 820, 180);
+  motif(ctx, 90, 1560, 280);
+  motif(ctx, 960, 1720, 150);
+  motif(ctx, 700, 70, 120);
 
   if(logo){
     ctx.save();
-    kotakBulat(ctx, x, y, 84, 84, 22);
-    ctx.clip();
-    ctx.drawImage(logo, x, y, 84, 84);
+    ctx.beginPath(); ctx.arc(w - 72 - 48, 98, 48, 0, Math.PI * 2); ctx.clip();
+    ctx.drawImage(logo, w - 72 - 96, 50, 96, 96);
     ctx.restore();
   }
-  ctx.textBaseline = 'middle';
-  ctx.font = `800 26px ${f.isi}`;
-  ctx.fillStyle = TEMPLATE.warna.aksen;
-  ctx.fillText(TEMPLATE.merek, x + (logo ? 104 : 0), y + 30);
-  ctx.font = `600 24px ${f.isi}`;
-  ctx.fillStyle = TEMPLATE.warna.subjudul;
-  ctx.fillText(TEMPLATE.akun, x + (logo ? 104 : 0), y + 62);
 
-  if(halaman){
-    ctx.textAlign = 'right';
-    ctx.font = `800 24px ${f.isi}`;
-    ctx.fillStyle = TEMPLATE.warna.subjudul;
-    ctx.fillText(halaman, uk.w - x, y + 42);
-    ctx.textAlign = 'left';
-  }
+  // Kartu putih
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)';
+  ctx.shadowBlur = 40;
+  ctx.fillStyle = c.kartu;
+  kotakBulat(ctx, 108, 250, w - 216, 1400, 80);
+  ctx.fill();
+  ctx.restore();
 
-  y += 84 + 22;
-  ctx.textBaseline = 'alphabetic';
-  ctx.font = `800 76px ${f.judul}`;
-  ctx.fillStyle = TEMPLATE.warna.judul;
-  ctx.fillText(TEMPLATE.judul, x, y + 66);
-
-  ctx.font = `700 28px ${f.isi}`;
-  ctx.fillStyle = TEMPLATE.warna.aksen;
-  ctx.fillText(subjudul, x, y + 112);
-}
-
-function gambarKaki(ctx, uk){
-  const f = TEMPLATE.font;
-  const y = uk.h - uk.bawah - 30;
-  ctx.fillStyle = 'rgba(255,255,255,0.18)';
-  ctx.fillRect(TEMPLATE.samping, y - 58, uk.w - TEMPLATE.samping * 2, 2);
-  ctx.textBaseline = 'alphabetic';
+  // Pita PENGUMUMAN
+  ctx.fillStyle = c.pita;
+  kotakBulat(ctx, 190, 170, w - 380, 140, 56);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth = 3;
+  kotakBulat(ctx, 202, 182, w - 404, 116, 48);
+  ctx.stroke();
+  ctx.fillStyle = c.putih;
   ctx.textAlign = 'center';
-  ctx.font = `600 26px ${f.isi}`;
-  ctx.fillStyle = TEMPLATE.warna.kaki;
-  ctx.fillText(TEMPLATE.kaki, uk.w / 2, y);
+  ctx.textBaseline = 'middle';
+  ctx.font = `italic 900 76px ${f.isi}`;
+  ctx.fillText('PENGUMUMAN', w / 2, 243);
+
+  ornamen(ctx, w / 2, 372, 300);
+
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = c.tinta;
+  ctx.font = `800 66px ${f.isi}`;
+  ctx.fillText('TERIMA KASIH', w / 2, 1580);
+
+  ctx.textAlign = 'right';
+  ctx.fillStyle = c.putih;
+  ctx.font = `700 46px ${f.slogan}`;
+  TEMPLATE.slogan.forEach((t, i) => ctx.fillText(t, w - 64, 1760 + i * 62));
   ctx.textAlign = 'left';
 }
 
-/*
-  Membagi butir ke halaman. Diutamakan semuanya muat dalam satu gambar,
-  bila perlu dengan huruf sedikit diperkecil. Bila tetap tidak muat,
-  butir dibagi ke beberapa gambar dengan ukuran huruf normal.
+function gambarLatar(ctx, logo){
+  if(!tpl.gambar){ gambarLatarBawaan(ctx, logo); return; }
+  const { w, h } = TEMPLATE;
+  const img = tpl.gambar;
+  const r = Math.max(w / img.width, h / img.height);
+  const lw = img.width * r, lh = img.height * r;
+  ctx.drawImage(img, (w - lw) / 2, (h - lh) / 2, lw, lh);
+}
+
+/* ============================================================
+   Isi pengumuman
+   ============================================================
+
+   konten = {
+     judul: 'JADWAL PERPINDAHAN SEMENTARA',
+     isi:   'Diharapkan bagi mahasiswa ... *AKM 1 KP B* ...',
+     daftar: [{ judul: 'Akuntansi ... KP B',
+                baris: [{ teks, gaya: 'lembut' | 'tebal' | 'catatan' }] }],
+   }
 */
-function bagiHalaman(ctx, uk, daftar){
-  const lebar = uk.w - TEMPLATE.samping * 2;
-  const ruang = uk.h - uk.atas - uk.bawah - TINGGI_KEPALA - TINGGI_KAKI;
-  const jarak = s => 22 * s;
 
-  for(const s of [1, 0.92, 0.84, 0.76, 0.7]){
-    const kartu = daftar.map(b => susunKartu(ctx, b, lebar, s));
-    const total = kartu.reduce((n, k) => n + k.tinggi, 0) + jarak(s) * (kartu.length - 1);
-    if(total <= ruang) return [kartu];
+function susunKepala(ctx, konten, lebar, s){
+  const f = TEMPLATE.font;
+  ctx.font = `700 ${84 * s}px ${f.judul}`;
+  const judul = barisKaya(ctx, String(konten.judul || '').toUpperCase(), lebar);
+  const tJudul = judul.baris.length * 88 * s;
+
+  ctx.font = `700 ${42 * s}px ${f.isi}`;
+  const isi = barisKaya(ctx, konten.isi, lebar);
+  const tIsi = isi.baris.length * 58 * s;
+
+  const tinggi = tJudul + (tJudul ? 26 * s : 0) + 26 * s + 40 * s + tIsi;
+  return { judul, isi, tJudul, tIsi, tinggi, s };
+}
+
+function susunButir(ctx, butir, lebar, s){
+  const f = TEMPLATE.font;
+  const pad = 24 * s;
+  const dalam = lebar - pad * 2;
+  const baris = [];
+  const gaya = {
+    judul:   { font: `800 ${36 * s}px ${f.isi}`, tinggi: 46 * s, warna: TEMPLATE.warna.emas },
+    lembut:  { font: `600 ${30 * s}px ${f.isi}`, tinggi: 40 * s, warna: TEMPLATE.warna.tintaLembut },
+    tebal:   { font: `700 ${32 * s}px ${f.isi}`, tinggi: 42 * s, warna: TEMPLATE.warna.tinta },
+    catatan: { font: `500 ${26 * s}px ${f.isi}`, tinggi: 36 * s, warna: TEMPLATE.warna.tintaLembut },
+  };
+  const tambah = (teks, g) => {
+    ctx.font = g.font;
+    const { baris: bs, lebarSpasi } = barisKaya(ctx, teks, dalam);
+    for(const b of bs) baris.push({ b, lebarSpasi, ...g });
+  };
+  if(butir.judul) tambah(butir.judul, gaya.judul);
+  for(const b of butir.baris || []) tambah(b.teks, gaya[b.gaya] || gaya.tebal);
+  const tinggi = pad * 2 + baris.reduce((n, b) => n + b.tinggi, 0);
+  return { baris, tinggi, pad, s };
+}
+
+function gambarKepala(ctx, k, cx, y){
+  const f = TEMPLATE.font;
+  const s = k.s;
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = `700 ${84 * s}px ${f.judul}`;
+  for(const b of k.judul.baris){
+    y += 88 * s;
+    gambarBarisKaya(ctx, b, cx, y - 14 * s, k.judul.lebarSpasi, TEMPLATE.warna.tinta);
   }
-
-  const s = 0.76;
-  const halaman = [];
-  let kini = [], terpakai = 0;
-  for(const b of daftar){
-    const k = susunKartu(ctx, b, lebar, s);
-    const tambah = (kini.length ? jarak(s) : 0) + k.tinggi;
-    if(kini.length && terpakai + tambah > ruang){
-      halaman.push(kini);
-      kini = []; terpakai = 0;
-    }
-    terpakai += (kini.length ? jarak(s) : 0) + k.tinggi;
-    kini.push(k);
+  if(k.tJudul) y += 26 * s;
+  ornamen(ctx, cx, y + 13 * s, 260 * s, s);
+  y += 26 * s + 40 * s;
+  ctx.font = `700 ${42 * s}px ${f.isi}`;
+  for(const b of k.isi.baris){
+    y += 58 * s;
+    gambarBarisKaya(ctx, b, cx, y - 14 * s, k.isi.lebarSpasi, TEMPLATE.warna.tinta);
   }
-  if(kini.length) halaman.push(kini);
+  return y;
+}
 
-  // Pembagian di atas mengisi halaman awal sepenuh mungkin, sehingga halaman
-  // terakhir bisa hanya berisi satu kartu. Bila memungkinkan, jumlah kartu
-  // diratakan supaya tiap gambar tampak seimbang.
-  const semua = halaman.flat();
-  const per = Math.ceil(semua.length / halaman.length);
-  const rata = [];
-  for(let i = 0; i < semua.length; i += per) rata.push(semua.slice(i, i + per));
-  const muat = h => h.reduce((n, k) => n + k.tinggi, 0) + jarak(s) * (h.length - 1) <= ruang;
-  return rata.length === halaman.length && rata.every(muat) ? rata : halaman;
+function gambarButir(ctx, k, x, y, lebar){
+  ctx.fillStyle = TEMPLATE.warna.kotak;
+  kotakBulat(ctx, x, y, lebar, k.tinggi, 26 * k.s);
+  ctx.fill();
+  let cy = y + k.pad;
+  const cx = x + lebar / 2;
+  for(const b of k.baris){
+    cy += b.tinggi;
+    ctx.font = b.font;
+    gambarBarisKaya(ctx, b.b, cx, cy - b.tinggi * 0.26, b.lebarSpasi, b.warna);
+  }
+}
+
+function hitungArea(){
+  const { w, h } = TEMPLATE;
+  const a = tpl.area;
+  const x0 = w * a.kiri / 100, x1 = w * (1 - a.kanan / 100);
+  const y0 = h * a.atas / 100, y1 = h * a.bawah / 100;
+  return { x0, x1, y0, y1, lebar: x1 - x0, tinggi: y1 - y0 };
+}
+
+const JARAK_DAFTAR = 38;   // jarak isi ke daftar
+const JARAK_BUTIR = 18;
+
+function tinggiHalaman(kepala, butir, s){
+  if(!butir.length) return kepala.tinggi;
+  return kepala.tinggi + JARAK_DAFTAR * s
+    + butir.reduce((n, b) => n + b.tinggi, 0) + JARAK_BUTIR * s * (butir.length - 1);
 }
 
 /*
-  Menghasilkan daftar kanvas untuk satu format ('post' atau 'story').
-
-  butir: [{ tipe, label?, judul, info, detail: [..], catatan?, tanggal, tanggalPendek }]
-  subjudul: teks di bawah judul besar, misalnya rentang tanggalnya.
+  Diutamakan semuanya muat dalam satu gambar, bila perlu dengan huruf
+  diperkecil. Bila tetap tidak muat, daftar dibagi ke beberapa gambar dengan
+  judul dan kalimat pembuka yang sama di tiap gambar.
 */
-export async function buatKanvas(format, daftar, subjudul){
-  const uk = TEMPLATE.ukuran[format];
+function bagiHalaman(ctx, konten, area){
+  const daftar = konten.daftar || [];
+  for(const s of [1, 0.92, 0.85, 0.78, 0.72]){
+    const kepala = susunKepala(ctx, konten, area.lebar, s);
+    const butir = daftar.map(b => susunButir(ctx, b, area.lebar, s));
+    if(tinggiHalaman(kepala, butir, s) <= area.tinggi) return { kepala, halaman: [butir] };
+  }
+
+  const s = 0.72;
+  const kepala = susunKepala(ctx, konten, area.lebar, s);
+  const semua = daftar.map(b => susunButir(ctx, b, area.lebar, s));
+  const halaman = [];
+  let kini = [];
+  for(const b of semua){
+    if(kini.length && tinggiHalaman(kepala, [...kini, b], s) > area.tinggi){
+      halaman.push(kini); kini = [];
+    }
+    kini.push(b);
+  }
+  if(kini.length) halaman.push(kini);
+
+  // Ratakan jumlah kotak per gambar bila masih muat, supaya gambar terakhir
+  // tidak hanya berisi satu kotak.
+  const per = Math.ceil(semua.length / halaman.length);
+  const rata = [];
+  for(let i = 0; i < semua.length; i += per) rata.push(semua.slice(i, i + per));
+  const pakai = rata.length === halaman.length && rata.every(h => tinggiHalaman(kepala, h, s) <= area.tinggi)
+    ? rata : halaman;
+  return { kepala, halaman: pakai };
+}
+
+/*
+  Menghasilkan daftar kanvas story.
+  opsi.panduan: gambar garis putus-putus di batas area teks (untuk pratinjau
+  di tab Upload dan Download, tidak untuk gambar yang diunduh).
+*/
+export async function buatStory(konten, opsi = {}){
   await siapkanFont();
-  // Latar dari desainer biasanya sudah memuat logo, jadi logo bawaan hanya
-  // digambar di atas latar bawaan.
-  const [logo, latarImg] = await Promise.all([
-    TEMPLATE.latar[format] ? null : muatGambar(TEMPLATE.logo),
-    muatGambar(TEMPLATE.latar[format]),
-  ]);
-
+  const logo = tpl.gambar ? null : await muatGambar(TEMPLATE.logo);
+  const area = hitungArea();
   const ukur = document.createElement('canvas').getContext('2d');
-  const halaman = bagiHalaman(ukur, uk, daftar);
+  const { kepala, halaman } = bagiHalaman(ukur, konten, area);
 
-  return halaman.map((kartu, i) => {
+  return halaman.map((butir, i) => {
     const kanvas = document.createElement('canvas');
-    kanvas.width = uk.w; kanvas.height = uk.h;
+    kanvas.width = TEMPLATE.w; kanvas.height = TEMPLATE.h;
     const ctx = kanvas.getContext('2d');
+    gambarLatar(ctx, logo);
 
-    gambarLatar(ctx, uk, latarImg);
-    gambarKepala(ctx, uk, logo, subjudul,
-      halaman.length > 1 ? `${i + 1}/${halaman.length}` : '');
-
-    const lebar = uk.w - TEMPLATE.samping * 2;
-    const jarak = 22 * kartu[0].s;
-    const ruang = uk.h - uk.atas - uk.bawah - TINGGI_KEPALA - TINGGI_KAKI;
-    const total = kartu.reduce((n, k) => n + k.tinggi, 0) + jarak * (kartu.length - 1);
-    // Kartu diletakkan sedikit ke atas dari tengah area isi, supaya gambar
-    // dengan satu perubahan saja tidak terlihat kosong di bagian atas.
-    let y = uk.atas + TINGGI_KEPALA + Math.max(0, (ruang - total) * 0.35);
-    for(const k of kartu){
-      gambarKartu(ctx, k, TEMPLATE.samping, y, lebar);
-      y += k.tinggi + jarak;
+    if(opsi.panduan){
+      ctx.save();
+      ctx.setLineDash([18, 12]);
+      ctx.strokeStyle = '#E0457B';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(area.x0, area.y0, area.lebar, area.tinggi);
+      ctx.restore();
     }
 
-    gambarKaki(ctx, uk);
+    const s = kepala.s;
+    const total = tinggiHalaman(kepala, butir, s);
+    const cx = area.x0 + area.lebar / 2;
+    let y = area.y0 + Math.max(0, (area.tinggi - total) / 2);
+    y = gambarKepala(ctx, kepala, cx, y);
+    if(butir.length) y += JARAK_DAFTAR * s;
+    for(const b of butir){
+      gambarButir(ctx, b, area.x0, y, area.lebar);
+      y += b.tinggi + JARAK_BUTIR * s;
+    }
+
+    if(halaman.length > 1){
+      ctx.font = `700 ${26}px ${TEMPLATE.font.isi}`;
+      ctx.fillStyle = TEMPLATE.warna.tintaLembut;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(`${i + 1}/${halaman.length}`, area.x1, area.y1 + 34);
+      ctx.textAlign = 'left';
+    }
     return kanvas;
   });
 }
 
+// Latar bawaan tanpa isi, untuk diunduh sebagai titik awal desain template.
+export async function kanvasLatarBawaan(){
+  await siapkanFont();
+  const logo = await muatGambar(TEMPLATE.logo);
+  const kanvas = document.createElement('canvas');
+  kanvas.width = TEMPLATE.w; kanvas.height = TEMPLATE.h;
+  gambarLatarBawaan(kanvas.getContext('2d'), logo);
+  return kanvas;
+}
+
 /* ============================================================
-   Jendela pratinjau, unduh, salin, dan bagikan
+   Jendela pratinjau: ubah teks, unduh, salin, bagikan
    ============================================================ */
 
 const $ = id => document.getElementById(id);
 const keBlob = kanvas => new Promise(res => kanvas.toBlob(res, 'image/png'));
 
-let kini = { daftar: [], subjudul: '', format: 'post', kanvas: [], namaDasar: 'kafbe' };
+let kini = { konten: null, kanvas: [], namaDasar: 'kafbe-story' };
+let jedaGambar = null;
 
 function pesanIg(teks, jenis){
   const el = $('igPesan');
@@ -432,16 +509,19 @@ function pesanIg(teks, jenis){
 
 function namaBerkas(i){
   const n = kini.kanvas.length > 1 ? `-${i + 1}` : '';
-  return `${kini.namaDasar}-${kini.format}${n}.png`;
+  return `${kini.namaDasar}${n}.png`;
+}
+
+export function unduhBlobSebagai(blob, nama){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nama;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
 async function unduh(i){
-  const blob = await keBlob(kini.kanvas[i]);
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = namaBerkas(i);
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  unduhBlobSebagai(await keBlob(kini.kanvas[i]), namaBerkas(i));
 }
 
 async function salin(i){
@@ -484,33 +564,30 @@ function bisaBagikanBerkas(){
 
 async function gambarUlang(){
   const wadah = $('igPratinjau');
-  wadah.innerHTML = '<p class="op-samar">Menyusun gambar…</p>';
-  document.querySelectorAll('[data-ig-format]').forEach(b =>
-    b.classList.toggle('active', b.dataset.igFormat === kini.format));
-
+  const konten = { ...kini.konten, judul: $('igJudulTeks').value, isi: $('igIsiTeks').value };
   try{
-    kini.kanvas = await buatKanvas(kini.format, kini.daftar, kini.subjudul);
+    kini.kanvas = await buatStory(konten);
   }catch(err){
     console.error(err);
-    wadah.innerHTML = '';
     pesanIg('Gagal menyusun gambar: ' + err.message, 'salah');
     return;
   }
 
   const bagi = bisaBagikanBerkas();
   const banyak = kini.kanvas.length > 1;
-  $('igRingkas').textContent =
-    `${kini.daftar.length} perubahan · ${kini.kanvas.length} gambar · ${TEMPLATE.ukuran[kini.format].nama}`;
+  const n = (kini.konten.daftar || []).length;
+  $('igRingkas').textContent = `${n ? n + ' kelas · ' : ''}${kini.kanvas.length} gambar story 1080 × 1920`
+    + (tpl.gambar ? ' · template unggahan' : ' · template bawaan');
   $('igUnduhSemua').hidden = !banyak;
   $('igBagikanSemua').hidden = !(banyak && bagi);
 
   wadah.innerHTML = '';
   kini.kanvas.forEach((kanvas, i) => {
     const kartu = document.createElement('figure');
-    kartu.className = 'op-ig-hasil ' + kini.format;
+    kartu.className = 'op-ig-hasil';
     const img = document.createElement('img');
     img.src = kanvas.toDataURL('image/png');
-    img.alt = `Pratinjau gambar ${i + 1}`;
+    img.alt = `Pratinjau story ${i + 1}`;
     const aksi = document.createElement('figcaption');
     aksi.className = 'op-tombol-baris';
     aksi.innerHTML = `
@@ -526,16 +603,17 @@ async function gambarUlang(){
   });
 }
 
+function jadwalkanGambar(){
+  clearTimeout(jedaGambar);
+  jedaGambar = setTimeout(gambarUlang, 350);
+}
+
 let terpasang = false;
 function pasang(){
   if(terpasang) return;
   terpasang = true;
-  document.querySelectorAll('[data-ig-format]').forEach(b => b.addEventListener('click', () => {
-    if(kini.format === b.dataset.igFormat) return;
-    kini.format = b.dataset.igFormat;
-    pesanIg('');
-    gambarUlang();
-  }));
+  $('igJudulTeks').addEventListener('input', jadwalkanGambar);
+  $('igIsiTeks').addEventListener('input', jadwalkanGambar);
   $('igTutup').addEventListener('click', () => $('dialogIg').close());
   $('dialogIg').addEventListener('click', e => { if(e.target === $('dialogIg')) $('dialogIg').close(); });
   $('igUnduhSemua').addEventListener('click', async () => {
@@ -549,12 +627,15 @@ function pasang(){
 }
 
 /*
-  Membuka jendela pratinjau.
-  namaDasar dipakai untuk nama berkas unduhan, misalnya "kafbe-2026-09-29".
+  Membuka jendela pratinjau. Judul dan kalimat pembuka bisa disunting di
+  jendela itu sebelum gambarnya diunduh.
 */
-export function bukaGambarIg(daftar, subjudul, namaDasar){
+export function bukaStory(konten, namaDasar){
   pasang();
-  kini = { ...kini, daftar, subjudul, namaDasar: namaDasar || 'kafbe', kanvas: [] };
+  kini = { konten, kanvas: [], namaDasar: namaDasar || 'kafbe-story' };
+  $('igJudulTeks').value = konten.judul || '';
+  $('igIsiTeks').value = konten.isi || '';
+  $('igPratinjau').innerHTML = '<p class="op-samar">Menyusun gambar…</p>';
   pesanIg('');
   $('dialogIg').showModal();
   gambarUlang();

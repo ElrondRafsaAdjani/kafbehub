@@ -466,6 +466,15 @@ service cloud.firestore {
       allow write: if tulisanAdmin();
     }
 
+    // Template story Instagram yang diunggah di tab "Upload dan Download".
+    // Gambarnya disimpan sebagai potongan teks base64 (lihat
+    // shared/operasional.js). Hanya pengurus yang memakainya, jadi tidak
+    // dibuka untuk publik.
+    match /templateig/{id} {
+      allow read: if adminTerdaftar();
+      allow write: if tulisanAdmin();
+    }
+
     match /pengumuman/{id} {
       allow read: if true;
       allow write: if tulisanAdmin();
