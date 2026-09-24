@@ -739,7 +739,7 @@
           </div>
 
           <h4 class="op-subjudul">Warna</h4>
-          <p class="op-catatan">Warna primer untuk seluruh teks biasa. Warna sekunder untuk kata yang diapit tanda bintang, misalnya <code>*SEMENTARA*</code>, dan nama kelas di daftar. Kode hex bisa diketik langsung.</p>
+          <p class="op-catatan">Warna primer untuk seluruh teks biasa. Warna sekunder untuk kata yang diapit tanda bintang, misalnya <code>*SEMENTARA*</code>, dan nama kelas di daftar. Jadwal yang berubah (diapit dua bintang, <code>**…**</code>) ditulis tebal dengan isi warna sekunder dan garis tepi warna primer. Kode hex bisa diketik langsung.</p>
           <div class="op-baris">
             <div class="op-field op-sempit"><label for="tplHexPrimer">Warna primer</label>
               <span class="op-warna"><input type="color" id="tplWarnaPrimer" aria-label="Pilih warna primer" />
@@ -747,11 +747,7 @@
             <div class="op-field op-sempit"><label for="tplHexSekunder">Warna sekunder</label>
               <span class="op-warna"><input type="color" id="tplWarnaSekunder" aria-label="Pilih warna sekunder" />
               <input type="text" id="tplHexSekunder" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
-            <div class="op-field op-sempit"><label for="tplHexKotak">Kotak daftar kelas</label>
-              <span class="op-warna"><input type="color" id="tplWarnaKotak" aria-label="Pilih warna kotak daftar kelas" />
-              <input type="text" id="tplHexKotak" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
           </div>
-          <label class="op-centang-sebaris"><input type="checkbox" id="tplKotakAktif" /> Tampilkan kotak di belakang tiap kelas</label>
 
           <h4 class="op-subjudul">Posisi</h4>
           <p class="op-catatan">Seperti di Canva: header, body, daftar kelas, dan footer adalah empat elemen terpisah di pratinjau. Seret elemennya untuk memindahkan, seret sisi kiri/kanan untuk mengubah lebar, dan sisi bawah daftar kelas untuk mengubah tingginya. Posisi yang disimpan di sini menjadi posisi awal semua story.</p>
@@ -1006,7 +1002,7 @@
         <textarea id="igTeksDaftar" rows="8"></textarea></div>
       <div class="op-field"><label for="igTeksFooter">Footer</label>
         <input type="text" id="igTeksFooter" placeholder="Kosongkan bila TERIMA KASIH sudah ada di template" /></div>
-      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, memakai warna sekunder. Di daftar kelas, baris kosong memisahkan kelas; tiap kelas diberi kotak sendiri bila diaktifkan di tab PR.</p>
+      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, memakai warna sekunder. Yang diapit dua bintang, misalnya <code>**TF 02.02**</code>, ditulis tebal dengan garis tepi, seperti jadwal yang berubah. Di daftar kelas, baris kosong memisahkan kelas.</p>
       <div class="op-aksi">
         <button type="button" class="btn btn-ghost op-kecil" id="igPosisiAwal">Kembalikan posisi awal</button>
         <button type="button" class="btn btn-primary op-kecil" id="igUnduhSemua" hidden>Unduh semua</button>

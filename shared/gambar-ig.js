@@ -7,7 +7,7 @@
 
     header : judul, misalnya JADWAL PERPINDAHAN SEMENTARA
     body   : kalimat pembuka
-    daftar : daftar kelas yang berubah, tiap kelas dalam kotak berwarna
+    daftar : daftar kelas yang berubah, jadwalnya ditulis tegas
     footer : misalnya TERIMA KASIH (boleh kosong bila sudah ada di template)
 
   Isi awalnya disusun dari data jadwal oleh operasional.js. Dulu jadwal
@@ -19,8 +19,9 @@
 
   ATURAN PENULISAN
     - *kata*          ditulis dengan warna sekunder
-    - baris kosong    di daftar kelas memisahkan kelas; tiap kelas diberi
-                      kotak berwarna sendiri (bila diaktifkan)
+    - **kata**        ditulis tegas: isi warna sekunder, tebal, bergaris tepi
+                      warna primer (untuk jadwal yang berubah)
+    - baris kosong    di daftar kelas memisahkan kelas
 
   TEMPLATE DAN PENGATURAN
 
@@ -28,13 +29,12 @@
   Firestore, koleksi templateig). Template diunggah sekali dan dipakai
   sepanjang satu periode kepengurusan; periode berikutnya cukup mengunggah
   template baru. Batik, logo, pita PENGUMUMAN, kartu putih, ornamen, dan
-  slogan sudah ada di gambar template, jadi yang digambar di sini hanya teks
-  dan kotak daftar kelas.
+  slogan sudah ada di gambar template, jadi yang digambar di sini hanya teks.
 
   Di tab PR diatur posisi awal keempat elemen, ukuran hurufnya, font
   primer (header dan footer) dan sekunder (body dan daftar) dari Google Fonts
-  (lihat shared/daftar-font.js), warna primer dan sekunder, warna kotak, dan
-  teks footer bawaan. Posisi yang digeser di jendela story hanya berlaku
+  (lihat shared/daftar-font.js), warna primer dan sekunder, dan teks footer
+  bawaan. Posisi yang digeser di jendela story hanya berlaku
   untuk story itu.
 */
 
@@ -63,7 +63,6 @@ export const TEMPLATE = {
   },
   fontBawaan:   { primer: 'Lilita One', sekunder: 'Fredoka' },
   warnaBawaan:  { primer: '#13192f', sekunder: '#be8f41' },
-  kotakBawaan:  { aktif: true, warna: '#F7F1E4' },
   footerTeksBawaan: '',
 };
 
@@ -134,7 +133,6 @@ function susunTpl(isi){
     elemen: elemenDariMeta(isi),
     font:   lengkapi(isi.font, TEMPLATE.fontBawaan),
     warna:  lengkapi(isi.warna, TEMPLATE.warnaBawaan),
-    kotak:  lengkapi(isi.kotak, TEMPLATE.kotakBawaan),
     footerTeks: typeof isi.footerTeks === 'string' ? isi.footerTeks : TEMPLATE.footerTeksBawaan,
   };
 }
@@ -142,7 +140,7 @@ function susunTpl(isi){
 /*
   Dipanggil oleh operasional.js setelah template dari Firestore dimuat, dan
   setiap kali isian di tab PR berubah (untuk pratinjau).
-  isi: { gambar, elemen, font, warna, kotak, footerTeks }
+  isi: { gambar, elemen, font, warna, footerTeks }
 */
 export function aturTemplate(isi = {}){
   tpl = susunTpl(isi);
@@ -233,17 +231,23 @@ async function siapkanFont(){
 
 /* ---------- Teks berwarna: *kata* memakai warna sekunder ---------- */
 
+/*
+  *kata*   : warna sekunder
+  **kata** : "tegas", yaitu isi warna sekunder, tebal, dan bergaris tepi
+             warna primer. Dipakai untuk jadwal yang berubah di daftar kelas.
+*/
 function tokenKaya(teks){
   const out = [];
-  let sorot = false;
-  for(const bag of String(teks || '').split(/(\*)/)){
+  let sorot = false, tegas = false;
+  for(const bag of String(teks || '').split(/(\*\*|\*)/)){
+    if(bag === '**'){ tegas = !tegas; continue; }
     if(bag === '*'){ sorot = !sorot; continue; }
     for(const t of bag.split(/(\s+)/)){
       if(!t) continue;
       if(/^\s+$/.test(t)){
         const n = (t.match(/\n/g) || []).length;
         out.push(n ? { br: n } : { spasi: true });
-      }else out.push({ k: t, sorot });
+      }else out.push({ k: t, sorot, tegas });
     }
   }
   return out;
@@ -255,16 +259,20 @@ function lebarKata(ctx, k, jarak){
   return ctx.measureText(k).width + (jarak ? jarak * ([...k].length - 1) : 0);
 }
 
-function barisKaya(ctx, teks, lebar, jarak = 0){
+function barisKaya(ctx, teks, lebar, jarak = 0, fontTegas = null){
   const baris = [];
   let kini = [], lebarKini = 0, spasi = false;
   const lebarSpasi = ctx.measureText(' ').width + jarak * 2;
+  const fontBiasa = ctx.font;
   const tutup = () => { baris.push({ kata: kini, lebar: lebarKini }); kini = []; lebarKini = 0; spasi = false; };
 
   for(const t of tokenKaya(teks)){
     if(t.br){ tutup(); for(let i = 1; i < t.br; i++) baris.push({ kata: [], lebar: 0 }); continue; }
     if(t.spasi){ spasi = kini.length > 0; continue; }
+    // Kata tegas diukur dengan font tebalnya, karena lebih lebar.
+    if(t.tegas && fontTegas) ctx.font = fontTegas;
     const w = lebarKata(ctx, t.k, jarak);
+    ctx.font = fontBiasa;
     const tambah = (spasi ? lebarSpasi : 0) + w;
     if(kini.length && lebarKini + tambah > lebar) tutup();
     const pakaiSpasi = kini.length > 0 && spasi;
@@ -276,18 +284,33 @@ function barisKaya(ctx, teks, lebar, jarak = 0){
   return { baris, lebarSpasi };
 }
 
-function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, jarak = 0){
+function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, jarak = 0, blok = null){
   let x = cx - b.lebar / 2;
+  const fontBiasa = ctx.font;
   for(const k of b.kata){
     if(k.spasi) x += lebarSpasi;
-    ctx.fillStyle = k.sorot ? tpl.warna.sekunder : tpl.warna.primer;
-    if(!jarak) ctx.fillText(k.k, x, y);
+    const tegas = k.tegas && blok;
+    ctx.font = tegas ? blok.fontTegas : fontBiasa;
+    ctx.fillStyle = (k.sorot || k.tegas) ? tpl.warna.sekunder : tpl.warna.primer;
+    // Garis tepi digambar lebih dulu lalu ditimpa isi hurufnya, jadi yang
+    // terlihat hanya bagian luar garis, seperti outline di Canva.
+    const tulis = (t, xt) => {
+      if(tegas){
+        ctx.strokeStyle = tpl.warna.primer;
+        ctx.lineWidth = blok.garisTepi;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(t, xt, y);
+      }
+      ctx.fillText(t, xt, y);
+    };
+    if(!jarak) tulis(k.k, x);
     else{
       let xh = x;
-      for(const h of k.k){ ctx.fillText(h, xh, y); xh += ctx.measureText(h).width + jarak; }
+      for(const h of k.k){ tulis(h, xh); xh += ctx.measureText(h).width + jarak; }
     }
     x += k.w;
   }
+  ctx.font = fontBiasa;
 }
 
 /* ============================================================
@@ -305,20 +328,23 @@ function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, jarak = 0){
 function susunBlok(ctx, teks, gaya, lebar){
   ctx.font = gaya.font;
   const jarak = (Number(gaya.spasiHuruf) || 0) / 1000 * gaya.px;
-  const { baris, lebarSpasi } = barisKaya(ctx, teks, lebar, jarak);
+  const { baris, lebarSpasi } = barisKaya(ctx, teks, lebar, jarak, gaya.fontTegas);
   const tinggiBaris = gaya.px * (Number(gaya.spasiBaris) || 1.4);
   const m = ctx.measureText('Hg');
   const naik = m.fontBoundingBoxAscent ?? gaya.px * 0.8;
   const turun = m.fontBoundingBoxDescent ?? gaya.px * 0.2;
   const garisDasar = (tinggiBaris - (naik + turun)) / 2 + naik;
-  return { baris, lebarSpasi, jarak, font: gaya.font, tinggiBaris, garisDasar, tinggi: baris.length * tinggiBaris };
+  return {
+    baris, lebarSpasi, jarak, font: gaya.font, fontTegas: gaya.fontTegas || gaya.font,
+    garisTepi: gaya.px * 0.14, tinggiBaris, garisDasar, tinggi: baris.length * tinggiBaris,
+  };
 }
 
 function gambarBlok(ctx, blok, cx, y){
   ctx.font = blok.font;
   ctx.textBaseline = 'alphabetic';
   for(const b of blok.baris){
-    gambarBarisKaya(ctx, b, cx, y + blok.garisDasar, blok.lebarSpasi, blok.jarak);
+    gambarBarisKaya(ctx, b, cx, y + blok.garisDasar, blok.lebarSpasi, blok.jarak, blok);
     y += blok.tinggiBaris;
   }
   return y;
@@ -329,6 +355,8 @@ function gayaElemen(el, fontNama, s = 1, ukuran = el.ukuran){
   const px = (Number(ukuran) || 30) * PT * s;
   return {
     font: `${ketebalan(fontNama, Number(el.tebal) || 400)} ${px}px ${css(fontNama)}`,
+    // Kata tegas memakai ketebalan paling tebal yang tersedia.
+    fontTegas: `${ketebalan(fontNama, 800)} ${px}px ${css(fontNama)}`,
     px, spasiBaris: el.spasiBaris, spasiHuruf: el.spasiHuruf,
   };
 }
@@ -350,8 +378,9 @@ function pecahParagraf(teks){
 }
 
 /*
-  Daftar kelas: tiap kelas satu kotak berwarna (bila diaktifkan), disusun
-  ke bawah di dalam kotak elemen "daftar". Elemen ini punya tinggi sendiri
+  Daftar kelas: tiap kelas satu paragraf, disusun ke bawah di dalam kotak
+  elemen "daftar". Jadwal yang berubah ditulis tegas (**...**), jadi tidak
+  perlu kotak berwarna di belakangnya. Elemen ini punya tinggi sendiri
   (h): bila isinya melebihi tinggi itu, hurufnya diperkecil, lalu bila masih
   belum muat, kelasnya dibagi ke beberapa gambar. Header, body, dan footer
   sama di tiap gambar.
@@ -359,13 +388,11 @@ function pecahParagraf(teks){
 function susunDaftar(ctx, paragraf, el, s){
   const r = persenKePx(el);
   const g = gayaElemen(el, tpl.font.sekunder, s);
-  const kotak = tpl.kotak.aktif;
-  const pad = kotak ? 22 * s : 0;
   const bagian = paragraf.map(p => {
-    const blok = susunBlok(ctx, p, g, r.w - pad * 2);
-    return { blok, pad, tinggi: blok.tinggi + pad * 2, kotak };
+    const blok = susunBlok(ctx, p, g, r.w);
+    return { blok, tinggi: blok.tinggi };
   });
-  return { bagian, jarak: kotak ? 16 * s : g.px * 0.5, r, s };
+  return { bagian, jarak: g.px * 0.6, r, s };
 }
 
 function tinggiDaftar(susun, bagian){
@@ -404,14 +431,7 @@ function gambarDaftar(ctx, susun, bagian){
   let y = r.y;
   bagian.forEach((b, i) => {
     if(i > 0) y += susun.jarak;
-    if(b.kotak){
-      ctx.fillStyle = tpl.kotak.warna;
-      ctx.beginPath();
-      if(ctx.roundRect) ctx.roundRect(r.x, y, r.w, b.tinggi, 24 * susun.s);
-      else ctx.rect(r.x, y, r.w, b.tinggi);
-      ctx.fill();
-    }
-    gambarBlok(ctx, b.blok, cx, y + b.pad);
+    gambarBlok(ctx, b.blok, cx, y);
     y += b.tinggi;
   });
 }

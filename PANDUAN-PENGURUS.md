@@ -232,8 +232,8 @@ permanen** yang sudah memuat jadwal lama dan jadwal barunya. Tombol
 **Story IG** di tiap baris tabel juga bisa dipakai, tetapi tanpa jadwal lama.
 
 **Jendela story bekerja seperti Canva.** Ada empat elemen terpisah: header
-(judul), body (kalimat pembuka), daftar kelas (tiap kelas dalam kotak
-berwarna), dan footer (misalnya TERIMA KASIH):
+(judul), body (kalimat pembuka), daftar kelas, dan footer (misalnya TERIMA
+KASIH):
 
 - Tulisan keempatnya bisa disunting di kotak isian sebelah kiri. Isinya
   sudah disusun otomatis dari data jadwal
@@ -241,8 +241,10 @@ berwarna), dan footer (misalnya TERIMA KASIH):
   untuk mengubah lebar, dan pegangan bawah daftar kelas untuk mengubah
   tingginya. Mengeklik elemen di pratinjau langsung membuka isian tulisannya
 - Kata yang diapit tanda bintang, misalnya `*PERMANEN*`, memakai warna
-  sekunder. Di daftar kelas, baris kosong memisahkan kelas; tiap kelas
-  diberi kotak sendiri bila diaktifkan
+  sekunder. Yang diapit dua bintang, misalnya `**TF 02.02**`, ditulis tegas:
+  tebal, isi warna sekunder, dan bergaris tepi warna primer. Jadwal semula
+  dan jadwal baru di daftar kelas otomatis ditulis tegas. Di daftar kelas,
+  baris kosong memisahkan kelas
 - Posisi yang digeser di sini hanya berlaku untuk story itu. **Kembalikan
   posisi awal** memakai lagi posisi dari tab PR
 
@@ -282,10 +284,9 @@ konfirmasi dulu sebelum menimpa).
     tarik pegangan bawah daftar kelas supaya kotaknya lebih tinggi
 - **Teks footer bawaan**, misalnya TERIMA KASIH, tetap bisa diubah di tiap
   story. Kosongkan bila tulisan itu sudah ada di gambar template
-- **Warna** primer untuk seluruh teks biasa, sekunder untuk kata yang diapit
-  `*...*`, serta warna kotak di belakang tiap kelas (kotaknya bisa
-  dimatikan). Kode hex bisa diketik langsung. Saat ini: `#13192f` dan
-  `#be8f41`
+- **Warna** primer untuk seluruh teks biasa dan garis tepi jadwal yang
+  berubah, sekunder untuk kata yang diapit `*...*` dan isi jadwal yang
+  berubah. Kode hex bisa diketik langsung. Saat ini: `#13192f` dan `#be8f41`
 - **Posisi** keempat elemen diatur dengan menyeretnya di pratinjau, sama
   seperti di jendela story. Yang disimpan di sini menjadi posisi awal semua
   story

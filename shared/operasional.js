@@ -1313,20 +1313,22 @@ function butirSementara(p){
   const jamBaru = (p.mulaiBaru && p.selesaiBaru) ? rentangJam(p.mulaiBaru, p.selesaiBaru) : '';
   const asal = [tanggalRingkas(p.tanggal), jamAsli, ruangAsli].filter(Boolean).join(' · ');
 
+  // Jadwal yang berubah ditulis tegas (**...**): isi warna sekunder, tebal,
+  // bergaris tepi warna primer. Kata pengantarnya (Semula, Menjadi) biasa.
   let hasil;
   switch(p.tipe){
-    case 'libur':  hasil = 'Ditiadakan'; break;
-    case 'daring': hasil = 'Online (daring)'; break;
-    case 'ruang':  hasil = `Menjadi: ruang ${p.ruangBaru || 'menyusul'}`; break;
+    case 'libur':  hasil = '**Ditiadakan**'; break;
+    case 'daring': hasil = '**Online (daring)**'; break;
+    case 'ruang':  hasil = `Menjadi: **ruang ${p.ruangBaru || 'menyusul'}**`; break;
     case 'pindah':
-      hasil = 'Menjadi: ' + [tanggalRingkas(p.tanggalBaru), jamBaru, p.ruangBaru || ruangAsli]
-        .filter(Boolean).join(' · ');
+      hasil = 'Menjadi: **' + [tanggalRingkas(p.tanggalBaru), jamBaru, p.ruangBaru || ruangAsli]
+        .filter(Boolean).join(' · ') + '**';
       break;
     case 'menyusul': {
       const kapan = p.tanggalBaru
         ? [tanggalRingkas(p.tanggalBaru), jamBaru].filter(Boolean).join(' · ')
         : 'tanggal dan jam menyusul';
-      hasil = `Pengganti: ${kapan} · ${p.ruangBaru || 'ruang menyusul'}`;
+      hasil = `Pengganti: **${kapan} · ${p.ruangBaru || 'ruang menyusul'}**`;
       break;
     }
     default: hasil = p.tipe;
@@ -1336,7 +1338,7 @@ function butirSementara(p){
   return {
     judul: `${namaMatkul(p.kode) || p.kode} KP ${p.kp}`,
     baris: [
-      { teks: (pindahan ? 'Semula: ' : '') + asal, gaya: 'lembut' },
+      { teks: pindahan ? `Semula: **${asal}**` : asal, gaya: 'lembut' },
       { teks: hasil, gaya: 'tebal' },
       ...(p.catatan ? [{ teks: p.catatan, gaya: 'catatan' }] : []),
     ],
@@ -1399,8 +1401,8 @@ function kontenPermanen(j, lama){
       + `${apa} akan dipindah *PERMANEN* sebagai berikut:`,
     daftar: [{
       baris: [
-        ...(lama ? [{ teks: `Semula: ${teksJadwal(lama)}`, gaya: 'lembut' }] : []),
-        { teks: `${lama ? 'Menjadi: ' : ''}*${teksJadwal(j)}*`, gaya: 'tebal' },
+        ...(lama ? [{ teks: `Semula: **${teksJadwal(lama)}**`, gaya: 'lembut' }] : []),
+        { teks: `${lama ? 'Menjadi: ' : ''}**${teksJadwal(j)}**`, gaya: 'tebal' },
       ],
     }],
   };
@@ -1442,8 +1444,8 @@ async function bukaStoryPermanen(j, lama){
    base64 di koleksi templateig, dipotong-potong karena satu dokumen Firestore
    paling besar 1 MB:
 
-     templateig/story            { potongan, elemen, font, warna, kotak,
-                                   footerTeks, namaBerkas, oleh, diunggah }
+     templateig/story            { potongan, elemen, font, warna, footerTeks,
+                                   namaBerkas, oleh, diunggah }
      templateig/story-potongan-0 { isi: '...' }
      templateig/story-potongan-1 { isi: '...' }
 
@@ -1505,8 +1507,8 @@ const CONTOH_STORY = {
   daftar: [{
     judul: 'Akuntansi Keuangan Menengah I KP B',
     baris: [
-      { teks: 'Semula: Kam, 2 Okt · 13.00 - 14.40 · FG 06.02', gaya: 'lembut' },
-      { teks: 'Menjadi: Jum, 3 Okt · 17.00 - 18.40 · EA 02.05', gaya: 'tebal' },
+      { teks: 'Semula: **Kam, 2 Okt · 13.00 - 14.40 · FG 06.02**', gaya: 'lembut' },
+      { teks: 'Menjadi: **Jum, 3 Okt · 17.00 - 18.40 · EA 02.05**', gaya: 'tebal' },
     ],
   }],
 };
@@ -1534,7 +1536,6 @@ function pengaturanDariIsian(){
     elemen,
     font: { primer: $('tplFontPrimer').value, sekunder: $('tplFontSekunder').value },
     warna: { primer: $('tplWarnaPrimer').value, sekunder: $('tplWarnaSekunder').value },
-    kotak: { aktif: $('tplKotakAktif').checked, warna: $('tplWarnaKotak').value },
     footerTeks: $('tplFooterTeks').value.trim(),
   };
 }
@@ -1544,7 +1545,6 @@ function pengaturanDariIsian(){
 const PASANGAN_WARNA = [
   ['tplWarnaPrimer', 'tplHexPrimer'],
   ['tplWarnaSekunder', 'tplHexSekunder'],
-  ['tplWarnaKotak', 'tplHexKotak'],
 ];
 function aturWarna(idWarna, idHex, nilai){
   $(idWarna).value = nilai;
@@ -1554,14 +1554,12 @@ function aturWarna(idWarna, idHex, nilai){
 
 function isiIsianPengaturan(m){
   const ambil = (k, b) => ({ ...TEMPLATE[b], ...(m?.[k] || {}) });
-  const f = ambil('font', 'fontBawaan'), w = ambil('warna', 'warnaBawaan'), k = ambil('kotak', 'kotakBawaan');
+  const f = ambil('font', 'fontBawaan'), w = ambil('warna', 'warnaBawaan');
   elemenPR = elemenDariMeta(m);
   for(const [n, k] of ISIAN_TIPOGRAFI) $(`tpl-${n}-${k}`).value = elemenPR[n][k];
   pilihFont('tplFontPrimer', f.primer); pilihFont('tplFontSekunder', f.sekunder);
   aturWarna('tplWarnaPrimer', 'tplHexPrimer', w.primer);
   aturWarna('tplWarnaSekunder', 'tplHexSekunder', w.sekunder);
-  aturWarna('tplWarnaKotak', 'tplHexKotak', k.warna);
-  $('tplKotakAktif').checked = k.aktif !== false;
   $('tplFooterTeks').value = typeof m?.footerTeks === 'string' ? m.footerTeks : TEMPLATE.footerTeksBawaan;
 }
 
@@ -1671,7 +1669,7 @@ function pratinjauDariIsian(){
   jedaPratinjau = setTimeout(gambarPratinjauTemplate, 400);
 }
 
-[...ISIAN_TIPOGRAFI.map(([n, k]) => `tpl-${n}-${k}`), 'tplFooterTeks', 'tplKotakAktif']
+[...ISIAN_TIPOGRAFI.map(([n, k]) => `tpl-${n}-${k}`), 'tplFooterTeks']
   .forEach(id => $(id).addEventListener('input', pratinjauDariIsian));
 
 ['tplFontPrimer', 'tplFontSekunder'].forEach(id => $(id).addEventListener('change', () => {
