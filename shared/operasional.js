@@ -1210,7 +1210,8 @@ function gambarPerubahan(){
           ${igPilih.has(p.id) ? 'checked' : ''} aria-label="Pilih untuk story Instagram" /></td>
         <td>${esc(tanggalPanjang(p.tanggal))}${lewat ? '<br><span class="op-samar">sudah lewat</span>' : ''}</td>
         <td><span class="op-lencana ${esc(p.tipe)}">${esc(label)}</span></td>
-        <td>${esc(p.kode)} KP ${esc(p.kp)}${j ? '' : '<br><span class="op-samar">kelas sudah dihapus</span>'}</td>
+        <td><strong>${esc(namaMatkul(p.kode) || p.kode)}</strong> KP ${esc(p.kp)}
+          <br><span class="op-samar">${esc(p.kode)}${j ? '' : ' · kelas sudah dihapus'}</span></td>
         <td>${ket}</td>
         <td><div class="op-tombol-baris">
           <button class="op-mini" data-ig-pb="${esc(p.id)}" title="Buat story Instagram untuk perubahan ini">Story IG</button>
