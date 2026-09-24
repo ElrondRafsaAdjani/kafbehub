@@ -641,7 +641,7 @@
           </div>
 
           <h4 class="op-subjudul">Font</h4>
-          <p class="op-catatan">Dipilih dari seluruh Google Fonts. Font primer untuk judul dan footer, font sekunder untuk kalimat pembuka dan daftar kelas. Di bawah tiap pilihan ada contoh tulisannya.</p>
+          <p class="op-catatan">Dipilih dari seluruh Google Fonts. Font primer untuk header dan footer, font sekunder untuk body. Di bawah tiap pilihan ada contoh tulisannya.</p>
           <div class="op-baris">
             <div class="op-field"><label for="tplFontPrimer">Font primer</label>
               <select id="tplFontPrimer"><option>Memuat daftar font…</option></select>
@@ -652,25 +652,21 @@
           </div>
 
           <h4 class="op-subjudul">Ukuran huruf (piksel, pada gambar 1080 × 1920)</h4>
-          <p class="op-catatan">Bila isinya terlalu panjang untuk area teks, ukuran judul dan isi diperkecil otomatis.</p>
+          <p class="op-catatan">Daftar kelas di body ditulis sedikit lebih kecil dari kalimat pembuka. Bila body lebih panjang dari kotaknya, hurufnya diperkecil otomatis.</p>
           <div class="op-baris">
-            <div class="op-field op-sempit"><label for="tplUkJudul">Judul</label>
+            <div class="op-field op-sempit"><label for="tplUkJudul">Header</label>
               <input type="number" id="tplUkJudul" min="12" max="200" step="1" /></div>
-            <div class="op-field op-sempit"><label for="tplUkIsi">Isi</label>
+            <div class="op-field op-sempit"><label for="tplUkIsi">Body</label>
               <input type="number" id="tplUkIsi" min="12" max="200" step="1" /></div>
             <div class="op-field op-sempit"><label for="tplUkFooter">Footer</label>
               <input type="number" id="tplUkFooter" min="12" max="200" step="1" /></div>
           </div>
 
-          <h4 class="op-subjudul">Footer</h4>
-          <p class="op-catatan">Misalnya TERIMA KASIH. Kosongkan bila tulisan itu sudah ada di gambar template.</p>
+          <h4 class="op-subjudul">Teks footer bawaan</h4>
+          <p class="op-catatan">Misalnya TERIMA KASIH. Tetap bisa diubah di tiap story. Kosongkan bila tulisan itu sudah ada di gambar template.</p>
           <div class="op-baris">
             <div class="op-field op-lebar"><label for="tplFooterTeks">Teks footer</label>
               <input type="text" id="tplFooterTeks" placeholder="TERIMA KASIH" autocomplete="off" /></div>
-            <div class="op-field op-sempit"><label for="tplFooterX">Posisi X (%)</label>
-              <input type="number" id="tplFooterX" min="0" max="100" step="0.5" /></div>
-            <div class="op-field op-sempit"><label for="tplFooterY">Posisi Y (%)</label>
-              <input type="number" id="tplFooterY" min="0" max="100" step="0.5" /></div>
           </div>
 
           <h4 class="op-subjudul">Warna</h4>
@@ -688,18 +684,8 @@
           </div>
           <label class="op-centang-sebaris"><input type="checkbox" id="tplKotakAktif" /> Tampilkan kotak di belakang tiap kelas</label>
 
-          <h4 class="op-subjudul">Area teks (persen dari ukuran gambar)</h4>
-          <p class="op-catatan">Bisa juga langsung diseret di pratinjau: seret bagian dalam kotak garis putus-putus untuk memindahkan, seret sisinya untuk mengubah ukuran, dan seret kotak footer untuk memindahkan footer.</p>
-          <div class="op-baris">
-            <div class="op-field op-sempit"><label for="tplAtas">Atas</label>
-              <input type="number" id="tplAtas" min="0" max="90" step="0.5" /></div>
-            <div class="op-field op-sempit"><label for="tplBawah">Bawah</label>
-              <input type="number" id="tplBawah" min="10" max="100" step="0.5" /></div>
-            <div class="op-field op-sempit"><label for="tplKiri">Kiri</label>
-              <input type="number" id="tplKiri" min="0" max="80" step="0.5" /></div>
-            <div class="op-field op-sempit"><label for="tplKanan">Kanan</label>
-              <input type="number" id="tplKanan" min="0" max="80" step="0.5" /></div>
-          </div>
+          <h4 class="op-subjudul">Posisi</h4>
+          <p class="op-catatan">Seperti di Canva: header, body, dan footer adalah tiga kotak terpisah di pratinjau. Seret kotaknya untuk memindahkan, seret sisi kiri/kanan untuk mengubah lebar, dan sisi bawah body untuk mengubah tingginya. Posisi yang disimpan di sini menjadi posisi awal semua story.</p>
 
           <div class="op-aksi">
             <button type="button" class="btn btn-primary op-kecil" id="tplSimpan">Simpan pengaturan</button>
@@ -710,13 +696,6 @@
         <div class="op-template-kanan">
           <div class="op-tpl-kanvas" id="tplKanvas" hidden>
             <img class="op-template-pratinjau" id="tplPratinjau" alt="Pratinjau template story dengan contoh isi" draggable="false" />
-            <div class="op-tpl-area" id="tplKotakArea" title="Seret untuk memindahkan area teks">
-              <span class="op-tpl-sisi atas" data-sisi="atas"></span>
-              <span class="op-tpl-sisi bawah" data-sisi="bawah"></span>
-              <span class="op-tpl-sisi kiri" data-sisi="kiri"></span>
-              <span class="op-tpl-sisi kanan" data-sisi="kanan"></span>
-            </div>
-            <div class="op-tpl-footer" id="tplKotakFooter" title="Seret untuk memindahkan footer" hidden></div>
           </div>
           <div class="op-template-kosong" id="tplKosong">Pratinjau muncul setelah template diunggah.</div>
         </div>
@@ -988,19 +967,30 @@
   </div>
   <div class="op-ig-susun">
     <div class="op-ig-teks">
-      <div class="op-field"><label for="igJudulTeks">Judul</label>
-              <input type="text" id="igJudulTeks" /></div>
-      <div class="op-field"><label for="igIsiTeks">Kalimat pembuka</label>
-              <textarea id="igIsiTeks" rows="6"></textarea></div>
-      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, ditulis dengan warna sekunder (diatur di tab PR). Daftar kelas di bawahnya disusun otomatis dari data.</p>
-      <p class="op-catatan">Periksa dulu isinya, lalu unduh atau salin gambarnya dan unggah sendiri sebagai story. Di ponsel, tombol Bagikan bisa langsung membuka Instagram.</p>
+      <p class="op-catatan">Seperti di Canva: header, body, dan footer adalah tiga kotak teks terpisah. Sunting tulisannya di sini, lalu seret kotaknya di pratinjau untuk memindahkan, atau seret sisi kiri/kanan untuk mengubah lebarnya.</p>
+      <div class="op-field"><label for="igTeksHeader">Header</label>
+        <textarea id="igTeksHeader" rows="2"></textarea></div>
+      <div class="op-field"><label for="igTeksBody">Body</label>
+        <textarea id="igTeksBody" rows="12"></textarea></div>
+      <div class="op-field"><label for="igTeksFooter">Footer</label>
+        <input type="text" id="igTeksFooter" placeholder="Kosongkan bila TERIMA KASIH sudah ada di template" /></div>
+      <p class="op-catatan">Kata yang diapit tanda bintang, misalnya <code>*PERMANEN*</code>, memakai warna sekunder. Di body, baris kosong memisahkan paragraf: paragraf pertama kalimat pembuka, paragraf berikutnya daftar kelas (diberi kotak bila diaktifkan di tab PR).</p>
       <div class="op-aksi">
+        <button type="button" class="btn btn-ghost op-kecil" id="igPosisiAwal">Kembalikan posisi awal</button>
         <button type="button" class="btn btn-primary op-kecil" id="igUnduhSemua" hidden>Unduh semua</button>
         <button type="button" class="btn btn-ghost op-kecil" id="igBagikanSemua" hidden>Bagikan semua</button>
       </div>
       <p class="op-pesan" id="igPesan" role="status"></p>
     </div>
-    <div class="op-ig-pratinjau" id="igPratinjau"></div>
+    <div class="op-ig-kanan">
+      <figure class="op-ig-hasil">
+        <div class="op-tpl-kanvas" id="igBingkai">
+          <img class="op-template-pratinjau" id="igUtama" alt="Pratinjau story" draggable="false" />
+        </div>
+        <div id="igUtamaAksi"></div>
+      </figure>
+      <div class="op-ig-lainnya" id="igLainnya"></div>
+    </div>
   </div>
 </dialog>
 

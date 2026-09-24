@@ -1,75 +1,73 @@
 /*
   Pembuat gambar Story Instagram (SG) untuk pengumuman perubahan jadwal.
 
-  Admin operasional memilih perubahan sementara, atau baru saja memindah
-  jadwal permanen, lalu berkas ini MENEMPELKAN TEKS pengumumannya ke template
-  story yang diunggah tim di tab PR:
+  Cara kerjanya meniru Canva: di atas template story yang diunggah tim ada
+  TIGA kotak teks yang berdiri sendiri, masing-masing bisa digeser, dilebarkan,
+  dan disunting tulisannya:
 
-    [judul, misalnya JADWAL PERPINDAHAN SEMENTARA]
-    [kalimat pembuka, bagian bertanda *...* diberi warna sekunder]
-    [daftar kelas yang berubah]
+    header : judul, misalnya JADWAL PERPINDAHAN SEMENTARA
+    body   : kalimat pembuka lalu daftar kelas yang berubah
+    footer : misalnya TERIMA KASIH (boleh kosong bila sudah ada di template)
 
-  Dulu jadwal pengganti ditempel sebagai tangkapan layar tabel Excel. Karena
-  datanya kini sudah ada di KAFBE Hub, daftar itu ditulis langsung sebagai
-  teks, jadi tetap terbaca di layar ponsel.
+  Isi awalnya disusun dari data jadwal oleh operasional.js. Dulu jadwal
+  pengganti ditempel sebagai tangkapan layar tabel Excel; kini ditulis
+  langsung sebagai teks, jadi tetap terbaca di layar ponsel.
 
   Tidak ada yang dikirim ke Instagram dari sini. Gambar diunduh, disalin, atau
   dibagikan lewat menu bagikan ponsel, lalu diunggah sendiri oleh pengurus.
 
-  TEMPLATE DAN GAYA TEKS
+  ATURAN PENULISAN
+    - *kata*          ditulis dengan warna sekunder
+    - baris kosong    memisahkan paragraf di body. Paragraf pertama adalah
+                      kalimat pembuka; paragraf berikutnya adalah daftar kelas,
+                      ditulis sedikit lebih kecil dan (bila diaktifkan) diberi
+                      kotak berwarna di belakangnya
+
+  TEMPLATE DAN PENGATURAN
 
   Latarnya selalu template yang diunggah tim di tab PR (disimpan di
   Firestore, koleksi templateig). Template diunggah sekali dan dipakai
   sepanjang satu periode kepengurusan; periode berikutnya cukup mengunggah
-  template baru untuk menggantikannya.
+  template baru. Batik, logo, pita PENGUMUMAN, kartu putih, ornamen, dan
+  slogan sudah ada di gambar template, jadi yang digambar di sini hanya teks
+  dan kotak daftar kelas.
 
-  Yang digambar di sini hanya teks, ditambah kotak di belakang tiap kelas
-  pada daftar (bisa dimatikan). Batik, logo, pita PENGUMUMAN, kartu putih,
-  ornamen, dan slogan sudah ada di gambar template. Teks ditulis di dalam
-  "area teks", jadi di template bagian itu harus dikosongkan. Teks footer
-  (misalnya TERIMA KASIH) ikut ditulis bila diisi di tab PR, dan dibiarkan
-  kosong bila sudah menjadi bagian dari template.
-
-  Semua pengaturan berikut disimpan di tab PR:
-    - font primer    : judul dan footer
-    - font sekunder  : kalimat pembuka dan daftar kelas
-    - warna primer   : seluruh teks biasa
-    - warna sekunder : kata yang diapit *...* dan nama kelas di daftar
-    - ukuran huruf judul, isi, dan footer
-    - warna kotak daftar kelas
-    - posisi area teks dan posisi footer
-  Font diambil dari Google Fonts (lihat shared/daftar-font.js).
+  Di tab PR diatur posisi awal ketiga kotak teks, ukuran hurufnya, font
+  primer (header dan footer) dan sekunder (body) dari Google Fonts
+  (lihat shared/daftar-font.js), warna primer dan sekunder, warna kotak, dan
+  teks footer bawaan. Posisi yang digeser di jendela story hanya berlaku
+  untuk story itu.
 */
 
 export const TEMPLATE = {
   w: 1080,
   h: 1920,
 
-  // Dipakai bila belum ada pengaturan yang disimpan di tab PR.
-  // Area dan posisi footer dalam persen dari lebar dan tinggi gambar;
-  // ukuran huruf dalam piksel pada gambar 1080 x 1920.
-  areaBawaan:   { atas: 22, bawah: 79, kiri: 15, kanan: 15 },
+  // Posisi dan lebar dalam persen dari ukuran gambar; ukuran huruf dalam
+  // piksel pada gambar 1080 x 1920. Body punya tinggi sendiri (h): bila
+  // isinya melebihi tinggi itu, hurufnya diperkecil, lalu bila masih belum
+  // muat, daftar kelasnya dibagi ke beberapa gambar.
+  elemenBawaan: {
+    header: { x: 15, y: 20.5, w: 70, ukuran: 88 },
+    body:   { x: 12, y: 33,   w: 76, h: 44, ukuran: 44 },
+    footer: { x: 15, y: 80,   w: 70, ukuran: 66 },
+  },
   fontBawaan:   { primer: 'Lilita One', sekunder: 'Fredoka' },
   warnaBawaan:  { primer: '#13192f', sekunder: '#be8f41' },
-  ukuranBawaan: { judul: 88, isi: 44, footer: 66 },
-  footerBawaan: { teks: '', x: 50, y: 82 },
   kotakBawaan:  { aktif: true, warna: '#F7F1E4' },
+  footerTeksBawaan: '',
 };
+
+export const NAMA_ELEMEN = ['header', 'body', 'footer'];
 
 /* ============================================================
    Keadaan template yang sedang dipakai
    ============================================================ */
 
-const BAGIAN = {
-  area: 'areaBawaan', font: 'fontBawaan', warna: 'warnaBawaan',
-  ukuran: 'ukuranBawaan', footer: 'footerBawaan', kotak: 'kotakBawaan',
-};
+let tpl = susunTpl({});
 
-let tpl = { gambar: null };
-for(const [k, b] of Object.entries(BAGIAN)) tpl[k] = { ...TEMPLATE[b] };
-
-// Mengisi nilai kosong dengan bawaannya, supaya kolom yang dikosongkan di tab
-// PR tidak membuat teks hilang.
+// Mengisi nilai kosong dengan bawaannya, supaya kolom yang dikosongkan di
+// tab PR tidak membuat teks hilang.
 function lengkapi(nilai, bawaan){
   const out = { ...bawaan };
   for(const [k, v] of Object.entries(nilai || {})){
@@ -78,17 +76,34 @@ function lengkapi(nilai, bawaan){
   return out;
 }
 
+export function lengkapiElemen(elemen){
+  const out = {};
+  for(const n of NAMA_ELEMEN) out[n] = lengkapi(elemen?.[n], TEMPLATE.elemenBawaan[n]);
+  return out;
+}
+
+function susunTpl(isi){
+  return {
+    gambar: isi.gambar || null,
+    elemen: lengkapiElemen(isi.elemen),
+    font:   lengkapi(isi.font, TEMPLATE.fontBawaan),
+    warna:  lengkapi(isi.warna, TEMPLATE.warnaBawaan),
+    kotak:  lengkapi(isi.kotak, TEMPLATE.kotakBawaan),
+    footerTeks: typeof isi.footerTeks === 'string' ? isi.footerTeks : TEMPLATE.footerTeksBawaan,
+  };
+}
+
 /*
   Dipanggil oleh operasional.js setelah template dari Firestore dimuat, dan
   setiap kali isian di tab PR berubah (untuk pratinjau).
-  gambar: HTMLImageElement, atau null bila belum ada template yang diunggah.
+  isi: { gambar, elemen, font, warna, kotak, footerTeks }
 */
 export function aturTemplate(isi = {}){
-  tpl = { gambar: isi.gambar || null };
-  for(const [k, b] of Object.entries(BAGIAN)) tpl[k] = lengkapi(isi[k], TEMPLATE[b]);
+  tpl = susunTpl(isi);
 }
 
 export const adaTemplate = () => !!tpl.gambar;
+export const elemenTemplate = () => lengkapiElemen(tpl.elemen);
 
 /* ============================================================
    Font dari Google Fonts
@@ -169,24 +184,6 @@ async function siapkanFont(){
   }catch{ /* tetap lanjut dengan font yang ada */ }
 }
 
-// Susunan huruf untuk tiap jenis teks, dihitung sekali per penggambaran.
-// Ukuran daftar kelas mengikuti ukuran isi supaya tetap sebanding.
-function gaya(s){
-  const { primer, sekunder } = tpl.font;
-  const judul = Number(tpl.ukuran.judul) || TEMPLATE.ukuranBawaan.judul;
-  const isi = Number(tpl.ukuran.isi) || TEMPLATE.ukuranBawaan.isi;
-  const g = (nama, ingin, px, lh, lain = {}) =>
-    ({ font: `${ketebalan(nama, ingin)} ${px * s}px ${css(nama)}`, tinggi: px * lh * s, ...lain });
-  return {
-    judul:   g(primer, 700, judul, 1.07),
-    isi:     g(sekunder, 600, isi, 1.32),
-    kelas:   g(sekunder, 700, isi * 0.86, 1.26, { sekunder: true }),
-    lembut:  g(sekunder, 500, isi * 0.7, 1.32),
-    tebal:   g(sekunder, 600, isi * 0.75, 1.3),
-    catatan: g(sekunder, 400, isi * 0.64, 1.36),
-  };
-}
-
 /* ---------- Teks berwarna: *kata* memakai warna sekunder ---------- */
 
 function tokenKaya(teks){
@@ -226,63 +223,130 @@ function barisKaya(ctx, teks, lebar){
   return { baris, lebarSpasi };
 }
 
-function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, semuaSekunder){
+function gambarBarisKaya(ctx, b, cx, y, lebarSpasi){
   let x = cx - b.lebar / 2;
   for(const k of b.kata){
     if(k.spasi) x += lebarSpasi;
-    ctx.fillStyle = (semuaSekunder || k.sorot) ? tpl.warna.sekunder : tpl.warna.primer;
+    ctx.fillStyle = k.sorot ? tpl.warna.sekunder : tpl.warna.primer;
     ctx.fillText(k.k, x, y);
     x += k.w;
   }
 }
 
 /* ============================================================
-   Isi pengumuman
-   ============================================================
+   Susunan ketiga kotak teks
+   ============================================================ */
 
-   konten = {
-     judul: 'JADWAL PERPINDAHAN SEMENTARA',
-     isi:   'Diharapkan bagi mahasiswa ... *AKM 1 KP B* ...',
-     daftar: [{ judul: 'Akuntansi ... KP B',
-                baris: [{ teks, gaya: 'lembut' | 'tebal' | 'catatan' }] }],
-   }
-
-   Semuanya ditulis rata tengah sebagai blok teks yang disusun ke bawah.
-*/
-
-// Satu blok = beberapa baris dengan gaya yang sama.
-function susunBlok(ctx, teks, g, lebar, hurufBesar = false){
-  ctx.font = g.font;
-  const { baris, lebarSpasi } = barisKaya(ctx, hurufBesar ? String(teks || '').toUpperCase() : teks, lebar);
-  return { baris, lebarSpasi, g, tinggi: baris.length * g.tinggi };
-}
-
-function susunKepala(ctx, konten, lebar, s){
-  const g = gaya(s);
-  const judul = susunBlok(ctx, konten.judul, g.judul, lebar, true);
-  const isi = susunBlok(ctx, konten.isi, g.isi, lebar);
-  const jarak = judul.tinggi && isi.tinggi ? 34 * s : 0;
-  return { blok: [judul, isi], jarak, tinggi: judul.tinggi + jarak + isi.tinggi, s };
-}
-
-function susunButir(ctx, butir, lebar, s){
-  const g = gaya(s);
-  const pad = tpl.kotak.aktif ? 22 * s : 0;
-  const dalam = lebar - pad * 2;
-  const blok = [];
-  if(butir.judul) blok.push(susunBlok(ctx, butir.judul, g.kelas, dalam));
-  for(const b of butir.baris || []) blok.push(susunBlok(ctx, b.teks, g[b.gaya] || g.tebal, dalam));
-  return { blok, pad, tinggi: blok.reduce((n, b) => n + b.tinggi, 0) + pad * 2, s };
+// Satu blok = beberapa baris dengan font dan ukuran yang sama.
+function susunBlok(ctx, teks, font, px, lh, lebar){
+  ctx.font = font;
+  const { baris, lebarSpasi } = barisKaya(ctx, teks, lebar);
+  const tinggiBaris = px * lh;
+  return { baris, lebarSpasi, font, tinggiBaris, tinggi: baris.length * tinggiBaris };
 }
 
 function gambarBlok(ctx, blok, cx, y){
-  ctx.font = blok.g.font;
+  ctx.font = blok.font;
   ctx.textBaseline = 'alphabetic';
   for(const b of blok.baris){
-    y += blok.g.tinggi;
-    gambarBarisKaya(ctx, b, cx, y - blok.g.tinggi * 0.24, blok.lebarSpasi, blok.g.sekunder);
+    y += blok.tinggiBaris;
+    gambarBarisKaya(ctx, b, cx, y - blok.tinggiBaris * 0.24, blok.lebarSpasi);
   }
   return y;
+}
+
+function persenKePx(el){
+  const { w, h } = TEMPLATE;
+  return { x: w * el.x / 100, y: h * el.y / 100, w: w * el.w / 100, h: el.h != null ? h * el.h / 100 : null };
+}
+
+function susunSatuBaris(ctx, teks, el, fontNama, bobot){
+  const px = Number(el.ukuran) || 40;
+  const r = persenKePx(el);
+  const blok = susunBlok(ctx, teks, `${ketebalan(fontNama, bobot)} ${px}px ${css(fontNama)}`, px, 1.1, r.w);
+  return { blok, r };
+}
+
+// Paragraf body: yang pertama kalimat pembuka, sisanya daftar kelas.
+function pecahParagraf(teks){
+  return String(teks || '').split(/\n[ \t]*\n+/).map(p => p.replace(/^\n+|\n+$/g, '')).filter(p => p.trim());
+}
+
+function susunBody(ctx, paragraf, el, s){
+  const r = persenKePx(el);
+  const px = (Number(el.ukuran) || 44) * s;
+  const pxDaftar = px * 0.8;
+  const f = tpl.font.sekunder;
+  const kotak = tpl.kotak.aktif;
+  const pad = kotak ? 22 * s : 0;
+  const bagian = paragraf.map((p, i) => {
+    if(i === 0){
+      const blok = susunBlok(ctx, p, `${ketebalan(f, 600)} ${px}px ${css(f)}`, px, 1.3, r.w);
+      return { blok, pad: 0, tinggi: blok.tinggi, kotak: false };
+    }
+    const blok = susunBlok(ctx, p, `${ketebalan(f, 600)} ${pxDaftar}px ${css(f)}`, pxDaftar, 1.3, r.w - pad * 2);
+    return { blok, pad, tinggi: blok.tinggi + pad * 2, kotak };
+  });
+  return { bagian, jarakPembuka: px * 0.8, jarakDaftar: kotak ? 16 * s : px * 0.55, r, s };
+}
+
+function tinggiBody(susun, bagian){
+  if(!bagian.length) return 0;
+  let t = bagian[0].tinggi;
+  for(let i = 1; i < bagian.length; i++){
+    t += (i === 1 ? susun.jarakPembuka : susun.jarakDaftar) + bagian[i].tinggi;
+  }
+  return t;
+}
+
+/*
+  Diutamakan seluruh body muat dalam satu gambar, bila perlu dengan huruf
+  diperkecil. Bila tetap tidak muat, daftar kelas dibagi ke beberapa gambar,
+  dengan kalimat pembuka, header, dan footer yang sama di tiap gambar.
+*/
+function bagiBody(ctx, teks, el){
+  const paragraf = pecahParagraf(teks);
+  const batas = persenKePx(el).h;
+  for(const s of [1, 0.92, 0.85, 0.78, 0.72, 0.66]){
+    const susun = susunBody(ctx, paragraf, el, s);
+    if(tinggiBody(susun, susun.bagian) <= batas) return { susun, halaman: [susun.bagian] };
+  }
+  const susun = susunBody(ctx, paragraf, el, 0.72);
+  const [pembuka, ...daftar] = susun.bagian;
+  if(!daftar.length) return { susun, halaman: [susun.bagian] };
+  const halaman = [];
+  let kini = [pembuka];
+  for(const b of daftar){
+    if(kini.length > 1 && tinggiBody(susun, [...kini, b]) > batas){ halaman.push(kini); kini = [pembuka]; }
+    kini.push(b);
+  }
+  halaman.push(kini);
+
+  // Ratakan jumlah kelas per gambar bila masih muat, supaya gambar terakhir
+  // tidak hanya berisi satu kelas.
+  const per = Math.ceil(daftar.length / halaman.length);
+  const rata = [];
+  for(let i = 0; i < daftar.length; i += per) rata.push([pembuka, ...daftar.slice(i, i + per)]);
+  const pakai = rata.length === halaman.length && rata.every(h => tinggiBody(susun, h) <= batas) ? rata : halaman;
+  return { susun, halaman: pakai };
+}
+
+function gambarBody(ctx, susun, bagian){
+  const { r } = susun;
+  const cx = r.x + r.w / 2;
+  let y = r.y;
+  bagian.forEach((b, i) => {
+    if(i > 0) y += i === 1 ? susun.jarakPembuka : susun.jarakDaftar;
+    if(b.kotak){
+      ctx.fillStyle = tpl.kotak.warna;
+      ctx.beginPath();
+      if(ctx.roundRect) ctx.roundRect(r.x, y, r.w, b.tinggi, 24 * susun.s);
+      else ctx.rect(r.x, y, r.w, b.tinggi);
+      ctx.fill();
+    }
+    gambarBlok(ctx, b.blok, cx, y + b.pad);
+    y += b.tinggi;
+  });
 }
 
 function gambarLatar(ctx){
@@ -293,134 +357,196 @@ function gambarLatar(ctx){
   ctx.drawImage(img, (w - lw) / 2, (h - lh) / 2, lw, lh);
 }
 
-function hitungArea(){
-  const { w, h } = TEMPLATE;
-  const a = tpl.area;
-  const x0 = w * a.kiri / 100, x1 = w * (1 - a.kanan / 100);
-  const y0 = h * a.atas / 100, y1 = h * a.bawah / 100;
-  return { x0, x1, y0, y1, lebar: x1 - x0, tinggi: y1 - y0 };
-}
-
-const JARAK_DAFTAR = 40;   // jarak kalimat pembuka ke daftar
-
-// Kotak memberi batas sendiri, jadi jarak antarkelas bisa lebih rapat.
-const jarakButir = () => (tpl.kotak.aktif ? 16 : 30);
-
-function tinggiHalaman(kepala, butir, s){
-  if(!butir.length) return kepala.tinggi;
-  return kepala.tinggi + JARAK_DAFTAR * s
-    + butir.reduce((n, b) => n + b.tinggi, 0) + jarakButir() * s * (butir.length - 1);
-}
-
-/*
-  Diutamakan semuanya muat dalam satu gambar, bila perlu dengan huruf
-  diperkecil. Bila tetap tidak muat, daftar dibagi ke beberapa gambar dengan
-  judul dan kalimat pembuka yang sama di tiap gambar.
-*/
-function bagiHalaman(ctx, konten, area){
-  const daftar = konten.daftar || [];
-  for(const s of [1, 0.92, 0.85, 0.78, 0.72]){
-    const kepala = susunKepala(ctx, konten, area.lebar, s);
-    const butir = daftar.map(b => susunButir(ctx, b, area.lebar, s));
-    if(tinggiHalaman(kepala, butir, s) <= area.tinggi) return { kepala, halaman: [butir] };
-  }
-
-  const s = 0.72;
-  const kepala = susunKepala(ctx, konten, area.lebar, s);
-  const semua = daftar.map(b => susunButir(ctx, b, area.lebar, s));
-  const halaman = [];
-  let kini = [];
-  for(const b of semua){
-    if(kini.length && tinggiHalaman(kepala, [...kini, b], s) > area.tinggi){
-      halaman.push(kini); kini = [];
-    }
-    kini.push(b);
-  }
-  if(kini.length) halaman.push(kini);
-
-  // Ratakan jumlah kelas per gambar bila masih muat, supaya gambar terakhir
-  // tidak hanya berisi satu kelas.
-  const per = Math.ceil(semua.length / halaman.length);
-  const rata = [];
-  for(let i = 0; i < semua.length; i += per) rata.push(semua.slice(i, i + per));
-  const pakai = rata.length === halaman.length && rata.every(h => tinggiHalaman(kepala, h, s) <= area.tinggi)
-    ? rata : halaman;
-  return { kepala, halaman: pakai };
-}
-
 /*
   Menghasilkan daftar kanvas story.
-*/
-function gambarFooter(ctx){
-  const teks = String(tpl.footer.teks || '').trim();
-  if(!teks) return;
-  const { w, h } = TEMPLATE;
-  const px = Number(tpl.ukuran.footer) || TEMPLATE.ukuranBawaan.footer;
-  ctx.font = `${ketebalan(tpl.font.primer, 700)} ${px}px ${css(tpl.font.primer)}`;
-  ctx.fillStyle = tpl.warna.primer;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(teks, w * tpl.footer.x / 100, h * tpl.footer.y / 100);
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
-}
 
-export async function buatStory(konten){
+  teks   : { header, body, footer }
+  elemen : posisi ketiga kotak (bawaan: posisi dari tab PR)
+
+  Tiap kanvas membawa kanvas.tataLetak, yaitu kotak yang benar-benar dipakai
+  tiap elemen dalam piksel, untuk menempatkan penanda seret di pratinjau.
+*/
+export async function buatStory(teks, elemen = tpl.elemen){
   if(!tpl.gambar) throw new Error('Belum ada template story. Upload dulu di tab PR.');
   await siapkanFont();
-  const area = hitungArea();
+  const el = lengkapiElemen(elemen);
   const ukur = document.createElement('canvas').getContext('2d');
-  const { kepala, halaman } = bagiHalaman(ukur, konten, area);
 
-  return halaman.map((butir, i) => {
+  const header = susunSatuBaris(ukur, teks.header, el.header, tpl.font.primer, 700);
+  const footer = susunSatuBaris(ukur, teks.footer, el.footer, tpl.font.primer, 700);
+  const { susun, halaman } = bagiBody(ukur, teks.body, el.body);
+
+  const tataLetak = {
+    header: { ...header.r, h: Math.max(header.blok.tinggi, el.header.ukuran * 1.1) },
+    body:   { ...susun.r },
+    footer: { ...footer.r, h: Math.max(footer.blok.tinggi, el.footer.ukuran * 1.1), kosong: !String(teks.footer || '').trim() },
+  };
+
+  return halaman.map((bagian, i) => {
     const kanvas = document.createElement('canvas');
     kanvas.width = TEMPLATE.w; kanvas.height = TEMPLATE.h;
     const ctx = kanvas.getContext('2d');
     gambarLatar(ctx);
-    gambarFooter(ctx);
-
-    const s = kepala.s;
-    const total = tinggiHalaman(kepala, butir, s);
-    const cx = area.x0 + area.lebar / 2;
-    let y = area.y0 + Math.max(0, (area.tinggi - total) / 2);
-    y = gambarBlok(ctx, kepala.blok[0], cx, y);
-    y += kepala.jarak;
-    y = gambarBlok(ctx, kepala.blok[1], cx, y);
-    if(butir.length) y += JARAK_DAFTAR * s;
-    for(const b of butir){
-      if(tpl.kotak.aktif){
-        ctx.fillStyle = tpl.kotak.warna;
-        ctx.beginPath();
-        if(ctx.roundRect) ctx.roundRect(area.x0, y, area.lebar, b.tinggi, 24 * s);
-        else ctx.rect(area.x0, y, area.lebar, b.tinggi);
-        ctx.fill();
-      }
-      let yb = y + b.pad;
-      for(const blok of b.blok) yb = gambarBlok(ctx, blok, cx, yb);
-      y += b.tinggi + jarakButir() * s;
-    }
+    gambarBlok(ctx, header.blok, header.r.x + header.r.w / 2, header.r.y);
+    gambarBody(ctx, susun, bagian);
+    gambarBlok(ctx, footer.blok, footer.r.x + footer.r.w / 2, footer.r.y);
 
     if(halaman.length > 1){
-      ctx.font = `${ketebalan(tpl.font.sekunder, 600)} 26px ${css(tpl.font.sekunder)}`;
+      const f = tpl.font.sekunder;
+      ctx.font = `${ketebalan(f, 600)} 26px ${css(f)}`;
       ctx.fillStyle = tpl.warna.primer;
       ctx.textAlign = 'right';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillText(`${i + 1}/${halaman.length}`, area.x1, area.y1 + 34);
+      ctx.fillText(`${i + 1}/${halaman.length}`, susun.r.x + susun.r.w, susun.r.y + susun.r.h + 34);
       ctx.textAlign = 'left';
     }
+    kanvas.tataLetak = tataLetak;
     return kanvas;
   });
 }
 
+/*
+  Mengubah isi pengumuman yang disusun operasional.js menjadi teks ketiga
+  kotak. konten = { judul, isi, daftar: [{ judul, baris: [{ teks }] }] }
+*/
+export function keTeksStory(konten){
+  const daftar = (konten.daftar || []).map(b => [
+    b.judul ? `*${b.judul}*` : '',
+    ...(b.baris || []).map(x => x.teks),
+  ].filter(Boolean).join('\n'));
+  return {
+    header: String(konten.judul || '').toUpperCase(),
+    body: [konten.isi || '', ...daftar].filter(Boolean).join('\n\n'),
+    footer: tpl.footerTeks,
+  };
+}
+
 /* ============================================================
-   Jendela pratinjau: ubah teks, unduh, salin, bagikan
+   Penyunting posisi (seperti Canva)
+   ============================================================
+
+   Dipasang di atas gambar pratinjau, baik di tab PR maupun di jendela story.
+   Ketiga kotak teks tampil sebagai bingkai: seret bagian dalamnya untuk
+   memindahkan, seret pegangan kiri/kanan untuk mengubah lebar, dan pegangan
+   bawah body untuk mengubah tingginya. Mengeklik bingkai memilih elemen itu
+   (misalnya untuk memusatkan kotak isiannya).
+
+   opsi = {
+     ambil()          : posisi elemen saat ini (persen)
+     ubah(elemen)     : dipanggil selama diseret, dengan posisi baru
+     selesai()        : dipanggil saat seretan dilepas (gambar ulang)
+     pilih(nama)      : dipanggil saat bingkai diklik
+   }
+*/
+const LABEL_ELEMEN = { header: 'Header', body: 'Body', footer: 'Footer' };
+
+export function pasangPenyunting(bingkai, opsi){
+  bingkai.classList.add('op-penyunting');
+  const kotak = {};
+  let tataLetak = null;
+  let terpilih = null;
+
+  for(const nama of NAMA_ELEMEN){
+    const el = document.createElement('div');
+    el.className = `op-el op-el-${nama}`;
+    el.innerHTML = `<span class="op-el-label">${LABEL_ELEMEN[nama]}</span>
+      <span class="op-el-sisi kiri" data-sisi="kiri"></span>
+      <span class="op-el-sisi kanan" data-sisi="kanan"></span>
+      ${nama === 'body' ? '<span class="op-el-sisi bawah" data-sisi="bawah"></span>' : ''}`;
+    el.hidden = true;
+    bingkai.appendChild(el);
+    kotak[nama] = el;
+    el.addEventListener('pointerdown', e => mulai(e, nama, e.target.dataset.sisi || 'geser'));
+  }
+
+  function tandai(nama){
+    terpilih = nama;
+    for(const n of NAMA_ELEMEN) kotak[n].classList.toggle('terpilih', n === nama);
+  }
+
+  // Tinggi header dan footer mengikuti isi teksnya, jadi diambil dari hasil
+  // penggambaran terakhir; posisinya diambil dari nilai persen terkini.
+  function tempatkan(elemen){
+    if(!tataLetak) return;
+    const { w, h } = TEMPLATE;
+    for(const n of NAMA_ELEMEN){
+      const k = kotak[n], e = elemen[n], t = tataLetak[n];
+      k.hidden = n === 'footer' && t.kosong;
+      k.style.left = e.x + '%';
+      k.style.top = e.y + '%';
+      k.style.width = e.w + '%';
+      k.style.height = (n === 'body' ? e.h : t.h / h * 100) + '%';
+    }
+  }
+
+  function mulai(e, nama, jenis){
+    if(e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    tandai(nama);
+    opsi.pilih?.(nama);
+    const rect = bingkai.getBoundingClientRect();
+    const awal = lengkapiElemen(opsi.ambil());
+    const x0 = e.clientX, y0 = e.clientY;
+    const target = e.currentTarget;
+    target.setPointerCapture(e.pointerId);
+    let bergerak = false;
+
+    const gerak = ev => {
+      const dx = (ev.clientX - x0) / rect.width * 100;
+      const dy = (ev.clientY - y0) / rect.height * 100;
+      if(Math.abs(dx) + Math.abs(dy) > 0.2) bergerak = true;
+      const baru = lengkapiElemen(awal);
+      const a = { ...awal[nama] };
+      const bulat = n => Math.round(n * 10) / 10;
+      const batasi = (n, min, max) => Math.min(max, Math.max(min, n));
+      if(jenis === 'geser'){
+        a.x = bulat(batasi(awal[nama].x + dx, -a.w / 2, 100 - a.w / 2));
+        a.y = bulat(batasi(awal[nama].y + dy, 0, 98));
+      }else if(jenis === 'kiri'){
+        const kanan = awal[nama].x + awal[nama].w;
+        a.x = bulat(batasi(awal[nama].x + dx, 0, kanan - 15));
+        a.w = bulat(kanan - a.x);
+      }else if(jenis === 'kanan'){
+        a.w = bulat(batasi(awal[nama].w + dx, 15, 100 - a.x));
+      }else if(jenis === 'bawah'){
+        a.h = bulat(batasi(awal[nama].h + dy, 8, 100 - a.y));
+      }
+      baru[nama] = a;
+      opsi.ubah(baru);
+      tempatkan(baru);
+    };
+    const lepas = () => {
+      target.removeEventListener('pointermove', gerak);
+      target.removeEventListener('pointerup', lepas);
+      target.removeEventListener('pointercancel', lepas);
+      if(bergerak) opsi.selesai();
+    };
+    target.addEventListener('pointermove', gerak);
+    target.addEventListener('pointerup', lepas);
+    target.addEventListener('pointercancel', lepas);
+  }
+
+  return {
+    // Dipanggil setiap kali pratinjau selesai digambar ulang.
+    perbarui(baru){ tataLetak = baru; tempatkan(lengkapiElemen(opsi.ambil())); },
+    pilih(nama){ tandai(nama); },
+    get terpilih(){ return terpilih; },
+  };
+}
+
+/* ============================================================
+   Jendela story: sunting teks, geser posisi, unduh, salin, bagikan
    ============================================================ */
 
 const $ = id => document.getElementById(id);
 const keBlob = kanvas => new Promise(res => kanvas.toBlob(res, 'image/png'));
 
-let kini = { konten: null, kanvas: [], namaDasar: 'kafbe-story' };
+const ID_TEKS = { header: 'igTeksHeader', body: 'igTeksBody', footer: 'igTeksFooter' };
+
+let kini = { elemen: null, kanvas: [], namaDasar: 'kafbe-story' };
 let jedaGambar = null;
+let penyuntingDialog = null;
+let nomorGambar = 0;
 
 function pesanIg(teks, jenis){
   const el = $('igPesan');
@@ -483,59 +609,79 @@ function bisaBagikanBerkas(){
   }catch{ return false; }
 }
 
+const teksDialog = () => ({
+  header: $(ID_TEKS.header).value, body: $(ID_TEKS.body).value, footer: $(ID_TEKS.footer).value,
+});
+
+function tombolAksi(i, banyak, bagi){
+  const aksi = document.createElement('div');
+  aksi.className = 'op-tombol-baris op-ig-aksi';
+  aksi.innerHTML = `
+    ${banyak ? `<span class="op-samar">${i + 1}/${kini.kanvas.length}</span>` : ''}
+    <button type="button" class="op-mini" data-ig="unduh">Unduh</button>
+    <button type="button" class="op-mini" data-ig="salin">Salin</button>
+    ${bagi ? '<button type="button" class="op-mini" data-ig="bagikan">Bagikan</button>' : ''}`;
+  aksi.querySelector('[data-ig="unduh"]').addEventListener('click', () => unduh(i));
+  aksi.querySelector('[data-ig="salin"]').addEventListener('click', () => salin(i));
+  aksi.querySelector('[data-ig="bagikan"]')?.addEventListener('click', () => bagikan(i));
+  return aksi;
+}
+
 async function gambarUlang(){
-  const wadah = $('igPratinjau');
-  const konten = { ...kini.konten, judul: $('igJudulTeks').value, isi: $('igIsiTeks').value };
+  const nomor = ++nomorGambar;
+  let kanvas;
   try{
-    kini.kanvas = await buatStory(konten);
+    kanvas = await buatStory(teksDialog(), kini.elemen);
   }catch(err){
     console.error(err);
     pesanIg('Gagal menyusun gambar: ' + err.message, 'salah');
     return;
   }
+  if(nomor !== nomorGambar) return;
+  kini.kanvas = kanvas;
 
   const bagi = bisaBagikanBerkas();
-  const banyak = kini.kanvas.length > 1;
-  const n = (kini.konten.daftar || []).length;
-  $('igRingkas').textContent = `${n ? n + ' kelas · ' : ''}${kini.kanvas.length} gambar story 1080 × 1920`;
+  const banyak = kanvas.length > 1;
+  $('igRingkas').textContent = `${kanvas.length} gambar story 1080 × 1920`
+    + (banyak ? ' · daftar kelas terlalu panjang untuk satu gambar, jadi dibagi' : '');
   $('igUnduhSemua').hidden = !banyak;
   $('igBagikanSemua').hidden = !(banyak && bagi);
 
-  wadah.innerHTML = '';
-  kini.kanvas.forEach((kanvas, i) => {
-    const kartu = document.createElement('figure');
-    kartu.className = 'op-ig-hasil';
+  // Gambar pertama memakai bingkai yang sama sepanjang jendela terbuka,
+  // supaya penanda seretnya tidak ikut dibuat ulang.
+  $('igUtama').src = kanvas[0].toDataURL('image/png');
+  $('igUtamaAksi').replaceChildren(tombolAksi(0, banyak, bagi));
+  penyuntingDialog.perbarui(kanvas[0].tataLetak);
+
+  const lain = $('igLainnya');
+  lain.innerHTML = '';
+  kanvas.slice(1).forEach((k, n) => {
+    const fig = document.createElement('figure');
+    fig.className = 'op-ig-hasil';
     const img = document.createElement('img');
-    img.src = kanvas.toDataURL('image/png');
-    img.alt = `Pratinjau story ${i + 1}`;
-    const aksi = document.createElement('figcaption');
-    aksi.className = 'op-tombol-baris';
-    aksi.innerHTML = `
-      ${banyak ? `<span class="op-samar">${i + 1}/${kini.kanvas.length}</span>` : ''}
-      <button type="button" class="op-mini" data-ig="unduh">Unduh</button>
-      <button type="button" class="op-mini" data-ig="salin">Salin</button>
-      ${bagi ? '<button type="button" class="op-mini" data-ig="bagikan">Bagikan</button>' : ''}`;
-    aksi.querySelector('[data-ig="unduh"]').addEventListener('click', () => unduh(i));
-    aksi.querySelector('[data-ig="salin"]').addEventListener('click', () => salin(i));
-    aksi.querySelector('[data-ig="bagikan"]')?.addEventListener('click', () => bagikan(i));
-    kartu.append(img, aksi);
-    wadah.appendChild(kartu);
+    img.src = k.toDataURL('image/png');
+    img.alt = `Pratinjau story ${n + 2}`;
+    fig.append(img, tombolAksi(n + 1, banyak, bagi));
+    lain.appendChild(fig);
   });
 }
 
 function jadwalkanGambar(){
   clearTimeout(jedaGambar);
-  jedaGambar = setTimeout(gambarUlang, 350);
+  jedaGambar = setTimeout(gambarUlang, 300);
 }
 
 let terpasang = false;
 function pasang(){
   if(terpasang) return;
   terpasang = true;
-  $('igJudulTeks').addEventListener('input', jadwalkanGambar);
-  $('igIsiTeks').addEventListener('input', jadwalkanGambar);
+  for(const id of Object.values(ID_TEKS)) $(id).addEventListener('input', jadwalkanGambar);
+  for(const [nama, id] of Object.entries(ID_TEKS)){
+    $(id).addEventListener('focus', () => penyuntingDialog.pilih(nama));
+  }
   $('igTutup').addEventListener('click', () => $('dialogIg').close());
   $('dialogIg').addEventListener('click', e => { if(e.target === $('dialogIg')) $('dialogIg').close(); });
+  $('igPosisiAwal').addEventListener('click', () => { kini.elemen = elemenTemplate(); gambarUlang(); });
   $('igUnduhSemua').addEventListener('click', async () => {
     for(let i = 0; i < kini.kanvas.length; i++){
       await unduh(i);
@@ -544,18 +690,30 @@ function pasang(){
     }
   });
   $('igBagikanSemua').addEventListener('click', () => bagikan('semua'));
+
+  penyuntingDialog = pasangPenyunting($('igBingkai'), {
+    ambil: () => kini.elemen,
+    ubah: e => { kini.elemen = e; },
+    selesai: gambarUlang,
+    pilih: nama => {
+      const el = $(ID_TEKS[nama]);
+      el.focus({ preventScroll: true });
+      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    },
+  });
 }
 
 /*
-  Membuka jendela pratinjau. Judul dan kalimat pembuka bisa disunting di
-  jendela itu sebelum gambarnya diunduh.
+  Membuka jendela story. konten disusun operasional.js (lihat keTeksStory).
+  Ketiga teks bisa disunting dan posisinya digeser sebelum gambar diunduh;
+  perubahan posisi di sini hanya berlaku untuk story ini.
 */
 export function bukaStory(konten, namaDasar){
   pasang();
-  kini = { konten, kanvas: [], namaDasar: namaDasar || 'kafbe-story' };
-  $('igJudulTeks').value = konten.judul || '';
-  $('igIsiTeks').value = konten.isi || '';
-  $('igPratinjau').innerHTML = '<p class="op-samar">Menyusun gambar…</p>';
+  kini = { elemen: elemenTemplate(), kanvas: [], namaDasar: namaDasar || 'kafbe-story' };
+  const teks = keTeksStory(konten);
+  for(const n of NAMA_ELEMEN) $(ID_TEKS[n]).value = teks[n];
+  $('igLainnya').innerHTML = '';
   pesanIg('');
   $('dialogIg').showModal();
   gambarUlang();

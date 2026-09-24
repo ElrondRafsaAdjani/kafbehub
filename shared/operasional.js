@@ -15,7 +15,7 @@
 import { bacaBerkas, susunBerkas, unduhBlob } from './excel.js';
 import {
   bukaStory, buatStory, aturTemplate, adaTemplate, unduhBlobSebagai, TEMPLATE,
-  muatDaftarFont, pasangFontGoogle,
+  muatDaftarFont, pasangFontGoogle, lengkapiElemen, keTeksStory, pasangPenyunting,
 } from './gambar-ig.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
@@ -1441,8 +1441,8 @@ async function bukaStoryPermanen(j, lama){
    base64 di koleksi templateig, dipotong-potong karena satu dokumen Firestore
    paling besar 1 MB:
 
-     templateig/story            { potongan, area, font, warna, ukuran, footer,
-                                   kotak, namaBerkas, oleh, diunggah }
+     templateig/story            { potongan, elemen, font, warna, kotak,
+                                   footerTeks, namaBerkas, oleh, diunggah }
      templateig/story-potongan-0 { isi: '...' }
      templateig/story-potongan-1 { isi: '...' }
 
@@ -1510,6 +1510,10 @@ const CONTOH_STORY = {
   }],
 };
 
+// Posisi dan ukuran ketiga kotak teks yang sedang diatur di tab PR. Posisi
+// diubah dengan menyeret di pratinjau, ukuran huruf lewat kotak isian.
+let elemenPR = lengkapiElemen({});
+
 // Seluruh pengaturan di tab PR. Bentuknya sama dengan yang disimpan di
 // templateig/story dan yang diterima aturTemplate().
 function pengaturanDariIsian(){
@@ -1517,19 +1521,16 @@ function pengaturanDariIsian(){
     const n = Number($(id).value);
     return Number.isFinite(n) && $(id).value !== '' ? n : bawaan;
   };
-  const A = TEMPLATE.areaBawaan, U = TEMPLATE.ukuranBawaan, F = TEMPLATE.footerBawaan;
+  const elemen = lengkapiElemen(elemenPR);
+  elemen.header.ukuran = angka('tplUkJudul', elemen.header.ukuran);
+  elemen.body.ukuran = angka('tplUkIsi', elemen.body.ukuran);
+  elemen.footer.ukuran = angka('tplUkFooter', elemen.footer.ukuran);
   return {
-    area: {
-      atas: angka('tplAtas', A.atas), bawah: angka('tplBawah', A.bawah),
-      kiri: angka('tplKiri', A.kiri), kanan: angka('tplKanan', A.kanan),
-    },
+    elemen,
     font: { primer: $('tplFontPrimer').value, sekunder: $('tplFontSekunder').value },
     warna: { primer: $('tplWarnaPrimer').value, sekunder: $('tplWarnaSekunder').value },
-    ukuran: {
-      judul: angka('tplUkJudul', U.judul), isi: angka('tplUkIsi', U.isi), footer: angka('tplUkFooter', U.footer),
-    },
-    footer: { teks: $('tplFooterTeks').value.trim(), x: angka('tplFooterX', F.x), y: angka('tplFooterY', F.y) },
     kotak: { aktif: $('tplKotakAktif').checked, warna: $('tplWarnaKotak').value },
+    footerTeks: $('tplFooterTeks').value.trim(),
   };
 }
 
@@ -1548,17 +1549,17 @@ function aturWarna(idWarna, idHex, nilai){
 
 function isiIsianPengaturan(m){
   const ambil = (k, b) => ({ ...TEMPLATE[b], ...(m?.[k] || {}) });
-  const a = ambil('area', 'areaBawaan'), f = ambil('font', 'fontBawaan'), w = ambil('warna', 'warnaBawaan');
-  const u = ambil('ukuran', 'ukuranBawaan'), ft = ambil('footer', 'footerBawaan'), k = ambil('kotak', 'kotakBawaan');
-  $('tplAtas').value = a.atas; $('tplBawah').value = a.bawah; $('tplKiri').value = a.kiri; $('tplKanan').value = a.kanan;
+  const f = ambil('font', 'fontBawaan'), w = ambil('warna', 'warnaBawaan'), k = ambil('kotak', 'kotakBawaan');
+  elemenPR = lengkapiElemen(m?.elemen);
+  $('tplUkJudul').value = elemenPR.header.ukuran;
+  $('tplUkIsi').value = elemenPR.body.ukuran;
+  $('tplUkFooter').value = elemenPR.footer.ukuran;
   pilihFont('tplFontPrimer', f.primer); pilihFont('tplFontSekunder', f.sekunder);
   aturWarna('tplWarnaPrimer', 'tplHexPrimer', w.primer);
   aturWarna('tplWarnaSekunder', 'tplHexSekunder', w.sekunder);
   aturWarna('tplWarnaKotak', 'tplHexKotak', k.warna);
   $('tplKotakAktif').checked = k.aktif !== false;
-  $('tplUkJudul').value = u.judul; $('tplUkIsi').value = u.isi; $('tplUkFooter').value = u.footer;
-  $('tplFooterTeks').value = ft.teks || ''; $('tplFooterX').value = ft.x; $('tplFooterY').value = ft.y;
-  aturPenandaPosisi();
+  $('tplFooterTeks').value = typeof m?.footerTeks === 'string' ? m.footerTeks : TEMPLATE.footerTeksBawaan;
 }
 
 /* ---------- Pilihan font ----------
@@ -1608,82 +1609,11 @@ async function contohFont(id){
 
 /* ---------- Geser posisi langsung di pratinjau ----------
 
-   Kotak garis putus-putus di atas pratinjau adalah area teks. Menyeret
-   bagian dalamnya memindahkan seluruh area; menyeret salah satu sisinya
-   mengubah ukuran dari sisi itu. Kotak kedua (bila teks footer diisi)
-   memindahkan footer. Angkanya ikut berubah di kotak isian, jadi posisi
-   yang pas bisa juga diketik langsung.
+   Sama dengan jendela story: header, body, dan footer tampil sebagai bingkai
+   di atas pratinjau yang bisa diseret dan diubah lebarnya. Di tab PR,
+   posisinya menjadi posisi awal untuk semua story berikutnya setelah
+   disimpan. Contoh teksnya memakai teks footer yang sedang diisi.
 */
-function aturPenandaPosisi(){
-  const { area, footer, ukuran } = pengaturanDariIsian();
-  const k = $('tplKotakArea');
-  k.style.left = area.kiri + '%';
-  k.style.top = area.atas + '%';
-  k.style.width = Math.max(0, 100 - area.kiri - area.kanan) + '%';
-  k.style.height = Math.max(0, area.bawah - area.atas) + '%';
-  const f = $('tplKotakFooter');
-  f.hidden = !footer.teks;
-  const tinggi = ukuran.footer * 1.4 / TEMPLATE.h * 100;
-  f.style.left = footer.x + '%';
-  f.style.top = footer.y + '%';
-  f.style.height = tinggi + '%';
-  f.textContent = footer.teks;
-}
-
-const bulat = n => Math.round(n * 10) / 10;
-const batasi = (n, min, max) => Math.min(max, Math.max(min, n));
-
-function mulaiSeret(e, jenis){
-  if(e.button !== 0) return;
-  e.preventDefault();
-  e.stopPropagation();
-  const bingkai = $('tplKanvas').getBoundingClientRect();
-  const awal = pengaturanDariIsian();
-  const x0 = e.clientX, y0 = e.clientY;
-  const el = e.currentTarget;
-  el.setPointerCapture(e.pointerId);
-
-  const gerak = ev => {
-    const dx = (ev.clientX - x0) / bingkai.width * 100;
-    const dy = (ev.clientY - y0) / bingkai.height * 100;
-    const a = { ...awal.area };
-    if(jenis === 'geser'){
-      const lebar = 100 - a.kiri - a.kanan, tinggi = a.bawah - a.atas;
-      const kiri = batasi(a.kiri + dx, 0, 100 - lebar);
-      const atas = batasi(a.atas + dy, 0, 100 - tinggi);
-      a.kiri = kiri; a.kanan = 100 - lebar - kiri; a.atas = atas; a.bawah = atas + tinggi;
-    }else if(jenis === 'atas') a.atas = batasi(a.atas + dy, 0, a.bawah - 10);
-    else if(jenis === 'bawah') a.bawah = batasi(a.bawah + dy, a.atas + 10, 100);
-    else if(jenis === 'kiri') a.kiri = batasi(a.kiri + dx, 0, 100 - a.kanan - 20);
-    else if(jenis === 'kanan') a.kanan = batasi(a.kanan - dx, 0, 100 - a.kiri - 20);
-
-    if(jenis === 'footer'){
-      $('tplFooterX').value = bulat(batasi(awal.footer.x + dx, 0, 100));
-      $('tplFooterY').value = bulat(batasi(awal.footer.y + dy, 0, 100));
-    }else{
-      $('tplAtas').value = bulat(a.atas); $('tplBawah').value = bulat(a.bawah);
-      $('tplKiri').value = bulat(a.kiri); $('tplKanan').value = bulat(a.kanan);
-    }
-    aturPenandaPosisi();
-  };
-  const selesai = () => {
-    el.removeEventListener('pointermove', gerak);
-    el.removeEventListener('pointerup', selesai);
-    el.removeEventListener('pointercancel', selesai);
-    pratinjauDariIsian();
-  };
-  el.addEventListener('pointermove', gerak);
-  el.addEventListener('pointerup', selesai);
-  el.addEventListener('pointercancel', selesai);
-}
-
-$('tplKotakArea').addEventListener('pointerdown', e => mulaiSeret(e, 'geser'));
-document.querySelectorAll('[data-sisi]').forEach(el =>
-  el.addEventListener('pointerdown', e => mulaiSeret(e, el.dataset.sisi)));
-$('tplKotakFooter').addEventListener('pointerdown', e => mulaiSeret(e, 'footer'));
-
-// Contoh isi pratinjau memakai teks footer yang sedang diisi, supaya posisi
-// footer bisa dilihat bersama isi.
 const CONTOH_DAFTAR_KEDUA = {
   judul: 'Ekonomi Mikro KP A',
   baris: [
@@ -1691,6 +1621,12 @@ const CONTOH_DAFTAR_KEDUA = {
     { teks: 'Online (daring)', gaya: 'tebal' },
   ],
 };
+
+const penyuntingPR = pasangPenyunting($('tplKanvas'), {
+  ambil: () => elemenPR,
+  ubah: e => { elemenPR = e; },
+  selesai: () => pratinjauDariIsian(),
+});
 
 // Beberapa pratinjau bisa diminta berturut-turut saat mengetik; hanya yang
 // terakhir yang dipasang.
@@ -1701,8 +1637,11 @@ async function gambarPratinjauTemplate(){
   $('tplKosong').hidden = ada;
   if(!ada) return;
   const nomor = ++nomorPratinjau;
-  const [kanvas] = await buatStory({ ...CONTOH_STORY, daftar: [...CONTOH_STORY.daftar, CONTOH_DAFTAR_KEDUA] });
-  if(nomor === nomorPratinjau) $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
+  const teks = keTeksStory({ ...CONTOH_STORY, daftar: [...CONTOH_STORY.daftar, CONTOH_DAFTAR_KEDUA] });
+  const [kanvas] = await buatStory(teks);
+  if(nomor !== nomorPratinjau) return;
+  $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
+  penyuntingPR.perbarui(kanvas.tataLetak);
 }
 
 async function segarkanTabTemplate(ulang = false){
@@ -1732,13 +1671,11 @@ async function segarkanTabTemplate(ulang = false){
 let jedaPratinjau = null;
 function pratinjauDariIsian(){
   aturTemplate({ ...pengaturanDariIsian(), gambar: templateIg?.gambar || null });
-  aturPenandaPosisi();
   clearTimeout(jedaPratinjau);
   jedaPratinjau = setTimeout(gambarPratinjauTemplate, 400);
 }
 
-['tplAtas', 'tplBawah', 'tplKiri', 'tplKanan', 'tplUkJudul', 'tplUkIsi', 'tplUkFooter',
- 'tplFooterTeks', 'tplFooterX', 'tplFooterY', 'tplKotakAktif']
+['tplUkJudul', 'tplUkIsi', 'tplUkFooter', 'tplFooterTeks', 'tplKotakAktif']
   .forEach(id => $(id).addEventListener('input', pratinjauDariIsian));
 
 ['tplFontPrimer', 'tplFontSekunder'].forEach(id => $(id).addEventListener('change', () => {
@@ -1769,12 +1706,10 @@ for(const [idWarna, idHex] of PASANGAN_WARNA){
 $('tplSimpan').addEventListener('click', async () => {
   const el = $('pesanTemplate');
   const atur = pengaturanDariIsian();
-  const { area, font, warna, ukuran, footer } = atur;
+  const { elemen, font, warna, footerTeks } = atur;
   const salah = [];
-  if(!(area.atas >= 0 && area.bawah <= 100 && area.atas + 10 <= area.bawah)) salah.push('Batas atas harus lebih kecil dari batas bawah, dengan selisih minimal 10.');
-  if(!(area.kiri >= 0 && area.kanan >= 0 && area.kiri + area.kanan <= 80)) salah.push('Jarak kiri dan kanan masing-masing minimal 0, dan jumlahnya paling besar 80.');
-  for(const [k, nama] of [['judul', 'judul'], ['isi', 'isi'], ['footer', 'footer']]){
-    if(!(ukuran[k] >= 12 && ukuran[k] <= 200)) salah.push(`Ukuran huruf ${nama} harus antara 12 dan 200.`);
+  for(const n of ['header', 'body', 'footer']){
+    if(!(elemen[n].ukuran >= 12 && elemen[n].ukuran <= 200)) salah.push(`Ukuran huruf ${n} harus antara 12 dan 200.`);
   }
   if(PASANGAN_WARNA.some(([, h]) => $(h).classList.contains('op-salah-isi'))) salah.push('Ada kode warna yang belum benar. Tulis enam digit, misalnya #13192f.');
   if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
@@ -1782,8 +1717,8 @@ $('tplSimpan').addEventListener('click', async () => {
   try{
     await setDoc(doc(db, 'templateig', 'story'), atur, { merge: true });
     await catat('ubah', 'template story', 'Pengaturan template story diubah',
-      `font ${font.primer} / ${font.sekunder}; ukuran ${ukuran.judul}/${ukuran.isi}/${ukuran.footer}; `
-      + `warna ${warna.primer} / ${warna.sekunder}; footer "${footer.teks.slice(0, 60)}"`);
+      `font ${font.primer} / ${font.sekunder}; ukuran ${elemen.header.ukuran}/${elemen.body.ukuran}/${elemen.footer.ukuran}; `
+      + `warna ${warna.primer} / ${warna.sekunder}; footer "${footerTeks.slice(0, 60)}"`);
     await segarkanTabTemplate(true);
     pesan(el, 'Pengaturan tersimpan dan berlaku untuk semua story berikutnya.', 'benar');
   }catch(err){

@@ -497,33 +497,37 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 }
 .op-centang-sebaris input{ width:auto; }
 
-/* Penanda posisi yang bisa diseret di atas pratinjau template. */
+/* ---------- Penyunting posisi ala Canva ----------
+   Bingkai header, body, dan footer di atas pratinjau story. Dipakai di tab PR
+   dan di jendela story (lihat pasangPenyunting di shared/gambar-ig.js). */
 .op-tpl-kanvas{ position:relative; touch-action:none; user-select:none; }
 .op-tpl-kanvas img{ pointer-events:none; }
-.op-tpl-area, .op-tpl-footer{
-  position:absolute; box-sizing:border-box; cursor:move;
-  border:2px dashed #E0457B; background:rgba(224,69,123,0.06); border-radius:4px;
+.op-el{
+  position:absolute; box-sizing:border-box; cursor:move; border-radius:3px;
+  border:1.5px dashed rgba(122,92,224,0.55);
 }
-.op-tpl-area:hover, .op-tpl-footer:hover{ background:rgba(224,69,123,0.12); }
-.op-tpl-footer{
-  transform:translate(-50%, -50%); min-width:30%; padding:0 6px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:0.62rem; font-weight:700; color:#E0457B; white-space:nowrap;
-  border-color:#7A5CE0; color:#7A5CE0; background:rgba(122,92,224,0.08);
+.op-el:hover{ border-color:#7A5CE0; background:rgba(122,92,224,0.06); }
+.op-el.terpilih{ border:2px solid #7A5CE0; background:rgba(122,92,224,0.05); z-index:2; }
+.op-el-label{
+  position:absolute; left:-2px; top:-18px; padding:1px 6px; border-radius:4px 4px 0 0;
+  font-size:0.62rem; font-weight:800; letter-spacing:0.03em; color:#fff; background:#7A5CE0;
+  opacity:0; pointer-events:none; white-space:nowrap;
 }
-/* Area sengaja tanpa z-index, supaya pegangan sisinya bisa berada di atas
-   kotak footer, sementara bagian dalam area tetap di bawahnya. */
-.op-tpl-footer{ z-index:2; }
-.op-tpl-sisi{ position:absolute; z-index:3; }
-.op-tpl-sisi.atas, .op-tpl-sisi.bawah{ left:8px; right:8px; height:12px; cursor:ns-resize; }
-.op-tpl-sisi.atas{ top:-7px; }
-.op-tpl-sisi.bawah{ bottom:-7px; }
-.op-tpl-sisi.kiri, .op-tpl-sisi.kanan{ top:8px; bottom:8px; width:12px; cursor:ew-resize; }
-.op-tpl-sisi.kiri{ left:-7px; }
-.op-tpl-sisi.kanan{ right:-7px; }
-.op-tpl-sisi::after{
-  content:''; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);
-  background:#E0457B; border-radius:3px;
+.op-el:hover .op-el-label, .op-el.terpilih .op-el-label{ opacity:1; }
+.op-el-sisi{ position:absolute; z-index:3; opacity:0; }
+.op-el:hover .op-el-sisi, .op-el.terpilih .op-el-sisi{ opacity:1; }
+.op-el-sisi.kiri, .op-el-sisi.kanan{ top:50%; width:14px; height:28px; margin-top:-14px; cursor:ew-resize; }
+.op-el-sisi.kiri{ left:-8px; }
+.op-el-sisi.kanan{ right:-8px; }
+.op-el-sisi.bawah{ left:50%; width:28px; height:14px; margin-left:-14px; bottom:-8px; cursor:ns-resize; }
+.op-el-sisi::after{
+  content:''; position:absolute; inset:3px; border-radius:6px;
+  background:#fff; border:1.5px solid #7A5CE0; box-shadow:0 1px 3px rgba(0,0,0,0.25);
 }
-.op-tpl-sisi.atas::after, .op-tpl-sisi.bawah::after{ width:26px; height:5px; }
-.op-tpl-sisi.kiri::after, .op-tpl-sisi.kanan::after{ width:5px; height:26px; }
+
+/* Jendela story: isian teks di kiri, pratinjau yang bisa disunting di kanan. */
+.op-ig-kanan{ display:flex; flex-direction:column; gap:16px; }
+.op-ig-kanan .op-ig-hasil{ max-width:360px; }
+.op-ig-lainnya{ display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:14px; }
+.op-ig-aksi{ align-items:center; flex-wrap:wrap; margin-top:8px; }
+.op-ig-teks textarea{ font-size:0.88rem; line-height:1.5; }
