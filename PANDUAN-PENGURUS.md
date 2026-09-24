@@ -243,17 +243,24 @@ cukup mengunggah template baru; template lama otomatis tergantikan (ada
 konfirmasi dulu sebelum menimpa).
 
 - Template berukuran 1080 × 1920 (PNG atau JPG) dan sudah memuat semua
-  hiasan: batik, logo, PENGUMUMAN, kartu putih, ornamen, TERIMA KASIH, dan
-  slogan. Situs hanya menulis teks (judul, kalimat pembuka, daftar kelas),
-  jadi bagian itu dikosongkan di template
-- **Font primer** dipakai untuk judul dan **font sekunder** untuk kalimat
-  pembuka serta daftar kelas. Tulis namanya persis seperti di
-  fonts.google.com. Saat ini: Lilita One dan Fredoka
-- **Warna primer** dipakai untuk seluruh teks biasa, **warna sekunder** untuk
-  kata yang diapit `*...*` dan nama kelas di daftar. Saat ini: `#13192f` dan
-  `#be8f41`
-- **Area teks** mengatur di mana teks ditulis, dalam persen dari ukuran
-  gambar. Pratinjau di sebelahnya menandai area itu dengan garis putus-putus
+  hiasan: batik, logo, PENGUMUMAN, kartu putih, ornamen, dan slogan. Situs
+  hanya menulis teks (judul, kalimat pembuka, daftar kelas, dan footer bila
+  diisi), jadi bagian itu dikosongkan di template
+- **Font** dipilih dari daftar seluruh Google Fonts, lengkap dengan contoh
+  tulisannya. Font primer untuk judul dan footer, font sekunder untuk kalimat
+  pembuka dan daftar kelas. Saat ini: Lilita One dan Fredoka
+- **Ukuran huruf** judul, isi, dan footer diatur dalam piksel pada gambar
+  1080 × 1920. Bila isinya terlalu panjang, judul dan isi diperkecil otomatis
+- **Footer**, misalnya TERIMA KASIH. Kosongkan bila tulisan itu sudah ada di
+  gambar template
+- **Warna** primer untuk seluruh teks biasa, sekunder untuk kata yang diapit
+  `*...*` dan nama kelas di daftar, serta warna kotak di belakang tiap kelas
+  (kotaknya bisa dimatikan). Kode hex bisa diketik langsung. Saat ini:
+  `#13192f` dan `#be8f41`
+- **Posisi** area teks dan footer bisa diseret langsung di pratinjau: seret
+  bagian dalam kotak garis putus-putus untuk memindahkan area, seret sisinya
+  untuk mengubah ukuran, dan seret kotak footer untuk memindahkannya. Angkanya
+  juga bisa diketik
 - Tekan **Simpan pengaturan** setelah semuanya pas. Cukup diatur sekali
   setiap kali template diganti
 - **Download template** mengunduh template yang sedang dipakai, misalnya

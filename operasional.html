@@ -641,31 +641,64 @@
           </div>
 
           <h4 class="op-subjudul">Font</h4>
-          <p class="op-catatan">Tulis nama font persis seperti di fonts.google.com. Font primer untuk judul, font sekunder untuk kalimat pembuka dan daftar kelas.</p>
+          <p class="op-catatan">Dipilih dari seluruh Google Fonts. Font primer untuk judul dan footer, font sekunder untuk kalimat pembuka dan daftar kelas. Di bawah tiap pilihan ada contoh tulisannya.</p>
           <div class="op-baris">
             <div class="op-field"><label for="tplFontPrimer">Font primer</label>
-              <input type="text" id="tplFontPrimer" placeholder="Lilita One" autocomplete="off" /></div>
+              <select id="tplFontPrimer"><option>Memuat daftar font…</option></select>
+              <span class="op-contoh-font" id="tplFontPrimerContoh"></span></div>
             <div class="op-field"><label for="tplFontSekunder">Font sekunder</label>
-              <input type="text" id="tplFontSekunder" placeholder="Fredoka" autocomplete="off" /></div>
+              <select id="tplFontSekunder"><option>Memuat daftar font…</option></select>
+              <span class="op-contoh-font" id="tplFontSekunderContoh"></span></div>
           </div>
 
-          <h4 class="op-subjudul">Warna teks</h4>
-          <p class="op-catatan">Warna primer untuk seluruh teks biasa. Warna sekunder untuk kata yang diapit tanda bintang, misalnya <code>*SEMENTARA*</code>, dan nama kelas di daftar.</p>
+          <h4 class="op-subjudul">Ukuran huruf (piksel, pada gambar 1080 × 1920)</h4>
+          <p class="op-catatan">Bila isinya terlalu panjang untuk area teks, ukuran judul dan isi diperkecil otomatis.</p>
           <div class="op-baris">
-            <div class="op-field op-sempit"><label for="tplWarnaPrimer">Warna primer</label>
-              <span class="op-warna"><input type="color" id="tplWarnaPrimer" /> <code id="tplKodePrimer"></code></span></div>
-            <div class="op-field op-sempit"><label for="tplWarnaSekunder">Warna sekunder</label>
-              <span class="op-warna"><input type="color" id="tplWarnaSekunder" /> <code id="tplKodeSekunder"></code></span></div>
+            <div class="op-field op-sempit"><label for="tplUkJudul">Judul</label>
+              <input type="number" id="tplUkJudul" min="12" max="200" step="1" /></div>
+            <div class="op-field op-sempit"><label for="tplUkIsi">Isi</label>
+              <input type="number" id="tplUkIsi" min="12" max="200" step="1" /></div>
+            <div class="op-field op-sempit"><label for="tplUkFooter">Footer</label>
+              <input type="number" id="tplUkFooter" min="12" max="200" step="1" /></div>
           </div>
+
+          <h4 class="op-subjudul">Footer</h4>
+          <p class="op-catatan">Misalnya TERIMA KASIH. Kosongkan bila tulisan itu sudah ada di gambar template.</p>
+          <div class="op-baris">
+            <div class="op-field op-lebar"><label for="tplFooterTeks">Teks footer</label>
+              <input type="text" id="tplFooterTeks" placeholder="TERIMA KASIH" autocomplete="off" /></div>
+            <div class="op-field op-sempit"><label for="tplFooterX">Posisi X (%)</label>
+              <input type="number" id="tplFooterX" min="0" max="100" step="0.5" /></div>
+            <div class="op-field op-sempit"><label for="tplFooterY">Posisi Y (%)</label>
+              <input type="number" id="tplFooterY" min="0" max="100" step="0.5" /></div>
+          </div>
+
+          <h4 class="op-subjudul">Warna</h4>
+          <p class="op-catatan">Warna primer untuk seluruh teks biasa. Warna sekunder untuk kata yang diapit tanda bintang, misalnya <code>*SEMENTARA*</code>, dan nama kelas di daftar. Kode hex bisa diketik langsung.</p>
+          <div class="op-baris">
+            <div class="op-field op-sempit"><label for="tplHexPrimer">Warna primer</label>
+              <span class="op-warna"><input type="color" id="tplWarnaPrimer" aria-label="Pilih warna primer" />
+              <input type="text" id="tplHexPrimer" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
+            <div class="op-field op-sempit"><label for="tplHexSekunder">Warna sekunder</label>
+              <span class="op-warna"><input type="color" id="tplWarnaSekunder" aria-label="Pilih warna sekunder" />
+              <input type="text" id="tplHexSekunder" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
+            <div class="op-field op-sempit"><label for="tplHexKotak">Kotak daftar kelas</label>
+              <span class="op-warna"><input type="color" id="tplWarnaKotak" aria-label="Pilih warna kotak daftar kelas" />
+              <input type="text" id="tplHexKotak" maxlength="7" spellcheck="false" autocomplete="off" /></span></div>
+          </div>
+          <label class="op-centang-sebaris"><input type="checkbox" id="tplKotakAktif" /> Tampilkan kotak di belakang tiap kelas</label>
 
           <h4 class="op-subjudul">Area teks (persen dari ukuran gambar)</h4>
+          <p class="op-catatan">Bisa juga langsung diseret di pratinjau: seret bagian dalam kotak garis putus-putus untuk memindahkan, seret sisinya untuk mengubah ukuran, dan seret kotak footer untuk memindahkan footer.</p>
           <div class="op-baris">
-            <div class="op-field op-sempit"><label for="tplAtas">Batas atas</label>
+            <div class="op-field op-sempit"><label for="tplAtas">Atas</label>
               <input type="number" id="tplAtas" min="0" max="90" step="0.5" /></div>
-            <div class="op-field op-sempit"><label for="tplBawah">Batas bawah</label>
+            <div class="op-field op-sempit"><label for="tplBawah">Bawah</label>
               <input type="number" id="tplBawah" min="10" max="100" step="0.5" /></div>
-            <div class="op-field op-sempit"><label for="tplSamping">Jarak samping</label>
-              <input type="number" id="tplSamping" min="0" max="40" step="0.5" /></div>
+            <div class="op-field op-sempit"><label for="tplKiri">Kiri</label>
+              <input type="number" id="tplKiri" min="0" max="80" step="0.5" /></div>
+            <div class="op-field op-sempit"><label for="tplKanan">Kanan</label>
+              <input type="number" id="tplKanan" min="0" max="80" step="0.5" /></div>
           </div>
 
           <div class="op-aksi">
@@ -674,8 +707,17 @@
           </div>
           <p class="op-pesan" id="pesanTemplate" role="alert"></p>
         </div>
-        <div>
-          <img class="op-template-pratinjau" id="tplPratinjau" alt="Pratinjau template story dengan contoh isi" hidden />
+        <div class="op-template-kanan">
+          <div class="op-tpl-kanvas" id="tplKanvas" hidden>
+            <img class="op-template-pratinjau" id="tplPratinjau" alt="Pratinjau template story dengan contoh isi" draggable="false" />
+            <div class="op-tpl-area" id="tplKotakArea" title="Seret untuk memindahkan area teks">
+              <span class="op-tpl-sisi atas" data-sisi="atas"></span>
+              <span class="op-tpl-sisi bawah" data-sisi="bawah"></span>
+              <span class="op-tpl-sisi kiri" data-sisi="kiri"></span>
+              <span class="op-tpl-sisi kanan" data-sisi="kanan"></span>
+            </div>
+            <div class="op-tpl-footer" id="tplKotakFooter" title="Seret untuk memindahkan footer" hidden></div>
+          </div>
           <div class="op-template-kosong" id="tplKosong">Pratinjau muncul setelah template diunggah.</div>
         </div>
       </div>

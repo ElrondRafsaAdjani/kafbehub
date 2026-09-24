@@ -15,6 +15,7 @@
 import { bacaBerkas, susunBerkas, unduhBlob } from './excel.js';
 import {
   bukaStory, buatStory, aturTemplate, adaTemplate, unduhBlobSebagai, TEMPLATE,
+  muatDaftarFont, pasangFontGoogle,
 } from './gambar-ig.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
@@ -1440,7 +1441,8 @@ async function bukaStoryPermanen(j, lama){
    base64 di koleksi templateig, dipotong-potong karena satu dokumen Firestore
    paling besar 1 MB:
 
-     templateig/story            { potongan, area, font, warna, namaBerkas, oleh, diunggah }
+     templateig/story            { potongan, area, font, warna, ukuran, footer,
+                                   kotak, namaBerkas, oleh, diunggah }
      templateig/story-potongan-0 { isi: '...' }
      templateig/story-potongan-1 { isi: '...' }
 
@@ -1476,7 +1478,7 @@ async function ambilTemplateIg(){
     catch(err){ console.error(err); dataUrl = ''; }
   }
   templateIg = { meta, dataUrl, gambar };
-  aturTemplate({ gambar, area: meta.area, font: meta.font, warna: meta.warna });
+  aturTemplate({ ...meta, gambar });
   return templateIg;
 }
 
@@ -1508,49 +1510,203 @@ const CONTOH_STORY = {
   }],
 };
 
-// Seluruh pengaturan di tab PR: area teks, font, dan warna.
+// Seluruh pengaturan di tab PR. Bentuknya sama dengan yang disimpan di
+// templateig/story dan yang diterima aturTemplate().
 function pengaturanDariIsian(){
   const angka = (id, bawaan) => {
     const n = Number($(id).value);
     return Number.isFinite(n) && $(id).value !== '' ? n : bawaan;
   };
-  const b = TEMPLATE.areaBawaan;
-  const samping = angka('tplSamping', b.kiri);
+  const A = TEMPLATE.areaBawaan, U = TEMPLATE.ukuranBawaan, F = TEMPLATE.footerBawaan;
   return {
-    area: { atas: angka('tplAtas', b.atas), bawah: angka('tplBawah', b.bawah), kiri: samping, kanan: samping },
-    font: {
-      primer:   $('tplFontPrimer').value.trim()   || TEMPLATE.fontBawaan.primer,
-      sekunder: $('tplFontSekunder').value.trim() || TEMPLATE.fontBawaan.sekunder,
+    area: {
+      atas: angka('tplAtas', A.atas), bawah: angka('tplBawah', A.bawah),
+      kiri: angka('tplKiri', A.kiri), kanan: angka('tplKanan', A.kanan),
     },
+    font: { primer: $('tplFontPrimer').value, sekunder: $('tplFontSekunder').value },
     warna: { primer: $('tplWarnaPrimer').value, sekunder: $('tplWarnaSekunder').value },
+    ukuran: {
+      judul: angka('tplUkJudul', U.judul), isi: angka('tplUkIsi', U.isi), footer: angka('tplUkFooter', U.footer),
+    },
+    footer: { teks: $('tplFooterTeks').value.trim(), x: angka('tplFooterX', F.x), y: angka('tplFooterY', F.y) },
+    kotak: { aktif: $('tplKotakAktif').checked, warna: $('tplWarnaKotak').value },
   };
 }
 
-function isiIsianPengaturan(m){
-  const a = { ...TEMPLATE.areaBawaan, ...(m?.area || {}) };
-  const f = { ...TEMPLATE.fontBawaan, ...(m?.font || {}) };
-  const w = { ...TEMPLATE.warnaBawaan, ...(m?.warna || {}) };
-  $('tplAtas').value = a.atas; $('tplBawah').value = a.bawah; $('tplSamping').value = a.kiri;
-  $('tplFontPrimer').value = f.primer; $('tplFontSekunder').value = f.sekunder;
-  $('tplWarnaPrimer').value = w.primer; $('tplWarnaSekunder').value = w.sekunder;
-  $('tplKodePrimer').textContent = w.primer; $('tplKodeSekunder').textContent = w.sekunder;
+// Kotak warna dan kotak kode hex selalu seiring: mengubah salah satunya
+// mengubah yang lain. Kode hex yang belum lengkap diabaikan sampai benar.
+const PASANGAN_WARNA = [
+  ['tplWarnaPrimer', 'tplHexPrimer'],
+  ['tplWarnaSekunder', 'tplHexSekunder'],
+  ['tplWarnaKotak', 'tplHexKotak'],
+];
+function aturWarna(idWarna, idHex, nilai){
+  $(idWarna).value = nilai;
+  $(idHex).value = nilai;
+  $(idHex).classList.remove('op-salah-isi');
 }
+
+function isiIsianPengaturan(m){
+  const ambil = (k, b) => ({ ...TEMPLATE[b], ...(m?.[k] || {}) });
+  const a = ambil('area', 'areaBawaan'), f = ambil('font', 'fontBawaan'), w = ambil('warna', 'warnaBawaan');
+  const u = ambil('ukuran', 'ukuranBawaan'), ft = ambil('footer', 'footerBawaan'), k = ambil('kotak', 'kotakBawaan');
+  $('tplAtas').value = a.atas; $('tplBawah').value = a.bawah; $('tplKiri').value = a.kiri; $('tplKanan').value = a.kanan;
+  pilihFont('tplFontPrimer', f.primer); pilihFont('tplFontSekunder', f.sekunder);
+  aturWarna('tplWarnaPrimer', 'tplHexPrimer', w.primer);
+  aturWarna('tplWarnaSekunder', 'tplHexSekunder', w.sekunder);
+  aturWarna('tplWarnaKotak', 'tplHexKotak', k.warna);
+  $('tplKotakAktif').checked = k.aktif !== false;
+  $('tplUkJudul').value = u.judul; $('tplUkIsi').value = u.isi; $('tplUkFooter').value = u.footer;
+  $('tplFooterTeks').value = ft.teks || ''; $('tplFooterX').value = ft.x; $('tplFooterY').value = ft.y;
+  aturPenandaPosisi();
+}
+
+/* ---------- Pilihan font ----------
+
+   Daftarnya diambil dari shared/daftar-font.js (seluruh Google Fonts yang
+   mendukung huruf Latin), dikelompokkan per jenis. Di bawah tiap pilihan ada
+   contoh tulisan dengan font itu, supaya tidak perlu menebak dari namanya.
+*/
+const JENIS_FONT = { s: 'Sans serif', r: 'Serif', d: 'Display', h: 'Tulisan tangan', m: 'Monospace' };
+let pilihanFontSiap = null;
+
+function isiPilihanFont(){
+  if(!pilihanFontSiap){
+    pilihanFontSiap = muatDaftarFont().then(daftar => {
+      const kelompok = Object.entries(JENIS_FONT).map(([k, nama]) =>
+        `<optgroup label="${esc(nama)}">${daftar.filter(r => r[1] === k)
+          .map(r => `<option value="${esc(r[0])}">${esc(r[0])}</option>`).join('')}</optgroup>`).join('');
+      for(const id of ['tplFontPrimer', 'tplFontSekunder']) $(id).innerHTML = kelompok;
+    });
+  }
+  return pilihanFontSiap;
+}
+
+// Font yang tersimpan tapi tidak ada di daftar (misalnya daftar sudah lama)
+// tetap ditampilkan sebagai pilihan, supaya tidak diam-diam tertukar.
+function pilihFont(id, nama){
+  const el = $(id);
+  if(nama && ![...el.options].some(o => o.value === nama)){
+    el.insertAdjacentHTML('afterbegin', `<option value="${esc(nama)}">${esc(nama)}</option>`);
+  }
+  el.value = nama;
+  contohFont(id);
+}
+
+async function contohFont(id){
+  const nama = $(id).value;
+  const el = $(id + 'Contoh');
+  if(!nama){ el.textContent = ''; return; }
+  el.textContent = 'Memuat contoh…';
+  el.style.fontFamily = '';
+  const ok = await pasangFontGoogle(nama);
+  try{ await document.fonts.load(`400 24px "${nama}"`); }catch{ /* lanjut saja */ }
+  if($(id).value !== nama) return;
+  el.style.fontFamily = `"${nama}", sans-serif`;
+  el.textContent = ok ? 'JADWAL PERPINDAHAN · Diharapkan bagi mahasiswa 0123' : 'Font ini gagal dimuat dari Google Fonts.';
+}
+
+/* ---------- Geser posisi langsung di pratinjau ----------
+
+   Kotak garis putus-putus di atas pratinjau adalah area teks. Menyeret
+   bagian dalamnya memindahkan seluruh area; menyeret salah satu sisinya
+   mengubah ukuran dari sisi itu. Kotak kedua (bila teks footer diisi)
+   memindahkan footer. Angkanya ikut berubah di kotak isian, jadi posisi
+   yang pas bisa juga diketik langsung.
+*/
+function aturPenandaPosisi(){
+  const { area, footer, ukuran } = pengaturanDariIsian();
+  const k = $('tplKotakArea');
+  k.style.left = area.kiri + '%';
+  k.style.top = area.atas + '%';
+  k.style.width = Math.max(0, 100 - area.kiri - area.kanan) + '%';
+  k.style.height = Math.max(0, area.bawah - area.atas) + '%';
+  const f = $('tplKotakFooter');
+  f.hidden = !footer.teks;
+  const tinggi = ukuran.footer * 1.4 / TEMPLATE.h * 100;
+  f.style.left = footer.x + '%';
+  f.style.top = footer.y + '%';
+  f.style.height = tinggi + '%';
+  f.textContent = footer.teks;
+}
+
+const bulat = n => Math.round(n * 10) / 10;
+const batasi = (n, min, max) => Math.min(max, Math.max(min, n));
+
+function mulaiSeret(e, jenis){
+  if(e.button !== 0) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const bingkai = $('tplKanvas').getBoundingClientRect();
+  const awal = pengaturanDariIsian();
+  const x0 = e.clientX, y0 = e.clientY;
+  const el = e.currentTarget;
+  el.setPointerCapture(e.pointerId);
+
+  const gerak = ev => {
+    const dx = (ev.clientX - x0) / bingkai.width * 100;
+    const dy = (ev.clientY - y0) / bingkai.height * 100;
+    const a = { ...awal.area };
+    if(jenis === 'geser'){
+      const lebar = 100 - a.kiri - a.kanan, tinggi = a.bawah - a.atas;
+      const kiri = batasi(a.kiri + dx, 0, 100 - lebar);
+      const atas = batasi(a.atas + dy, 0, 100 - tinggi);
+      a.kiri = kiri; a.kanan = 100 - lebar - kiri; a.atas = atas; a.bawah = atas + tinggi;
+    }else if(jenis === 'atas') a.atas = batasi(a.atas + dy, 0, a.bawah - 10);
+    else if(jenis === 'bawah') a.bawah = batasi(a.bawah + dy, a.atas + 10, 100);
+    else if(jenis === 'kiri') a.kiri = batasi(a.kiri + dx, 0, 100 - a.kanan - 20);
+    else if(jenis === 'kanan') a.kanan = batasi(a.kanan - dx, 0, 100 - a.kiri - 20);
+
+    if(jenis === 'footer'){
+      $('tplFooterX').value = bulat(batasi(awal.footer.x + dx, 0, 100));
+      $('tplFooterY').value = bulat(batasi(awal.footer.y + dy, 0, 100));
+    }else{
+      $('tplAtas').value = bulat(a.atas); $('tplBawah').value = bulat(a.bawah);
+      $('tplKiri').value = bulat(a.kiri); $('tplKanan').value = bulat(a.kanan);
+    }
+    aturPenandaPosisi();
+  };
+  const selesai = () => {
+    el.removeEventListener('pointermove', gerak);
+    el.removeEventListener('pointerup', selesai);
+    el.removeEventListener('pointercancel', selesai);
+    pratinjauDariIsian();
+  };
+  el.addEventListener('pointermove', gerak);
+  el.addEventListener('pointerup', selesai);
+  el.addEventListener('pointercancel', selesai);
+}
+
+$('tplKotakArea').addEventListener('pointerdown', e => mulaiSeret(e, 'geser'));
+document.querySelectorAll('[data-sisi]').forEach(el =>
+  el.addEventListener('pointerdown', e => mulaiSeret(e, el.dataset.sisi)));
+$('tplKotakFooter').addEventListener('pointerdown', e => mulaiSeret(e, 'footer'));
+
+// Contoh isi pratinjau memakai teks footer yang sedang diisi, supaya posisi
+// footer bisa dilihat bersama isi.
+const CONTOH_DAFTAR_KEDUA = {
+  judul: 'Ekonomi Mikro KP A',
+  baris: [
+    { teks: 'Senin, 5 Okt · 07.30 - 10.00 · TC 2.1', gaya: 'lembut' },
+    { teks: 'Online (daring)', gaya: 'tebal' },
+  ],
+};
 
 // Beberapa pratinjau bisa diminta berturut-turut saat mengetik; hanya yang
 // terakhir yang dipasang.
 let nomorPratinjau = 0;
 async function gambarPratinjauTemplate(){
   const ada = adaTemplate();
-  $('tplPratinjau').hidden = !ada;
+  $('tplKanvas').hidden = !ada;
   $('tplKosong').hidden = ada;
   if(!ada) return;
   const nomor = ++nomorPratinjau;
-  const [kanvas] = await buatStory(CONTOH_STORY, { panduan: true });
+  const [kanvas] = await buatStory({ ...CONTOH_STORY, daftar: [...CONTOH_STORY.daftar, CONTOH_DAFTAR_KEDUA] });
   if(nomor === nomorPratinjau) $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
 }
 
 async function segarkanTabTemplate(ulang = false){
-  const t = await siapkanTemplateIg(ulang);
+  const [t] = await Promise.all([siapkanTemplateIg(ulang), isiPilihanFont()]);
   const m = t?.meta || {};
   const unggahan = !!t?.gambar;
   let waktu = '';
@@ -1575,32 +1731,59 @@ async function segarkanTabTemplate(ulang = false){
 
 let jedaPratinjau = null;
 function pratinjauDariIsian(){
-  const { area, font, warna } = pengaturanDariIsian();
-  $('tplKodePrimer').textContent = warna.primer;
-  $('tplKodeSekunder').textContent = warna.sekunder;
-  aturTemplate({ gambar: templateIg?.gambar || null, area, font, warna });
-  // Nama font diketik huruf demi huruf; pratinjaunya ditunda sebentar supaya
-  // tidak memesan font setengah jadi ke Google Fonts di setiap ketukan.
+  aturTemplate({ ...pengaturanDariIsian(), gambar: templateIg?.gambar || null });
+  aturPenandaPosisi();
   clearTimeout(jedaPratinjau);
-  jedaPratinjau = setTimeout(gambarPratinjauTemplate, 500);
+  jedaPratinjau = setTimeout(gambarPratinjauTemplate, 400);
 }
 
-['tplAtas', 'tplBawah', 'tplSamping', 'tplFontPrimer', 'tplFontSekunder', 'tplWarnaPrimer', 'tplWarnaSekunder']
+['tplAtas', 'tplBawah', 'tplKiri', 'tplKanan', 'tplUkJudul', 'tplUkIsi', 'tplUkFooter',
+ 'tplFooterTeks', 'tplFooterX', 'tplFooterY', 'tplKotakAktif']
   .forEach(id => $(id).addEventListener('input', pratinjauDariIsian));
+
+['tplFontPrimer', 'tplFontSekunder'].forEach(id => $(id).addEventListener('change', () => {
+  contohFont(id);
+  pratinjauDariIsian();
+}));
+
+for(const [idWarna, idHex] of PASANGAN_WARNA){
+  $(idWarna).addEventListener('input', () => {
+    $(idHex).value = $(idWarna).value;
+    $(idHex).classList.remove('op-salah-isi');
+    pratinjauDariIsian();
+  });
+  $(idHex).addEventListener('input', () => {
+    let v = $(idHex).value.trim();
+    if(v && v[0] !== '#') v = '#' + v;
+    // Bentuk singkat #abc diperluas menjadi #aabbcc, karena kotak warna
+    // hanya menerima bentuk enam digit.
+    if(/^#[0-9a-f]{3}$/i.test(v)) v = '#' + v.slice(1).split('').map(c => c + c).join('');
+    const sah = /^#[0-9a-f]{6}$/i.test(v);
+    $(idHex).classList.toggle('op-salah-isi', !sah);
+    if(!sah) return;
+    $(idWarna).value = v.toLowerCase();
+    pratinjauDariIsian();
+  });
+}
 
 $('tplSimpan').addEventListener('click', async () => {
   const el = $('pesanTemplate');
-  const { area, font, warna } = pengaturanDariIsian();
-  if(!(area.atas >= 0 && area.bawah <= 100 && area.atas + 10 <= area.bawah
-       && area.kiri >= 0 && area.kiri <= 40)){
-    pesan(el, 'Batas area tidak masuk akal. Atas harus lebih kecil dari bawah (selisih minimal 10), dan samping 0 sampai 40.', 'salah');
-    return;
+  const atur = pengaturanDariIsian();
+  const { area, font, warna, ukuran, footer } = atur;
+  const salah = [];
+  if(!(area.atas >= 0 && area.bawah <= 100 && area.atas + 10 <= area.bawah)) salah.push('Batas atas harus lebih kecil dari batas bawah, dengan selisih minimal 10.');
+  if(!(area.kiri >= 0 && area.kanan >= 0 && area.kiri + area.kanan <= 80)) salah.push('Jarak kiri dan kanan masing-masing minimal 0, dan jumlahnya paling besar 80.');
+  for(const [k, nama] of [['judul', 'judul'], ['isi', 'isi'], ['footer', 'footer']]){
+    if(!(ukuran[k] >= 12 && ukuran[k] <= 200)) salah.push(`Ukuran huruf ${nama} harus antara 12 dan 200.`);
   }
+  if(PASANGAN_WARNA.some(([, h]) => $(h).classList.contains('op-salah-isi'))) salah.push('Ada kode warna yang belum benar. Tulis enam digit, misalnya #13192f.');
+  if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
+
   try{
-    await setDoc(doc(db, 'templateig', 'story'), { area, font, warna }, { merge: true });
+    await setDoc(doc(db, 'templateig', 'story'), atur, { merge: true });
     await catat('ubah', 'template story', 'Pengaturan template story diubah',
-      `area ${area.atas}-${area.bawah}% samping ${area.kiri}%; font ${font.primer} / ${font.sekunder}; `
-      + `warna ${warna.primer} / ${warna.sekunder}`);
+      `font ${font.primer} / ${font.sekunder}; ukuran ${ukuran.judul}/${ukuran.isi}/${ukuran.footer}; `
+      + `warna ${warna.primer} / ${warna.sekunder}; footer "${footer.teks.slice(0, 60)}"`);
     await segarkanTabTemplate(true);
     pesan(el, 'Pengaturan tersimpan dan berlaku untuk semua story berikutnya.', 'benar');
   }catch(err){
@@ -1613,7 +1796,7 @@ $('tplSimpan').addEventListener('click', async () => {
 $('tplPengaturanAwal').addEventListener('click', () => {
   isiIsianPengaturan({});
   pratinjauDariIsian();
-  pesan($('pesanTemplate'), 'Area, font, dan warna dikembalikan ke pengaturan awal. Tekan Simpan pengaturan untuk menyimpannya.', 'hati');
+  pesan($('pesanTemplate'), 'Semua pengaturan dikembalikan ke awal. Tekan Simpan pengaturan untuk menyimpannya.', 'hati');
 });
 
 $('tplUnduh').addEventListener('click', async () => {

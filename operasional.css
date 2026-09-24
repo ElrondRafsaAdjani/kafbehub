@@ -449,9 +449,11 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 .op-label-berkas{ cursor:pointer; }
 
 .op-template{
-  display:grid; grid-template-columns:minmax(0, 1fr) 260px; gap:24px; align-items:start;
+  display:grid; grid-template-columns:minmax(0, 1fr) 340px; gap:28px; align-items:start;
   margin-top:10px;
 }
+/* Pratinjau tetap terlihat selagi pengaturan di sebelahnya digulir. */
+.op-template-kanan{ position:sticky; top:84px; }
 .op-template-pratinjau{
   width:100%; height:auto; display:block; border-radius:14px;
   border:1px solid var(--line); background:var(--bg-deep); aspect-ratio:9 / 16;
@@ -466,7 +468,7 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 
 @media (max-width:760px){
   .op-template, .op-ig-susun{ grid-template-columns:1fr; }
-  .op-template-pratinjau{ max-width:280px; }
+  .op-template-kanan{ position:static; max-width:340px; }
 }
 .op-ig-teks .op-field{ flex:0 0 auto; }
 .op-template-kosong{
@@ -479,4 +481,49 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
   width:48px; height:40px; padding:3px; cursor:pointer;
   border:1px solid var(--line); border-radius:10px; background:var(--surface);
 }
-.op-warna code{ font-size:0.82rem; color:var(--ink-soft); }
+.op-warna input[type=text]{
+  width:110px; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:0.88rem; text-transform:lowercase;
+}
+.op-salah-isi{ border-color:#D9534F !important; box-shadow:0 0 0 3px rgba(217,83,79,0.15) !important; }
+.op-field.op-sempit:has(.op-warna){ flex:0 0 auto; }
+.op-contoh-font{
+  display:block; min-height:1.6em; margin-top:4px; font-size:1.05rem; color:var(--owl-dark2);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.op-centang-sebaris{
+  display:inline-flex; align-items:center; gap:8px; margin-top:12px;
+  font-size:0.86rem; font-weight:600; color:var(--owl-dark2); cursor:pointer;
+}
+.op-centang-sebaris input{ width:auto; }
+
+/* Penanda posisi yang bisa diseret di atas pratinjau template. */
+.op-tpl-kanvas{ position:relative; touch-action:none; user-select:none; }
+.op-tpl-kanvas img{ pointer-events:none; }
+.op-tpl-area, .op-tpl-footer{
+  position:absolute; box-sizing:border-box; cursor:move;
+  border:2px dashed #E0457B; background:rgba(224,69,123,0.06); border-radius:4px;
+}
+.op-tpl-area:hover, .op-tpl-footer:hover{ background:rgba(224,69,123,0.12); }
+.op-tpl-footer{
+  transform:translate(-50%, -50%); min-width:30%; padding:0 6px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.62rem; font-weight:700; color:#E0457B; white-space:nowrap;
+  border-color:#7A5CE0; color:#7A5CE0; background:rgba(122,92,224,0.08);
+}
+/* Area sengaja tanpa z-index, supaya pegangan sisinya bisa berada di atas
+   kotak footer, sementara bagian dalam area tetap di bawahnya. */
+.op-tpl-footer{ z-index:2; }
+.op-tpl-sisi{ position:absolute; z-index:3; }
+.op-tpl-sisi.atas, .op-tpl-sisi.bawah{ left:8px; right:8px; height:12px; cursor:ns-resize; }
+.op-tpl-sisi.atas{ top:-7px; }
+.op-tpl-sisi.bawah{ bottom:-7px; }
+.op-tpl-sisi.kiri, .op-tpl-sisi.kanan{ top:8px; bottom:8px; width:12px; cursor:ew-resize; }
+.op-tpl-sisi.kiri{ left:-7px; }
+.op-tpl-sisi.kanan{ right:-7px; }
+.op-tpl-sisi::after{
+  content:''; position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);
+  background:#E0457B; border-radius:3px;
+}
+.op-tpl-sisi.atas::after, .op-tpl-sisi.bawah::after{ width:26px; height:5px; }
+.op-tpl-sisi.kiri::after, .op-tpl-sisi.kanan::after{ width:5px; height:26px; }

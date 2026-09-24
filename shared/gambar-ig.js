@@ -23,17 +23,22 @@
   sepanjang satu periode kepengurusan; periode berikutnya cukup mengunggah
   template baru untuk menggantikannya.
 
-  Berkas ini tidak menggambar apa pun selain teks. Batik, logo, pita
-  PENGUMUMAN, kartu putih, ornamen emas, TERIMA KASIH, dan slogan sudah ada di
-  gambar template. Teks ditulis di dalam "area teks" yang batasnya diatur di
-  tab PR, jadi di template bagian itu harus dikosongkan.
+  Yang digambar di sini hanya teks, ditambah kotak di belakang tiap kelas
+  pada daftar (bisa dimatikan). Batik, logo, pita PENGUMUMAN, kartu putih,
+  ornamen, dan slogan sudah ada di gambar template. Teks ditulis di dalam
+  "area teks", jadi di template bagian itu harus dikosongkan. Teks footer
+  (misalnya TERIMA KASIH) ikut ditulis bila diisi di tab PR, dan dibiarkan
+  kosong bila sudah menjadi bagian dari template.
 
-  Font dan warnanya juga diatur di tab PR:
-    - font primer    : judul
+  Semua pengaturan berikut disimpan di tab PR:
+    - font primer    : judul dan footer
     - font sekunder  : kalimat pembuka dan daftar kelas
     - warna primer   : seluruh teks biasa
     - warna sekunder : kata yang diapit *...* dan nama kelas di daftar
-  Font diambil dari Google Fonts sesuai nama yang ditulis di sana.
+    - ukuran huruf judul, isi, dan footer
+    - warna kotak daftar kelas
+    - posisi area teks dan posisi footer
+  Font diambil dari Google Fonts (lihat shared/daftar-font.js).
 */
 
 export const TEMPLATE = {
@@ -41,21 +46,27 @@ export const TEMPLATE = {
   h: 1920,
 
   // Dipakai bila belum ada pengaturan yang disimpan di tab PR.
-  areaBawaan:  { atas: 22, bawah: 79, kiri: 15, kanan: 15 },
-  fontBawaan:  { primer: 'Lilita One', sekunder: 'Fredoka' },
-  warnaBawaan: { primer: '#13192f', sekunder: '#be8f41' },
+  // Area dan posisi footer dalam persen dari lebar dan tinggi gambar;
+  // ukuran huruf dalam piksel pada gambar 1080 x 1920.
+  areaBawaan:   { atas: 22, bawah: 79, kiri: 15, kanan: 15 },
+  fontBawaan:   { primer: 'Lilita One', sekunder: 'Fredoka' },
+  warnaBawaan:  { primer: '#13192f', sekunder: '#be8f41' },
+  ukuranBawaan: { judul: 88, isi: 44, footer: 66 },
+  footerBawaan: { teks: '', x: 50, y: 82 },
+  kotakBawaan:  { aktif: true, warna: '#F7F1E4' },
 };
 
 /* ============================================================
    Keadaan template yang sedang dipakai
    ============================================================ */
 
-let tpl = {
-  gambar: null,
-  area:  { ...TEMPLATE.areaBawaan },
-  font:  { ...TEMPLATE.fontBawaan },
-  warna: { ...TEMPLATE.warnaBawaan },
+const BAGIAN = {
+  area: 'areaBawaan', font: 'fontBawaan', warna: 'warnaBawaan',
+  ukuran: 'ukuranBawaan', footer: 'footerBawaan', kotak: 'kotakBawaan',
 };
+
+let tpl = { gambar: null };
+for(const [k, b] of Object.entries(BAGIAN)) tpl[k] = { ...TEMPLATE[b] };
 
 // Mengisi nilai kosong dengan bawaannya, supaya kolom yang dikosongkan di tab
 // PR tidak membuat teks hilang.
@@ -72,13 +83,9 @@ function lengkapi(nilai, bawaan){
   setiap kali isian di tab PR berubah (untuk pratinjau).
   gambar: HTMLImageElement, atau null bila belum ada template yang diunggah.
 */
-export function aturTemplate({ gambar = null, area = null, font = null, warna = null } = {}){
-  tpl = {
-    gambar,
-    area:  lengkapi(area, TEMPLATE.areaBawaan),
-    font:  lengkapi(font, TEMPLATE.fontBawaan),
-    warna: lengkapi(warna, TEMPLATE.warnaBawaan),
-  };
+export function aturTemplate(isi = {}){
+  tpl = { gambar: isi.gambar || null };
+  for(const [k, b] of Object.entries(BAGIAN)) tpl[k] = lengkapi(isi[k], TEMPLATE[b]);
 }
 
 export const adaTemplate = () => !!tpl.gambar;
@@ -87,11 +94,18 @@ export const adaTemplate = () => !!tpl.gambar;
    Font dari Google Fonts
    ============================================================
 
-   Nama font ditulis bebas di tab PR, jadi lembar gayanya dipasang saat
-   dibutuhkan. Ketebalan yang tersedia berbeda-beda (Lilita One hanya punya
-   satu), sedangkan Google Fonts menolak permintaan ketebalan yang tidak ada.
-   Karena itu dicoba dulu dengan beberapa ketebalan, lalu tanpa ketebalan.
+   Lembar gaya font dipasang saat dibutuhkan. Ketebalan yang tersedia
+   berbeda-beda (Lilita One hanya punya satu), sedangkan Google Fonts menolak
+   permintaan ketebalan yang tidak ada. Karena itu ketebalannya diambil dari
+   shared/daftar-font.js; untuk nama yang tidak ada di daftar, dicoba dengan
+   beberapa ketebalan lalu tanpa ketebalan.
 */
+
+let janjiDaftarFont = null;
+export function muatDaftarFont(){
+  if(!janjiDaftarFont) janjiDaftarFont = import('./daftar-font.js').then(m => m.DAFTAR_FONT);
+  return janjiDaftarFont;
+}
 
 const fontDipasang = new Map();   // nama -> Promise<boolean>
 
@@ -106,13 +120,18 @@ function pasangLink(href){
   });
 }
 
-function pasangFontGoogle(nama){
+export function pasangFontGoogle(nama){
   if(!fontDipasang.has(nama)){
     const f = encodeURIComponent(nama).replace(/%20/g, '+');
-    fontDipasang.set(nama, (async () =>
-      await pasangLink(`https://fonts.googleapis.com/css2?family=${f}:wght@400;500;600;700&display=swap`)
-      || await pasangLink(`https://fonts.googleapis.com/css2?family=${f}&display=swap`)
-    )());
+    fontDipasang.set(nama, (async () => {
+      const baris = (await muatDaftarFont()).find(r => r[0] === nama);
+      const berat = baris
+        ? baris[2].split('').map(d => d + '00').filter(w => w >= 300 && w <= 800)
+        : ['400', '500', '600', '700'];
+      return (berat.length > 1
+          && await pasangLink(`https://fonts.googleapis.com/css2?family=${f}:wght@${berat.join(';')}&display=swap`))
+        || await pasangLink(`https://fonts.googleapis.com/css2?family=${f}&display=swap`);
+    })());
   }
   return fontDipasang.get(nama);
 }
@@ -151,16 +170,20 @@ async function siapkanFont(){
 }
 
 // Susunan huruf untuk tiap jenis teks, dihitung sekali per penggambaran.
+// Ukuran daftar kelas mengikuti ukuran isi supaya tetap sebanding.
 function gaya(s){
   const { primer, sekunder } = tpl.font;
-  const f = (nama, ingin, px) => `${ketebalan(nama, ingin)} ${px * s}px ${css(nama)}`;
+  const judul = Number(tpl.ukuran.judul) || TEMPLATE.ukuranBawaan.judul;
+  const isi = Number(tpl.ukuran.isi) || TEMPLATE.ukuranBawaan.isi;
+  const g = (nama, ingin, px, lh, lain = {}) =>
+    ({ font: `${ketebalan(nama, ingin)} ${px * s}px ${css(nama)}`, tinggi: px * lh * s, ...lain });
   return {
-    judul:    { font: f(primer, 700, 88),   tinggi: 94 * s },
-    isi:      { font: f(sekunder, 600, 44), tinggi: 58 * s },
-    kelas:    { font: f(sekunder, 700, 38), tinggi: 48 * s, sekunder: true },
-    lembut:   { font: f(sekunder, 500, 31), tinggi: 41 * s },
-    tebal:    { font: f(sekunder, 600, 33), tinggi: 43 * s },
-    catatan:  { font: f(sekunder, 400, 28), tinggi: 38 * s },
+    judul:   g(primer, 700, judul, 1.07),
+    isi:     g(sekunder, 600, isi, 1.32),
+    kelas:   g(sekunder, 700, isi * 0.86, 1.26, { sekunder: true }),
+    lembut:  g(sekunder, 500, isi * 0.7, 1.32),
+    tebal:   g(sekunder, 600, isi * 0.75, 1.3),
+    catatan: g(sekunder, 400, isi * 0.64, 1.36),
   };
 }
 
@@ -244,10 +267,12 @@ function susunKepala(ctx, konten, lebar, s){
 
 function susunButir(ctx, butir, lebar, s){
   const g = gaya(s);
+  const pad = tpl.kotak.aktif ? 22 * s : 0;
+  const dalam = lebar - pad * 2;
   const blok = [];
-  if(butir.judul) blok.push(susunBlok(ctx, butir.judul, g.kelas, lebar));
-  for(const b of butir.baris || []) blok.push(susunBlok(ctx, b.teks, g[b.gaya] || g.tebal, lebar));
-  return { blok, tinggi: blok.reduce((n, b) => n + b.tinggi, 0), s };
+  if(butir.judul) blok.push(susunBlok(ctx, butir.judul, g.kelas, dalam));
+  for(const b of butir.baris || []) blok.push(susunBlok(ctx, b.teks, g[b.gaya] || g.tebal, dalam));
+  return { blok, pad, tinggi: blok.reduce((n, b) => n + b.tinggi, 0) + pad * 2, s };
 }
 
 function gambarBlok(ctx, blok, cx, y){
@@ -276,13 +301,15 @@ function hitungArea(){
   return { x0, x1, y0, y1, lebar: x1 - x0, tinggi: y1 - y0 };
 }
 
-const JARAK_DAFTAR = 44;   // jarak kalimat pembuka ke daftar
-const JARAK_BUTIR = 30;    // jarak antarkelas di daftar
+const JARAK_DAFTAR = 40;   // jarak kalimat pembuka ke daftar
+
+// Kotak memberi batas sendiri, jadi jarak antarkelas bisa lebih rapat.
+const jarakButir = () => (tpl.kotak.aktif ? 16 : 30);
 
 function tinggiHalaman(kepala, butir, s){
   if(!butir.length) return kepala.tinggi;
   return kepala.tinggi + JARAK_DAFTAR * s
-    + butir.reduce((n, b) => n + b.tinggi, 0) + JARAK_BUTIR * s * (butir.length - 1);
+    + butir.reduce((n, b) => n + b.tinggi, 0) + jarakButir() * s * (butir.length - 1);
 }
 
 /*
@@ -323,10 +350,22 @@ function bagiHalaman(ctx, konten, area){
 
 /*
   Menghasilkan daftar kanvas story.
-  opsi.panduan: gambar garis putus-putus di batas area teks (untuk pratinjau
-  di tab PR, tidak untuk gambar yang diunduh).
 */
-export async function buatStory(konten, opsi = {}){
+function gambarFooter(ctx){
+  const teks = String(tpl.footer.teks || '').trim();
+  if(!teks) return;
+  const { w, h } = TEMPLATE;
+  const px = Number(tpl.ukuran.footer) || TEMPLATE.ukuranBawaan.footer;
+  ctx.font = `${ketebalan(tpl.font.primer, 700)} ${px}px ${css(tpl.font.primer)}`;
+  ctx.fillStyle = tpl.warna.primer;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(teks, w * tpl.footer.x / 100, h * tpl.footer.y / 100);
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+}
+
+export async function buatStory(konten){
   if(!tpl.gambar) throw new Error('Belum ada template story. Upload dulu di tab PR.');
   await siapkanFont();
   const area = hitungArea();
@@ -338,15 +377,7 @@ export async function buatStory(konten, opsi = {}){
     kanvas.width = TEMPLATE.w; kanvas.height = TEMPLATE.h;
     const ctx = kanvas.getContext('2d');
     gambarLatar(ctx);
-
-    if(opsi.panduan){
-      ctx.save();
-      ctx.setLineDash([18, 12]);
-      ctx.strokeStyle = '#E0457B';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(area.x0, area.y0, area.lebar, area.tinggi);
-      ctx.restore();
-    }
+    gambarFooter(ctx);
 
     const s = kepala.s;
     const total = tinggiHalaman(kepala, butir, s);
@@ -357,8 +388,16 @@ export async function buatStory(konten, opsi = {}){
     y = gambarBlok(ctx, kepala.blok[1], cx, y);
     if(butir.length) y += JARAK_DAFTAR * s;
     for(const b of butir){
-      for(const blok of b.blok) y = gambarBlok(ctx, blok, cx, y);
-      y += JARAK_BUTIR * s;
+      if(tpl.kotak.aktif){
+        ctx.fillStyle = tpl.kotak.warna;
+        ctx.beginPath();
+        if(ctx.roundRect) ctx.roundRect(area.x0, y, area.lebar, b.tinggi, 24 * s);
+        else ctx.rect(area.x0, y, area.lebar, b.tinggi);
+        ctx.fill();
+      }
+      let yb = y + b.pad;
+      for(const blok of b.blok) yb = gambarBlok(ctx, blok, cx, yb);
+      y += b.tinggi + jarakButir() * s;
     }
 
     if(halaman.length > 1){
