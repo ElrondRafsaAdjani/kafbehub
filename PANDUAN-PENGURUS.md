@@ -212,6 +212,29 @@ kotak **"Hasil pembuatan massal"**. Satu tombol di situ menghapus seluruh
 anggotanya sekaligus. Tanpa itu, membatalkan berarti menghapus puluhan baris
 satu per satu, yaitu persoalan yang justru ingin dihindari.
 
+#### Gambar untuk Instagram (post dan story)
+
+Perubahan sementara bisa langsung dijadikan gambar pengumuman untuk
+Instagram KAFBE. Situs ini tidak mengunggah apa pun ke Instagram. Gambarnya
+diunduh atau disalin, lalu diunggah sendiri.
+
+1. Centang perubahan yang ingin diumumkan di tabel perubahan. Kotak centang
+   di kepala tabel mencentang semua perubahan yang belum lewat. Bisa juga
+   langsung menekan **Gambar IG** di satu baris, atau di satu kelompok
+   pembuatan massal.
+2. Tekan **Buat gambar Instagram**.
+3. Pilih **Post feed (4:5)** atau **Story / SG (9:16)**.
+4. Tekan **Unduh** atau **Salin**. Di ponsel, **Bagikan** membuka menu
+   bagikan, jadi gambarnya bisa langsung dikirim ke Instagram.
+
+Bila perubahannya terlalu banyak untuk satu gambar, gambarnya dibagi
+otomatis dan diberi nomor (1/3, 2/3, dan seterusnya). Untuk post, unggah
+semuanya sebagai satu carousel.
+
+Tampilan gambar (warna, font, latar, logo, dan teks kaki) diatur di bagian
+`TEMPLATE` pada `shared/gambar-ig.js`. Cara memasang template dari desainer
+dijelaskan di komentar awal berkas itu.
+
 ### Pengajar
 
 Nama dan NRP pengajar untuk tiap KP. Mata kuliahnya dipilih dari daftar **Mata

@@ -13,6 +13,7 @@
 */
 
 import { bacaBerkas, susunBerkas, unduhBlob } from './excel.js';
+import { bukaGambarIg } from './gambar-ig.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
 
@@ -1149,7 +1150,10 @@ function gambarPerubahan(){
   }
   const hariIni = hariIniJakarta();
   t.innerHTML = `
-    <thead><tr><th>Tanggal</th><th>Jenis</th><th>Kelas</th><th>Keterangan</th><th></th></tr></thead>
+    <thead><tr>
+      <th class="op-kolom-centang"><input type="checkbox" id="igCentangSemua"
+        title="Centang semua perubahan yang belum lewat" aria-label="Centang semua perubahan yang belum lewat" /></th>
+      <th>Tanggal</th><th>Jenis</th><th>Kelas</th><th>Keterangan</th><th></th></tr></thead>
     <tbody>${data.perubahan.map(p => {
       const j = data.jadwal.find(x => x.id === p.jadwalId);
       const lewat = p.tanggal < hariIni;
@@ -1179,16 +1183,42 @@ function gambarPerubahan(){
       const label = { libur:'Ditiadakan', daring:'Online', pindah:'Dipindah',
                       menyusul:'Menyusul', ruang:'Ganti ruang' }[p.tipe] || p.tipe;
       return `<tr${lewat ? ' style="opacity:.55"' : ''}>
+        <td class="op-kolom-centang"><input type="checkbox" data-pilih-pb="${esc(p.id)}"
+          ${igPilih.has(p.id) ? 'checked' : ''} aria-label="Pilih untuk gambar Instagram" /></td>
         <td>${esc(tanggalPanjang(p.tanggal))}${lewat ? '<br><span class="op-samar">sudah lewat</span>' : ''}</td>
         <td><span class="op-lencana ${esc(p.tipe)}">${esc(label)}</span></td>
         <td>${esc(p.kode)} KP ${esc(p.kp)}${j ? '' : '<br><span class="op-samar">kelas sudah dihapus</span>'}</td>
         <td>${ket}</td>
         <td><div class="op-tombol-baris">
+          <button class="op-mini" data-ig-pb="${esc(p.id)}" title="Buat gambar Instagram untuk perubahan ini">Gambar IG</button>
           <button class="op-mini" data-ubah-pb="${esc(p.id)}">Ubah</button>
           <button class="op-mini op-hapus" data-hapus-pb="${esc(p.id)}">Hapus</button>
         </div></td>
       </tr>`;
     }).join('')}</tbody>`;
+
+  // Centangan dipertahankan antar penggambaran ulang, kecuali untuk
+  // perubahan yang sudah tidak ada.
+  for(const id of [...igPilih]) if(!data.perubahan.some(p => p.id === id)) igPilih.delete(id);
+  perbaruiBilahIg();
+
+  t.querySelectorAll('[data-pilih-pb]').forEach(c => c.addEventListener('change', () => {
+    if(c.checked) igPilih.add(c.dataset.pilihPb); else igPilih.delete(c.dataset.pilihPb);
+    perbaruiBilahIg();
+  }));
+
+  $('igCentangSemua').addEventListener('change', e => {
+    const akanDatang = data.perubahan.filter(p => p.tanggal >= hariIni).map(p => p.id);
+    if(e.target.checked) akanDatang.forEach(id => igPilih.add(id));
+    else igPilih.clear();
+    t.querySelectorAll('[data-pilih-pb]').forEach(c => { c.checked = igPilih.has(c.dataset.pilihPb); });
+    perbaruiBilahIg();
+  });
+
+  t.querySelectorAll('[data-ig-pb]').forEach(b => b.addEventListener('click', () => {
+    const p = data.perubahan.find(x => x.id === b.dataset.igPb);
+    if(p) bukaIg([p]);
+  }));
 
   t.querySelectorAll('[data-ubah-pb]').forEach(b => b.addEventListener('click', () => {
     const p = data.perubahan.find(x => x.id === b.dataset.ubahPb);
@@ -1214,6 +1244,91 @@ function gambarPerubahan(){
       await terbitkan();
     }catch(err){ status('Gagal menghapus: ' + err.message, 'salah'); }
   }));
+}
+
+/* ============================================================
+   7b-2. Gambar Instagram
+   ============================================================
+
+   Perubahan yang dicentang disusun menjadi kalimat pendek untuk mahasiswa,
+   lalu diserahkan ke shared/gambar-ig.js untuk ditempel ke template post
+   atau story. Tampilan gambarnya sendiri diatur di berkas itu.
+*/
+
+const igPilih = new Set();
+
+function perbaruiBilahIg(){
+  const n = igPilih.size;
+  $('igDariCentang').disabled = n === 0;
+  $('igDariCentang').textContent = n ? `Buat gambar Instagram (${n})` : 'Buat gambar Instagram';
+  $('igJumlahCentang').textContent = n
+    ? `${n} perubahan dicentang.`
+    : 'Centang perubahan untuk dijadikan gambar Instagram (post atau story).';
+}
+
+$('igDariCentang').addEventListener('click', () => {
+  bukaIg(data.perubahan.filter(p => igPilih.has(p.id)));
+});
+
+const HARI_PENDEK = { Minggu:'Min', Senin:'Sen', Selasa:'Sel', Rabu:'Rab', Kamis:'Kam', Jumat:'Jum', Sabtu:'Sab' };
+
+function tanggalRingkas(iso){
+  const [, m, d] = String(iso).split('-').map(Number);
+  if(!m) return iso;
+  return `${HARI_PENDEK[hariDariTanggal(iso)] || ''}, ${d} ${BULAN[m-1].slice(0, 3)}`;
+}
+
+function butirIg(p){
+  const j = data.jadwal.find(x => x.id === p.jadwalId) || {};
+  const jamAsli = (j.mulai || j.selesai) ? rentangJam(j.mulai, j.selesai) : '';
+  const ruangAsli = String(j.ruang || '').trim();
+  const jamBaru = (p.mulaiBaru && p.selesaiBaru) ? rentangJam(p.mulaiBaru, p.selesaiBaru) : '';
+
+  const detail = [];
+  switch(p.tipe){
+    case 'libur':
+      detail.push('Kelas tidak berlangsung pada tanggal ini');
+      break;
+    case 'daring':
+      detail.push('Kelas berlangsung online (daring)');
+      break;
+    case 'ruang':
+      detail.push(`Pindah ke ruang ${p.ruangBaru || '(menyusul)'}`);
+      break;
+    case 'pindah':
+      detail.push(`Diganti ${[tanggalPanjang(p.tanggalBaru), jamBaru].filter(Boolean).join(', ')}`
+        + ` di ${p.ruangBaru || ruangAsli || 'ruang yang sama'}`);
+      break;
+    case 'menyusul': {
+      const kapan = p.tanggalBaru
+        ? [tanggalPanjang(p.tanggalBaru), jamBaru].filter(Boolean).join(', ')
+        : 'tanggal dan jam menyusul';
+      detail.push(`Jadwal pengganti: ${kapan}`);
+      detail.push(`Ruang: ${p.ruangBaru || 'menyusul'}`);
+      break;
+    }
+  }
+
+  return {
+    tipe: p.tipe,
+    judul: namaMatkul(p.kode) || p.kode,
+    tanggalPendek: tanggalRingkas(p.tanggal),
+    info: [`KP ${p.kp}`, jamAsli, ruangAsli].filter(Boolean).join(' · '),
+    detail,
+    catatan: p.catatan || '',
+    urut: `${p.tanggal} ${j.mulai || ''} ${p.kode} ${p.kp}`,
+    tanggal: p.tanggal,
+  };
+}
+
+function bukaIg(daftar){
+  if(daftar.length === 0) return;
+  const butir = daftar.map(butirIg).sort((a, b) => a.urut.localeCompare(b.urut));
+  const awal = butir[0].tanggal, akhir = butir[butir.length - 1].tanggal;
+  const subjudul = awal === akhir
+    ? tanggalPanjang(awal)
+    : `${tanggalRingkas(awal)} s/d ${tanggalRingkas(akhir)} ${akhir.slice(0, 4)}`;
+  bukaGambarIg(butir, subjudul, `kafbe-perubahan-${awal}${awal === akhir ? '' : '-sd-' + akhir}`);
 }
 
 function periksaPerubahan(isi){
@@ -1566,9 +1681,16 @@ function gambarKelompok(){
     <p class="op-catatan">Menghapus kelompok akan membuang seluruh perubahan yang dibuat bersamaan dengannya.</p>
     ${[...peta.entries()].map(([nama, n]) => `<div class="op-kelompok-baris">
       <span><strong>${esc(nama)}</strong> <span class="op-samar">· ${n} perubahan</span></span>
-      <button class="op-mini op-hapus" data-hapus-kelompok="${esc(nama)}">Hapus kelompok</button>
+      <span class="op-tombol-baris">
+        <button class="op-mini" data-ig-kelompok="${esc(nama)}">Gambar IG</button>
+        <button class="op-mini op-hapus" data-hapus-kelompok="${esc(nama)}">Hapus kelompok</button>
+      </span>
     </div>`).join('')}
   </div>`;
+
+  el.querySelectorAll('[data-ig-kelompok]').forEach(b => b.addEventListener('click', () => {
+    bukaIg(data.perubahan.filter(p => p.kelompok === b.dataset.igKelompok));
+  }));
 
   el.querySelectorAll('[data-hapus-kelompok]').forEach(b => b.addEventListener('click', async () => {
     const nama = b.dataset.hapusKelompok;

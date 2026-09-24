@@ -367,6 +367,11 @@
 
       <div id="daftarKelompok"></div>
 
+      <div class="op-ig-bilah">
+        <span class="op-samar" id="igJumlahCentang">Centang perubahan untuk dijadikan gambar Instagram (post atau story).</span>
+        <button type="button" class="btn btn-gold op-kecil" id="igDariCentang" disabled>Buat gambar Instagram</button>
+      </div>
+
       <div class="op-tabel-bungkus">
         <table class="op-tabel" id="tabelPerubahan"></table>
       </div>
@@ -855,6 +860,28 @@
     <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
   </symbol>
 </svg>
+
+<!-- ---------- GAMBAR INSTAGRAM ---------- -->
+<dialog class="op-dialog-ig" id="dialogIg" aria-labelledby="igJudul">
+  <div class="op-dialog-kepala">
+    <div>
+      <h2 id="igJudul">Gambar untuk Instagram</h2>
+      <p class="op-samar" id="igRingkas"></p>
+    </div>
+    <button type="button" class="op-mini" id="igTutup" aria-label="Tutup">Tutup</button>
+  </div>
+  <div class="op-ig-format" role="group" aria-label="Format gambar">
+    <button type="button" class="op-ig-pilih" data-ig-format="post">Post feed (4:5)</button>
+    <button type="button" class="op-ig-pilih" data-ig-format="story">Story / SG (9:16)</button>
+  </div>
+  <p class="op-catatan">Periksa dulu isinya, lalu unduh atau salin gambarnya dan unggah sendiri di Instagram. Di ponsel, tombol Bagikan bisa langsung membuka Instagram.</p>
+  <div class="op-ig-pratinjau" id="igPratinjau"></div>
+  <div class="op-aksi">
+    <button type="button" class="btn btn-primary op-kecil" id="igUnduhSemua" hidden>Unduh semua</button>
+    <button type="button" class="btn btn-ghost op-kecil" id="igBagikanSemua" hidden>Bagikan semua</button>
+  </div>
+  <p class="op-pesan" id="igPesan" role="status"></p>
+</dialog>
 
 <script src="firebase-config.js"></script>
 <script src="shared/materi-daftar.js"></script>

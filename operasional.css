@@ -401,3 +401,47 @@ textarea{ resize:vertical; }
   .op-panel{ padding:18px; }
   .op-field.op-sempit{ flex:1 1 130px; }
 }
+
+/* ---------- Gambar Instagram ---------- */
+.op-ig-bilah{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  flex-wrap:wrap; margin-bottom:12px;
+}
+.op-tabel .op-kolom-centang{ width:1%; padding-right:0; }
+.op-tabel .op-kolom-centang input{ width:auto; cursor:pointer; }
+
+.op-dialog-ig{
+  width:min(980px, calc(100vw - 32px)); max-height:calc(100vh - 32px);
+  border:none; border-radius:var(--radius-lg); padding:26px;
+  background:var(--surface); color:var(--ink); box-shadow:var(--shadow);
+}
+.op-dialog-ig::backdrop{ background:rgba(15,37,64,0.55); }
+.op-dialog-kepala{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+}
+.op-dialog-kepala h2{ font-size:1.3rem; }
+.op-ig-format{ display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+/* Sengaja bukan .op-tab-btn: tombol berkelas itu dipasangi pengganti panel. */
+.op-ig-pilih{
+  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.88rem;
+  padding:10px 17px; border-radius:100px; cursor:pointer;
+  background:var(--surface); color:var(--ink-soft); border:1px solid var(--line);
+}
+.op-ig-pilih:hover{ border-color:var(--owl-mid); color:var(--owl-dark2); }
+.op-ig-pilih.active{ background:var(--owl-dark2); color:#fff; border-color:var(--owl-dark2); }
+.op-dialog-ig .op-catatan{ margin-top:10px; }
+.op-ig-pratinjau{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));
+  gap:18px; margin-top:16px;
+}
+.op-ig-hasil{ margin:0; display:flex; flex-direction:column; gap:10px; }
+.op-ig-hasil img{
+  width:100%; height:auto; display:block; border-radius:14px;
+  border:1px solid var(--line); background:var(--bg-deep);
+}
+.op-ig-hasil figcaption{ align-items:center; flex-wrap:wrap; }
+
+@media (max-width:620px){
+  .op-dialog-ig{ padding:18px; }
+  .op-ig-pratinjau{ grid-template-columns:1fr; }
+}
