@@ -1387,26 +1387,6 @@ function teksJadwal(j){
   return `${j.hari}, ${rentangJam(j.mulai, j.selesai)} di ${j.ruang || 'ruang menyusul'}`;
 }
 
-// lama boleh kosong, misalnya bila story dibuat dari tombol di tabel dan
-// jadwal sebelumnya tidak diketahui.
-function kontenPermanen(j, lama){
-  const waktu = lama && (lama.hari !== j.hari || lama.mulai !== j.mulai || lama.selesai !== j.selesai);
-  const ruang = lama && samakanRuang(lama.ruang) !== samakanRuang(j.ruang);
-  const apa = ruang && !waktu ? 'ruangan'
-    : waktu && ruang ? 'jadwal dan ruangan kelas'
-    : 'jadwal kelas';
-  return {
-    judul: 'Jadwal Perpindahan Permanen',
-    isi: `Diharapkan bagi mahasiswa yang mengambil kelas *${namaMatkul(j.kode) || j.kode} KP ${j.kp}*, `
-      + `${apa} akan dipindah *PERMANEN* sebagai berikut:`,
-    daftar: [{
-      baris: [
-        ...(lama ? [{ teks: `Semula: **${teksJadwal(lama)}**`, gaya: 'lembut' }] : []),
-        { teks: `${lama ? 'Menjadi: ' : ''}**${teksJadwal(j)}**`, gaya: 'tebal' },
-      ],
-    }],
-  };
-}
 
 /*
   Story hanya bisa dibuat di atas template yang diunggah tim. Bila belum ada,
@@ -1417,7 +1397,7 @@ async function templateSiap(jenis){
   const pakai = await templateUntuk(jenis);
   if(pakai){
     aturTemplate({ ...pakai.t.meta, gambar: pakai.t.gambar });
-    return true;
+    return pakai;
   }
   aturTemplate({});
   if(confirm(`Belum ada template story Instagram untuk ${JENIS_TEMPLATE[jenis].nama.toLowerCase()}.\n\n`
@@ -1425,7 +1405,7 @@ async function templateSiap(jenis){
     jenisPR = jenis;
     document.querySelector('.op-tab-btn[data-tab="pr"]').click();
   }
-  return false;
+  return null;
 }
 
 // Jenis template untuk sekumpulan perubahan sementara. Ditiadakan dan
@@ -1437,17 +1417,160 @@ function jenisSementara(daftar){
   return 'sementara';
 }
 
+/* ---------- Teks story dari template teks tiap jenis ----------
+
+   Tiap sub-tab di tab PR menyimpan teks header, body, dan daftar kelas
+   dengan penanda seperti {kelas} dan {semula}, yang diisi dari data jadwal
+   saat story dibuat. Baris yang semua penandanya kosong ikut dihilangkan,
+   misalnya baris {catatan} bila perubahan itu tidak punya catatan.
+*/
+const TEKS_BAWAAN = {
+  sementara: {
+    header: 'JADWAL PERPINDAHAN SEMENTARA',
+    body: 'Diharapkan bagi mahasiswa yang mengambil {kelas}, khusus pada *{tanggal}*, perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
+    daftar: '*{nama}*\nSemula: **{semula}**\nMenjadi: **{menjadi}**\n{catatan}',
+  },
+  permanen: {
+    header: 'JADWAL PERPINDAHAN PERMANEN',
+    body: 'Diharapkan bagi mahasiswa yang mengambil {kelas}, {yang} akan dipindah *PERMANEN* sebagai berikut:',
+    daftar: 'Semula: **{semula}**\nMenjadi: **{menjadi}**',
+  },
+  ruang: {
+    header: 'PERPINDAHAN RUANG SEMENTARA',
+    body: 'Diharapkan bagi mahasiswa yang mengambil {kelas}, khusus pada *{tanggal}*, ruangan perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
+    daftar: '*{nama}*\nSemula: **{semula}**\nMenjadi: **ruang {ruang}**\n{catatan}',
+  },
+  online: {
+    header: 'PERKULIAHAN ONLINE',
+    body: 'Diharapkan bagi mahasiswa yang mengambil {kelas}, khusus pada *{tanggal}*, perkuliahan dilaksanakan secara *ONLINE* sebagai berikut:',
+    daftar: '*{nama}*\n{semula}\n**Online (daring)**\n{catatan}',
+  },
+};
+
+// Penanda yang tersedia di tiap jenis, untuk keterangan di tab PR.
+const PENANDA = {
+  sementara: {
+    kelas: '"kelas *Nama KP B*", atau "kelas-kelas berikut" bila lebih dari satu kelas',
+    tanggal: 'tanggal terdampak, atau rentangnya bila lebih dari satu tanggal',
+    nama: 'nama mata kuliah dan KP (per kelas)', semula: 'jadwal semula (per kelas)',
+    menjadi: 'jadwal pengganti (per kelas)', catatan: 'catatan perubahan (per kelas)',
+  },
+  permanen: {
+    kelas: '"kelas *Nama KP B1*"', yang: '"ruangan", "jadwal kelas", atau "jadwal dan ruangan kelas"',
+    semula: 'jadwal lama (kosong bila tidak diketahui)', menjadi: 'jadwal baru',
+  },
+  ruang: {
+    kelas: '"kelas *Nama KP B*", atau "kelas-kelas berikut" bila lebih dari satu kelas',
+    tanggal: 'tanggal terdampak, atau rentangnya', nama: 'nama mata kuliah dan KP (per kelas)',
+    semula: 'jadwal semula (per kelas)', ruang: 'ruang baru (per kelas)', catatan: 'catatan (per kelas)',
+  },
+  online: {
+    kelas: '"kelas *Nama KP B*", atau "kelas-kelas berikut" bila lebih dari satu kelas',
+    tanggal: 'tanggal terdampak, atau rentangnya', nama: 'nama mata kuliah dan KP (per kelas)',
+    semula: 'jadwal kelas (per kelas)', catatan: 'catatan (per kelas)',
+  },
+};
+
+function isiPenanda(templat, nilai){
+  return String(templat || '').split('\n').map(baris => {
+    let adaPenanda = false, adaIsi = false;
+    const hasil = baris.replace(/\{(\w+)\}/g, (asli, k) => {
+      if(!(k in nilai)) return asli;
+      adaPenanda = true;
+      const v = String(nilai[k] ?? '');
+      if(v.trim()) adaIsi = true;
+      return v;
+    });
+    return adaPenanda && !adaIsi ? null : hasil;
+  }).filter(b => b !== null).join('\n');
+}
+
+// Teks template jenis itu; yang belum pernah disimpan memakai bawaannya.
+function teksJenis(jenis, meta){
+  const t = { ...TEKS_BAWAAN[jenis] };
+  for(const k of ['header', 'body', 'daftar']){
+    if(typeof meta?.teks?.[k] === 'string') t[k] = meta.teks[k];
+  }
+  return t;
+}
+
+function susunTeksStory(teks, nilai, butir, footer){
+  return {
+    header: isiPenanda(teks.header, nilai),
+    body: isiPenanda(teks.body, nilai),
+    daftar: butir.map(b => isiPenanda(teks.daftar, { ...nilai, ...b })).join('\n\n'),
+    footer: footer || '',
+  };
+}
+
+function nilaiButir(p){
+  const j = data.jadwal.find(x => x.id === p.jadwalId) || {};
+  const jamAsli = (j.mulai || j.selesai) ? rentangJam(j.mulai, j.selesai) : '';
+  const ruangAsli = String(j.ruang || '').trim();
+  const jamBaru = (p.mulaiBaru && p.selesaiBaru) ? rentangJam(p.mulaiBaru, p.selesaiBaru) : '';
+  let menjadi = '';
+  if(p.tipe === 'pindah'){
+    menjadi = [tanggalRingkas(p.tanggalBaru), jamBaru, p.ruangBaru || ruangAsli].filter(Boolean).join(' · ');
+  }else if(p.tipe === 'menyusul'){
+    const kapan = p.tanggalBaru
+      ? [tanggalRingkas(p.tanggalBaru), jamBaru].filter(Boolean).join(' · ')
+      : 'tanggal dan jam menyusul';
+    menjadi = `${kapan} · ${p.ruangBaru || 'ruang menyusul'}`;
+  }else if(p.tipe === 'ruang'){
+    menjadi = `ruang ${p.ruangBaru || 'menyusul'}`;
+  }
+  return {
+    nama: `${namaMatkul(p.kode) || p.kode} KP ${p.kp}`,
+    semula: [tanggalRingkas(p.tanggal), jamAsli, ruangAsli].filter(Boolean).join(' · '),
+    menjadi, ruang: p.ruangBaru || 'menyusul', catatan: p.catatan || '',
+  };
+}
+
+function nilaiSementara(urut){
+  const kelas = new Set(urut.map(p => `${p.kode}|${p.kp}`));
+  const tgl = urut.map(p => p.tanggal).sort();
+  const awal = tgl[0], akhir = tgl[tgl.length - 1];
+  const p0 = urut[0];
+  return {
+    kelas: kelas.size === 1 ? `kelas *${namaMatkul(p0.kode) || p0.kode} KP ${p0.kp}*` : 'kelas-kelas berikut',
+    tanggal: awal === akhir ? tanggalPanjang(awal)
+      : `${tanggalRingkas(awal)} s/d ${tanggalRingkas(akhir)} ${akhir.slice(0, 4)}`,
+  };
+}
+
 async function bukaIg(daftar){
   if(daftar.length === 0) return;
-  if(!await templateSiap(jenisSementara(daftar))) return;
-  const tgl = daftar.map(p => p.tanggal).sort();
+  const jenis = jenisSementara(daftar);
+  const pakai = await templateSiap(jenis);
+  if(!pakai) return;
+  const urut = [...daftar].sort((a, b) =>
+    butirSementara(a).urut.localeCompare(butirSementara(b).urut));
+  const tgl = urut.map(p => p.tanggal).sort();
   const awal = tgl[0], akhir = tgl[tgl.length - 1];
-  bukaStory(kontenSementara(daftar), `kafbe-story-${awal}${awal === akhir ? '' : '-sd-' + akhir}`);
+
+  // Kelas ditiadakan dan campuran beberapa jenis tidak punya template teks
+  // sendiri, jadi teksnya disusun seperti sebelumnya.
+  const bertemplate = jenis !== 'sementara' || urut.every(p => p.tipe === 'pindah' || p.tipe === 'menyusul');
+  const teks = bertemplate
+    ? susunTeksStory(teksJenis(jenis, (await siapkanTemplateIg(jenis))?.meta),
+        nilaiSementara(urut), urut.map(nilaiButir), pakai.t.meta.footerTeks)
+    : keTeksStory(kontenSementara(daftar));
+  bukaStory(teks, `kafbe-story-${awal}${awal === akhir ? '' : '-sd-' + akhir}`);
 }
 
 async function bukaStoryPermanen(j, lama){
-  if(!await templateSiap('permanen')) return;
-  bukaStory(kontenPermanen(j, lama),
+  const pakai = await templateSiap('permanen');
+  if(!pakai) return;
+  const waktu = lama && (lama.hari !== j.hari || lama.mulai !== j.mulai || lama.selesai !== j.selesai);
+  const ruang = lama && samakanRuang(lama.ruang) !== samakanRuang(j.ruang);
+  const nilai = {
+    kelas: `kelas *${namaMatkul(j.kode) || j.kode} KP ${j.kp}*`,
+    yang: ruang && !waktu ? 'ruangan' : waktu && ruang ? 'jadwal dan ruangan kelas' : 'jadwal kelas',
+  };
+  const butir = [{ semula: lama ? teksJadwal(lama) : '', menjadi: teksJadwal(j) }];
+  const teks = susunTeksStory(teksJenis('permanen', (await siapkanTemplateIg('permanen'))?.meta),
+    nilai, butir, pakai.t.meta.footerTeks);
+  bukaStory(teks,
     `kafbe-story-permanen-${String(namaMatkul(j.kode) || j.kode).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${j.kp}`);
 }
 
@@ -1493,6 +1616,7 @@ const dokTemplate = jenis => JENIS_TEMPLATE[jenis].dok;
 
 let jenisPR = 'sementara';    // sub-tab yang sedang dibuka di tab PR
 let templateIg = null;        // { meta, dataUrl, gambar } milik jenisPR
+let gambarPratinjauPR = null; // gambar untuk pratinjau: milik jenisPR, atau pinjaman
 const janjiTemplate = {};     // jenis -> Promise
 const galatTemplate = {};     // jenis -> kegagalan terakhir saat membaca
 
@@ -1541,48 +1665,35 @@ async function templateUntuk(jenis){
   if(t?.gambar) return { t, jenis };
   if(jenis !== 'sementara'){
     const c = await siapkanTemplateIg('sementara');
-    if(c?.gambar) return { t: c, jenis: 'sementara', cadangan: true };
+    if(c?.gambar){
+      // Pengaturan yang sudah disimpan untuk jenis ini tetap dipakai; hanya
+      // gambarnya yang dipinjam dari template perpindahan jadwal sementara.
+      const punyaPengaturan = t?.meta && Object.keys(t.meta).length > 0;
+      return { t: { meta: punyaPengaturan ? t.meta : c.meta, gambar: c.gambar }, jenis: 'sementara', cadangan: true };
+    }
   }
   return null;
 }
 
-// Contoh isi pratinjau tiap sub-tab, satu perubahan saja.
-const CONTOH_STORY = {
+// Contoh data untuk pratinjau tiap sub-tab, satu perubahan saja.
+const CONTOH_NILAI = {
   sementara: {
-    judul: 'Jadwal Perpindahan Sementara',
-    isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Akuntansi Keuangan Menengah I KP B*, '
-      + 'khusus pada *Kamis, 2 Oktober 2026*, perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
-    daftar: [{ judul: 'Akuntansi Keuangan Menengah I KP B', baris: [
-      { teks: 'Semula: **Kam, 2 Okt · 13.00 - 14.40 · FG 06.02**' },
-      { teks: 'Menjadi: **Jum, 3 Okt · 17.00 - 18.40 · EA 02.05**' },
-    ] }],
+    nilai: { kelas: 'kelas *Akuntansi Keuangan Menengah I KP B*', tanggal: 'Kamis, 2 Oktober 2026' },
+    butir: [{ nama: 'Akuntansi Keuangan Menengah I KP B', semula: 'Kam, 2 Okt · 13.00 - 14.40 · FG 06.02',
+      menjadi: 'Jum, 3 Okt · 17.00 - 18.40 · EA 02.05', catatan: '' }],
   },
   permanen: {
-    judul: 'Jadwal Perpindahan Permanen',
-    isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Analisis dan Visualisasi Data Bisnis KP B1*, '
-      + 'ruangan akan dipindah *PERMANEN* sebagai berikut:',
-    daftar: [{ baris: [
-      { teks: 'Semula: **Senin, 18.30 - 20.20 di EA 01.03**' },
-      { teks: 'Menjadi: **Senin, 18.30 - 20.20 di EA 02.05**' },
-    ] }],
+    nilai: { kelas: 'kelas *Analisis dan Visualisasi Data Bisnis KP B1*', yang: 'ruangan' },
+    butir: [{ semula: 'Senin, 18.30 - 20.20 di EA 01.03', menjadi: 'Senin, 18.30 - 20.20 di EA 02.05' }],
   },
   ruang: {
-    judul: 'Perpindahan Ruang Sementara',
-    isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Akuntansi Keuangan Menengah I KP B*, '
-      + 'khusus pada *Kamis, 2 Oktober 2026*, ruangan perkuliahan akan dipindah *SEMENTARA* sesuai dengan jadwal berikut:',
-    daftar: [{ judul: 'Akuntansi Keuangan Menengah I KP B', baris: [
-      { teks: 'Semula: **Kam, 2 Okt · 13.00 - 14.40 · FG 06.02**' },
-      { teks: 'Menjadi: **ruang TF 02.02**' },
-    ] }],
+    nilai: { kelas: 'kelas *Akuntansi Keuangan Menengah I KP B*', tanggal: 'Kamis, 2 Oktober 2026' },
+    butir: [{ nama: 'Akuntansi Keuangan Menengah I KP B', semula: 'Kam, 2 Okt · 13.00 - 14.40 · FG 06.02',
+      ruang: 'TF 02.02', catatan: '' }],
   },
   online: {
-    judul: 'Perkuliahan Online',
-    isi: 'Diharapkan bagi mahasiswa yang mengambil kelas *Akuntansi Keuangan Menengah I KP B*, '
-      + 'khusus pada *Kamis, 2 Oktober 2026*, perkuliahan dilaksanakan secara *ONLINE* sebagai berikut:',
-    daftar: [{ judul: 'Akuntansi Keuangan Menengah I KP B', baris: [
-      { teks: 'Kam, 2 Okt · 13.00 - 14.40 · FG 06.02' },
-      { teks: '**Online (daring)**' },
-    ] }],
+    nilai: { kelas: 'kelas *Akuntansi Keuangan Menengah I KP B*', tanggal: 'Kamis, 2 Oktober 2026' },
+    butir: [{ nama: 'Akuntansi Keuangan Menengah I KP B', semula: 'Kam, 2 Okt · 13.00 - 14.40 · FG 06.02', catatan: '' }],
   },
 };
 
@@ -1615,6 +1726,7 @@ function pengaturanDariIsian(){
       tegasIsi: $('tplWarnaTegasIsi').value, tegasGaris: $('tplWarnaTegasGaris').value,
     },
     footerTeks: $('tplFooterTeks').value.trim(),
+    teks: { header: $('tplTeksHeader').value, body: $('tplTeksBody').value, daftar: $('tplTeksDaftar').value },
   };
 }
 
@@ -1647,6 +1759,10 @@ function isiIsianPengaturan(m){
   aturWarna('tplWarnaTegasIsi', 'tplHexTegasIsi', w.tegasIsi);
   aturWarna('tplWarnaTegasGaris', 'tplHexTegasGaris', w.tegasGaris);
   $('tplFooterTeks').value = typeof m?.footerTeks === 'string' ? m.footerTeks : TEMPLATE.footerTeksBawaan;
+  const t = teksJenis(jenisPR, m);
+  $('tplTeksHeader').value = t.header; $('tplTeksBody').value = t.body; $('tplTeksDaftar').value = t.daftar;
+  $('tplPenanda').innerHTML = Object.entries(PENANDA[jenisPR])
+    .map(([k, v]) => `<li><code>{${k}}</code> ${esc(v)}</li>`).join('');
 }
 
 /* ---------- Pilihan font ----------
@@ -1701,11 +1817,21 @@ async function contohFont(id){
    posisinya menjadi posisi awal untuk semua story berikutnya setelah
    disimpan. Contoh teksnya memakai teks footer yang sedang diisi.
 */
+const ISIAN_TEKS_PR = { header: 'tplTeksHeader', body: 'tplTeksBody', daftar: 'tplTeksDaftar', footer: 'tplFooterTeks' };
 const penyuntingPR = pasangPenyunting($('tplKanvas'), {
   ambil: () => elemenPR,
   ubah: e => { elemenPR = e; },
   selesai: () => pratinjauDariIsian(),
+  // Mengeklik elemen di pratinjau membuka isian teksnya.
+  pilih: nama => {
+    const el = $(ISIAN_TEKS_PR[nama]);
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  },
 });
+for(const [nama, id] of Object.entries(ISIAN_TEKS_PR)){
+  $(id).addEventListener('focus', () => penyuntingPR.pilih(nama));
+}
 
 // Beberapa pratinjau bisa diminta berturut-turut saat mengetik; hanya yang
 // terakhir yang dipasang.
@@ -1717,8 +1843,10 @@ async function gambarPratinjauTemplate(){
   if(!ada) return;
   const nomor = ++nomorPratinjau;
   // Cukup satu perubahan sebagai contoh, seperti pengumuman pada umumnya.
-  const teks = keTeksStory(CONTOH_STORY[jenisPR]);
-  const [kanvas] = await buatStory(teks);
+  const { teks, footerTeks } = pengaturanDariIsian();
+  const contoh = CONTOH_NILAI[jenisPR];
+  const teksPratinjau = susunTeksStory(teks, contoh.nilai, contoh.butir, footerTeks);
+  const [kanvas] = await buatStory(teksPratinjau);
   if(nomor !== nomorPratinjau) return;
   $('tplPratinjau').src = kanvas.toDataURL('image/jpeg', 0.85);
   penyuntingPR.perbarui(kanvas.tataLetak);
@@ -1750,22 +1878,30 @@ async function segarkanTabTemplate(ulang = false){
         + (galatTemplateIg.code === 'permission-denied'
           ? '. Pastikan isi firestore.rules terbaru sudah ditempel dan di-Publish.' : '')
       : cadangan
-        ? '<strong>Belum ada template khusus untuk jenis ini.</strong> Sampai diunggah, story jenis ini memakai template Perpindahan jadwal sementara. Unggah template baru, atau salin dari jenis lain di bawah.'
+        ? '<strong>Belum ada gambar template khusus untuk jenis ini.</strong> Sampai diunggah, story jenis ini (dan pratinjau di bawah) memakai gambar template Perpindahan jadwal sementara, dengan teks dan pengaturan milik jenis ini. Unggah template baru, atau salin dari jenis lain.'
         : '<strong>Belum ada template.</strong> Story Instagram belum bisa dibuat sampai template diunggah.';
   $('tplUnduh').hidden = !unggahan;
   $('tplLabelUnggah').firstChild.textContent = unggahan ? 'Ganti template ' : 'Upload template ';
   isiIsianPengaturan(m);
+  // Gambar template harus diserahkan ke penggambar di sini; tanpa ini
+  // pratinjau tidak pernah muncul sampai ada isian yang diubah.
+  // Jenis yang belum punya gambar sendiri dipratinjau dengan gambar template
+  // perpindahan jadwal sementara, sama seperti saat story-nya dibuat.
+  gambarPratinjauPR = t?.gambar || (cadangan ? (await siapkanTemplateIg('sementara'))?.gambar : null) || null;
+  if(jenis !== jenisPR) return;
+  aturTemplate({ ...pengaturanDariIsian(), gambar: gambarPratinjauPR });
   await gambarPratinjauTemplate();
 }
 
 let jedaPratinjau = null;
 function pratinjauDariIsian(){
-  aturTemplate({ ...pengaturanDariIsian(), gambar: templateIg?.gambar || null });
+  aturTemplate({ ...pengaturanDariIsian(), gambar: gambarPratinjauPR });
   clearTimeout(jedaPratinjau);
   jedaPratinjau = setTimeout(gambarPratinjauTemplate, 400);
 }
 
-[...ISIAN_TIPOGRAFI.map(([n, k]) => `tpl-${n}-${k}`), 'tplFooterTeks', 'tplGarisTegas']
+[...ISIAN_TIPOGRAFI.map(([n, k]) => `tpl-${n}-${k}`), 'tplFooterTeks', 'tplGarisTegas',
+ 'tplTeksHeader', 'tplTeksBody', 'tplTeksDaftar']
   .forEach(id => $(id).addEventListener('input', pratinjauDariIsian));
 
 ['tplFontPrimer', 'tplFontSekunder'].forEach(id => $(id).addEventListener('change', () => {

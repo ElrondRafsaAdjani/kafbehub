@@ -820,8 +820,10 @@ function pasang(){
 export function bukaStory(konten, namaDasar){
   pasang();
   kini = { elemen: elemenTemplate(), kanvas: [], namaDasar: namaDasar || 'kafbe-story' };
-  const teks = keTeksStory(konten);
-  for(const n of NAMA_ELEMEN) $(ID_TEKS[n]).value = teks[n];
+  // Bisa berupa teks keempat elemen yang sudah jadi, atau isi pengumuman
+  // bentuk lama (judul, isi, daftar) yang diubah dulu dengan keTeksStory.
+  const teks = 'header' in konten ? konten : keTeksStory(konten);
+  for(const n of NAMA_ELEMEN) $(ID_TEKS[n]).value = teks[n] || '';
   $('igLainnya').innerHTML = '';
   pesanIg('');
   $('dialogIg').showModal();

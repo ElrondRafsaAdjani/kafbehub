@@ -753,12 +753,20 @@
             </div>
           </div>
 
-          <h4 class="op-subjudul">Teks footer bawaan</h4>
-          <p class="op-catatan">Misalnya TERIMA KASIH. Tetap bisa diubah di tiap story. Kosongkan bila tulisan itu sudah ada di gambar template.</p>
-          <div class="op-baris">
-            <div class="op-field op-lebar"><label for="tplFooterTeks">Teks footer</label>
-              <input type="text" id="tplFooterTeks" placeholder="TERIMA KASIH" autocomplete="off" /></div>
-          </div>
+          <h4 class="op-subjudul">Teks</h4>
+          <p class="op-catatan">Teks bawaan keempat elemen untuk jenis pengumuman ini. Penanda dalam kurung kurawal diisi otomatis dari data jadwal saat story dibuat; baris yang semua penandanya kosong ikut dihilangkan. <code>*kata*</code> memakai warna sekunder, <code>**kata**</code> ditulis seperti teks perpindahan. Teksnya tetap bisa diubah lagi di tiap story.</p>
+          <div class="op-field"><label for="tplTeksHeader">Header</label>
+            <textarea id="tplTeksHeader" rows="2" spellcheck="false"></textarea></div>
+          <div class="op-field"><label for="tplTeksBody">Body</label>
+            <textarea id="tplTeksBody" rows="4" spellcheck="false"></textarea></div>
+          <div class="op-field"><label for="tplTeksDaftar">Daftar kelas (untuk tiap kelas)</label>
+            <textarea id="tplTeksDaftar" rows="4" spellcheck="false"></textarea></div>
+          <div class="op-field"><label for="tplFooterTeks">Footer</label>
+            <input type="text" id="tplFooterTeks" placeholder="Kosongkan bila TERIMA KASIH sudah ada di gambar template" autocomplete="off" /></div>
+          <details class="op-penanda">
+            <summary>Penanda yang bisa dipakai</summary>
+            <ul id="tplPenanda"></ul>
+          </details>
 
           <h4 class="op-subjudul">Warna</h4>
           <p class="op-catatan">Warna primer untuk seluruh teks biasa. Warna sekunder untuk kata yang diapit tanda bintang, misalnya <code>*SEMENTARA*</code>, dan nama kelas di daftar. Kode hex bisa diketik langsung.</p>

@@ -556,3 +556,8 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 .op-tipo-warna{ flex:1 1 150px; }
 .op-tipo-warna .op-warna input[type=text]{ width:90px; padding:8px; }
 .op-tipo-warna .op-warna input[type=color]{ width:40px; height:36px; }
+.op-template-kiri > .op-field{ margin-top:10px; }
+.op-template-kiri textarea{ font-size:0.86rem; line-height:1.5; }
+.op-penanda{ margin-top:10px; font-size:0.8rem; color:var(--ink-soft); }
+.op-penanda summary{ cursor:pointer; font-weight:700; color:var(--owl-dark2); }
+.op-penanda ul{ margin:8px 0 0 18px; line-height:1.7; }

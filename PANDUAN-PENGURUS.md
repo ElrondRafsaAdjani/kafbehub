@@ -258,7 +258,8 @@ nomor.
 **Perpindahan ruangan sementara**, dan **Kelas online**. Tiap sub-tab punya
 template dan pengaturannya sendiri. Pengumuman kelas ditiadakan dan
 campuran beberapa jenis memakai template perpindahan jadwal sementara.
-Jenis yang belum punya template sendiri juga memakai template itu, dan
+Jenis yang belum punya gambar template sendiri meminjam gambar template itu
+(tetap dengan teks dan pengaturan milik jenisnya), dan
 **Salin template dan pengaturan dari** menyalin template beserta seluruh
 pengaturan dari jenis lain supaya tidak perlu diatur dari nol.
 
@@ -268,6 +269,14 @@ baru; template lama otomatis tergantikan (ada konfirmasi dulu sebelum
 menimpa).
 konfirmasi dulu sebelum menimpa).
 
+- **Teks** header, body, daftar kelas, dan footer tiap jenis bisa diubah.
+  Penanda dalam kurung kurawal diisi otomatis dari data jadwal saat story
+  dibuat, misalnya `{kelas}`, `{tanggal}`, `{semula}`, dan `{menjadi}`;
+  daftar lengkapnya ada di bagian **Penanda yang bisa dipakai**. Teks daftar
+  kelas dipakai untuk tiap kelas, dan baris yang semua penandanya kosong
+  (misalnya `{catatan}` tanpa catatan) dihilangkan. Mengeklik elemen di
+  pratinjau langsung membuka isian teksnya. Pengumuman kelas ditiadakan dan
+  campuran beberapa jenis tetap disusun otomatis
 - Template berukuran 1080 × 1920 (PNG atau JPG) dan sudah memuat semua
   hiasan: batik, logo, PENGUMUMAN, kartu putih, ornamen, dan slogan. Situs
   hanya menulis teks (judul, kalimat pembuka, daftar kelas, dan footer bila
