@@ -531,3 +531,14 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 .op-ig-lainnya{ display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:14px; }
 .op-ig-aksi{ align-items:center; flex-wrap:wrap; margin-top:8px; }
 .op-ig-teks textarea{ font-size:0.88rem; line-height:1.5; }
+
+/* Tabel kecil ukuran dan spasi per elemen di tab PR. */
+.op-tipo{ display:flex; flex-direction:column; gap:10px; }
+.op-tipo-baris{
+  display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap;
+  padding:10px 12px; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--bg);
+}
+.op-tipo-baris > strong{ flex:0 0 64px; font-size:0.86rem; color:var(--owl-dark2); padding-bottom:10px; }
+.op-tipo-sel{ display:flex; flex-direction:column; gap:4px; flex:1 1 90px; min-width:84px; }
+.op-tipo-sel span{ font-size:0.72rem; font-weight:700; color:var(--ink-soft); }
+.op-tipo-sel input, .op-tipo-sel select{ padding:8px 10px; }

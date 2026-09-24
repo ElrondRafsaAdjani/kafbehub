@@ -16,6 +16,7 @@ import { bacaBerkas, susunBerkas, unduhBlob } from './excel.js';
 import {
   bukaStory, buatStory, aturTemplate, adaTemplate, unduhBlobSebagai, TEMPLATE,
   muatDaftarFont, pasangFontGoogle, lengkapiElemen, keTeksStory, pasangPenyunting,
+  elemenDariMeta, SATUAN_UKURAN,
 } from './gambar-ig.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
@@ -1514,6 +1515,12 @@ const CONTOH_STORY = {
 // diubah dengan menyeret di pratinjau, ukuran huruf lewat kotak isian.
 let elemenPR = lengkapiElemen({});
 
+// Isian ukuran dan spasi per elemen, dengan id tpl-<elemen>-<kolom>.
+const ISIAN_TIPOGRAFI = [
+  ...['header', 'body', 'footer'].flatMap(n => ['ukuran', 'spasiBaris', 'spasiHuruf', 'tebal'].map(k => [n, k])),
+  ['body', 'ukuranDaftar'],
+];
+
 // Seluruh pengaturan di tab PR. Bentuknya sama dengan yang disimpan di
 // templateig/story dan yang diterima aturTemplate().
 function pengaturanDariIsian(){
@@ -1522,10 +1529,10 @@ function pengaturanDariIsian(){
     return Number.isFinite(n) && $(id).value !== '' ? n : bawaan;
   };
   const elemen = lengkapiElemen(elemenPR);
-  elemen.header.ukuran = angka('tplUkJudul', elemen.header.ukuran);
-  elemen.body.ukuran = angka('tplUkIsi', elemen.body.ukuran);
-  elemen.footer.ukuran = angka('tplUkFooter', elemen.footer.ukuran);
+  for(const [n, k] of ISIAN_TIPOGRAFI) elemen[n][k] = angka(`tpl-${n}-${k}`, elemen[n][k]);
   return {
+    // Ukuran disimpan dalam satuan Canva (pt); lihat elemenDariMeta.
+    satuanUkuran: SATUAN_UKURAN,
     elemen,
     font: { primer: $('tplFontPrimer').value, sekunder: $('tplFontSekunder').value },
     warna: { primer: $('tplWarnaPrimer').value, sekunder: $('tplWarnaSekunder').value },
@@ -1550,10 +1557,8 @@ function aturWarna(idWarna, idHex, nilai){
 function isiIsianPengaturan(m){
   const ambil = (k, b) => ({ ...TEMPLATE[b], ...(m?.[k] || {}) });
   const f = ambil('font', 'fontBawaan'), w = ambil('warna', 'warnaBawaan'), k = ambil('kotak', 'kotakBawaan');
-  elemenPR = lengkapiElemen(m?.elemen);
-  $('tplUkJudul').value = elemenPR.header.ukuran;
-  $('tplUkIsi').value = elemenPR.body.ukuran;
-  $('tplUkFooter').value = elemenPR.footer.ukuran;
+  elemenPR = elemenDariMeta(m);
+  for(const [n, k] of ISIAN_TIPOGRAFI) $(`tpl-${n}-${k}`).value = elemenPR[n][k];
   pilihFont('tplFontPrimer', f.primer); pilihFont('tplFontSekunder', f.sekunder);
   aturWarna('tplWarnaPrimer', 'tplHexPrimer', w.primer);
   aturWarna('tplWarnaSekunder', 'tplHexSekunder', w.sekunder);
@@ -1675,7 +1680,7 @@ function pratinjauDariIsian(){
   jedaPratinjau = setTimeout(gambarPratinjauTemplate, 400);
 }
 
-['tplUkJudul', 'tplUkIsi', 'tplUkFooter', 'tplFooterTeks', 'tplKotakAktif']
+[...ISIAN_TIPOGRAFI.map(([n, k]) => `tpl-${n}-${k}`), 'tplFooterTeks', 'tplKotakAktif']
   .forEach(id => $(id).addEventListener('input', pratinjauDariIsian));
 
 ['tplFontPrimer', 'tplFontSekunder'].forEach(id => $(id).addEventListener('change', () => {
@@ -1709,8 +1714,12 @@ $('tplSimpan').addEventListener('click', async () => {
   const { elemen, font, warna, footerTeks } = atur;
   const salah = [];
   for(const n of ['header', 'body', 'footer']){
-    if(!(elemen[n].ukuran >= 12 && elemen[n].ukuran <= 200)) salah.push(`Ukuran huruf ${n} harus antara 12 dan 200.`);
+    const e = elemen[n];
+    if(!(e.ukuran >= 8 && e.ukuran <= 150)) salah.push(`Ukuran ${n} harus antara 8 dan 150 pt.`);
+    if(!(e.spasiBaris >= 0.5 && e.spasiBaris <= 3)) salah.push(`Spasi baris ${n} harus antara 0.5 dan 3.`);
+    if(!(e.spasiHuruf >= -200 && e.spasiHuruf <= 800)) salah.push(`Spasi huruf ${n} harus antara -200 dan 800.`);
   }
+  if(!(elemen.body.ukuranDaftar >= 8 && elemen.body.ukuranDaftar <= 150)) salah.push('Ukuran daftar kelas harus antara 8 dan 150 pt.');
   if(PASANGAN_WARNA.some(([, h]) => $(h).classList.contains('op-salah-isi'))) salah.push('Ada kode warna yang belum benar. Tulis enam digit, misalnya #13192f.');
   if(salah.length){ pesan(el, daftarKesalahan('Belum bisa disimpan:', salah), 'salah'); return; }
 

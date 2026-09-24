@@ -43,14 +43,24 @@ export const TEMPLATE = {
   w: 1080,
   h: 1920,
 
-  // Posisi dan lebar dalam persen dari ukuran gambar; ukuran huruf dalam
-  // piksel pada gambar 1080 x 1920. Body punya tinggi sendiri (h): bila
-  // isinya melebihi tinggi itu, hurufnya diperkecil, lalu bila masih belum
-  // muat, daftar kelasnya dibagi ke beberapa gambar.
+  // Posisi dan lebar dalam persen dari ukuran gambar. Body punya tinggi
+  // sendiri (h): bila isinya melebihi tinggi itu, hurufnya diperkecil, lalu
+  // bila masih belum muat, daftar kelasnya dibagi ke beberapa gambar.
+  //
+  // Ukuran, spasi baris, dan spasi huruf memakai satuan yang SAMA DENGAN
+  // CANVA, supaya angka dari desain Canva bisa disalin apa adanya:
+  //   ukuran      : poin (pt). Pada desain 1080 px, 1 pt = 4/3 px, jadi
+  //                 ukuran 60 di Canva tergambar 80 px. Inilah sebab angka
+  //                 yang sama dulu tampak jauh lebih kecil di sini.
+  //   spasiBaris  : kelipatan ukuran huruf (Canva: Line spacing, mis. 1.4)
+  //   spasiHuruf  : per seribu em (Canva: Letter spacing, mis. 0 atau 50)
+  //   tebal       : ketebalan font; bila tidak tersedia, dipakai yang
+  //                 terdekat (Lilita One hanya punya 400)
+  //   ukuranDaftar: ukuran daftar kelas di body, juga dalam pt
   elemenBawaan: {
-    header: { x: 15, y: 20.5, w: 70, ukuran: 88 },
-    body:   { x: 12, y: 33,   w: 76, h: 44, ukuran: 44 },
-    footer: { x: 15, y: 80,   w: 70, ukuran: 66 },
+    header: { x: 15, y: 20.5, w: 70, ukuran: 60, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400 },
+    body:   { x: 12, y: 33, w: 76, h: 44, ukuran: 35, ukuranDaftar: 30, spasiBaris: 1.4, spasiHuruf: 0, tebal: 600 },
+    footer: { x: 15, y: 80, w: 70, ukuran: 54.7, spasiBaris: 1.4, spasiHuruf: 0, tebal: 400 },
   },
   fontBawaan:   { primer: 'Lilita One', sekunder: 'Fredoka' },
   warnaBawaan:  { primer: '#13192f', sekunder: '#be8f41' },
@@ -59,6 +69,24 @@ export const TEMPLATE = {
 };
 
 export const NAMA_ELEMEN = ['header', 'body', 'footer'];
+
+// Satu poin Canva dalam piksel gambar 1080 x 1920.
+const PT = 4 / 3;
+
+/*
+  Posisi elemen dari dokumen templateig/story. Pengaturan yang disimpan
+  sebelum satuan Canva dipakai (tanpa satuanUkuran: 'pt') menyimpan ukuran
+  dalam piksel, jadi diubah dulu ke poin supaya tampilannya tidak berubah.
+*/
+export function elemenDariMeta(meta){
+  const el = lengkapiElemen(meta?.elemen);
+  if(meta?.elemen && meta.satuanUkuran !== 'pt'){
+    for(const n of NAMA_ELEMEN){
+      if(meta.elemen[n]?.ukuran) el[n].ukuran = Math.round(meta.elemen[n].ukuran / PT * 10) / 10;
+    }
+  }
+  return el;
+}
 
 /* ============================================================
    Keadaan template yang sedang dipakai
@@ -85,7 +113,7 @@ export function lengkapiElemen(elemen){
 function susunTpl(isi){
   return {
     gambar: isi.gambar || null,
-    elemen: lengkapiElemen(isi.elemen),
+    elemen: elemenDariMeta(isi),
     font:   lengkapi(isi.font, TEMPLATE.fontBawaan),
     warna:  lengkapi(isi.warna, TEMPLATE.warnaBawaan),
     kotak:  lengkapi(isi.kotak, TEMPLATE.kotakBawaan),
@@ -104,6 +132,7 @@ export function aturTemplate(isi = {}){
 
 export const adaTemplate = () => !!tpl.gambar;
 export const elemenTemplate = () => lengkapiElemen(tpl.elemen);
+export const SATUAN_UKURAN = 'pt';
 
 /* ============================================================
    Font dari Google Fonts
@@ -202,16 +231,22 @@ function tokenKaya(teks){
   return out;
 }
 
-function barisKaya(ctx, teks, lebar){
+// Lebar kata dengan spasi huruf: tiap huruf ditambah jaraknya, kecuali huruf
+// terakhir, supaya teks rata tengah tetap benar-benar di tengah.
+function lebarKata(ctx, k, jarak){
+  return ctx.measureText(k).width + (jarak ? jarak * ([...k].length - 1) : 0);
+}
+
+function barisKaya(ctx, teks, lebar, jarak = 0){
   const baris = [];
   let kini = [], lebarKini = 0, spasi = false;
-  const lebarSpasi = ctx.measureText(' ').width;
+  const lebarSpasi = ctx.measureText(' ').width + jarak * 2;
   const tutup = () => { baris.push({ kata: kini, lebar: lebarKini }); kini = []; lebarKini = 0; spasi = false; };
 
   for(const t of tokenKaya(teks)){
     if(t.br){ tutup(); for(let i = 1; i < t.br; i++) baris.push({ kata: [], lebar: 0 }); continue; }
     if(t.spasi){ spasi = kini.length > 0; continue; }
-    const w = ctx.measureText(t.k).width;
+    const w = lebarKata(ctx, t.k, jarak);
     const tambah = (spasi ? lebarSpasi : 0) + w;
     if(kini.length && lebarKini + tambah > lebar) tutup();
     const pakaiSpasi = kini.length > 0 && spasi;
@@ -223,12 +258,16 @@ function barisKaya(ctx, teks, lebar){
   return { baris, lebarSpasi };
 }
 
-function gambarBarisKaya(ctx, b, cx, y, lebarSpasi){
+function gambarBarisKaya(ctx, b, cx, y, lebarSpasi, jarak = 0){
   let x = cx - b.lebar / 2;
   for(const k of b.kata){
     if(k.spasi) x += lebarSpasi;
     ctx.fillStyle = k.sorot ? tpl.warna.sekunder : tpl.warna.primer;
-    ctx.fillText(k.k, x, y);
+    if(!jarak) ctx.fillText(k.k, x, y);
+    else{
+      let xh = x;
+      for(const h of k.k){ ctx.fillText(h, xh, y); xh += ctx.measureText(h).width + jarak; }
+    }
     x += k.w;
   }
 }
@@ -237,22 +276,43 @@ function gambarBarisKaya(ctx, b, cx, y, lebarSpasi){
    Susunan ketiga kotak teks
    ============================================================ */
 
-// Satu blok = beberapa baris dengan font dan ukuran yang sama.
-function susunBlok(ctx, teks, font, px, lh, lebar){
-  ctx.font = font;
-  const { baris, lebarSpasi } = barisKaya(ctx, teks, lebar);
-  const tinggiBaris = px * lh;
-  return { baris, lebarSpasi, font, tinggiBaris, tinggi: baris.length * tinggiBaris };
+/*
+  Satu blok = beberapa baris dengan font dan ukuran yang sama.
+  gaya = { font, px, spasiBaris, spasiHuruf }
+
+  Seperti Canva (dan CSS line-height), tiap baris setinggi px x spasiBaris,
+  dan hurufnya diletakkan di tengah tinggi itu berdasarkan ukuran asli font
+  (ascent dan descent), bukan perkiraan.
+*/
+function susunBlok(ctx, teks, gaya, lebar){
+  ctx.font = gaya.font;
+  const jarak = (Number(gaya.spasiHuruf) || 0) / 1000 * gaya.px;
+  const { baris, lebarSpasi } = barisKaya(ctx, teks, lebar, jarak);
+  const tinggiBaris = gaya.px * (Number(gaya.spasiBaris) || 1.4);
+  const m = ctx.measureText('Hg');
+  const naik = m.fontBoundingBoxAscent ?? gaya.px * 0.8;
+  const turun = m.fontBoundingBoxDescent ?? gaya.px * 0.2;
+  const garisDasar = (tinggiBaris - (naik + turun)) / 2 + naik;
+  return { baris, lebarSpasi, jarak, font: gaya.font, tinggiBaris, garisDasar, tinggi: baris.length * tinggiBaris };
 }
 
 function gambarBlok(ctx, blok, cx, y){
   ctx.font = blok.font;
   ctx.textBaseline = 'alphabetic';
   for(const b of blok.baris){
+    gambarBarisKaya(ctx, b, cx, y + blok.garisDasar, blok.lebarSpasi, blok.jarak);
     y += blok.tinggiBaris;
-    gambarBarisKaya(ctx, b, cx, y - blok.tinggiBaris * 0.24, blok.lebarSpasi);
   }
   return y;
+}
+
+// Gaya satu elemen pada skala s (skala < 1 dipakai saat body diperkecil).
+function gayaElemen(el, fontNama, s = 1, ukuran = el.ukuran){
+  const px = (Number(ukuran) || 30) * PT * s;
+  return {
+    font: `${ketebalan(fontNama, Number(el.tebal) || 400)} ${px}px ${css(fontNama)}`,
+    px, spasiBaris: el.spasiBaris, spasiHuruf: el.spasiHuruf,
+  };
 }
 
 function persenKePx(el){
@@ -260,10 +320,9 @@ function persenKePx(el){
   return { x: w * el.x / 100, y: h * el.y / 100, w: w * el.w / 100, h: el.h != null ? h * el.h / 100 : null };
 }
 
-function susunSatuBaris(ctx, teks, el, fontNama, bobot){
-  const px = Number(el.ukuran) || 40;
+function susunSatuBaris(ctx, teks, el, fontNama){
   const r = persenKePx(el);
-  const blok = susunBlok(ctx, teks, `${ketebalan(fontNama, bobot)} ${px}px ${css(fontNama)}`, px, 1.1, r.w);
+  const blok = susunBlok(ctx, teks, gayaElemen(el, fontNama), r.w);
   return { blok, r };
 }
 
@@ -274,20 +333,20 @@ function pecahParagraf(teks){
 
 function susunBody(ctx, paragraf, el, s){
   const r = persenKePx(el);
-  const px = (Number(el.ukuran) || 44) * s;
-  const pxDaftar = px * 0.8;
   const f = tpl.font.sekunder;
+  const gPembuka = gayaElemen(el, f, s);
+  const gDaftar = gayaElemen(el, f, s, el.ukuranDaftar || el.ukuran);
   const kotak = tpl.kotak.aktif;
   const pad = kotak ? 22 * s : 0;
   const bagian = paragraf.map((p, i) => {
     if(i === 0){
-      const blok = susunBlok(ctx, p, `${ketebalan(f, 600)} ${px}px ${css(f)}`, px, 1.3, r.w);
+      const blok = susunBlok(ctx, p, gPembuka, r.w);
       return { blok, pad: 0, tinggi: blok.tinggi, kotak: false };
     }
-    const blok = susunBlok(ctx, p, `${ketebalan(f, 600)} ${pxDaftar}px ${css(f)}`, pxDaftar, 1.3, r.w - pad * 2);
+    const blok = susunBlok(ctx, p, gDaftar, r.w - pad * 2);
     return { blok, pad, tinggi: blok.tinggi + pad * 2, kotak };
   });
-  return { bagian, jarakPembuka: px * 0.8, jarakDaftar: kotak ? 16 * s : px * 0.55, r, s };
+  return { bagian, jarakPembuka: gPembuka.px * 0.6, jarakDaftar: kotak ? 16 * s : gDaftar.px * 0.5, r, s };
 }
 
 function tinggiBody(susun, bagian){
@@ -372,14 +431,14 @@ export async function buatStory(teks, elemen = tpl.elemen){
   const el = lengkapiElemen(elemen);
   const ukur = document.createElement('canvas').getContext('2d');
 
-  const header = susunSatuBaris(ukur, teks.header, el.header, tpl.font.primer, 700);
-  const footer = susunSatuBaris(ukur, teks.footer, el.footer, tpl.font.primer, 700);
+  const header = susunSatuBaris(ukur, teks.header, el.header, tpl.font.primer);
+  const footer = susunSatuBaris(ukur, teks.footer, el.footer, tpl.font.primer);
   const { susun, halaman } = bagiBody(ukur, teks.body, el.body);
 
   const tataLetak = {
-    header: { ...header.r, h: Math.max(header.blok.tinggi, el.header.ukuran * 1.1) },
+    header: { ...header.r, h: Math.max(header.blok.tinggi, header.blok.tinggiBaris) },
     body:   { ...susun.r },
-    footer: { ...footer.r, h: Math.max(footer.blok.tinggi, el.footer.ukuran * 1.1), kosong: !String(teks.footer || '').trim() },
+    footer: { ...footer.r, h: Math.max(footer.blok.tinggi, footer.blok.tinggiBaris), kosong: !String(teks.footer || '').trim() },
   };
 
   return halaman.map((bagian, i) => {

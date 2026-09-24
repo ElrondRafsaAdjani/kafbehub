@@ -264,10 +264,21 @@ konfirmasi dulu sebelum menimpa).
 - **Font** dipilih dari daftar seluruh Google Fonts, lengkap dengan contoh
   tulisannya. Font primer untuk header dan footer, font sekunder untuk body.
   Saat ini: Lilita One dan Fredoka
-- **Ukuran huruf** header, body, dan footer diatur dalam piksel pada gambar
-  1080 × 1920. Daftar kelas ditulis sedikit lebih kecil dari kalimat
-  pembuka. Bila body lebih panjang dari kotaknya, hurufnya diperkecil
-  otomatis
+- **Ukuran dan spasi** tiap elemen memakai satuan yang sama dengan Canva,
+  jadi angkanya bisa disalin langsung dari desain Canva:
+  - *Ukuran* dalam pt. Pada desain 1080 × 1920, 1 pt = 1,33 px, jadi ukuran
+    60 di Canva tergambar 80 px. (Dulu ukuran di sini dalam px, sehingga
+    angka yang sama tampak jauh lebih kecil daripada di Canva. Pengaturan
+    lama sudah diubah otomatis ke pt.)
+  - *Spasi baris* seperti Line spacing di Canva, misalnya 1.4
+  - *Spasi huruf* seperti Letter spacing di Canva, per seribu em, misalnya
+    0 atau 50
+  - *Ketebalan*; bila tidak tersedia pada font itu, dipakai yang terdekat
+    (Lilita One hanya punya 400)
+  - Body punya ukuran sendiri untuk *daftar kelas*
+  - Bila body lebih panjang dari kotaknya, hurufnya diperkecil otomatis.
+    Kalau tulisan body tampak lebih kecil dari angka yang diisi, tarik
+    pegangan bawah body supaya kotaknya lebih tinggi
 - **Teks footer bawaan**, misalnya TERIMA KASIH, tetap bisa diubah di tiap
   story. Kosongkan bila tulisan itu sudah ada di gambar template
 - **Warna** primer untuk seluruh teks biasa, sekunder untuk kata yang diapit

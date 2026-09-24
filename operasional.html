@@ -651,15 +651,31 @@
               <span class="op-contoh-font" id="tplFontSekunderContoh"></span></div>
           </div>
 
-          <h4 class="op-subjudul">Ukuran huruf (piksel, pada gambar 1080 × 1920)</h4>
-          <p class="op-catatan">Daftar kelas di body ditulis sedikit lebih kecil dari kalimat pembuka. Bila body lebih panjang dari kotaknya, hurufnya diperkecil otomatis.</p>
-          <div class="op-baris">
-            <div class="op-field op-sempit"><label for="tplUkJudul">Header</label>
-              <input type="number" id="tplUkJudul" min="12" max="200" step="1" /></div>
-            <div class="op-field op-sempit"><label for="tplUkIsi">Body</label>
-              <input type="number" id="tplUkIsi" min="12" max="200" step="1" /></div>
-            <div class="op-field op-sempit"><label for="tplUkFooter">Footer</label>
-              <input type="number" id="tplUkFooter" min="12" max="200" step="1" /></div>
+          <h4 class="op-subjudul">Ukuran dan spasi (satuan sama dengan Canva)</h4>
+          <p class="op-catatan">Angkanya bisa disalin langsung dari Canva. Ukuran dalam pt seperti di Canva (pada desain 1080 × 1920, 1 pt = 1,33 px), spasi baris seperti <em>Line spacing</em> (misalnya 1.4), dan spasi huruf seperti <em>Letter spacing</em> (misalnya 0 atau 50). Ketebalan yang tidak tersedia pada font itu diganti yang terdekat. Bila body lebih panjang dari kotaknya, hurufnya diperkecil otomatis.</p>
+          <div class="op-tipo">
+            <div class="op-tipo-baris">
+              <strong>Header</strong>
+              <label class="op-tipo-sel"><span>Ukuran (pt)</span><input type="number" id="tpl-header-ukuran" min="8" max="150" step="0.1" /></label>
+              <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-header-spasiBaris" min="0.5" max="3" step="0.05" /></label>
+              <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-header-spasiHuruf" min="-200" max="800" step="5" /></label>
+              <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-header-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
+            </div>
+            <div class="op-tipo-baris">
+              <strong>Body</strong>
+              <label class="op-tipo-sel"><span>Ukuran (pt)</span><input type="number" id="tpl-body-ukuran" min="8" max="150" step="0.1" /></label>
+              <label class="op-tipo-sel"><span>Daftar kelas (pt)</span><input type="number" id="tpl-body-ukuranDaftar" min="8" max="150" step="0.1" /></label>
+              <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-body-spasiBaris" min="0.5" max="3" step="0.05" /></label>
+              <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-body-spasiHuruf" min="-200" max="800" step="5" /></label>
+              <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-body-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
+            </div>
+            <div class="op-tipo-baris">
+              <strong>Footer</strong>
+              <label class="op-tipo-sel"><span>Ukuran (pt)</span><input type="number" id="tpl-footer-ukuran" min="8" max="150" step="0.1" /></label>
+              <label class="op-tipo-sel"><span>Spasi baris</span><input type="number" id="tpl-footer-spasiBaris" min="0.5" max="3" step="0.05" /></label>
+              <label class="op-tipo-sel"><span>Spasi huruf</span><input type="number" id="tpl-footer-spasiHuruf" min="-200" max="800" step="5" /></label>
+              <label class="op-tipo-sel"><span>Ketebalan</span><select id="tpl-footer-tebal"><option value="300">300 · tipis</option><option value="400">400 · biasa</option><option value="500">500 · sedang</option><option value="600">600 · agak tebal</option><option value="700">700 · tebal</option><option value="800">800 · sangat tebal</option></select></label>
+            </div>
           </div>
 
           <h4 class="op-subjudul">Teks footer bawaan</h4>
