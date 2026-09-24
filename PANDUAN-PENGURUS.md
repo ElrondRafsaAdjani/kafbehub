@@ -408,8 +408,9 @@ Mengubah centang itu setelah perbandingan tersusun akan membatalkan
 ringkasannya, karena isinya sudah tidak lagi menggambarkan apa yang akan
 terjadi. Tekan tombol bandingkan sekali lagi.
 
-**Kode Google Classroom dan Koordinator Mata Kuliah** dikelola di tab ini juga,
-karena keduanya tidak punya tempat di tab lain. Keduanya hanya dipakai pengurus,
+**Koordinator Mata Kuliah** dikelola di tab ini juga, sedangkan **kode Google
+Classroom** punya tab sendiri, **Google Classroom**. Keduanya tetap ikut terisi
+saat berkas Excel diunggah di sini. Keduanya hanya dipakai pengurus,
 tidak ditampilkan ke mahasiswa, dan tidak bisa dibaca pengunjung sama sekali.
 Kode kelas adalah kunci masuk kelas daring, dan daftar kontak koordinator berisi
 nomor pribadi, jadi keduanya ditutup di aturan keamanan.

@@ -113,6 +113,7 @@
       <button class="op-tab-btn" data-tab="jadwal" role="tab">Jadwal Permanen</button>
       <button class="op-tab-btn" data-tab="perubahan" role="tab">Perubahan Sementara</button>
       <button class="op-tab-btn" data-tab="pengajar" role="tab">Pengajar</button>
+      <button class="op-tab-btn" data-tab="classroom" role="tab">Google Classroom</button>
       <button class="op-tab-btn" data-tab="akunpengajar" role="tab">Akun Pengajar</button>
       <button class="op-tab-btn" data-tab="akunoperasional" role="tab">Akun Operasional</button>
       <button class="op-tab-btn" data-tab="pengumuman" role="tab">Pengumuman</button>
@@ -610,6 +611,52 @@
       </div>
     </section>
 
+    <!-- ---------- GOOGLE CLASSROOM ---------- -->
+    <section class="op-panel" id="panel-classroom" hidden>
+      <div class="op-panel-kepala">
+        <div>
+          <h2>Google Classroom</h2>
+          <p>Kode kelas Google Classroom untuk tiap KP. Bisa diisi di sini atau ikut terisi saat mengunggah berkas Excel di tab Upload dan Download.</p>
+        </div>
+      </div>
+
+      <p class="op-catatan">
+        Satu kode untuk tiap KP. Dipakai pengurus dan tidak ditampilkan ke mahasiswa.
+      </p>
+      <form class="op-form" id="formClassroom">
+        <input type="hidden" id="gcId" />
+        <div class="op-baris">
+          <div class="op-field">
+            <label for="gcKode">Kode mata kuliah</label>
+            <input type="text" id="gcKode" required maxlength="20" placeholder="1300M03B" list="daftarKodeMk" />
+          </div>
+          <div class="op-field op-lebar">
+            <label for="gcNama">Nama mata kuliah</label>
+            <input type="text" id="gcNama" maxlength="120" placeholder="Statistika II" />
+          </div>
+          <div class="op-field op-sempit">
+            <label for="gcKp">KP</label>
+            <input type="text" id="gcKp" required maxlength="6" placeholder="A" />
+          </div>
+          <div class="op-field">
+            <label for="gcKelas">Kode kelas</label>
+            <input type="text" id="gcKelas" maxlength="40" placeholder="khjrjkw2" />
+          </div>
+        </div>
+        <div class="op-aksi">
+          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
+          <button type="button" class="btn btn-ghost op-kecil" data-batal="formClassroom" hidden>Batal ubah</button>
+        </div>
+        <p class="op-pesan" id="pesanClassroom" role="alert"></p>
+      </form>
+      <div class="op-saring">
+        <input type="search" id="cariClassroom" placeholder="Cari kode, nama, atau KP…" aria-label="Cari kode Google Classroom" />
+      </div>
+      <div class="op-tabel-bungkus">
+        <table class="op-tabel" id="tabelClassroom"></table>
+      </div>
+    </section>
+
     <!-- ---------- PR ---------- -->
     <section class="op-panel" id="panel-pr" hidden>
       <div class="op-panel-kepala">
@@ -781,45 +828,6 @@
         <p class="op-pesan" id="pesanExcel" role="alert"></p>
       </form>
       <div id="pratinjauExcel"></div>
-
-      <hr class="op-garis" />
-
-      <h3>Kode Google Classroom</h3>
-      <p class="op-catatan">
-        Satu kode untuk tiap KP. Dipakai pengurus dan tidak ditampilkan ke mahasiswa.
-      </p>
-      <form class="op-form" id="formClassroom">
-        <input type="hidden" id="gcId" />
-        <div class="op-baris">
-          <div class="op-field">
-            <label for="gcKode">Kode mata kuliah</label>
-            <input type="text" id="gcKode" required maxlength="20" placeholder="1300M03B" list="daftarKodeMk" />
-          </div>
-          <div class="op-field op-lebar">
-            <label for="gcNama">Nama mata kuliah</label>
-            <input type="text" id="gcNama" maxlength="120" placeholder="Statistika II" />
-          </div>
-          <div class="op-field op-sempit">
-            <label for="gcKp">KP</label>
-            <input type="text" id="gcKp" required maxlength="6" placeholder="A" />
-          </div>
-          <div class="op-field">
-            <label for="gcKelas">Kode kelas</label>
-            <input type="text" id="gcKelas" maxlength="40" placeholder="khjrjkw2" />
-          </div>
-        </div>
-        <div class="op-aksi">
-          <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
-          <button type="button" class="btn btn-ghost op-kecil" data-batal="formClassroom" hidden>Batal ubah</button>
-        </div>
-        <p class="op-pesan" id="pesanClassroom" role="alert"></p>
-      </form>
-      <div class="op-saring">
-        <input type="search" id="cariClassroom" placeholder="Cari kode, nama, atau KP…" aria-label="Cari kode Google Classroom" />
-      </div>
-      <div class="op-tabel-bungkus">
-        <table class="op-tabel" id="tabelClassroom"></table>
-      </div>
 
       <hr class="op-garis" />
 
