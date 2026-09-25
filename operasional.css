@@ -567,3 +567,9 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 .op-massal-baris:last-child{ border-bottom:none; }
 .op-massal-baris .op-centang-baris{ flex:1 1 320px; border-bottom:none; }
 .op-massal-catatan{ flex:1 1 220px; max-width:320px; padding:7px 10px !important; font-size:0.82rem !important; }
+
+/* Grup angkatan di tab Mata Kuliah. */
+.op-saring-angkatan{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.op-saring-angkatan label{ font-size:0.8rem; font-weight:700; color:var(--owl-dark2); }
+.op-saring-angkatan select{ width:auto; min-width:200px; }
+.op-pilih-angkatan{ width:auto; min-width:170px; padding:6px 10px !important; font-size:0.82rem !important; }

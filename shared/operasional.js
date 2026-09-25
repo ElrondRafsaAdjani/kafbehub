@@ -643,6 +643,7 @@ const KOLOM_LOG = {
   matakuliah: [
     { k:'kode', label:'kode' },
     { k:'nama', label:'nama' },
+    { label:'grup angkatan', ambil: x => LABEL_ANGKATAN[x.angkatan || ''] },
   ],
   jadwal: [
     { k:'hari', label:'hari' },
@@ -736,19 +737,44 @@ function uraiPerubahan(p){
    5. Mata kuliah
    ============================================================ */
 
+/*
+  Grup angkatan mata kuliah: mahasiswa baru atau mahasiswa lama. Dipakai
+  untuk menyaring kelas pada pembuatan massal, misalnya saat mahasiswa lama
+  UTS sementara kelas mahasiswa baru dijadikan daring. Disimpan sebagai
+  kolom "angkatan" di dokumen matakuliah ('baru', 'lama', atau kosong).
+*/
+const LABEL_ANGKATAN = { baru: 'Mahasiswa baru', lama: 'Mahasiswa lama', '': 'Belum dikelompokkan' };
+const angkatanKode = kode => data.matakuliah.find(m => m.kode === kode)?.angkatan || '';
+
 function gambarMatkul(){
   const t = $('tabelMatkul');
+  const hitung = g => data.matakuliah.filter(m => (m.angkatan || '') === g).length;
+  $('mkRingkasAngkatan').textContent = data.matakuliah.length
+    ? `${hitung('baru')} mahasiswa baru · ${hitung('lama')} mahasiswa lama · ${hitung('')} belum dikelompokkan`
+    : '';
   if(data.matakuliah.length === 0){
     t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada mata kuliah. Tambahkan melalui formulir di atas.</td></tr></tbody>';
     return;
   }
+  const saring = $('mkSaring').value;
+  const tampil = data.matakuliah.filter(m => saring === 'semua' || (m.angkatan || '') === saring);
+  if(tampil.length === 0){
+    t.innerHTML = '<tbody><tr><td class="op-kosong">Tidak ada mata kuliah di grup ini.</td></tr></tbody>';
+    return;
+  }
+  // Grupnya bisa diganti langsung dari tabel, supaya puluhan mata kuliah
+  // bisa dikelompokkan cepat tanpa membuka formulir satu per satu.
+  const pilihan = m => ['', 'baru', 'lama'].map(g =>
+    `<option value="${g}"${(m.angkatan || '') === g ? ' selected' : ''}>${LABEL_ANGKATAN[g]}</option>`).join('');
   t.innerHTML = `
-    <thead><tr><th>Kode</th><th>Nama</th><th>Dipakai jadwal</th><th></th></tr></thead>
-    <tbody>${data.matakuliah.map(m => {
+    <thead><tr><th>Kode</th><th>Nama</th><th>Grup angkatan</th><th>Dipakai jadwal</th><th></th></tr></thead>
+    <tbody>${tampil.map(m => {
       const digunakan = data.jadwal.filter(j => j.kode === m.kode).length;
       return `<tr>
         <td><strong>${esc(m.kode)}</strong></td>
         <td>${esc(m.nama)}</td>
+        <td><select class="op-pilih-angkatan" data-angkatan-mk="${esc(m.id)}"
+          aria-label="Grup angkatan ${esc(m.nama)}">${pilihan(m)}</select></td>
         <td class="op-samar">${digunakan} kelas</td>
         <td><div class="op-tombol-baris">
           <button class="op-mini" data-ubah-mk="${esc(m.id)}">Ubah</button>
@@ -757,10 +783,30 @@ function gambarMatkul(){
       </tr>`;
     }).join('')}</tbody>`;
 
+  t.querySelectorAll('[data-angkatan-mk]').forEach(sel => sel.addEventListener('change', async () => {
+    const m = data.matakuliah.find(x => x.id === sel.dataset.angkatanMk);
+    if(!m) return;
+    const baru = sel.value;
+    try{
+      sel.disabled = true;
+      await updateDoc(doc(db, 'matakuliah', m.id), { angkatan: baru });
+      await catat('ubah', 'matakuliah', `${m.kode} · ${m.nama}`,
+        `grup angkatan: ${LABEL_ANGKATAN[m.angkatan || '']} → ${LABEL_ANGKATAN[baru]}`);
+      m.angkatan = baru;
+      gambarMatkul();
+    }catch(err){
+      console.error(err);
+      status('Gagal menyimpan grup angkatan: ' + err.message, 'salah');
+      sel.value = m.angkatan || '';
+      sel.disabled = false;
+    }
+  }));
+
   t.querySelectorAll('[data-ubah-mk]').forEach(b => b.addEventListener('click', () => {
     const m = data.matakuliah.find(x => x.id === b.dataset.ubahMk);
     if(!m) return;
     $('mkId').value = m.id; $('mkKode').value = m.kode; $('mkNama').value = m.nama;
+    $('mkAngkatan').value = m.angkatan || '';
     modeUbah('formMatkul', true);
     $('mkKode').focus();
   }));
@@ -776,6 +822,7 @@ $('formMatkul').addEventListener('submit', async (e) => {
   const id = $('mkId').value;
   const kode = $('mkKode').value.trim().toUpperCase();
   const nama = $('mkNama').value.trim();
+  const angkatan = $('mkAngkatan').value;
 
   const salah = [];
   if(!kode) salah.push('Kode tidak boleh kosong.');
@@ -789,9 +836,9 @@ $('formMatkul').addEventListener('submit', async (e) => {
     status('Menyimpan…', 'sibuk');
     if(id){
       const lama = data.matakuliah.find(m => m.id === id);
-      await updateDoc(doc(db, 'matakuliah', id), { kode, nama });
+      await updateDoc(doc(db, 'matakuliah', id), { kode, nama, angkatan });
       await catat('ubah', 'matakuliah', `${kode} · ${nama}`,
-        bedaKolom(lama, { kode, nama }, KOLOM_LOG.matakuliah));
+        bedaKolom(lama, { kode, nama, angkatan }, KOLOM_LOG.matakuliah));
       // Kode adalah tali penghubung ke jadwal, jadi jika kode berubah,
       // semua jadwal yang memakainya harus ikut diperbarui. Jika tidak,
       // jadwalnya jadi yatim dan namanya hilang di halaman publik.
@@ -804,7 +851,7 @@ $('formMatkul').addEventListener('submit', async (e) => {
         for(const p of pgTerdampak) await updateDoc(doc(db, 'pengajar', p.id), { kode });
       }
     }else{
-      await addDoc(collection(db, 'matakuliah'), { kode, nama });
+      await addDoc(collection(db, 'matakuliah'), { kode, nama, angkatan });
       await catat('tambah', 'matakuliah', `${kode} · ${nama}`);
     }
     e.target.reset(); $('mkId').value = ''; modeUbah('formMatkul', false);
@@ -912,6 +959,7 @@ function gambarJadwal(){
 }
 
 $('cariJadwal').addEventListener('input', gambarJadwal);
+$('mkSaring').addEventListener('change', gambarMatkul);
 
 // Pemeriksaan inilah yang mencegah dua kelas menggunakan ruangan yang sama pada
 // jam yang beririsan, dan mencegah satu KP tercatat dua kali.
@@ -2352,16 +2400,26 @@ $('msTampilkan').addEventListener('click', () => {
   // Satu kelas bisa muncul beberapa kali dalam rentang, misalnya rentang dua
   // pekan. Pencentangannya tetap per kelas, lalu entri dibuat untuk setiap
   // kemunculannya.
+  // Grup angkatan menyaring kelas yang ditawarkan, misalnya hanya kelas
+  // mahasiswa baru. Grupnya diambil dari mata kuliah tiap kelas.
+  const grup = $('msAngkatan').value;
+  const masukGrup = j => grup === 'semua' || angkatanKode(j.kode) === grup;
   const peta = new Map();
   for(const tgl of tanggalList){
     const hari = HARI[new Date(tgl + 'T00:00:00Z').getUTCDay()];
-    for(const j of data.jadwal.filter(x => x.hari === hari)){
+    for(const j of data.jadwal.filter(x => x.hari === hari && masukGrup(x))){
       if(!peta.has(j.id)) peta.set(j.id, []);
       peta.get(j.id).push(tgl);
     }
   }
 
-  if(peta.size === 0){ pesan(el, 'Tidak ada kelas yang jatuh pada rentang tanggal itu.', 'salah'); return; }
+  if(peta.size === 0){
+    pesan(el, grup === 'semua'
+      ? 'Tidak ada kelas yang jatuh pada rentang tanggal itu.'
+      : `Tidak ada kelas grup "${esc(LABEL_ANGKATAN[grup])}" pada rentang tanggal itu. `
+        + 'Periksa grup angkatan mata kuliahnya di tab Mata Kuliah.', 'salah');
+    return;
+  }
 
   massalKandidat = [...peta.entries()].map(([jadwalId, tgls]) => ({
     jadwalId, tanggalList: tgls,
@@ -2381,7 +2439,7 @@ $('msTampilkan').addEventListener('click', () => {
         <span>
           <strong>${esc(namaMatkul(j.kode) || j.kode)}</strong> KP ${esc(j.kp)}
           <span class="op-samar">· ${esc(j.hari)} ${esc(rentangJam(j.mulai, j.selesai))} · ${esc(j.ruang || 'tanpa ruang')}
-          · ${k.tanggalList.length} tanggal</span>
+          · ${k.tanggalList.length} tanggal · ${esc(LABEL_ANGKATAN[angkatanKode(j.kode)])}</span>
         </span>
       </label>
       <input type="text" class="op-massal-catatan" data-catatan-massal="${esc(k.jadwalId)}" maxlength="160"
@@ -2392,7 +2450,7 @@ $('msTampilkan').addEventListener('click', () => {
   const jumlahTercentang = massalKandidat.length;
   $('msDaftar').innerHTML = `
     <div class="op-massal-kepala">
-      <strong>${massalKandidat.length} kelas</strong> jatuh pada ${tanggalList.length} hari terpilih.
+      <strong>${massalKandidat.length} kelas</strong>${grup === 'semua' ? '' : ` ${esc(LABEL_ANGKATAN[grup].toLowerCase())}`} jatuh pada ${tanggalList.length} hari terpilih.
       <button type="button" class="op-mini" id="msSemua">Centang semua</button>
       <button type="button" class="op-mini" id="msKosong">Hapus semua centang</button>
     </div>

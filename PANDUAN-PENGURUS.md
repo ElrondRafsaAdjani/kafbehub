@@ -110,6 +110,15 @@ satu mata kuliah tidak ditulis dengan nama berbeda-beda.
 Mengubah kode di sini otomatis memperbarui semua jadwal yang memakainya.
 Menghapus mata kuliah yang masih dipakai jadwal akan ditolak.
 
+
+**Grup angkatan.** Tiap mata kuliah bisa dimasukkan ke grup **Mahasiswa
+baru** atau **Mahasiswa lama**. Grupnya bisa diganti langsung dari kolom
+**Grup angkatan** di tabel, tanpa membuka formulir, dan tabelnya bisa
+disaring per grup. Grup ini dipakai di **Buat banyak sekaligus** (tab
+Perubahan Sementara): pilih **Grup angkatan**, lalu **Tampilkan kelas** hanya
+menampilkan kelas grup itu. Misalnya, saat mahasiswa lama UTS dan kelas
+mahasiswa baru dijadikan daring, pilih "Mahasiswa baru saja" dan jenis
+"daring". Unggahan Excel tidak mengubah grup yang sudah diatur.
 ### Jadwal Permanen
 
 Jadwal mingguan yang berulang. Sistem menolak menyimpan bila:

@@ -142,6 +142,14 @@
             <label for="mkNama">Nama mata kuliah</label>
             <input type="text" id="mkNama" required maxlength="120" placeholder="Statistika II" />
           </div>
+          <div class="op-field">
+            <label for="mkAngkatan">Grup angkatan</label>
+            <select id="mkAngkatan">
+              <option value="">Belum dikelompokkan</option>
+              <option value="baru">Mahasiswa baru</option>
+              <option value="lama">Mahasiswa lama</option>
+            </select>
+          </div>
         </div>
         <div class="op-aksi">
           <button type="submit" class="btn btn-primary op-kecil">Simpan</button>
@@ -150,6 +158,16 @@
         <p class="op-pesan" id="pesanMatkul" role="alert"></p>
       </form>
 
+      <div class="op-saring op-saring-angkatan">
+        <label for="mkSaring">Tampilkan</label>
+        <select id="mkSaring">
+          <option value="semua">Semua grup</option>
+          <option value="baru">Mahasiswa baru</option>
+          <option value="lama">Mahasiswa lama</option>
+          <option value="">Belum dikelompokkan</option>
+        </select>
+        <span class="op-samar" id="mkRingkasAngkatan"></span>
+      </div>
       <div class="op-tabel-bungkus">
         <table class="op-tabel" id="tabelMatkul"></table>
       </div>
@@ -335,6 +353,15 @@
               <select id="msTipe">
                 <option value="daring">Kelas jadi daring (online)</option>
                 <option value="libur">Kelas ditiadakan</option>
+              </select>
+            </div>
+            <div class="op-field">
+              <label for="msAngkatan">Grup angkatan</label>
+              <select id="msAngkatan">
+                <option value="semua">Semua kelas</option>
+                <option value="baru">Mahasiswa baru saja</option>
+                <option value="lama">Mahasiswa lama saja</option>
+                <option value="">Belum dikelompokkan saja</option>
               </select>
             </div>
             <div class="op-field">
