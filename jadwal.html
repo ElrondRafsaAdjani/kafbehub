@@ -118,7 +118,8 @@
   const btnThis  = document.getElementById('thisWeek');
 
   let data = null;
-  let offsetMinggu = 0;      // 0 = minggu ini, -1 = minggu lalu, dst.
+  let offsetMinggu = 0;      // 0 = minggu kalender ini, -1 = minggu lalu, dst.
+  let offsetDasar = 0;       // minggu yang dianggap "minggu ini" (lihat awalTampilan)
   let hariAktif = null;
 
   /* ---------- util ---------- */
@@ -139,6 +140,30 @@
     const x = new Date(d);
     x.setDate(x.getDate() + n);
     return x;
+  }
+
+  /*
+    Minggu dan hari yang dibuka saat halaman dimuat.
+
+    Hari kerja: minggu berjalan, pada tab hari ini.
+
+    Sabtu dan Minggu: kuliah pekan itu sudah selesai, dan yang dicari
+    mahasiswa hampir selalu kelas Senin depan. Jadi yang ditampilkan langsung
+    minggu berikutnya, pada tab Senin. Pengecualiannya bila hari itu sendiri
+    ada kelas pengganti: minggu berjalan tetap ditampilkan pada tab hari itu,
+    supaya kelas yang berlangsung hari ini tidak terlewat.
+
+    Tombol "Kembali ke minggu ini" mengarah ke minggu yang dipilih di sini.
+  */
+  function awalTampilan(){
+    const hariIni = new Date();
+    const h = hariIni.getDay();                 // 0 = Minggu, 6 = Sabtu
+    if(h === 0 || h === 6){
+      const adaKelasHariIni = (data.changes || [])
+        .some(c => c.tanggal === iso(hariIni) && c.tipe === 'pengganti');
+      if(!adaKelasHariIni) return { offset: 1, hari: 'Senin' };
+    }
+    return { offset: 0, hari: HARI[h] };
   }
 
   // Senin pada minggu yang memuat tanggal d.
@@ -282,7 +307,7 @@
 
     const jumat = tanggalHari(senin, hariList[hariList.length-1]);
     elRange.textContent = `${tglPendek(senin)} - ${tglPendek(jumat)} ${jumat.getFullYear()}`;
-    btnThis.hidden = offsetMinggu === 0;
+    btnThis.hidden = offsetMinggu === offsetDasar;
     elNav.hidden = false;
 
     // Tab hari
@@ -550,7 +575,9 @@
       }
       if(!data.days || data.days.length === 0) throw new Error('data jadwal kosong');
 
-      hariAktif = HARI[new Date().getDay()];
+      const awal = awalTampilan();
+      offsetDasar = offsetMinggu = awal.offset;
+      hariAktif = awal.hari;
       renderPerubahan();
       renderPeringatan();
       render();
@@ -559,7 +586,7 @@
       elCari.addEventListener('input', render);
       btnPrev.addEventListener('click', () => { offsetMinggu--; render(); });
       btnNext.addEventListener('click', () => { offsetMinggu++; render(); });
-      btnThis.addEventListener('click', () => { offsetMinggu = 0; render(); });
+      btnThis.addEventListener('click', () => { offsetMinggu = offsetDasar; hariAktif = awal.hari; render(); });
     }catch(err){
       console.error('Gagal memuat jadwal:', err);
       elIsi.innerHTML = `
