@@ -476,6 +476,14 @@ service cloud.firestore {
       allow write: if tulisanAdmin();
     }
 
+    // Grup mata kuliah buatan pengurus (misalnya mahasiswa baru dan lama),
+    // untuk menyaring kelas pada pembuatan massal. Hanya dipakai di halaman
+    // operasional, jadi tidak dibuka untuk publik.
+    match /grupmatkul/{id} {
+      allow read: if adminTerdaftar();
+      allow write: if tulisanAdmin();
+    }
+
     match /pengumuman/{id} {
       allow read: if true;
       allow write: if tulisanAdmin();

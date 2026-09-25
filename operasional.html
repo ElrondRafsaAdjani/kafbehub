@@ -143,12 +143,8 @@
             <input type="text" id="mkNama" required maxlength="120" placeholder="Statistika II" />
           </div>
           <div class="op-field">
-            <label for="mkAngkatan">Grup angkatan</label>
-            <select id="mkAngkatan">
-              <option value="">Belum dikelompokkan</option>
-              <option value="baru">Mahasiswa baru</option>
-              <option value="lama">Mahasiswa lama</option>
-            </select>
+            <label for="mkGrup">Grup</label>
+            <select id="mkGrup"><option value="">Tanpa grup</option></select>
           </div>
         </div>
         <div class="op-aksi">
@@ -158,14 +154,27 @@
         <p class="op-pesan" id="pesanMatkul" role="alert"></p>
       </form>
 
+      <details class="op-massal op-grup">
+        <summary>Grup mata kuliah</summary>
+        <div class="op-form" style="margin-top:14px;">
+          <p class="op-catatan">Kelompokkan mata kuliah sesuai kebutuhan, misalnya "Mahasiswa baru" dan "Mahasiswa lama", supaya perubahan massal bisa dibuat per grup. Grup hanya dipakai di halaman operasional ini: tidak tampil ke mahasiswa, tidak ikut ke Excel yang diunduh, dan tidak berubah saat Excel diunggah.</p>
+          <form class="op-baris" id="formGrup">
+            <div class="op-field op-lebar">
+              <label for="grNama">Nama grup baru</label>
+              <input type="text" id="grNama" maxlength="60" placeholder="Mahasiswa baru" autocomplete="off" />
+            </div>
+            <div class="op-field op-centang">
+              <button type="submit" class="btn btn-primary op-kecil">Tambah grup</button>
+            </div>
+          </form>
+          <p class="op-pesan" id="pesanGrup" role="alert"></p>
+          <div id="daftarGrup"></div>
+        </div>
+      </details>
+
       <div class="op-saring op-saring-angkatan">
         <label for="mkSaring">Tampilkan</label>
-        <select id="mkSaring">
-          <option value="semua">Semua grup</option>
-          <option value="baru">Mahasiswa baru</option>
-          <option value="lama">Mahasiswa lama</option>
-          <option value="">Belum dikelompokkan</option>
-        </select>
+        <select id="mkSaring"><option value="semua">Semua grup</option></select>
         <span class="op-samar" id="mkRingkasAngkatan"></span>
       </div>
       <div class="op-tabel-bungkus">
@@ -356,13 +365,8 @@
               </select>
             </div>
             <div class="op-field">
-              <label for="msAngkatan">Grup angkatan</label>
-              <select id="msAngkatan">
-                <option value="semua">Semua kelas</option>
-                <option value="baru">Mahasiswa baru saja</option>
-                <option value="lama">Mahasiswa lama saja</option>
-                <option value="">Belum dikelompokkan saja</option>
-              </select>
+              <label for="msGrup">Grup mata kuliah</label>
+              <select id="msGrup"><option value="semua">Semua kelas</option></select>
             </div>
             <div class="op-field">
               <label for="msDari">Dari tanggal</label>

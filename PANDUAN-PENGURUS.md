@@ -111,14 +111,20 @@ Mengubah kode di sini otomatis memperbarui semua jadwal yang memakainya.
 Menghapus mata kuliah yang masih dipakai jadwal akan ditolak.
 
 
-**Grup angkatan.** Tiap mata kuliah bisa dimasukkan ke grup **Mahasiswa
-baru** atau **Mahasiswa lama**. Grupnya bisa diganti langsung dari kolom
-**Grup angkatan** di tabel, tanpa membuka formulir, dan tabelnya bisa
-disaring per grup. Grup ini dipakai di **Buat banyak sekaligus** (tab
-Perubahan Sementara): pilih **Grup angkatan**, lalu **Tampilkan kelas** hanya
-menampilkan kelas grup itu. Misalnya, saat mahasiswa lama UTS dan kelas
-mahasiswa baru dijadikan daring, pilih "Mahasiswa baru saja" dan jenis
-"daring". Unggahan Excel tidak mengubah grup yang sudah diatur.
+**Grup mata kuliah.** Pengurus bisa membuat grup sendiri di kotak **Grup
+mata kuliah**, misalnya "Mahasiswa baru" dan "Mahasiswa lama": tambah, ganti
+nama, atau hapus (menghapus grup tidak menghapus mata kuliahnya, hanya
+membuatnya tanpa grup). Tiap mata kuliah dimasukkan ke satu grup lewat kolom
+**Grup** di tabel atau di formulir, dan tabelnya bisa disaring per grup.
+
+Grup dipakai di **Buat banyak sekaligus** (tab Perubahan Sementara): pilih
+**Grup mata kuliah**, lalu **Tampilkan kelas** hanya menampilkan kelas grup
+itu. Misalnya, saat mahasiswa lama UTS dan kelas mahasiswa baru dijadikan
+daring, pilih grup "Mahasiswa baru" dan jenis "daring".
+
+Grup **hanya dipakai di halaman operasional**: tidak tampil ke mahasiswa,
+tidak ikut ke berkas Excel yang diunduh, dan tidak berubah saat Excel
+diunggah. Grupnya disimpan di koleksi Firestore `grupmatkul`.
 ### Jadwal Permanen
 
 Jadwal mingguan yang berulang. Sistem menolak menyimpan bila:

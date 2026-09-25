@@ -468,6 +468,7 @@ let pemakai = { nama: '', email: '' };
 
 const data = {
   matakuliah: [],
+  grupmatkul: [],
   jadwal: [],
   perubahan: [],
   pengumuman: [],
@@ -512,7 +513,7 @@ async function ambilKoleksi(nama){
 async function muatSemua(){
   status('Memuat data…', 'sibuk');
   try{
-    const [mk, jd, pb, pm, pg, gc, ko, ap, ao, ad] = await Promise.all([
+    const [mk, jd, pb, pm, pg, gc, ko, ap, ao, ad, gr] = await Promise.all([
       ambilKoleksi('matakuliah'),
       ambilKoleksi('jadwal'),
       ambilKoleksi('perubahan'),
@@ -523,8 +524,11 @@ async function muatSemua(){
       ambilKoleksi('pengajarakun'),
       ambilKoleksi('adminakun'),
       ambilKoleksi('admins'),
+      ambilKoleksi('grupmatkul'),
     ]);
     data.matakuliah = mk.sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
+    data.grupmatkul = gr.sort((a,b) => (a.nama||'').localeCompare(b.nama||''));
+    await pindahkanAngkatanLama();
     data.jadwal = jd;
     data.perubahan = pb.sort((a,b) => String(a.tanggal).localeCompare(String(b.tanggal)));
     data.pengumuman = pm;
@@ -557,6 +561,8 @@ async function muatSemua(){
 }
 
 function gambarSemua(){
+  isiPilihanGrup();
+  gambarGrup();
   isiPilihanMatkul();
   isiPilihanKelas();
   isiPilihanPengajar();
@@ -643,7 +649,7 @@ const KOLOM_LOG = {
   matakuliah: [
     { k:'kode', label:'kode' },
     { k:'nama', label:'nama' },
-    { label:'grup angkatan', ambil: x => LABEL_ANGKATAN[x.angkatan || ''] },
+    { label:'grup', ambil: x => labelGrup(grupMk(x)) },
   ],
   jadwal: [
     { k:'hari', label:'hari' },
@@ -738,43 +744,163 @@ function uraiPerubahan(p){
    ============================================================ */
 
 /*
-  Grup angkatan mata kuliah: mahasiswa baru atau mahasiswa lama. Dipakai
-  untuk menyaring kelas pada pembuatan massal, misalnya saat mahasiswa lama
-  UTS sementara kelas mahasiswa baru dijadikan daring. Disimpan sebagai
-  kolom "angkatan" di dokumen matakuliah ('baru', 'lama', atau kosong).
+  Grup mata kuliah, dibuat dan dinamai sendiri oleh pengurus, misalnya
+  "Mahasiswa baru" dan "Mahasiswa lama". Dipakai untuk menyaring kelas pada
+  pembuatan massal, misalnya saat mahasiswa lama UTS sementara kelas
+  mahasiswa baru dijadikan daring.
+
+  Grupnya disimpan di koleksi grupmatkul, dan tiap mata kuliah menyimpan id
+  grupnya di kolom "grup". Grup HANYA dipakai di halaman ini: tidak ikut
+  diterbitkan ke halaman publik, tidak ikut ke berkas Excel yang diunduh,
+  dan tidak diubah oleh unggahan Excel (yang hanya menulis kode dan nama).
 */
-const LABEL_ANGKATAN = { baru: 'Mahasiswa baru', lama: 'Mahasiswa lama', '': 'Belum dikelompokkan' };
-const angkatanKode = kode => data.matakuliah.find(m => m.kode === kode)?.angkatan || '';
+const namaGrup = id => data.grupmatkul.find(g => g.id === id)?.nama || '';
+// Grup yang id-nya sudah tidak ada dianggap tanpa grup.
+const grupMk = m => (m && data.grupmatkul.some(g => g.id === m.grup)) ? m.grup : '';
+const grupKode = kode => grupMk(data.matakuliah.find(m => m.kode === kode));
+const labelGrup = id => namaGrup(id) || 'Tanpa grup';
+
+/*
+  Sempat ada grup tetap "baru" dan "lama" di kolom angkatan. Bila masih ada
+  mata kuliah yang memakainya dan belum ada satu pun grup buatan, keduanya
+  dijadikan grup biasa sekali saja, supaya pengelompokan yang sudah dibuat
+  tidak hilang.
+*/
+async function pindahkanAngkatanLama(){
+  const lama = data.matakuliah.filter(m => m.angkatan === 'baru' || m.angkatan === 'lama');
+  if(!lama.length || data.grupmatkul.length) return;
+  try{
+    const id = {};
+    for(const [k, nama] of [['baru', 'Mahasiswa baru'], ['lama', 'Mahasiswa lama']]){
+      if(!lama.some(m => m.angkatan === k)) continue;
+      const ref = await addDoc(collection(db, 'grupmatkul'), { nama });
+      id[k] = ref.id;
+      data.grupmatkul.push({ id: ref.id, nama });
+    }
+    for(const m of lama){
+      await updateDoc(doc(db, 'matakuliah', m.id), { grup: id[m.angkatan], angkatan: '' });
+      m.grup = id[m.angkatan]; m.angkatan = '';
+    }
+    data.grupmatkul.sort((a,b) => a.nama.localeCompare(b.nama));
+  }catch(err){
+    // Biasanya karena aturan Firestore untuk grupmatkul belum dipasang.
+    console.error('Gagal memindahkan grup angkatan lama', err);
+  }
+}
+
+// Mengisi semua pilihan grup, dengan tetap mempertahankan yang sedang dipilih.
+function isiPilihanGrup(){
+  const grup = data.grupmatkul.map(g => `<option value="${esc(g.id)}">${esc(g.nama)}</option>`).join('');
+  const isi = (id, awal, akhir) => {
+    const el = $(id);
+    const kini = el.value;
+    el.innerHTML = awal + grup + akhir;
+    if([...el.options].some(o => o.value === kini)) el.value = kini;
+  };
+  isi('mkGrup', '<option value="">Tanpa grup</option>', '');
+  isi('mkSaring', '<option value="semua">Semua grup</option>', '<option value="">Tanpa grup</option>');
+  isi('msGrup', '<option value="semua">Semua kelas</option>', '<option value="">Tanpa grup saja</option>');
+}
+
+function gambarGrup(){
+  const el = $('daftarGrup');
+  if(!data.grupmatkul.length){
+    el.innerHTML = '<p class="op-samar">Belum ada grup. Tambahkan misalnya "Mahasiswa baru" dan "Mahasiswa lama".</p>';
+    return;
+  }
+  el.innerHTML = data.grupmatkul.map(g => {
+    const n = data.matakuliah.filter(m => m.grup === g.id).length;
+    return `<div class="op-grup-baris">
+      <span><strong>${esc(g.nama)}</strong> <span class="op-samar">· ${n} mata kuliah</span></span>
+      <span class="op-tombol-baris">
+        <button type="button" class="op-mini" data-ubah-grup="${esc(g.id)}">Ganti nama</button>
+        <button type="button" class="op-mini op-hapus" data-hapus-grup="${esc(g.id)}">Hapus</button>
+      </span>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('[data-ubah-grup]').forEach(b => b.addEventListener('click', async () => {
+    const g = data.grupmatkul.find(x => x.id === b.dataset.ubahGrup);
+    if(!g) return;
+    const nama = (prompt('Nama baru grup:', g.nama) || '').trim();
+    if(!nama || nama === g.nama) return;
+    if(data.grupmatkul.some(x => x.id !== g.id && x.nama.toLowerCase() === nama.toLowerCase())){
+      pesan($('pesanGrup'), `Grup "${esc(nama)}" sudah ada.`, 'salah'); return;
+    }
+    try{
+      await updateDoc(doc(db, 'grupmatkul', g.id), { nama });
+      await catat('ubah', 'grup mata kuliah', nama, `nama ${g.nama} menjadi ${nama}`);
+      await muatSemua();
+      bersihkanPesan($('pesanGrup'));
+    }catch(err){ pesan($('pesanGrup'), 'Gagal mengganti nama: ' + esc(err.message), 'salah'); }
+  }));
+
+  el.querySelectorAll('[data-hapus-grup]').forEach(b => b.addEventListener('click', async () => {
+    const g = data.grupmatkul.find(x => x.id === b.dataset.hapusGrup);
+    if(!g) return;
+    const anggota = data.matakuliah.filter(m => m.grup === g.id);
+    if(!confirm(`Hapus grup "${g.nama}"?` + (anggota.length
+      ? `\n\n${anggota.length} mata kuliah di dalamnya menjadi tanpa grup. Mata kuliahnya sendiri tidak dihapus.` : ''))) return;
+    try{
+      for(const m of anggota) await updateDoc(doc(db, 'matakuliah', m.id), { grup: '' });
+      await deleteDoc(doc(db, 'grupmatkul', g.id));
+      await catat('hapus', 'grup mata kuliah', g.nama, `${anggota.length} mata kuliah menjadi tanpa grup`);
+      await muatSemua();
+    }catch(err){ pesan($('pesanGrup'), 'Gagal menghapus grup: ' + esc(err.message), 'salah'); }
+  }));
+}
+
+$('formGrup').addEventListener('submit', async e => {
+  e.preventDefault();
+  const el = $('pesanGrup');
+  const nama = $('grNama').value.trim();
+  if(!nama){ pesan(el, 'Nama grup belum diisi.', 'salah'); return; }
+  if(data.grupmatkul.some(g => g.nama.toLowerCase() === nama.toLowerCase())){
+    pesan(el, `Grup "${esc(nama)}" sudah ada.`, 'salah'); return;
+  }
+  try{
+    await addDoc(collection(db, 'grupmatkul'), { nama });
+    await catat('tambah', 'grup mata kuliah', nama);
+    $('grNama').value = '';
+    bersihkanPesan(el);
+    await muatSemua();
+  }catch(err){
+    console.error(err);
+    pesan(el, 'Gagal menambah grup: ' + esc(err.message)
+      + (err.code === 'permission-denied'
+        ? '. Aturan Firestore untuk koleksi grupmatkul belum dipasang; tempel ulang isi firestore.rules.' : ''), 'salah');
+  }
+});
 
 function gambarMatkul(){
   const t = $('tabelMatkul');
-  const hitung = g => data.matakuliah.filter(m => (m.angkatan || '') === g).length;
+  const hitung = id => data.matakuliah.filter(m => grupMk(m) === id).length;
   $('mkRingkasAngkatan').textContent = data.matakuliah.length
-    ? `${hitung('baru')} mahasiswa baru · ${hitung('lama')} mahasiswa lama · ${hitung('')} belum dikelompokkan`
+    ? [...data.grupmatkul.map(g => `${hitung(g.id)} ${g.nama}`), `${hitung('')} tanpa grup`].join(' · ')
     : '';
   if(data.matakuliah.length === 0){
     t.innerHTML = '<tbody><tr><td class="op-kosong">Belum ada mata kuliah. Tambahkan melalui formulir di atas.</td></tr></tbody>';
     return;
   }
   const saring = $('mkSaring').value;
-  const tampil = data.matakuliah.filter(m => saring === 'semua' || (m.angkatan || '') === saring);
+  const tampil = data.matakuliah.filter(m => saring === 'semua' || grupMk(m) === saring);
   if(tampil.length === 0){
     t.innerHTML = '<tbody><tr><td class="op-kosong">Tidak ada mata kuliah di grup ini.</td></tr></tbody>';
     return;
   }
   // Grupnya bisa diganti langsung dari tabel, supaya puluhan mata kuliah
   // bisa dikelompokkan cepat tanpa membuka formulir satu per satu.
-  const pilihan = m => ['', 'baru', 'lama'].map(g =>
-    `<option value="${g}"${(m.angkatan || '') === g ? ' selected' : ''}>${LABEL_ANGKATAN[g]}</option>`).join('');
+  const pilihan = m => [{ id: '', nama: 'Tanpa grup' }, ...data.grupmatkul].map(g =>
+    `<option value="${esc(g.id)}"${grupMk(m) === g.id ? ' selected' : ''}>${esc(g.nama)}</option>`).join('');
   t.innerHTML = `
-    <thead><tr><th>Kode</th><th>Nama</th><th>Grup angkatan</th><th>Dipakai jadwal</th><th></th></tr></thead>
+    <thead><tr><th>Kode</th><th>Nama</th><th>Grup</th><th>Dipakai jadwal</th><th></th></tr></thead>
     <tbody>${tampil.map(m => {
       const digunakan = data.jadwal.filter(j => j.kode === m.kode).length;
       return `<tr>
         <td><strong>${esc(m.kode)}</strong></td>
         <td>${esc(m.nama)}</td>
-        <td><select class="op-pilih-angkatan" data-angkatan-mk="${esc(m.id)}"
-          aria-label="Grup angkatan ${esc(m.nama)}">${pilihan(m)}</select></td>
+        <td><select class="op-pilih-angkatan" data-grup-mk="${esc(m.id)}"
+          aria-label="Grup ${esc(m.nama)}">${pilihan(m)}</select></td>
         <td class="op-samar">${digunakan} kelas</td>
         <td><div class="op-tombol-baris">
           <button class="op-mini" data-ubah-mk="${esc(m.id)}">Ubah</button>
@@ -783,21 +909,22 @@ function gambarMatkul(){
       </tr>`;
     }).join('')}</tbody>`;
 
-  t.querySelectorAll('[data-angkatan-mk]').forEach(sel => sel.addEventListener('change', async () => {
-    const m = data.matakuliah.find(x => x.id === sel.dataset.angkatanMk);
+  t.querySelectorAll('[data-grup-mk]').forEach(sel => sel.addEventListener('change', async () => {
+    const m = data.matakuliah.find(x => x.id === sel.dataset.grupMk);
     if(!m) return;
     const baru = sel.value;
     try{
       sel.disabled = true;
-      await updateDoc(doc(db, 'matakuliah', m.id), { angkatan: baru });
+      await updateDoc(doc(db, 'matakuliah', m.id), { grup: baru });
       await catat('ubah', 'matakuliah', `${m.kode} · ${m.nama}`,
-        `grup angkatan: ${LABEL_ANGKATAN[m.angkatan || '']} → ${LABEL_ANGKATAN[baru]}`);
-      m.angkatan = baru;
+        `grup: ${labelGrup(grupMk(m))} → ${labelGrup(baru)}`);
+      m.grup = baru;
       gambarMatkul();
+      gambarGrup();
     }catch(err){
       console.error(err);
-      status('Gagal menyimpan grup angkatan: ' + err.message, 'salah');
-      sel.value = m.angkatan || '';
+      status('Gagal menyimpan grup: ' + err.message, 'salah');
+      sel.value = grupMk(m);
       sel.disabled = false;
     }
   }));
@@ -806,7 +933,7 @@ function gambarMatkul(){
     const m = data.matakuliah.find(x => x.id === b.dataset.ubahMk);
     if(!m) return;
     $('mkId').value = m.id; $('mkKode').value = m.kode; $('mkNama').value = m.nama;
-    $('mkAngkatan').value = m.angkatan || '';
+    $('mkGrup').value = grupMk(m);
     modeUbah('formMatkul', true);
     $('mkKode').focus();
   }));
@@ -822,7 +949,7 @@ $('formMatkul').addEventListener('submit', async (e) => {
   const id = $('mkId').value;
   const kode = $('mkKode').value.trim().toUpperCase();
   const nama = $('mkNama').value.trim();
-  const angkatan = $('mkAngkatan').value;
+  const grup = $('mkGrup').value;
 
   const salah = [];
   if(!kode) salah.push('Kode tidak boleh kosong.');
@@ -836,9 +963,9 @@ $('formMatkul').addEventListener('submit', async (e) => {
     status('Menyimpan…', 'sibuk');
     if(id){
       const lama = data.matakuliah.find(m => m.id === id);
-      await updateDoc(doc(db, 'matakuliah', id), { kode, nama, angkatan });
+      await updateDoc(doc(db, 'matakuliah', id), { kode, nama, grup });
       await catat('ubah', 'matakuliah', `${kode} · ${nama}`,
-        bedaKolom(lama, { kode, nama, angkatan }, KOLOM_LOG.matakuliah));
+        bedaKolom(lama, { kode, nama, grup }, KOLOM_LOG.matakuliah));
       // Kode adalah tali penghubung ke jadwal, jadi jika kode berubah,
       // semua jadwal yang memakainya harus ikut diperbarui. Jika tidak,
       // jadwalnya jadi yatim dan namanya hilang di halaman publik.
@@ -851,7 +978,7 @@ $('formMatkul').addEventListener('submit', async (e) => {
         for(const p of pgTerdampak) await updateDoc(doc(db, 'pengajar', p.id), { kode });
       }
     }else{
-      await addDoc(collection(db, 'matakuliah'), { kode, nama, angkatan });
+      await addDoc(collection(db, 'matakuliah'), { kode, nama, grup });
       await catat('tambah', 'matakuliah', `${kode} · ${nama}`);
     }
     e.target.reset(); $('mkId').value = ''; modeUbah('formMatkul', false);
@@ -2402,8 +2529,8 @@ $('msTampilkan').addEventListener('click', () => {
   // kemunculannya.
   // Grup angkatan menyaring kelas yang ditawarkan, misalnya hanya kelas
   // mahasiswa baru. Grupnya diambil dari mata kuliah tiap kelas.
-  const grup = $('msAngkatan').value;
-  const masukGrup = j => grup === 'semua' || angkatanKode(j.kode) === grup;
+  const grup = $('msGrup').value;
+  const masukGrup = j => grup === 'semua' || grupKode(j.kode) === grup;
   const peta = new Map();
   for(const tgl of tanggalList){
     const hari = HARI[new Date(tgl + 'T00:00:00Z').getUTCDay()];
@@ -2416,8 +2543,8 @@ $('msTampilkan').addEventListener('click', () => {
   if(peta.size === 0){
     pesan(el, grup === 'semua'
       ? 'Tidak ada kelas yang jatuh pada rentang tanggal itu.'
-      : `Tidak ada kelas grup "${esc(LABEL_ANGKATAN[grup])}" pada rentang tanggal itu. `
-        + 'Periksa grup angkatan mata kuliahnya di tab Mata Kuliah.', 'salah');
+      : `Tidak ada kelas grup "${esc(labelGrup(grup))}" pada rentang tanggal itu. `
+        + 'Periksa grup mata kuliahnya di tab Mata Kuliah.', 'salah');
     return;
   }
 
@@ -2439,7 +2566,7 @@ $('msTampilkan').addEventListener('click', () => {
         <span>
           <strong>${esc(namaMatkul(j.kode) || j.kode)}</strong> KP ${esc(j.kp)}
           <span class="op-samar">· ${esc(j.hari)} ${esc(rentangJam(j.mulai, j.selesai))} · ${esc(j.ruang || 'tanpa ruang')}
-          · ${k.tanggalList.length} tanggal · ${esc(LABEL_ANGKATAN[angkatanKode(j.kode)])}</span>
+          · ${k.tanggalList.length} tanggal · ${esc(labelGrup(grupKode(j.kode)))}</span>
         </span>
       </label>
       <input type="text" class="op-massal-catatan" data-catatan-massal="${esc(k.jadwalId)}" maxlength="160"
@@ -2450,7 +2577,7 @@ $('msTampilkan').addEventListener('click', () => {
   const jumlahTercentang = massalKandidat.length;
   $('msDaftar').innerHTML = `
     <div class="op-massal-kepala">
-      <strong>${massalKandidat.length} kelas</strong>${grup === 'semua' ? '' : ` ${esc(LABEL_ANGKATAN[grup].toLowerCase())}`} jatuh pada ${tanggalList.length} hari terpilih.
+      <strong>${massalKandidat.length} kelas</strong>${grup === 'semua' ? '' : ` grup ${esc(labelGrup(grup))}`} jatuh pada ${tanggalList.length} hari terpilih.
       <button type="button" class="op-mini" id="msSemua">Centang semua</button>
       <button type="button" class="op-mini" id="msKosong">Hapus semua centang</button>
     </div>

@@ -573,3 +573,6 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
 .op-saring-angkatan label{ font-size:0.8rem; font-weight:700; color:var(--owl-dark2); }
 .op-saring-angkatan select{ width:auto; min-width:200px; }
 .op-pilih-angkatan{ width:auto; min-width:170px; padding:6px 10px !important; font-size:0.82rem !important; }
+.op-grup{ margin-bottom:16px; }
+.op-grup-baris{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:9px 0; border-bottom:1px solid var(--line); font-size:0.88rem; }
+.op-grup-baris:last-child{ border-bottom:none; }
