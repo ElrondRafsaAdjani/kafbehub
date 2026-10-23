@@ -83,6 +83,18 @@ textarea{ resize:vertical; }
 
 /* ---------- Tab ---------- */
 .op-tab{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+
+/* Sebelas tab menumpuk menjadi enam baris di layar ponsel dan mendorong isi
+   panel jauh ke bawah. Di layar sempit tabnya dijadikan satu baris yang
+   digulir mendatar, dengan satu tab berikutnya sengaja terlihat sebagian
+   sebagai tanda bahwa daftarnya masih berlanjut. */
+@media (max-width:900px){
+  .op-tab{
+    flex-wrap:nowrap; overflow-x:auto; overscroll-behavior-x:contain;
+    scrollbar-width:thin; padding-bottom:8px; margin-bottom:18px;
+  }
+  .op-tab-btn{ flex:none; }
+}
 .op-tab-btn{
   font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.88rem;
   padding:10px 17px; border-radius:100px; cursor:pointer;
@@ -101,7 +113,18 @@ textarea{ resize:vertical; }
 }
 .op-panel-kepala{ margin-bottom:20px; }
 .op-panel-kepala h2{ font-size:1.3rem; }
-.op-panel-kepala p{ color:var(--ink-soft); font-size:0.9rem; line-height:1.55; margin-top:6px; max-width:72ch; }
+.op-panel-kepala p{ color:var(--ink-soft); font-size:0.9rem; line-height:1.55; margin-top:6px; max-width:var(--lebar-baca); }
+
+/* Lebar baca di dalam panel. Panelnya boleh selebar halaman, barisnya tidak.
+   Kepala panel sudah dibatasi sejak awal, tetapi paragraf penjelas di badan
+   panel belum. Setelah halaman pengurus dilebarkan, paragraf di tab PR dan
+   tab Upload dan Download terbentang 1422 piksel dengan isi sampai 460
+   karakter, dan satu barisnya memuat sekitar 180 karakter. */
+.op-panel > p,
+.op-panel > details p,
+.op-panel > .op-form > p,
+.op-template-kiri > p,
+.op-panel .op-penanda ul{ max-width:var(--lebar-baca); }
 .op-garis{ border:none; border-top:1px solid var(--line); margin:28px 0 20px; }
 .op-panel h3{ font-size:1.05rem; margin-bottom:8px; }
 
@@ -409,7 +432,7 @@ textarea{ resize:vertical; }
 .op-lencana.daring{ background:#EDE7F8; color:#5B3FA0; }
 .op-lencana.libur{ background:#FBE3E2; color:#B03B37; }
 .op-lencana.pindah{ background:#E1F5E9; color:#1E7A44; }
-.op-lencana.ruang{ background:#E7EDF1; color:#5C7285; }
+.op-lencana.ruang{ background:#E7EDF1; color:#4F6376; }
 .op-lencana.menyusul{ background:#FDEEDB; color:#8A5A0B; }
 .op-lencana.pin{ background:#FDEEDB; color:var(--gold-deep); }
 
@@ -471,7 +494,7 @@ input[type=number]:focus{ border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba
   margin-top:10px;
 }
 /* Pratinjau tetap terlihat selagi pengaturan di sebelahnya digulir. */
-.op-template-kanan{ position:sticky; top:84px; }
+.op-template-kanan{ position:sticky; top:calc(var(--tinggi-nav) + 18px); }
 .op-template-pratinjau{
   width:100%; height:auto; display:block; border-radius:14px;
   border:1px solid var(--line); background:var(--bg-deep); aspect-ratio:9 / 16;

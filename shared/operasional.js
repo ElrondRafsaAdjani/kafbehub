@@ -595,6 +595,11 @@ document.querySelectorAll('.op-tab-btn').forEach(btn => {
     document.querySelectorAll('.op-panel').forEach(p => {
       p.hidden = p.id !== 'panel-' + btn.dataset.tab;
     });
+    // Di layar sempit bilah tab digulir mendatar, bukan menumpuk ke bawah
+    // (lihat .op-tab di operasional.css). Tab yang dibuka dari kode, misalnya
+    // tombol yang melempar pengurus ke tab PR, bisa berada di luar layar dan
+    // tidak terlihat sedang aktif. Baris ini yang menariknya kembali terlihat.
+    btn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     // Catatan log baru diambil saat tabnya benar-benar dibuka. Pengurus yang
     // hanya mengubah satu jadwal tidak perlu ikut menanggung pembacaannya.
     if(btn.dataset.tab === 'log' && !logSudahDimuat) muatLog(false);
