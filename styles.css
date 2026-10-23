@@ -1,3 +1,9 @@
+/* ============================================================
+   KAFBE Hub - gaya visual bersama
+   Satu berkas ini dipakai seluruh halaman: publik, operasional,
+   pengajar, dan admin. Nilai warna, radius, bayangan, dan ukuran
+   tata letak hanya didefinisikan di blok :root di bawah.
+   ============================================================ */
 :root{
   --bg:#EFF6F9;
   --bg-deep:#E2EFF4;
@@ -11,11 +17,36 @@
   --owl-dark2:#16294A;
   --owl-belly:#EEF7F9;
   --gold:#F0B93D;
-  --gold-deep:#D69A1F;
-  --line:#D3E4EC;
-  --shadow: 0 12px 30px -12px rgba(15,37,64,0.25);
-  --radius-lg: 28px;
-  --radius-md: 18px;
+  --gold-deep:#8F6208;
+  --line:#D8E7EE;
+  --line-kuat:#BFD6E2;
+
+  /* Bayangan bertingkat. Lapisan pertama menempelkan elemen ke latar,
+     lapisan kedua memberi kedalaman. Satu bayangan tunggal yang besar
+     membuat kartu terlihat melayang tanpa pijakan. */
+  --shadow-sm: 0 1px 2px rgba(15,37,64,0.05), 0 6px 16px -10px rgba(15,37,64,0.18);
+  --shadow: 0 1px 3px rgba(15,37,64,0.05), 0 14px 34px -18px rgba(15,37,64,0.26);
+  --shadow-lg: 0 2px 6px rgba(15,37,64,0.06), 0 30px 60px -28px rgba(15,37,64,0.34);
+
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  /* ---------- Ukuran tata letak ----------
+     --lebar-isi  : lebar maksimum isi halaman.
+     --sela-tepi  : jarak isi ke tepi layar. Ikut melebar sendiri mengikuti
+                    layar, jadi tidak perlu titik henti tersendiri hanya
+                    untuk mengatur jarak tepi.
+     --lebar-baca : batas lebar paragraf supaya satu baris tetap berada di
+                    kisaran 52 sampai 70 karakter.
+     --tinggi-nav : tinggi kepala navigasi. Dipakai ulang oleh panel menu
+                    layar kecil dan oleh scroll-margin, supaya tidak ada
+                    angka yang sama ditulis di dua tempat. */
+  --lebar-isi: 1600px;
+  --sela-tepi: clamp(18px, 3.4vw, 56px);
+  --ruang-bagian: clamp(48px, 5vw, 88px);
+  --lebar-baca: 68ch;
+  --tinggi-nav: 66px;
 }
 *{box-sizing:border-box;}
 
@@ -26,7 +57,14 @@
    menyembunyikan, berapa pun spesifisitas aturan lain.
    !important memang disengaja di sini, bukan jalan pintas. */
 [hidden]{display:none !important;}
+
 html{scroll-behavior:smooth;}
+
+/* Kepala navigasi bersifat sticky, jadi tujuan tautan dalam halaman seperti
+   #visualisasi akan tersembunyi di baliknya. Baris ini yang menyisakan ruang
+   di atas tujuan sebelum halaman berhenti menggulir. */
+:target, section[id]{scroll-margin-top:calc(var(--tinggi-nav) + 16px);}
+
 body{
   margin:0;
   background:
@@ -35,45 +73,89 @@ body{
     var(--bg);
   color:var(--ink);
   font-family:'Plus Jakarta Sans', system-ui, sans-serif;
+  font-size:16px;
+  line-height:1.6;
   -webkit-font-smoothing:antialiased;
 }
 h1,h2,h3,.display{
   font-family:'Baloo 2', system-ui, sans-serif;
   font-weight:700;
   color:var(--owl-dark2);
+  line-height:1.2;
+  letter-spacing:-0.01em;
+  text-wrap:balance;
   margin:0;
 }
+h4,h5,h6{line-height:1.3;}
 a{color:inherit;}
 img,svg{display:block;}
-.wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+::selection{background:var(--owl-light); color:var(--owl-dark2);}
+
+/* Penanda fokus papan ketik. Sebelumnya hanya ada garis bawaan peramban yang
+   nyaris hilang begitu latar elemennya gelap, sehingga pemakai papan ketik
+   kehilangan jejak posisinya. :focus-visible dipilih supaya penandanya tidak
+   ikut muncul pada klik tetikus. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible{
+  outline:3px solid var(--owl-mid);
+  outline-offset:3px;
+}
+
+/* Wadah isi halaman. Lebarnya mengikuti layar sampai batas --lebar-isi, jadi
+   layar lebar tidak lagi menyisakan ruang kosong besar di kiri dan kanan,
+   sementara layar sempit tetap punya jarak aman ke tepi. */
+.wrap{
+  width:100%;
+  max-width:calc(var(--lebar-isi) + var(--sela-tepi) * 2);
+  margin-inline:auto;
+  padding-inline:var(--sela-tepi);
+}
+/* Dua ukuran wadah yang lebih sempit, untuk isi yang justru menjadi sulit
+   dibaca kalau ikut melebar penuh.
+   .wrap-baca  : teks panjang, satu lajur.
+   .wrap-sedang: tabel data. Empat kolom yang ditarik sampai lebih dari 1500
+                 piksel membuat jarak antar kolomnya terlalu jauh, sehingga
+                 mata kehilangan barisnya saat melompat dari nama mata kuliah
+                 ke nomor KP. */
+.wrap-baca{--lebar-isi:var(--lebar-baca);}
+.wrap-sedang{--lebar-isi:1320px;}
 
 /* ---------- NAV ---------- */
 header.nav{
   position:sticky; top:0; z-index:50;
-  background:rgba(239,246,249,0.82);
-  backdrop-filter:blur(10px);
+  background:rgba(243,249,251,0.86);
+  backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
   border-bottom:1px solid var(--line);
 }
 .nav-inner{
-  max-width:1120px;margin:0 auto;padding:12px 24px;
-  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  width:100%;
+  max-width:calc(var(--lebar-isi) + var(--sela-tepi) * 2);
+  margin-inline:auto;
+  padding:11px var(--sela-tepi);
+  min-height:var(--tinggi-nav);
+  display:flex; align-items:center; gap:clamp(10px, 1.6vw, 24px);
 }
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;}
-.brand svg{width:42px;height:42px;}
-.brand-text{font-family:'Baloo 2';font-weight:800;font-size:1.15rem;letter-spacing:0.3px;}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; flex:none; order:0;}
+.brand svg{width:38px;height:38px;}
+.brand-text{font-family:'Baloo 2';font-weight:800;font-size:1.12rem;letter-spacing:0.3px;}
 .brand-text .blue{color:var(--owl-dark2);}
 .brand-text .gold{color:var(--gold-deep);}
-nav.links{display:flex;gap:4px;align-items:center;}
+
+/* Urutan tampilan diatur dari sini, bukan dari urutan markup di
+   shared/nav.js. Daftar menu dan saklar bahasa dikumpulkan di sisi kanan,
+   sehingga lambang berada di kiri dan seluruh kendali di kanan. */
+nav.links{display:flex; gap:2px; align-items:center; order:1; margin-left:auto;}
+.nav-kanan{display:flex; align-items:center; gap:10px; order:2;}
+
 nav.links a{
-  font-weight:600;font-size:0.92rem;color:var(--ink-soft);
+  font-weight:600;font-size:0.9rem;color:var(--ink-soft);
   padding:9px 14px;border-radius:100px;text-decoration:none;
   transition:background .15s, color .15s;
   white-space:nowrap;
 }
 nav.links a:hover{background:var(--surface);color:var(--owl-dark2);}
 /* Menandai halaman yang sedang dibuka, supaya pengunjung tahu posisinya. */
-nav.links a.aktif{background:var(--bg-deep);color:var(--owl-dark2);font-weight:700;}
-.nav-kanan{display:flex; align-items:center; gap:10px;}
+nav.links a.aktif{background:var(--owl-dark2);color:#fff;font-weight:700;}
 
 /* ---------- Saklar bahasa ---------- */
 .saklar-bahasa{
@@ -91,53 +173,74 @@ nav.links a.aktif{background:var(--bg-deep);color:var(--owl-dark2);font-weight:7
 
 .nav-toggle{display:none;}
 @media (max-width:820px){
+  /* Panel menu digantungkan pada kepala navigasi, bukan pada jarak tetap dari
+     atas layar. Dengan begitu tinggi kepala navigasi boleh berubah tanpa
+     membuat panelnya menimpa isi halaman atau menggantung terlalu jauh. */
   nav.links{
-    position:fixed; inset:64px 12px auto 12px;
-    background:var(--surface); border-radius:20px; box-shadow:var(--shadow);
-    flex-direction:column; align-items:stretch; padding:10px;
+    position:absolute; top:calc(100% + 10px); left:12px; right:12px;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:18px; box-shadow:var(--shadow-lg);
+    flex-direction:column; align-items:stretch; padding:8px; gap:2px;
+    margin-left:0;
     display:none;
   }
   nav.links.open{display:flex;}
   nav.links a{padding:12px 14px;}
+  .nav-kanan{margin-left:auto;}
   .nav-toggle{
     display:flex; align-items:center; justify-content:center;
     width:40px;height:40px;border-radius:12px;border:1px solid var(--line);
-    background:var(--surface); cursor:pointer;
+    background:var(--surface); cursor:pointer; font-size:1.05rem;
+    color:var(--owl-dark2);
   }
 }
 
 /* ---------- HERO ---------- */
-.hero{padding:64px 0 40px; position:relative; overflow:hidden;}
-.hero-inner{display:grid; grid-template-columns:1.1fr 0.9fr; gap:32px; align-items:center;}
-@media (max-width:860px){ .hero-inner{grid-template-columns:1fr; text-align:center;} }
+.hero{padding:clamp(40px, 5vw, 76px) 0 clamp(28px, 3.4vw, 52px); position:relative;}
+.hero-inner{
+  display:grid; grid-template-columns:minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap:clamp(24px, 4vw, 64px); align-items:center;
+}
+@media (max-width:860px){ .hero-inner{grid-template-columns:minmax(0,1fr); text-align:center;} }
 .eyebrow{
   display:inline-flex; align-items:center; gap:8px;
   background:var(--surface); border:1px solid var(--line);
-  padding:6px 14px; border-radius:100px; font-weight:700; font-size:0.78rem;
-  color:var(--owl-dark); letter-spacing:0.06em; text-transform:uppercase;
+  padding:6px 14px; border-radius:100px; font-weight:700; font-size:0.76rem;
+  color:var(--owl-dark); letter-spacing:0.07em; text-transform:uppercase;
+  box-shadow:var(--shadow-sm);
 }
-.hero h1{font-size:clamp(2.1rem, 4.2vw, 3.2rem); line-height:1.08; margin-top:16px;}
+.hero h1{font-size:clamp(2.1rem, 2.6vw + 1.1rem, 3.5rem); line-height:1.06; margin-top:18px;}
 .hero h1 em{font-style:normal; color:var(--owl-mid);}
-.hero p.lead{font-size:1.08rem; color:var(--ink-soft); margin-top:16px; max-width:52ch; line-height:1.6;}
+.hero p.lead{
+  font-size:clamp(1rem, 0.35vw + 0.95rem, 1.14rem); color:var(--ink-soft);
+  margin-top:18px; max-width:54ch; line-height:1.65;
+}
 @media (max-width:860px){ .hero p.lead{margin-left:auto;margin-right:auto;} }
-.hero-cta{display:flex; gap:12px; margin-top:26px; flex-wrap:wrap;}
+.hero-cta{display:flex; gap:12px; margin-top:28px; flex-wrap:wrap;}
 @media (max-width:860px){ .hero-cta{justify-content:center;} }
+
 .btn{
-  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.95rem;
-  padding:13px 22px; border-radius:100px; border:none; cursor:pointer;
-  text-decoration:none; display:inline-flex; align-items:center; gap:8px;
-  transition:transform .15s ease, box-shadow .15s ease;
+  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.94rem;
+  line-height:1.25;
+  padding:13px 22px; border-radius:100px; border:1px solid transparent; cursor:pointer;
+  text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
 }
 .btn:active{transform:scale(0.97);}
-.btn-primary{background:var(--owl-dark2); color:#fff; box-shadow:0 10px 24px -8px rgba(22,41,74,0.55);}
-.btn-primary:hover{transform:translateY(-2px);}
-.btn-ghost{background:var(--surface); color:var(--owl-dark2); border:1px solid var(--line);}
-.btn-ghost:hover{border-color:var(--owl-mid);}
-.btn-gold{background:var(--gold); color:var(--owl-dark2); box-shadow:0 10px 22px -8px rgba(214,154,31,0.55);}
-.btn:disabled, .btn.disabled{background:#E4EBEF;color:#9AAAB8;box-shadow:none;cursor:not-allowed;}
+.btn-primary{background:var(--owl-dark2); color:#fff; box-shadow:0 10px 24px -10px rgba(22,41,74,0.6);}
+.btn-primary:hover{transform:translateY(-2px); box-shadow:0 16px 30px -12px rgba(22,41,74,0.6);}
+.btn-ghost{background:var(--surface); color:var(--owl-dark2); border-color:var(--line); box-shadow:var(--shadow-sm);}
+.btn-ghost:hover{border-color:var(--owl-mid); transform:translateY(-2px);}
+.btn-gold{background:var(--gold); color:var(--owl-dark2); box-shadow:0 10px 22px -10px rgba(214,154,31,0.65);}
+.btn-gold:hover{transform:translateY(-2px); box-shadow:0 16px 28px -12px rgba(214,154,31,0.65);}
+.btn:disabled, .btn.disabled{
+  background:#E4EBEF; color:#8899A8; border-color:transparent;
+  box-shadow:none; cursor:not-allowed; transform:none;
+}
 
 .hero-owl-stage{position:relative; display:flex; justify-content:center;}
-.hero-owl{width:min(340px, 80vw); animation:float 5s ease-in-out infinite;}
+.hero-owl{width:min(380px, 78%); animation:float 5s ease-in-out infinite;}
+@media (max-width:860px){ .hero-owl{width:min(300px, 62%);} }
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
 .wing-l{transform-origin:78px 150px; animation:flapL 2.6s ease-in-out infinite;}
 .wing-r{transform-origin:222px 150px; animation:flapR 2.6s ease-in-out infinite;}
@@ -146,31 +249,57 @@ nav.links a.aktif{background:var(--bg-deep);color:var(--owl-dark2);font-weight:7
 .eyes-blink{transform-origin:150px 128px; animation:blink 4.5s ease-in-out infinite;}
 @keyframes blink{0%,92%,100%{transform:scaleY(1);}96%{transform:scaleY(0.12);}}
 
-/* ---------- SECTIONS ---------- */
-section{padding:64px 0;}
-.section-head{max-width:640px; margin-bottom:36px;}
-.section-head .kicker{font-weight:800; font-size:0.78rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold-deep);}
-.section-head h2{font-size:clamp(1.6rem,3vw,2.2rem); margin-top:8px;}
-.section-head p{color:var(--ink-soft); margin-top:10px; line-height:1.6;}
+/* Sebagian pemakai memasang pengaturan sistem untuk mengurangi gerak, biasanya
+   karena animasi memicu pusing. Permintaan itu dihormati di sini untuk seluruh
+   situs sekaligus, termasuk maskot yang melayang dan berkedip. */
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *, *::before, *::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+  }
+}
 
-.card-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
-@media (max-width:900px){.card-grid{grid-template-columns:1fr;}}
+/* ---------- SECTIONS ---------- */
+section{padding:var(--ruang-bagian) 0;}
+.section-head{max-width:var(--lebar-baca); margin-bottom:clamp(24px, 2.6vw, 40px);}
+.section-head .kicker{font-weight:800; font-size:0.76rem; letter-spacing:0.09em; text-transform:uppercase; color:var(--gold-deep);}
+.section-head h2{font-size:clamp(1.55rem, 1.4vw + 1.1rem, 2.3rem); margin-top:10px;}
+.section-head p{color:var(--ink-soft); margin-top:12px; line-height:1.65;}
+
+/* Jumlah kolom kartu diatur lewat --kolom supaya satu kelas cukup untuk semua
+   halaman. Kisi berisi empat kartu memakai .card-grid-4 agar tidak menyisakan
+   satu kartu sendirian di baris kedua. */
+.card-grid{
+  --kolom:3;
+  display:grid;
+  grid-template-columns:repeat(var(--kolom), minmax(0, 1fr));
+  gap:clamp(16px, 1.4vw, 24px);
+  align-items:stretch;
+}
+.card-grid-4{--kolom:4;}
+@media (max-width:1240px){ .card-grid{--kolom:2;} }
+@media (max-width:760px){ .card-grid{--kolom:1;} }
+
 .feature-card{
-  background:var(--surface); border-radius:var(--radius-lg); padding:26px;
-  border:1px solid var(--line); box-shadow:var(--shadow);
+  background:var(--surface); border-radius:var(--radius-lg); padding:clamp(20px, 1.5vw, 28px);
+  border:1px solid var(--line); box-shadow:var(--shadow-sm);
   display:flex; flex-direction:column; gap:14px;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
+.feature-card:hover{transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--line-kuat);}
 .feature-icon{
-  width:52px;height:52px;border-radius:16px; display:flex; align-items:center; justify-content:center;
-  background:var(--bg-deep);
+  width:50px;height:50px;border-radius:14px; display:flex; align-items:center; justify-content:center;
+  background:var(--bg-deep); font-size:1.3rem;
 }
-.feature-card h3{font-size:1.2rem;}
-.feature-card p{color:var(--ink-soft); font-size:0.94rem; line-height:1.55; flex:1;}
+.feature-card h3{font-size:1.16rem;}
+.feature-card p{color:var(--ink-soft); font-size:0.93rem; line-height:1.6; flex:1; margin:0;}
 .badge{
-  align-self:flex-start; font-size:0.72rem; font-weight:800; letter-spacing:0.04em;
+  align-self:flex-start; font-size:0.7rem; font-weight:800; letter-spacing:0.05em;
   padding:4px 10px; border-radius:100px; text-transform:uppercase;
 }
-.badge-live{background:#E1F5E9; color:#1E7A44;}
+.badge-live{background:#E1F5E9; color:#166534;}
 .badge-soon{background:#FDEEDB; color:var(--gold-deep);}
 .badge-maint{background:#FADDDD; color:#9B2C2C;}
 
@@ -179,6 +308,7 @@ section{padding:64px 0;}
    Kartu yang fiturnya tidak aktif diredupkan dan tombolnya disembunyikan,
    sehingga pengunjung tetap melihat fitur itu ada tapi belum bisa dibuka. */
 .fitur-tidak-aktif{opacity:0.72;}
+.fitur-tidak-aktif:hover{transform:none; box-shadow:var(--shadow-sm); border-color:var(--line);}
 .fitur-tidak-aktif .feature-icon{filter:grayscale(0.55);}
 nav.links a.nav-tidak-aktif{opacity:0.5;}
 
@@ -207,9 +337,9 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 }
 .situs-tutup{width:100%; display:flex; justify-content:center;}
 .situs-tutup-kartu{
-  background:var(--surface); border-radius:var(--radius-lg);
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
   padding:44px 36px; width:100%; max-width:34rem; text-align:center;
-  box-shadow:0 24px 60px -30px rgba(31,63,94,0.45);
+  box-shadow:var(--shadow-lg);
 }
 .situs-tutup-owl{width:104px; height:104px; margin-bottom:12px;}
 .situs-tutup-kartu h1{font-size:1.5rem; line-height:1.3;}
@@ -230,13 +360,27 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 }
 @media (max-width:900px){ .catatan-layar{display:flex;} }
 
+/* ---------- LEBAR BACA DI HALAMAN MATERI ----------
+   Kartu materi boleh selebar halaman, barisnya tidak. Setelah halaman
+   dilebarkan, daftar langkah dan kotak keterangan di dalam kartu ikut
+   melebar sampai satu barisnya berisi lebih dari seratus karakter, dan mata
+   kehilangan awal baris berikutnya. Aturan di bawah mengurung panjang
+   barisnya saja, tanpa menyempitkan kartunya.
+   Nama kelasnya dipakai bersama oleh berkas materi, jadi cukup ditulis
+   sekali di sini daripada diulang di tiap halaman. */
+.kotak-materi p,
+.kotak-materi li,
+.kotak-materi figcaption{ max-width:var(--lebar-baca); }
+.kotak-materi .dua,
+.story-card .dua{ max-width:min(100%, 920px); }
+
 /* ---------- PENGUMUMAN (halaman utama) ---------- */
-.pengumuman-wrap{ padding:26px 24px 0; }
+.pengumuman-wrap{ padding-top:26px; }
 .pengumuman{
   background:var(--surface); border:1px solid var(--line);
   border-left:4px solid var(--owl-mid);
   border-radius:var(--radius-md); padding:18px 22px; margin-bottom:12px;
-  box-shadow:var(--shadow);
+  box-shadow:var(--shadow-sm);
 }
 .pengumuman-pin{ border-left-color:var(--gold); }
 .pengumuman-label{
@@ -245,7 +389,10 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
   font-size:0.7rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase;
 }
 .pengumuman h3{ font-size:1.05rem; }
-.pengumuman p{ margin:6px 0 0; color:var(--ink-soft); font-size:0.92rem; line-height:1.6; }
+.pengumuman p{
+  margin:6px 0 0; color:var(--ink-soft); font-size:0.92rem; line-height:1.6;
+  max-width:var(--lebar-baca);
+}
 
 /* ---------- JADWAL KELAS ---------- */
 .sr-only{
@@ -258,6 +405,7 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
   display:flex; align-items:center; justify-content:space-between; gap:14px;
   background:var(--surface); border:1px solid var(--line); border-radius:100px;
   padding:8px 10px; margin-bottom:18px; max-width:440px;
+  box-shadow:var(--shadow-sm);
 }
 .week-btn{
   width:38px; height:38px; flex:none; border-radius:100px; cursor:pointer;
@@ -289,22 +437,22 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
   display:inline-block; margin-top:6px; padding:3px 9px; border-radius:100px;
   font-size:0.7rem; font-weight:800; letter-spacing:0.03em; text-transform:uppercase;
 }
-.tag-libur{background:#FBE3E2; color:#B03B37;}
-.tag-pengganti{background:#E1F5E9; color:#1E7A44;}
-.tag-ruang{background:#E3EEF8; color:#2C5A85;}
+.tag-libur{background:#FBE3E2; color:#9F2F2B;}
+.tag-pengganti{background:#E1F5E9; color:#166534;}
+.tag-ruang{background:#E3EEF8; color:#235078;}
 .row-ruang{background:#F6FAFD;}
-.tag-daring{background:#EDE7F8; color:#5B3FA0;}
+.tag-daring{background:#EDE7F8; color:#51379A;}
 .row-daring{background:#FAF8FE;}
 /* Dipindah, tapi jadwal penggantinya belum ditentukan. Warnanya sengaja
    berbeda dari "Ditiadakan" yang merah: kelasnya bukan hilang, hanya belum
    jelas kapan dan di mana. */
-.tag-menyusul{background:#FDEEDB; color:#8A5A0B;}
+.tag-menyusul{background:#FDEEDB; color:#7A4F08;}
 .row-menyusul{background:#FFFCF5;}
 /* Ditiadakan pada tanggal ini KARENA dipindah, dan penggantinya sudah
    ditentukan. Sengaja biru, bukan merah seperti "Ditiadakan", sebab kelasnya
    tidak hilang melainkan berpindah, dan mahasiswa perlu melihat bedanya
    sebelum membaca keterangannya. */
-.tag-diganti{background:#E4EEF6; color:#2C5C86;}
+.tag-diganti{background:#E4EEF6; color:#235078;}
 .row-diganti{background:#F7FBFD;}
 
 .row-libur .matkul-nama, .row-libur .jam-pill{text-decoration:line-through; opacity:0.65;}
@@ -313,25 +461,29 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 .row-pengganti{background:#F4FBF6;}
 .matkul-catatan{
   display:block; margin-top:5px; font-size:0.78rem;
-  color:var(--ink-soft); line-height:1.45;
+  color:var(--ink-soft); line-height:1.5;
 }
 
 /* Kotak pengumuman */
 .kotak{
   border-radius:var(--radius-md); padding:20px 22px; margin-bottom:20px;
   border:1px solid var(--line); background:var(--surface);
+  box-shadow:var(--shadow-sm);
 }
 .kotak h3{font-size:1.02rem; margin-bottom:12px;}
-.kotak p{margin:0; color:var(--ink-soft); font-size:0.9rem; line-height:1.6;}
+.kotak p{margin:0; color:var(--ink-soft); font-size:0.9rem; line-height:1.6; max-width:var(--lebar-baca);}
 .kotak-info{border-left:4px solid var(--gold);}
 .kotak-warn{border-left:4px solid #D9534F; background:#FDF6F6;}
 
 /* Daftarnya memuat seluruh perubahan pada dua tanggal terdekat, jadi panjangnya
    ikut jumlah kelas yang berubah hari itu. Tingginya dibatasi dan sisanya
-   digulir di dalam kotak, supaya tabel jadwal di bawah tidak terdorong jauh. */
+   digulir di dalam kotak, supaya tabel jadwal di bawah tidak terdorong jauh.
+   Di layar lebar daftarnya disusun beberapa kolom, sehingga ruang yang ada
+   terpakai dan kotaknya tidak menjadi satu lajur panjang di tepi kiri. */
 .perub-list{
   list-style:none; margin:0; padding:0 4px 0 0;
-  display:flex; flex-direction:column; gap:12px;
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+  gap:12px 28px; align-content:start;
   max-height:60vh; overflow-y:auto; overscroll-behavior:contain;
 }
 /* Tiap perubahan disusun bertingkat: tanggal dan labelnya di atas, nama mata
@@ -355,7 +507,7 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 
 .perub-rinci{display:flex; flex-wrap:wrap; gap:8px 10px;}
 .perub-butir{
-  background:var(--surface); border:1px solid var(--line);
+  background:var(--bg); border:1px solid var(--line);
   border-radius:100px; padding:3px 12px;
   font-size:0.84rem; color:var(--ink); white-space:nowrap;
 }
@@ -385,7 +537,7 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 }
 .day-tabs{display:flex; gap:8px; flex-wrap:wrap;}
 .day-tab{
-  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.92rem;
+  font-family:'Plus Jakarta Sans'; font-weight:700; font-size:0.9rem;
   padding:10px 18px; border-radius:100px; cursor:pointer;
   background:var(--surface); color:var(--ink-soft);
   border:1px solid var(--line);
@@ -396,7 +548,7 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 .day-tab:active{transform:scale(0.97);}
 .day-tab.active{
   background:var(--owl-dark2); color:#fff; border-color:var(--owl-dark2);
-  box-shadow:0 10px 22px -10px rgba(22,41,74,0.55);
+  box-shadow:0 10px 22px -12px rgba(22,41,74,0.6);
 }
 /* Titik emas = hari ini */
 .dot-today{
@@ -406,33 +558,47 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 
 .jadwal-search{
   font-family:'Plus Jakarta Sans'; font-size:0.92rem; color:var(--ink);
-  padding:11px 18px; border-radius:100px; min-width:270px; flex:1; max-width:340px;
+  padding:11px 18px; border-radius:100px; min-width:260px; flex:0 1 340px;
   background:var(--surface); border:1px solid var(--line); outline:none;
   transition:border-color .15s, box-shadow .15s;
 }
-.jadwal-search::placeholder{color:#9AAAB8;}
+.jadwal-search::placeholder{color:#62768A;}
 .jadwal-search:focus{border-color:var(--owl-mid); box-shadow:0 0 0 4px rgba(111,168,201,0.18);}
 
 .jadwal-card{
   background:var(--surface); border-radius:var(--radius-lg);
-  border:1px solid var(--line); box-shadow:var(--shadow);
-  padding:10px 10px 4px;
+  border:1px solid var(--line); box-shadow:var(--shadow-sm);
+  padding:6px 6px 2px; overflow:hidden;
 }
 /* Tabel bisa lebih lebar dari layar HP, biarkan ia yang menggeser,
    jangan sampai seluruh halaman ikut bisa digeser ke samping. */
 .jadwal-scroll{overflow-x:auto;}
 
+/* Lebar tiap kolom dipatok dalam persen supaya tabel tetap enak dibaca saat
+   halaman melebar. Tanpa ini kolom Mata Kuliah menyerap hampir seluruh
+   tambahan lebar, dan kolom lain terlihat terlempar jauh ke kanan. */
 .jadwal-table{width:100%; border-collapse:collapse; min-width:560px;}
+/* Patokan lebar ini hanya berlaku saat tabelnya memang punya ruang. Di layar
+   sempit tabelnya digulir di dalam kartu, dan table-layout:fixed di sana justru
+   memotong pil jam sampai menimpa kolom mata kuliah. */
+@media (min-width:980px){
+  .jadwal-table{table-layout:fixed;}
+  .jadwal-table th:nth-child(1), .jadwal-table td:nth-child(1){width:15%;}
+  .jadwal-table th:nth-child(2), .jadwal-table td:nth-child(2){width:45%;}
+  .jadwal-table th:nth-child(3), .jadwal-table td:nth-child(3){width:12%;}
+  .jadwal-table th:nth-child(4), .jadwal-table td:nth-child(4){width:28%;}
+}
 .jadwal-table th{
-  text-align:left; font-size:0.74rem; font-weight:800;
-  letter-spacing:0.08em; text-transform:uppercase; color:var(--gold-deep);
+  text-align:left; font-size:0.72rem; font-weight:800;
+  letter-spacing:0.09em; text-transform:uppercase; color:var(--gold-deep);
   padding:14px 16px; border-bottom:1px solid var(--line); white-space:nowrap;
 }
 .jadwal-table td{
   padding:14px 16px; border-bottom:1px solid var(--line);
-  font-size:0.94rem; vertical-align:middle;
+  font-size:0.93rem; vertical-align:middle;
 }
 .jadwal-table tbody tr:last-child td{border-bottom:none;}
+.jadwal-table tbody tr{transition:background .15s;}
 .jadwal-table tbody tr:hover{background:var(--bg);}
 
 .col-jam{white-space:nowrap;}
@@ -458,6 +624,7 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 }
 .jadwal-meta{
   margin-top:18px; font-size:0.82rem; color:var(--ink-soft); line-height:1.6;
+  max-width:var(--lebar-baca);
 }
 .jadwal-status{
   padding:22px 16px; margin:0;
@@ -465,9 +632,18 @@ nav.links a.nav-tidak-aktif{opacity:0.5;}
 }
 
 @media (max-width:620px){
-  .jadwal-search{max-width:none; min-width:0; width:100%;}
+  .jadwal-search{flex:1 1 100%; min-width:0; width:100%;}
   .day-tab{padding:9px 15px; font-size:0.88rem;}
 }
 
-footer{padding:36px 0 60px; text-align:center; color:var(--ink-soft); font-size:0.85rem;}
+footer{
+  padding:clamp(28px, 3vw, 44px) 0 clamp(40px, 4vw, 64px);
+  margin-top:clamp(24px, 3vw, 48px);
+  text-align:center; color:var(--ink-soft); font-size:0.85rem; line-height:1.7;
+}
+footer::before{
+  content:''; display:block; height:1px; background:var(--line);
+  margin:0 auto clamp(24px, 3vw, 40px);
+}
 footer strong{color:var(--owl-dark2);}
+footer p{max-width:72ch; margin-inline:auto;}

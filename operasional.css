@@ -62,7 +62,9 @@ textarea{ resize:vertical; }
   backdrop-filter:blur(10px); border-bottom:1px solid var(--line);
 }
 .op-nav-dalam{
-  max-width:1180px; margin:0 auto; padding:12px 24px;
+  width:100%; max-width:calc(var(--lebar-isi) + var(--sela-tepi) * 2);
+  margin-inline:auto; padding:11px var(--sela-tepi);
+  min-height:var(--tinggi-nav);
   display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
 }
 .op-merek{ display:flex; align-items:center; gap:10px; font-family:'Baloo 2'; font-size:1.05rem; color:var(--owl-dark2); }
@@ -71,7 +73,13 @@ textarea{ resize:vertical; }
 .op-siapa{ font-size:0.84rem; color:var(--ink-soft); }
 .op-tautan-luar{ font-size:0.84rem; font-weight:600; color:var(--gold-deep); }
 .op-kecil{ padding:9px 16px; font-size:0.86rem; }
-.op-wrap{ max-width:1180px; margin:0 auto; padding:26px 24px 70px; }
+/* Lebar isi halaman pengurus mengikuti tetapan yang sama dengan halaman
+   publik di styles.css, supaya ketiga lapisan punya satu ukuran. */
+.op-wrap{
+  width:100%; max-width:calc(var(--lebar-isi) + var(--sela-tepi) * 2);
+  margin-inline:auto;
+  padding:clamp(22px, 2.2vw, 34px) var(--sela-tepi) 70px;
+}
 
 /* ---------- Tab ---------- */
 .op-tab{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
@@ -104,7 +112,12 @@ textarea{ resize:vertical; }
 }
 .op-baris{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; }
 .op-baris + .op-baris{ margin-top:14px; }
-.op-field{ display:flex; flex-direction:column; gap:5px; flex:1 1 160px; min-width:0; }
+/* Batas lebar kolom isian. Setelah halaman pengurus dilebarkan, satu kolom
+   nama mata kuliah bisa melar sampai seribu piksel sementara isinya hanya
+   beberapa kata, dan barisnya jadi sulit dipindai. Yang dibatasi lebar
+   kolomnya, bukan lebar panelnya. */
+.op-field{ display:flex; flex-direction:column; gap:5px; flex:1 1 160px; min-width:0; max-width:520px; }
+.op-field:has(textarea){ max-width:860px; }
 .op-field.op-lebar{ flex:3 1 280px; }
 .op-field.op-sempit{ flex:0 0 130px; }
 .op-field.op-centang{ flex:0 0 auto; justify-content:flex-end; }
