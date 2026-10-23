@@ -112,12 +112,17 @@ textarea{ resize:vertical; }
 }
 .op-baris{ display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; }
 .op-baris + .op-baris{ margin-top:14px; }
-/* Batas lebar kolom isian. Setelah halaman pengurus dilebarkan, satu kolom
-   nama mata kuliah bisa melar sampai seribu piksel sementara isinya hanya
-   beberapa kata, dan barisnya jadi sulit dipindai. Yang dibatasi lebar
-   kolomnya, bukan lebar panelnya. */
-.op-field{ display:flex; flex-direction:column; gap:5px; flex:1 1 160px; min-width:0; max-width:520px; }
-.op-field:has(textarea){ max-width:860px; }
+.op-field{ display:flex; flex-direction:column; gap:5px; flex:1 1 160px; min-width:0; }
+
+/* Batas lebar kolom isian pada baris formulir. Setelah halaman pengurus
+   dilebarkan, satu kolom nama mata kuliah bisa melar sampai seribu piksel
+   sementara isinya hanya beberapa kata, dan barisnya jadi sulit dipindai.
+   Yang dibatasi lebar kolomnya, bukan lebar panelnya.
+   Sengaja ditulis .op-baris > .op-field dan bukan .op-field saja, supaya
+   kolom di penyusun story pada tab PR tidak ikut terpotong. Lebar kolom di
+   sana diatur sendiri oleh .op-ig-teks dan .op-template-kiri. */
+.op-baris > .op-field{ max-width:520px; }
+.op-baris > .op-field:has(textarea){ max-width:860px; }
 .op-field.op-lebar{ flex:3 1 280px; }
 .op-field.op-sempit{ flex:0 0 130px; }
 .op-field.op-centang{ flex:0 0 auto; justify-content:flex-end; }
