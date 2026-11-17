@@ -659,6 +659,17 @@ function anggotaHadir(p, idKubu){
   return G.pemain.filter(x => p.anggota[x.uid] === idKubu);
 }
 
+/*
+  Suara dianggap lengkap jika aksinya tidak butuh target, atau targetnya sudah
+  dipilih. Suara setengah jadi (misalnya Serang tanpa target) tidak boleh ikut
+  menutup voting lebih awal. Dulu hal itu terjadi: pemain memilih Serang,
+  voting langsung ditutup sebelum ia sempat memilih target, lalu kubunya
+  otomatis Diam.
+*/
+function suaraLengkap(s){
+  return !!s && !!s.aksi && (!M.butuhTarget(s.aksi) || !!s.target);
+}
+
 function semuaSudahMemilih(p){
   const sk = SKENARIO[p.skenario];
   let wajib = 0;
@@ -667,7 +678,7 @@ function semuaSudahMemilih(p){
     for(const orang of anggotaHadir(p, id)){
       wajib += 1;
       const s = G.suaraSemua.find(x => x.uid === orang.uid);
-      if(!s || s.ronde !== p.ronde || s.saluran !== G.sesi + '_' + id) return false;
+      if(!s || s.ronde !== p.ronde || s.saluran !== G.sesi + '_' + id || !suaraLengkap(s)) return false;
     }
   }
   return wajib > 0;
@@ -1336,6 +1347,10 @@ function gambarVotingKubu(el, p, sk, saya){
     G.pilihanAksi = b.dataset.pilihAksi;
     if(!M.butuhTarget(G.pilihanAksi)) G.pilihanTarget = '';
     tandaiPilihan();
+    // Di layar ponsel pilihan target berada jauh di bawah kartu aksi.
+    if(M.butuhTarget(G.pilihanAksi) && !G.pilihanTarget){
+      $('bungkusTarget').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     kirimSuara(G.pilihanAksi, G.pilihanTarget);
   }));
   el.querySelectorAll('[data-pilih-target]').forEach(b => b.addEventListener('click', () => {
@@ -1356,6 +1371,7 @@ function tandaiPilihan(){
   el.querySelectorAll('[data-pilih-target]').forEach(b => b.classList.toggle('dipilih', b.dataset.pilihTarget === G.pilihanTarget));
   const bungkus = $('bungkusTarget');
   if(bungkus) bungkus.hidden = !(G.pilihanAksi && M.butuhTarget(G.pilihanAksi));
+  perbaruiHitungan();
 }
 
 function gambarVotingSaksi(el, p, sk){
@@ -1401,7 +1417,8 @@ function perbaruiHitungan(pasangPilihan){
 
   $('statusSuara').textContent = saksi
     ? `${suara.length} Saksi sudah memilih.`
-    : `${suara.length} dari ${anggotaHadir(p, kubuSaya()).length} anggota kubumu sudah memilih.`;
+    : `${suara.filter(suaraLengkap).length} dari ${anggotaHadir(p, kubuSaya()).length} anggota kubumu sudah memilih.`
+      + (G.pilihanAksi && M.butuhTarget(G.pilihanAksi) && !G.pilihanTarget ? ' Pilih kubu target agar suaramu lengkap.' : '');
 
   if(pasangPilihan){
     const milik = suaraSaya();
