@@ -108,8 +108,10 @@ function pilihSatu(daftar, rng){
   jumlah anggota antar kubu paling banyak satu orang. Urutan kubunya ikut
   diacak supaya kubu yang kebagian anggota lebih banyak tidak selalu sama.
 */
-export function bagiKubu(daftarUid, daftarKubu, rng = Math.random){
-  const pemain = acak(daftarUid, rng);
+export function bagiKubu(daftarUid, daftarKubu, rng = Math.random, daftarBot = []){
+  // Manusia dibagi lebih dulu, baru bot. Dengan begitu peserta manusia
+  // tersebar ke sebanyak mungkin kubu dan bot hanya mengisi sisanya.
+  const pemain = acak(daftarUid, rng).concat(acak(daftarBot, rng));
   const kubu = acak(daftarKubu, rng);
   const hasil = {};
   pemain.forEach((uid, i) => { hasil[uid] = kubu[i % kubu.length]; });
@@ -210,6 +212,51 @@ export function rekapSaksi(sk, keadaan, suara){
   const maks = Math.max(...nilai);
   const juara = Object.keys(hitung).filter(k => hitung[k] === maks);
   return juara.length === 1 ? juara[0] : '';
+}
+
+/*
+  Pilihan aksi untuk kubu yang seluruh anggotanya bot.
+
+  Bot sengaja dibuat sederhana: memilih acak dengan bobot yang masuk akal
+  menurut keadaan dan tipe tujuannya. Bot tidak membaca intel dan tidak
+  menyusun strategi panjang. Gunanya hanya supaya permainan tetap bisa dicoba
+  walaupun peserta manusia kurang dari lima orang.
+*/
+export function suaraBot(sk, p, idKubu, rng = Math.random){
+  const k = p.kubu[idKubu];
+  const d = sk.kubu[idKubu];
+  const lawan = Object.keys(sk.kubu).filter(id => id !== idKubu && p.kubu[id].hidup);
+  const bobot = [];
+  const tambah = (aksi, nilai) => {
+    if(nilai <= 0 || aksiTerkunci(p, idKubu, aksi)) return;
+    if(butuhTarget(sk, idKubu, aksi) && !lawan.length) return;
+    bobot.push([aksi, nilai]);
+  };
+  tambah('galang', d.tujuan === 'ambisius' || d.tujuan === 'bayangan' ? 4 : 3);
+  tambah('pulih', k.kt <= 3 ? 4 : 0.5);
+  tambah('tameng', k.kt <= 4 ? 2 : 1);
+  tambah('sekutu', d.tujuan === 'diplomat' ? 4 : 2);
+  tambah('selidiki', 1.5);
+  tambah('serang', d.tujuan === 'rival' ? 2 : 1);
+  tambah('sabotase', d.tujuan === 'rival' ? 2 : 1);
+  tambah('rumor', 0.7);
+  tambah('khas', 1);
+
+  const total = bobot.reduce((n, [, b]) => n + b, 0);
+  let titik = rng() * total;
+  let aksi = 'galang';
+  for(const [a, b] of bobot){
+    titik -= b;
+    if(titik <= 0){ aksi = a; break; }
+  }
+
+  let target = '';
+  if(butuhTarget(sk, idKubu, aksi)){
+    const sasaran = d.sasaran && p.kubu[d.sasaran] && p.kubu[d.sasaran].hidup ? d.sasaran : '';
+    const menyerang = ['serang', 'sabotase', 'rumor'].includes(aksi);
+    target = sasaran && menyerang && rng() < 0.6 ? sasaran : pilihSatu(lawan, rng);
+  }
+  return { aksi, target };
 }
 
 /*

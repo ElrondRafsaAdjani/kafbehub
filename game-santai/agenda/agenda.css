@@ -118,6 +118,7 @@
 .ag-panel-host .ag-kecil{ color:var(--tinta-lembut); }
 .ag-panel-host .ag-tombol{ align-self:flex-start; }
 .ag-panel-host .ag-tombol-garis{ color:var(--tinta); border-color:var(--garis); }
+.ag-bot{ display:flex; gap:8px; flex-wrap:wrap; }
 .ag-tunggu{ margin-top:18px; color:var(--kertas); font-style:italic; }
 
 .ag-pemain{ list-style:none; margin:10px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }

@@ -165,7 +165,16 @@ const G = {
   terakhirKirim: 0,
   hostBasi: false,
   skenarioPilihan: 'acak',
+
+  // Bot hanya disimpan di peramban host selama lobi, lalu ikut ditulis ke
+  // dokumen ruang saat permainan dimulai. Jika host berpindah sebelum
+  // permainan dimulai, daftar bot ini ikut hilang dan perlu ditambah lagi.
+  bot: [],
 };
+
+const NAMA_BOT = ['Ana', 'Bayu', 'Candra', 'Dewi', 'Eko', 'Fitri', 'Galih', 'Hana', 'Indra', 'Joko',
+  'Kirana', 'Lukas', 'Maya', 'Nanda', 'Oki', 'Putri', 'Rangga', 'Sari', 'Tono', 'Wulan'];
+const MAKS_BOT = NAMA_BOT.length;
 
 const refRuang = () => doc(db, 'agendaruang', G.ruangId);
 const refSaya = () => doc(db, 'agendaruang', G.ruangId, 'pemain', G.uid);
@@ -657,15 +666,27 @@ function semuaSudahMemilih(p){
 function mulaiBicara(p, sk){
   const id = p.urutan[p.ronde - 1];
   if(!p.kubu[id].hidup){
-    return { ...p, fase: 'bebas', juru: null, berakhir: sekarang() + M.DURASI.bebas * 1000 };
+    return { ...p, fase: 'bebas', alasanBebas: 'tereliminasi', juru: null, berakhir: sekarang() + M.DURASI.bebas * 1000 };
   }
   const calon = anggotaHadir(p, id);
+  // Kubu yang hanya berisi bot tidak bisa berbicara, jadi gilirannya
+  // menjadi sesi bebas.
+  if(!calon.length && kubuBot(p, id)){
+    return { ...p, fase: 'bebas', alasanBebas: 'bot', juru: null, berakhir: sekarang() + M.DURASI.bebas * 1000 };
+  }
   const pilih = calon.length ? calon[Math.floor(Math.random() * calon.length)] : null;
   return {
-    ...p, fase: 'bicara',
+    ...p, fase: 'bicara', alasanBebas: '',
     juru: pilih ? { uid: pilih.uid, nama: pilih.nama } : null,
     berakhir: sekarang() + M.DURASI.bicara * 1000,
   };
+}
+
+// Jumlah bot di satu kubu. Bot hanya memilih jika tidak ada satu pun
+// anggota manusia kubu itu yang masih berada di ruang, sehingga keputusan
+// kubu campuran tetap di tangan manusianya.
+function kubuBot(p, idKubu){
+  return Object.keys(p.bot || {}).filter(id => p.anggota[id] === idKubu).length;
 }
 
 function hitungVoting(p, sk){
@@ -673,6 +694,12 @@ function hitungVoting(p, sk){
   const keputusan = {};
   for(const id of Object.keys(sk.kubu)){
     if(!p.kubu[id].hidup) continue;
+    const jumlahBot = kubuBot(p, id);
+    if(jumlahBot && !anggotaHadir(p, id).length){
+      const pilihan = M.suaraBot(sk, p, id);
+      keputusan[id] = M.rekapSuara(sk, id, Array.from({ length: jumlahBot }, () => pilihan));
+      continue;
+    }
     const milik = suara.filter(s => s.saluran === G.sesi + '_' + id && p.anggota[s.uid] === id);
     keputusan[id] = M.rekapSuara(sk, id, milik);
   }
@@ -734,7 +761,8 @@ async function mulaiPermainan(){
   const r = G.ruang;
   if(!G.host || r.status !== 'lobi') return;
   const pemain = G.pemain.slice(0, M.MAKS_PEMAIN);
-  if(pemain.length < M.MIN_PEMAIN){ pesan(`Butuh minimal ${M.MIN_PEMAIN} pemain untuk memulai.`); return; }
+  const bot = G.bot.slice(0, Math.max(0, M.MAKS_PEMAIN - pemain.length));
+  if(pemain.length + bot.length < M.MIN_PEMAIN){ pesan(`Butuh minimal ${M.MIN_PEMAIN} pemain untuk memulai. Tambahkan bot jika peserta belum cukup.`); return; }
 
   const idSk = G.skenarioPilihan === 'acak'
     ? URUTAN_SKENARIO[Math.floor(Math.random() * URUTAN_SKENARIO.length)]
@@ -749,7 +777,9 @@ async function mulaiPermainan(){
     jeda: null,
     urutan: M.acak(idKubu),
     juru: null,
-    anggota: M.bagiKubu(pemain.map(x => x.uid), idKubu),
+    anggota: M.bagiKubu(pemain.map(x => x.uid), idKubu, Math.random, bot.map(b => b.id)),
+    bot: Object.fromEntries(bot.map(b => [b.id, b.nama])),
+    alasanBebas: '',
     saksiKubu: '',
     akhir: null,
     ...M.keadaanAwal(sk),
@@ -948,11 +978,17 @@ function gambarLobi(){
     $('ketSkenario').textContent = sk
       ? `${sk.latar}. ${sk.briefing[0]}`
       : 'Skenario dipilih secara acak saat permainan dimulai.';
-    const cukup = G.pemain.length >= M.MIN_PEMAIN;
+    const total = G.pemain.length + G.bot.length;
+    const cukup = total >= M.MIN_PEMAIN;
     $('tombolMulai').disabled = !cukup;
     $('syaratMulai').textContent = cukup
-      ? 'Setelah dimulai, pemain dibagi rata ke lima kubu secara acak.'
-      : `Butuh minimal ${M.MIN_PEMAIN} pemain. Saat ini baru ${G.pemain.length}.`;
+      ? 'Setelah dimulai, pemain dibagi rata ke lima kubu secara acak. Peserta manusia disebar lebih dulu, bot mengisi sisanya.'
+      : `Butuh minimal ${M.MIN_PEMAIN} pemain. Saat ini baru ${total}. Tambahkan bot jika peserta belum cukup.`;
+    $('infoBot').textContent = G.bot.length
+      ? `${G.bot.length} bot ikut bermain. Bot hanya memilih aksi untuk kubu yang tidak punya anggota manusia.`
+      : 'Belum ada bot. Bot berguna untuk mencoba permainan saat peserta kurang dari lima orang.';
+    $('tombolTambahBot').disabled = G.bot.length >= MAKS_BOT || total >= M.MAKS_PEMAIN;
+    $('tombolKurangiBot').disabled = !G.bot.length;
   }
 
   $('daftarPemain').innerHTML = G.pemain.map(p => `
@@ -960,9 +996,19 @@ function gambarLobi(){
       <span>${esc(p.nama)}</span>
       ${p.uid === r.host ? '<span class="ag-lencana">HOST</span>' : ''}
       ${G.host && p.uid !== G.uid ? `<button type="button" data-jadikan-host="${esc(p.uid)}">Jadikan host</button>` : ''}
-    </li>`).join('');
+    </li>`).join('')
+    + (G.host ? G.bot.map(b => `<li><span>${esc(b.nama)}</span><span class="ag-lencana">BOT</span></li>`).join('') : '');
   tik();
 }
+
+$('tombolTambahBot').addEventListener('click', () => {
+  if(G.bot.length >= MAKS_BOT || G.pemain.length + G.bot.length >= M.MAKS_PEMAIN) return;
+  const terpakai = new Set(G.bot.map(b => b.nama));
+  const nama = NAMA_BOT.map(n => 'Bot ' + n).find(n => !terpakai.has(n));
+  G.bot.push({ id: 'bot-' + idAcak(8), nama });
+  gambarLobi();
+});
+$('tombolKurangiBot').addEventListener('click', () => { G.bot.pop(); gambarLobi(); });
 
 $('pilihSkenario').addEventListener('change', (e) => { G.skenarioPilihan = e.target.value; gambarLobi(); });
 $('tombolMulai').addEventListener('click', mulaiPermainan);
@@ -1019,9 +1065,10 @@ function gambarPapan(p, sk){
     const d = infoKubu(sk, id);
     const k = p.kubu[id];
     const jumlah = Object.values(p.anggota).filter(x => x === id).length;
+    const bot = kubuBot(p, id);
     return `<div class="ag-papan-baris ${id === saya ? 'saya' : ''} ${k.hidup ? '' : 'keluar'}" style="--warna:${d.warna}">
       <span class="ag-lambang" aria-hidden="true">${d.lambang}</span>
-      <span class="ag-papan-nama">${esc(d.nama)}<small>${id === saya ? 'Kubumu, ' : ''}${jumlah} anggota${k.hidup ? '' : ', tereliminasi'}</small></span>
+      <span class="ag-papan-nama">${esc(d.nama)}<small>${id === saya ? 'Kubumu, ' : ''}${jumlah} anggota${bot ? `, ${bot} bot` : ''}${k.hidup ? '' : ', tereliminasi'}</small></span>
       <span class="ag-papan-nilai">KT ${k.kt}<br>PG ${k.pg}</span>
     </div>`;
   }).join('');
@@ -1092,7 +1139,9 @@ function gambarPanggung(p, sk){
       el.innerHTML = `<div class="ag-sorot">
         <div class="ag-lambang-besar" aria-hidden="true">${d.lambang}</div>
         <h2>Sesi bebas</h2>
-        <p>${esc(d.nama)} sudah tereliminasi, jadi giliran ini dipakai untuk diskusi bebas antar kubu.</p>
+        <p>${p.alasanBebas === 'bot'
+          ? `${esc(d.nama)} dijalankan oleh bot, jadi giliran ini dipakai untuk diskusi bebas antar kubu.`
+          : `${esc(d.nama)} sudah tereliminasi, jadi giliran ini dipakai untuk diskusi bebas antar kubu.`}</p>
         <p class="ag-kecil">Manfaatkan obrolan kubu untuk menyusun rencana voting berikutnya.</p>
       </div>`;
       return;
