@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'none';" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ruang Terkunci Agenda Tersembunyi - KAFBE Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="operasional.css">
+<link rel="stylesheet" href="pengajar.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>
+  .as-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-top:16px; }
+  .as-ruang{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:10px; }
+  .as-ruang h3{ margin:0; }
+  .as-status{ font-size:0.9rem; color:var(--ink-soft); line-height:1.5; margin:0; }
+  .as-kode{ font-family:'Courier New', monospace; font-size:2rem; font-weight:700; letter-spacing:0.25em; background:var(--bg-deep); border-radius:12px; padding:8px 12px; text-align:center; color:var(--owl-dark2); }
+  .as-aksi{ display:flex; flex-wrap:wrap; gap:8px; }
+  .as-catatan{ max-width:var(--lebar-baca, 70ch); color:var(--ink-soft); line-height:1.6; }
+</style>
+</head>
+<body class="op-body">
+
+<!-- ============ LAYAR MASUK ============ -->
+<!--
+  Halaman ini memakai sesi yang sama dengan /pengajar. Pengajar yang sudah
+  masuk di /pengajar langsung dikenali di sini tanpa perlu masuk lagi.
+-->
+<section id="layarMasuk" class="op-masuk" hidden>
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1>Ruang Terkunci</h1>
+    <p class="op-sub">Khusus asisten. Masuk dengan akun pengajar untuk membuka ruang terkunci Agenda Tersembunyi.</p>
+
+    <form id="formMasuk" autocomplete="on">
+      <label for="email">Email pengajar</label>
+      <input type="email" id="email" name="email" required autocomplete="username" />
+
+      <label for="sandi">Kata sandi</label>
+      <input type="password" id="sandi" name="sandi" required autocomplete="current-password" />
+
+      <button type="submit" class="btn btn-primary op-penuh" id="tombolMasuk">Masuk</button>
+    </form>
+
+    <p class="op-pesan" id="pesanMasuk" role="alert"></p>
+    <p class="op-catatan">Belum punya akun? <a class="pg-tautan" href="pengajar-daftar.html">Buat akun pengajar</a></p>
+  </div>
+</section>
+
+<!-- ============ TIDAK BERWENANG ============ -->
+<section id="layarTolak" class="op-masuk" hidden>
+  <div class="op-kartu-masuk">
+    <svg viewBox="0 0 300 300" class="op-owl"><use href="#kafbe-owl"/></svg>
+    <h1>Belum bisa membuka ruang</h1>
+    <p class="op-sub" id="alasanTolak">Akun ini belum terdaftar sebagai pengajar yang diterima.</p>
+    <button type="button" class="btn btn-ghost op-penuh" data-keluar>Keluar</button>
+  </div>
+</section>
+
+<!-- ============ PANEL ============ -->
+<div id="aplikasi" hidden>
+  <header class="op-nav">
+    <div class="op-nav-dalam">
+      <div class="op-merek">
+        <svg viewBox="0 0 300 300"><use href="#kafbe-owl"/></svg>
+        <span>Ruang Terkunci <strong>Agenda Tersembunyi</strong></span>
+      </div>
+      <div class="op-nav-kanan">
+        <span class="op-siapa" id="siapa"></span>
+        <a href="pengajar.html" class="op-tautan-luar">Halaman pengajar</a>
+        <a href="game-santai/agenda-tersembunyi.html" class="op-tautan-luar" target="_blank" rel="noopener noreferrer">Buka game</a>
+        <button class="btn btn-ghost op-kecil" data-keluar>Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="op-wrap">
+    <h1>Ruang terkunci</h1>
+    <p class="as-catatan">Buka satu ruang, lalu bagikan kodenya kepada peserta kelas Anda. Peserta masuk lewat halaman game dengan mengetik kode itu. Orang pertama yang masuk menjadi host, jadi sebaiknya Anda masuk lebih dulu jika ingin mengatur jalannya permainan.</p>
+    <p class="as-catatan">Ruang terkunci tidak dibubarkan otomatis selama lobi. Tutup ruangnya setelah kelas selesai agar kodenya tidak bisa dipakai lagi.</p>
+    <p class="op-pesan" id="pesanPanel" role="alert"></p>
+    <div class="as-grid" id="daftarRuang"></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="kafbe-owl" viewBox="0 0 300 300">
+    <ellipse cx="150" cy="160" rx="98" ry="108" fill="var(--owl-light)"/>
+    <polygon points="85,62 111,62 92,40" fill="var(--owl-dark)"/>
+    <polygon points="189,62 215,62 208,40" fill="var(--owl-dark)"/>
+    <path d="M62 110 Q30 160 55 220 Q75 235 96 220 Q80 165 90 118 Z" fill="var(--owl-dark)"/>
+    <path d="M238 110 Q270 160 245 220 Q225 235 204 220 Q220 165 210 118 Z" fill="var(--owl-dark)"/>
+    <ellipse cx="150" cy="185" rx="58" ry="66" fill="var(--owl-belly)"/>
+    <circle cx="115" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+    <circle cx="185" cy="128" r="42" fill="var(--owl-light2)" stroke="var(--owl-dark)" stroke-width="4"/>
+    <circle cx="115" cy="128" r="25" fill="var(--owl-dark2)"/>
+    <circle cx="185" cy="128" r="25" fill="var(--owl-dark2)"/>
+    <circle cx="107" cy="118" r="7" fill="#fff"/><circle cx="177" cy="118" r="7" fill="#fff"/>
+    <path d="M150 145 q-6 0 -6 10 q0 16 6 20 q6 -4 6 -20 q0 -10 -6 -10 Z" fill="var(--gold)"/>
+  </symbol>
+</svg>
+
+<script src="firebase-config.js"></script>
+<script type="module" src="shared/agenda-asisten.js"></script>
+</body>
+</html>

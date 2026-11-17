@@ -37,6 +37,7 @@ const AKAR = process.cwd();
 // untuk syarat itu.
 const HALAMAN_PENGURUS = new Set([
   'adminkafbe.html', 'operasional.html', 'pengajar.html', 'pengajar-daftar.html',
+  'agenda-asisten.html',
 ]);
 
 /*

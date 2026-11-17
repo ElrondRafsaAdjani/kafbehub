@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; object-src 'none'; base-uri 'self'; form-action 'none';" />
+<meta name="referrer" content="strict-origin-when-cross-origin" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agenda Tersembunyi - KAFBE Hub</title>
+<meta name="description" content="Game misteri multipemain untuk ice breaking kelas. Lima kubu, agenda rahasia, dan keputusan bersama." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="agenda/agenda.css">
+<!-- Penerap pengaturan situs: maintenance, status fitur, dan naskah dari admin.
+     Dipasang di head supaya status maintenance sudah berlaku sebelum isi
+     halaman tergambar. -->
+<script src="/firebase-config.js"></script>
+<script src="/shared/situs.js"></script>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body data-fitur-halaman="main-santai agenda-tersembunyi">
+
+<div id="kafbeNav"></div>
+<script src="/shared/bahasa.js"></script>
+<script src="/shared/nav.js"></script>
+
+<section class="wrap ag-halaman">
+  <a class="back-link" href="../index.html#main-santai">← Kembali ke Hub</a>
+
+  <div class="ag-meja">
+    <header class="ag-kepala">
+      <span class="ag-stempel">RAHASIA</span>
+      <h1 data-teks="agenda.judul" data-label="Judul game">Agenda Tersembunyi</h1>
+      <p data-teks="agenda.teks" data-label="Keterangan game">Lima kubu terjebak dalam satu kasus. Setiap kubu menyimpan agenda rahasia. Bernegosiasilah, timbang setiap informasi, lalu putuskan aksi bersama kubumu.</p>
+    </header>
+
+    <p class="ag-pesan" id="pesan" role="alert" hidden></p>
+
+    <!-- ============ DAFTAR RUANG ============ -->
+    <section id="layarDaftar" class="ag-layar" hidden>
+      <div class="ag-nama">
+        <label for="inputNama">Nama yang tampil di permainan</label>
+        <input id="inputNama" maxlength="20" autocomplete="nickname" placeholder="Contoh: Rina" />
+        <small>Tidak perlu akun. Cukup isi nama, lalu pilih ruang.</small>
+      </div>
+
+      <h2 class="ag-subjudul">Ruang publik</h2>
+      <p class="ag-kecil">Siapa pun boleh masuk. Orang pertama yang masuk menjadi host. Ruang otomatis dibubarkan jika permainan belum dimulai dalam 10 menit.</p>
+      <div class="ag-daftar-ruang" id="daftarPublik"></div>
+
+      <h2 class="ag-subjudul">Ruang terkunci</h2>
+      <p class="ag-kecil">Dibuka oleh asisten untuk kelas tertentu. Masuk dengan kode akses yang dibagikan asisten.</p>
+      <div class="ag-daftar-ruang" id="daftarTerkunci"></div>
+
+      <details class="ag-cara">
+        <summary>Cara bermain</summary>
+        <div class="ag-cara-isi">
+          <p>Peserta dibagi rata ke lima kubu. Setiap kubu menerima kartu rahasia berisi agenda, tujuan, titik lemah, dan satu aksi khas. Kubu lain tidak tahu isi kartumu.</p>
+          <p>Permainan berlangsung lima ronde. Pada setiap ronde satu kubu mendapat giliran bicara selama satu menit lewat kanal suara kelas. Sesudah giliran bicara, semua kubu memilih aksi lewat voting selama satu menit.</p>
+          <p>Aksi dengan suara terbanyak yang dijalankan. Jika voting seri atau tidak ada yang memilih, kubu otomatis Diam. Laporan ronde hanya menampilkan akibat tanpa menyebut pelakunya, dan sebagian laporan intel bisa saja palsu.</p>
+          <p>Di akhir permainan semua agenda dibuka. Beberapa kubu bisa berhasil bersamaan.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ============ LOBI ============ -->
+    <section id="layarLobi" class="ag-layar" hidden>
+      <div class="ag-lobi-kepala">
+        <div>
+          <span class="ag-label" id="lobiJenis"></span>
+          <h2 id="lobiJudul"></h2>
+          <p class="ag-kecil" id="lobiInfo"></p>
+        </div>
+        <button type="button" class="ag-tombol ag-tombol-garis" data-aksi="keluar">Keluar dari ruang</button>
+      </div>
+      <p class="ag-bubar" id="lobiBubar" hidden></p>
+
+      <div class="ag-panel-host" id="lobiHost" hidden>
+        <h3>Panel host</h3>
+        <label for="pilihSkenario">Skenario</label>
+        <select id="pilihSkenario"></select>
+        <p class="ag-kecil" id="ketSkenario"></p>
+        <button type="button" class="ag-tombol" id="tombolMulai">Mulai permainan</button>
+        <p class="ag-kecil" id="syaratMulai"></p>
+        <button type="button" class="ag-tombol ag-tombol-garis ag-tombol-kecil" data-aksi="bubarkan">Bubarkan ruang</button>
+      </div>
+      <p class="ag-tunggu" id="lobiTunggu" hidden>Menunggu host memulai permainan.</p>
+
+      <h3 class="ag-subjudul">Pemain di ruang ini</h3>
+      <ul class="ag-pemain" id="daftarPemain"></ul>
+    </section>
+
+    <!-- ============ PERMAINAN ============ -->
+    <section id="layarMain" class="ag-layar" hidden>
+      <div class="ag-bar">
+        <div class="ag-bar-kasus">
+          <strong id="barJudul"></strong>
+          <span id="barLatar"></span>
+        </div>
+        <div class="ag-bar-fase">
+          <span id="barFase"></span>
+          <span id="barRonde"></span>
+        </div>
+        <div class="ag-timer" id="timer" aria-live="off">00:00</div>
+      </div>
+
+      <div class="ag-kontrol" id="kontrolHost" hidden>
+        <span class="ag-label">Kontrol host</span>
+        <button type="button" class="ag-tombol ag-tombol-kecil" data-aksi="jeda">Jeda</button>
+        <button type="button" class="ag-tombol ag-tombol-kecil" data-aksi="tambah">Tambah 30 detik</button>
+        <button type="button" class="ag-tombol ag-tombol-kecil" data-aksi="lewati">Lewati fase</button>
+        <button type="button" class="ag-tombol ag-tombol-kecil ag-tombol-garis" data-aksi="pindahHost">Pindahkan host</button>
+        <button type="button" class="ag-tombol ag-tombol-kecil ag-tombol-garis" data-aksi="bubarkan">Bubarkan ruang</button>
+      </div>
+
+      <div class="ag-banner" id="bannerHost" hidden></div>
+
+      <div class="ag-tata">
+        <section class="ag-panggung" id="panggung" aria-live="polite"></section>
+
+        <aside class="ag-samping">
+          <div class="ag-papan" id="papan"></div>
+
+          <div class="ag-tab" role="tablist">
+            <button type="button" role="tab" data-tab="kartu" class="aktif">Kartu kubu</button>
+            <button type="button" role="tab" data-tab="intel">Intel</button>
+            <button type="button" role="tab" data-tab="obrolan">Obrolan</button>
+          </div>
+          <div class="ag-isi-tab" id="tabKartu"></div>
+          <div class="ag-isi-tab" id="tabIntel" hidden></div>
+          <div class="ag-isi-tab" id="tabObrolan" hidden>
+            <p class="ag-kecil" id="obrolanKet"></p>
+            <ul class="ag-obrolan" id="daftarObrolan"></ul>
+            <form class="ag-kirim" id="formObrolan">
+              <input id="inputObrolan" maxlength="160" autocomplete="off" placeholder="Tulis pesan untuk kubumu" />
+              <button type="submit" class="ag-tombol ag-tombol-kecil">Kirim</button>
+            </form>
+          </div>
+
+          <button type="button" class="ag-tombol ag-tombol-garis ag-tombol-kecil ag-keluar" data-aksi="keluar">Keluar dari ruang</button>
+        </aside>
+      </div>
+    </section>
+
+    <p class="ag-memuat" id="memuat">Menyiapkan koneksi…</p>
+  </div>
+</section>
+
+<dialog class="ag-dialog" id="dialog">
+  <form method="dialog">
+    <div id="dialogIsi"></div>
+    <div class="ag-dialog-aksi">
+      <button value="batal" class="ag-tombol ag-tombol-garis ag-tombol-kecil">Tutup</button>
+    </div>
+  </form>
+</dialog>
+
+<footer class="wrap" data-bagian="Penutup">
+  <p data-en="Built by Elrond, for &lt;strong&gt;KAFBE&lt;/strong&gt; and FBE UBAYA. Official schedules and activities are also announced on KAFBE's Instagram: &lt;a href=&quot;https://www.instagram.com/ka.fbe.ubaya&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;@ka.fbe.ubaya&lt;/a&gt;." data-teks="penutup.teks" data-label="Kalimat penutup">Dibuat oleh Elrond, untuk <strong>KAFBE</strong> dan FBE UBAYA. Informasi jadwal dan kegiatan resmi juga ditayangkan melalui Instagram KAFBE: <a href="https://www.instagram.com/ka.fbe.ubaya" target="_blank" rel="noopener">@ka.fbe.ubaya</a>.</p>
+  <p data-en="version 1.0" data-teks="penutup.versi" data-label="Nomor versi">version 1.0</p>
+</footer>
+
+<script src="../main.js"></script>
+<script type="module" src="agenda/main.js"></script>
+
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/shared/kunjungan.js"></script>
+</body>
+</html>

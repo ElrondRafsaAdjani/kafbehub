@@ -925,6 +925,62 @@ Semua keputusan di tab ini ikut tercatat di tab **Log** dengan jenis
 
 ---
 
+## Bagian 2D - Game Agenda Tersembunyi
+
+Game misteri multipemain untuk ice breaking kelas, terutama materi Critical
+Thinking, Problem Solving, dan Decision Making. Halamannya ada di
+`/game-santai/agenda-tersembunyi`, dan kartunya tampil di bagian Game Santai
+pada beranda.
+
+### Pemasangan sekali saja
+
+Tanpa dua langkah ini, halaman game akan menampilkan pesan bahwa login tamu
+belum diaktifkan.
+
+1. **Nyalakan Anonymous Auth.** Firebase Console, Authentication, tab
+   Sign-in method, Add new provider, pilih **Anonymous**, lalu Enable. Pemain
+   tidak membuat akun. Halaman game masuk diam-diam sebagai tamu supaya setiap
+   pemain punya UID yang bisa diperiksa aturan Firestore.
+2. **Tempel ulang `firestore.rules`** seperti biasa (lihat Bagian 1). Aturan
+   barunya ada di bagian "Game Agenda Tersembunyi".
+
+Akun tamu tidak membuka akses lain. Semua aturan lama memeriksa email, koleksi
+`admins`, atau koleksi `pengajarakun`, dan akun tamu tidak memiliki satu pun.
+
+### Ruang
+
+| Ruang | Siapa yang bisa masuk | Kapan bubar |
+|---|---|---|
+| Ruang Publik 1 sampai 3 | Siapa pun. Orang pertama yang masuk menjadi host. | Otomatis jika permainan belum dimulai dalam 10 menit, atau 15 menit setelah permainan selesai. |
+| Ruang Terkunci 1 sampai 3 | Hanya yang memegang kode akses dari asisten. | Saat asisten menutupnya lewat `/agenda-asisten`. |
+
+Setiap ruang menampung paling banyak 90 orang. Host bisa memindahkan
+perannya kepada pemain lain. Jika host menutup tab, pemain yang paling awal
+masuk otomatis mengambil alih dalam waktu sekitar satu menit.
+
+### Membuka ruang terkunci
+
+Halaman `/agenda-asisten` (tautannya juga ada di kepala halaman `/pengajar`)
+memakai akun pengajar yang sama. Akun pengajar yang sudah diterima dan pengurus
+operasional bisa membuka, mengganti kode, mengosongkan lobi, dan menutup
+ruang terkunci. Kode akses disimpan di koleksi `agendakunci` yang tidak bisa
+dibaca pemain.
+
+### Hal yang perlu diketahui
+
+- **Rahasia kubu dijaga tampilan, bukan server.** Pemain yang membuka Console
+  peramban bisa mengintip isi permainan. Untuk ice breaking hal ini wajar dan
+  disengaja, karena situs ini tidak punya server sendiri.
+- **Kuota Firestore.** Satu permainan dengan 90 pemain bisa memakai puluhan
+  ribu pembacaan. Paket gratis (Spark) membatasi 50.000 pembacaan per hari,
+  jadi dua atau tiga kelas besar dalam sehari bisa menghabiskannya. Jika itu
+  terjadi, beralih ke paket Blaze biayanya sangat kecil untuk pemakaian
+  seperti ini.
+- **Naskah skenario** ada di `game-santai/agenda/skenario.js`, aturan
+  permainan di `game-santai/agenda/mesin.js`.
+
+---
+
 ## Bagian 3 - Mengelola admin
 
 ### Menambah admin operasional baru

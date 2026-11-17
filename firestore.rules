@@ -628,6 +628,324 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // ---------- Game Agenda Tersembunyi ----------
+    /*
+      Enam ruang tetap: tiga ruang publik dan tiga ruang terkunci. Pemain
+      tidak membuat akun. Halaman game masuk diam-diam memakai Anonymous Auth
+      (harus dinyalakan sekali di Firebase Console: Authentication, Sign-in
+      method, Anonymous), sehingga setiap pemain tetap punya UID yang bisa
+      dipakai aturan di bawah.
+
+      Akun anonim tidak membuka pintu lain di berkas ini. Semua aturan di atas
+      memeriksa email, koleksi admins, atau koleksi pengajarakun, dan akun
+      anonim tidak memiliki satu pun di antaranya.
+
+      SIAPA BOLEH MENULIS APA
+
+        Ruang (agendaruang/{id})
+          - Siapa pun yang masuk boleh MEMBUKA ruang publik yang kosong atau
+            yang sudah kedaluwarsa, dan otomatis menjadi host.
+          - Hanya host yang boleh menjalankan permainan dan memindahkan host
+            ke pemain lain di sesi yang sama.
+          - Pemain boleh MENGAMBIL ALIH host jika host lama berhenti mengirim
+            detak selama 45 detik, atau jika ruang belum punya host.
+          - Ruang terkunci hanya bisa dibuka dan ditutup asisten, yaitu akun
+            pengajar yang sudah diterima atau pengurus operasional.
+
+        Kedaluwarsa
+          - Ruang publik yang belum mulai dalam 10 menit sejak dibuka.
+          - Ruang yang host-nya berhenti mengirim detak selama 3 menit.
+          - Permainan yang sudah selesai lebih dari 15 menit.
+          Ruang kedaluwarsa boleh dikosongkan siapa pun. Tidak ada proses di
+          server yang membubarkannya; halaman game sendiri yang menganggapnya
+          bubar, dan pemain berikutnya yang mengosongkannya.
+
+        Kode akses ruang terkunci (agendakunci/{id})
+          - Hanya asisten yang boleh membaca dan menulisnya. Pemain tidak
+            pernah membaca kode ini. Saat bergabung, pemain mengirim kode yang
+            diketikkannya dan aturan di bawah mencocokkannya di server.
+
+      YANG TIDAK DIJAGA DI SINI
+
+      Isi permainan (kubu, voting, intel) bisa dibaca semua anggota ruang
+      lewat Console peramban. Rahasia antar kubu dijaga oleh tampilan, bukan
+      oleh server, karena tanpa server sendiri tetap harus ada satu peramban
+      (host) yang membaca seluruh suara untuk menghitung hasilnya. Untuk ice
+      breaking di kelas, hal itu sudah memadai.
+    */
+    function ruangAgendaSah(id) {
+      return id in ['publik-1', 'publik-2', 'publik-3', 'kunci-1', 'kunci-2', 'kunci-3'];
+    }
+
+    function jenisRuangAgenda(id) {
+      return id.matches('publik-[0-9]') ? 'publik' : 'terkunci';
+    }
+
+    function asistenAgenda() {
+      return pengajarAktif() || adminTerdaftar();
+    }
+
+    function dataRuang(id) {
+      return get(/databases/$(database)/documents/agendaruang/$(id)).data;
+    }
+
+    function anggotaSesi(id, uid, sesi) {
+      return exists(/databases/$(database)/documents/agendaruang/$(id)/pemain/$(uid))
+        && get(/databases/$(database)/documents/agendaruang/$(id)/pemain/$(uid)).data.sesi == sesi;
+    }
+
+    function anggotaAgenda(id) {
+      return request.auth != null
+        && anggotaSesi(id, request.auth.uid, dataRuang(id).sesi);
+    }
+
+    function detakBasi(id, detik) {
+      return !exists(/databases/$(database)/documents/agendaruang/$(id)/detak/host)
+        || get(/databases/$(database)/documents/agendaruang/$(id)/detak/host).data.waktu
+             + duration.value(detik, 's') < request.time;
+    }
+
+    function ruangKedaluwarsa(id, r) {
+      return (r.status == 'lobi' && r.jenis == 'publik'
+               && request.time > r.dibuka + duration.value(10, 'm'))
+        || (r.status == 'lobi' && r.jenis == 'publik' && detakBasi(id, 180))
+        || (r.status in ['main', 'selesai'] && detakBasi(id, 180))
+        || (r.status == 'selesai' && request.time > r.aktif + duration.value(15, 'm'));
+    }
+
+    /*
+      Bentuk umum dokumen ruang. Diperiksa sekali di awal aturan update,
+      sehingga fungsi lain di bawah tidak perlu mengulanginya. Firestore
+      membatasi jumlah ekspresi yang dievaluasi per permintaan, dan pemeriksaan
+      bentuk yang diulang di setiap cabang pernah melampaui batas itu.
+    */
+    function bentukRuang(d) {
+      return d.keys().size() == 9
+        && d.keys().hasAll(['jenis', 'status', 'sesi', 'host', 'hostNama',
+                            'dibuka', 'aktif', 'jumlah', 'permainan'])
+        && d.status in ['kosong', 'tertutup', 'lobi', 'main', 'selesai']
+        && d.sesi is string && d.sesi.size() <= 40
+        && d.host is string && d.host.size() <= 128
+        && d.hostNama is string && d.hostNama.size() <= 20
+        && d.jumlah is int && d.jumlah >= 0 && d.jumlah <= 200
+        && (d.permainan == null || d.permainan is map);
+    }
+
+    // Ruang yang sedang tidak dipakai: publik "kosong", terkunci "tertutup".
+    function bentukKosong(id, d) {
+      return d.jenis == jenisRuangAgenda(id)
+        && ((d.jenis == 'publik' && d.status == 'kosong')
+            || (d.jenis == 'terkunci' && d.status == 'tertutup'))
+        && d.sesi == '' && d.host == '' && d.hostNama == ''
+        && d.dibuka == null && d.aktif == null
+        && d.jumlah == 0 && d.permainan == null;
+    }
+
+    // Lobi baru dengan sesi baru. Sesi baru membuat semua pemain lama
+    // otomatis bukan anggota lagi tanpa perlu menghapus dokumennya satu per satu.
+    function bentukLobiBaru(lama, d, host) {
+      return d.status == 'lobi'
+        && d.host == host
+        && d.sesi.size() >= 8 && d.sesi != lama.sesi
+        && d.dibuka == request.time && d.aktif == request.time
+        && d.jumlah == 0 && d.permainan == null;
+    }
+
+    function peralihanHostSah(lama, baru) {
+      return (lama.status == 'lobi' && baru.status == 'lobi'
+                && baru.dibuka == lama.dibuka && baru.permainan == null)
+        || (lama.status == 'lobi' && baru.status == 'main'
+                && baru.dibuka == lama.dibuka
+                && !(lama.jenis == 'publik' && request.time > lama.dibuka + duration.value(10, 'm')))
+        || (lama.status == 'main' && baru.status in ['main', 'selesai']
+                && baru.dibuka == lama.dibuka)
+        || (lama.status == 'selesai' && baru.status == 'selesai'
+                && baru.dibuka == lama.dibuka)
+        || (lama.status == 'selesai' && baru.status == 'lobi'
+                && baru.dibuka == request.time && baru.permainan == null);
+    }
+
+    function ubahanHost(id, lama, baru) {
+      return lama.host == request.auth.uid
+        && lama.status in ['lobi', 'main', 'selesai']
+        && baru.sesi == lama.sesi
+        && baru.aktif == request.time
+        && peralihanHostSah(lama, baru)
+        && (baru.host == lama.host
+            || (baru.host.size() > 0 && anggotaSesi(id, baru.host, lama.sesi)));
+    }
+
+    function bubarkanOlehHost(id, lama, baru) {
+      return lama.host == request.auth.uid
+        && baru.status in ['kosong', 'lobi']
+        && ((lama.jenis == 'publik' && bentukKosong(id, baru))
+            || (lama.jenis == 'terkunci' && bentukLobiBaru(lama, baru, '')));
+    }
+
+    function ambilAlihHost(id, lama, baru) {
+      return baru.host == request.auth.uid
+        && lama.host != request.auth.uid
+        && lama.status in ['lobi', 'main', 'selesai']
+        && baru.diff(lama).affectedKeys().hasOnly(['host', 'hostNama'])
+        && baru.hostNama is string && baru.hostNama.size() >= 1 && baru.hostNama.size() <= 20
+        && anggotaSesi(id, request.auth.uid, lama.sesi)
+        && (lama.host == '' || detakBasi(id, 45));
+    }
+
+    function bukaPublik(id, lama, baru) {
+      return lama.jenis == 'publik'
+        && baru.status == 'lobi'
+        && baru.host == request.auth.uid
+        && baru.sesi != lama.sesi
+        && (lama.status == 'kosong' || ruangKedaluwarsa(id, lama))
+        && bentukLobiBaru(lama, baru, request.auth.uid)
+        && baru.hostNama.size() >= 1;
+    }
+
+    function pulihkanTerkunci(id, lama, baru) {
+      return lama.jenis == 'terkunci'
+        && baru.status == 'lobi'
+        && baru.host == ''
+        && lama.status in ['main', 'selesai']
+        && ruangKedaluwarsa(id, lama)
+        && bentukLobiBaru(lama, baru, '');
+    }
+
+    function ubahanAsisten(id, lama, baru) {
+      return lama.jenis == 'terkunci'
+        && asistenAgenda()
+        && (bentukKosong(id, baru) || bentukLobiBaru(lama, baru, ''));
+    }
+
+    match /agendaruang/{id} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && ruangAgendaSah(id)
+                    && bentukRuang(request.resource.data)
+                    && bentukKosong(id, request.resource.data);
+      allow update: if request.auth != null
+                    && ruangAgendaSah(id)
+                    && bentukRuang(request.resource.data)
+                    && request.resource.data.jenis == resource.data.jenis
+                    && (bukaPublik(id, resource.data, request.resource.data)
+                        || pulihkanTerkunci(id, resource.data, request.resource.data)
+                        || ubahanHost(id, resource.data, request.resource.data)
+                        || bubarkanOlehHost(id, resource.data, request.resource.data)
+                        || ambilAlihHost(id, resource.data, request.resource.data)
+                        || ubahanAsisten(id, resource.data, request.resource.data));
+      allow delete: if false;
+
+      /*
+        Satu dokumen per pemain, dengan Document ID sama dengan UID-nya.
+        getAfter dipakai supaya membuka ruang dan bergabung bisa dikirim dalam
+        satu batch: pemain pertama membuka ruang sekaligus menjadi anggotanya.
+      */
+      function pemainSah(uid, d) {
+        let r = getAfter(/databases/$(database)/documents/agendaruang/$(id)).data;
+        return request.auth != null
+          && request.auth.uid == uid
+          && d.keys().hasOnly(['nama', 'sesi', 'masuk', 'hadir', 'kode'])
+          && d.nama is string && d.nama.size() >= 1 && d.nama.size() <= 20
+          && r.sesi != '' && d.sesi == r.sesi
+          && r.status in ['lobi', 'main'];
+      }
+
+      function kodeSah(d) {
+        return dataRuang(id).jenis == 'publik'
+          || (exists(/databases/$(database)/documents/agendakunci/$(id))
+              && d.get('kode', '') == get(/databases/$(database)/documents/agendakunci/$(id)).data.kode);
+      }
+
+      match /pemain/{uid} {
+        allow read: if request.auth != null
+                    && (dataRuang(id).jenis == 'publik' || anggotaAgenda(id) || asistenAgenda());
+        allow create: if pemainSah(uid, request.resource.data)
+                      && request.resource.data.masuk == request.time
+                      && request.resource.data.hadir == request.time
+                      && kodeSah(request.resource.data);
+        allow update: if pemainSah(uid, request.resource.data)
+                      && ((request.resource.data.sesi != resource.data.sesi
+                            && request.resource.data.masuk == request.time
+                            && request.resource.data.hadir == request.time
+                            && kodeSah(request.resource.data))
+                          || (request.resource.data.sesi == resource.data.sesi
+                            && request.resource.data.nama == resource.data.nama
+                            && request.resource.data.masuk == resource.data.masuk
+                            && (request.resource.data.hadir == request.time
+                                || request.resource.data.hadir == resource.data.hadir)
+                            && !('kode' in request.resource.data)));
+        allow delete: if request.auth != null
+                      && (request.auth.uid == uid
+                          || dataRuang(id).host == request.auth.uid
+                          || resource.data.sesi != dataRuang(id).sesi);
+      }
+
+      function saluranSah(r, d) {
+        return d.saluran in [r.sesi + '_' + r.permainan.anggota.get(request.auth.uid, 'saksi'),
+                             r.sesi + '_saksi'];
+      }
+
+      // Satu dokumen suara per pemain, ditimpa tiap ronde.
+      match /suara/{uid} {
+        allow read: if anggotaAgenda(id);
+        allow create, update: if request.auth != null
+          && request.auth.uid == uid
+          && anggotaAgenda(id)
+          && dataRuang(id).status == 'main'
+          && dataRuang(id).permainan.fase == 'voting'
+          && request.resource.data.keys().hasOnly(['sesi', 'saluran', 'ronde', 'aksi', 'target'])
+          && request.resource.data.sesi == dataRuang(id).sesi
+          && request.resource.data.ronde == dataRuang(id).permainan.ronde
+          && saluranSah(dataRuang(id), request.resource.data)
+          && request.resource.data.aksi is string && request.resource.data.aksi.size() <= 20
+          && request.resource.data.target is string && request.resource.data.target.size() <= 20;
+        allow delete: if request.auth != null
+          && (request.auth.uid == uid || resource.data.sesi != dataRuang(id).sesi);
+      }
+
+      // Obrolan internal kubu dan obrolan Saksi.
+      match /obrolan/{pesanId} {
+        allow read: if anggotaAgenda(id);
+        allow create: if anggotaAgenda(id)
+          && dataRuang(id).status in ['main', 'selesai']
+          && request.resource.data.keys().hasOnly(['sesi', 'saluran', 'uid', 'nama', 'teks', 'waktu'])
+          && request.resource.data.sesi == dataRuang(id).sesi
+          && request.resource.data.uid == request.auth.uid
+          && saluranSah(dataRuang(id), request.resource.data)
+          && request.resource.data.nama is string && request.resource.data.nama.size() <= 20
+          && request.resource.data.teks is string
+          && request.resource.data.teks.size() >= 1 && request.resource.data.teks.size() <= 160
+          && request.resource.data.waktu == request.time;
+        allow update: if false;
+        allow delete: if request.auth != null && resource.data.sesi != dataRuang(id).sesi;
+      }
+
+      // Detak host. Ditulis host tiap 15 detik, dibaca pemain untuk tahu
+      // apakah host masih ada.
+      match /detak/{nama} {
+        allow read: if request.auth != null;
+        allow create, update: if request.auth != null
+          && nama == 'host'
+          && getAfter(/databases/$(database)/documents/agendaruang/$(id)).data.host == request.auth.uid
+          && request.resource.data.keys().hasOnly(['waktu', 'uid'])
+          && request.resource.data.waktu == request.time
+          && request.resource.data.uid == request.auth.uid;
+        allow delete: if false;
+      }
+    }
+
+    match /agendakunci/{id} {
+      allow read: if asistenAgenda();
+      allow create, update: if asistenAgenda()
+        && id in ['kunci-1', 'kunci-2', 'kunci-3']
+        && request.resource.data.keys().hasOnly(['kode', 'oleh', 'waktu'])
+        && request.resource.data.kode is string
+        && request.resource.data.kode.matches('^[A-Z0-9]{6}$')
+        && request.resource.data.oleh == request.auth.token.email
+        && request.resource.data.waktu == request.time;
+      allow delete: if asistenAgenda();
+    }
+
     // Koleksi yang tidak disebut di atas otomatis tertutup, karena Firestore
     // menolak apa pun yang tidak diizinkan secara eksplisit. Baris di bawah
     // hanya penegasan untuk pembaca; menghapusnya tidak mengubah apa pun.
