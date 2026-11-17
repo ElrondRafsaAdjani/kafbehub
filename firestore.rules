@@ -655,7 +655,7 @@ service cloud.firestore {
         Kedaluwarsa
           - Ruang publik yang belum mulai dalam 10 menit sejak dibuka.
           - Ruang yang host-nya berhenti mengirim detak selama 3 menit.
-          - Permainan yang sudah selesai lebih dari 15 menit.
+          - Permainan yang sudah selesai lebih dari 5 menit.
           Ruang kedaluwarsa boleh dikosongkan siapa pun. Tidak ada proses di
           server yang membubarkannya; halaman game sendiri yang menganggapnya
           bubar, dan pemain berikutnya yang mengosongkannya.
@@ -710,7 +710,7 @@ service cloud.firestore {
                && request.time > r.dibuka + duration.value(10, 'm'))
         || (r.status == 'lobi' && r.jenis == 'publik' && detakBasi(id, 180))
         || (r.status in ['main', 'selesai'] && detakBasi(id, 180))
-        || (r.status == 'selesai' && request.time > r.aktif + duration.value(15, 'm'));
+        || (r.status == 'selesai' && request.time > r.aktif + duration.value(5, 'm'));
     }
 
     /*

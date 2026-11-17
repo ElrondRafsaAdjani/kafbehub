@@ -30,6 +30,7 @@
 
 import { SKENARIO, URUTAN_SKENARIO, TUJUAN, TITIK, kalimatTujuan } from './skenario.js';
 import * as M from './mesin.js';
+import { lambang, ikonAksi, ikonKT, ikonPG, deretKT, nilaiPG } from './lambang.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.13.0';
 const { initializeApp } = await import(`${SDK}/firebase-app.js`);
@@ -66,7 +67,7 @@ const RUANG = [
 ];
 const NAMA_RUANG = Object.fromEntries(RUANG.map(r => [r.id, r.nama]));
 const BATAS_LOBI = 10 * 60 * 1000;
-const BATAS_SELESAI = 15 * 60 * 1000;
+const BATAS_SELESAI = 5 * 60 * 1000;
 const DETAK_BASI = 45 * 1000;
 const DETAK_MATI = 180 * 1000;
 
@@ -170,6 +171,10 @@ const G = {
   // dokumen ruang saat permainan dimulai. Jika host berpindah sebelum
   // permainan dimulai, daftar bot ini ikut hilang dan perlu ditambah lagi.
   bot: [],
+
+  // Pengaturan permainan dari panel host, juga hanya di peramban host sampai
+  // permainan dimulai.
+  atur: { ...M.ATURAN_AWAL },
 };
 
 const NAMA_BOT = ['Ana', 'Bayu', 'Candra', 'Dewi', 'Eko', 'Fitri', 'Galih', 'Hana', 'Indra', 'Joko',
@@ -204,7 +209,10 @@ function kedaluwarsa(r){
   if(!r) return false;
   const t = sekarang();
   if(r.status === 'lobi' && r.jenis === 'publik' && r.dibuka && t > ms(r.dibuka) + BATAS_LOBI) return true;
-  if(r.status === 'selesai' && r.aktif && t > ms(r.aktif) + BATAS_SELESAI) return true;
+  if(r.status === 'selesai'){
+    const selesai = (r.permainan && r.permainan.selesaiPada) || ms(r.aktif);
+    if(selesai && t > selesai + BATAS_SELESAI) return true;
+  }
   return false;
 }
 
@@ -499,9 +507,11 @@ function saatRuangBerubah(r){
     keluarPaksa('Ruang sudah dibubarkan.');
     return;
   }
-  if(kedaluwarsa(r) && r.status === 'lobi'){
-    if(r.host === G.uid) updateDoc(refRuang(), ruangKosong('publik')).catch(() => {});
-    keluarPaksa('Ruang dibubarkan karena permainan tidak dimulai dalam 10 menit.');
+  if(kedaluwarsa(r) && (r.status === 'lobi' || r.status === 'selesai')){
+    if(r.host === G.uid) bubarkan().catch(() => {});
+    keluarPaksa(r.status === 'lobi'
+      ? 'Ruang dibubarkan karena permainan tidak dimulai dalam 10 menit.'
+      : 'Ruang dibubarkan otomatis 5 menit setelah permainan selesai.');
     return;
   }
   G.ruang = r;
@@ -615,7 +625,7 @@ function urusPemainSebagaiHost(){
 
   // Jumlah pemain ditulis paling sering tiap 2 detik supaya tidak membebani.
   const n = Math.min(G.pemain.length, M.MAKS_PEMAIN);
-  if(n !== r.jumlah && n !== G.jumlahTertulis && !timerJumlah){
+  if((r.status === 'lobi' || r.status === 'main') && n !== r.jumlah && n !== G.jumlahTertulis && !timerJumlah){
     timerJumlah = setTimeout(() => {
       timerJumlah = null;
       const jumlah = Math.min(G.pemain.length, M.MAKS_PEMAIN);
@@ -664,21 +674,22 @@ function semuaSudahMemilih(p){
 }
 
 function mulaiBicara(p, sk){
-  const id = p.urutan[p.ronde - 1];
+  const id = p.urutan[(p.ronde - 1) % p.urutan.length];
+  const bebas = Math.min(M.DURASI.bebas, p.atur.bicara);
   if(!p.kubu[id].hidup){
-    return { ...p, fase: 'bebas', alasanBebas: 'tereliminasi', juru: null, berakhir: sekarang() + M.DURASI.bebas * 1000 };
+    return { ...p, fase: 'bebas', alasanBebas: 'tereliminasi', juru: null, berakhir: sekarang() + bebas * 1000 };
   }
   const calon = anggotaHadir(p, id);
   // Kubu yang hanya berisi bot tidak bisa berbicara, jadi gilirannya
   // menjadi sesi bebas.
   if(!calon.length && kubuBot(p, id)){
-    return { ...p, fase: 'bebas', alasanBebas: 'bot', juru: null, berakhir: sekarang() + M.DURASI.bebas * 1000 };
+    return { ...p, fase: 'bebas', alasanBebas: 'bot', juru: null, berakhir: sekarang() + bebas * 1000 };
   }
   const pilih = calon.length ? calon[Math.floor(Math.random() * calon.length)] : null;
   return {
     ...p, fase: 'bicara', alasanBebas: '',
     juru: pilih ? { uid: pilih.uid, nama: pilih.nama } : null,
-    berakhir: sekarang() + M.DURASI.bicara * 1000,
+    berakhir: sekarang() + p.atur.bicara * 1000,
   };
 }
 
@@ -722,7 +733,7 @@ async function maju(kunci){
     let status = null;
     switch(p.fase){
       case 'kartu':
-        baru = { ...p, fase: 'briefing', berakhir: sekarang() + M.DURASI.briefing * 1000 };
+        baru = { ...p, fase: 'briefing', berakhir: sekarang() + p.atur.briefing * 1000 };
         break;
       case 'briefing':
         baru = mulaiBicara({ ...p, ronde: 1 }, sk);
@@ -738,8 +749,8 @@ async function maju(kunci){
         break;
       }
       case 'laporan':
-        if(p.ronde >= M.JUMLAH_RONDE || M.jumlahHidup(p) <= 1){
-          baru = { ...p, fase: 'akhir', akhir: M.nilaiAkhir(p, sk), berakhir: sekarang() };
+        if(p.ronde >= p.atur.ronde || M.jumlahHidup(p) <= 1){
+          baru = { ...p, fase: 'akhir', akhir: M.nilaiAkhir(p, sk), berakhir: sekarang(), selesaiPada: sekarang() };
           status = 'selesai';
         } else {
           baru = mulaiBicara({ ...p, ronde: p.ronde + 1 }, sk);
@@ -775,6 +786,7 @@ async function mulaiPermainan(){
     ronde: 0,
     berakhir: sekarang() + M.DURASI.kartu * 1000,
     jeda: null,
+    atur: { ...G.atur },
     urutan: M.acak(idKubu),
     juru: null,
     anggota: M.bagiKubu(pemain.map(x => x.uid), idKubu, Math.random, bot.map(b => b.id)),
@@ -782,7 +794,8 @@ async function mulaiPermainan(){
     alasanBebas: '',
     saksiKubu: '',
     akhir: null,
-    ...M.keadaanAwal(sk),
+    selesaiPada: 0,
+    ...M.keadaanAwal(sk, G.atur.ronde),
   };
   $('tombolMulai').disabled = true;
   try{
@@ -950,6 +963,12 @@ function tik(){
   }
   const p = r.permainan;
   if(!p) return;
+  if(r.status === 'selesai'){
+    const info = $('infoBubarAkhir');
+    const selesai = p.selesaiPada || ms(r.aktif);
+    if(info && selesai) info.textContent = `Ruang otomatis dibubarkan dalam ${formatSisa(selesai + BATAS_SELESAI - sekarang())} jika host tidak kembali ke lobi.`;
+    if(kedaluwarsa(r)) saatRuangBerubah(r);
+  }
   const el = $('timer');
   const sisa = p.jeda != null ? p.jeda : p.berakhir - sekarang();
   el.textContent = p.fase === 'akhir' ? 'SELESAI' : formatSisa(sisa);
@@ -988,6 +1007,7 @@ function gambarLobi(){
       ? `${G.bot.length} bot ikut bermain. Bot hanya memilih aksi untuk kubu yang tidak punya anggota manusia.`
       : 'Belum ada bot. Bot berguna untuk mencoba permainan saat peserta kurang dari lima orang.';
     $('tombolTambahBot').disabled = G.bot.length >= MAKS_BOT || total >= M.MAKS_PEMAIN;
+    gambarAturan();
     $('tombolKurangiBot').disabled = !G.bot.length;
   }
 
@@ -1010,6 +1030,32 @@ $('tombolTambahBot').addEventListener('click', () => {
 });
 $('tombolKurangiBot').addEventListener('click', () => { G.bot.pop(); gambarLobi(); });
 
+function formatDetik(d){
+  return Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0');
+}
+
+function gambarAturan(){
+  const a = G.atur;
+  $('aturRonde').textContent = `${a.ronde} ronde`;
+  $('aturBriefing').textContent = formatDetik(a.briefing);
+  $('aturBicara').textContent = formatDetik(a.bicara);
+  document.querySelectorAll('[data-atur]').forEach(b => {
+    const batas = M.BATAS_ATURAN[b.dataset.atur];
+    const nilai = a[b.dataset.atur];
+    b.disabled = Number(b.dataset.arah) < 0 ? nilai <= batas.min : nilai >= batas.maks;
+  });
+  const detik = M.DURASI.kartu + a.briefing + a.ronde * (a.bicara + M.DURASI.voting + M.DURASI.laporan);
+  $('perkiraanDurasi').textContent = `Perkiraan durasi permainan sekitar ${Math.round(detik / 60)} menit, belum termasuk pembahasan di akhir.`;
+}
+
+document.querySelectorAll('[data-atur]').forEach(b => b.addEventListener('click', () => {
+  const kunci = b.dataset.atur;
+  const batas = M.BATAS_ATURAN[kunci];
+  const nilai = G.atur[kunci] + Number(b.dataset.arah) * batas.langkah;
+  G.atur[kunci] = Math.min(batas.maks, Math.max(batas.min, nilai));
+  gambarAturan();
+}));
+
 $('pilihSkenario').addEventListener('change', (e) => { G.skenarioPilihan = e.target.value; gambarLobi(); });
 $('tombolMulai').addEventListener('click', mulaiPermainan);
 $('daftarPemain').addEventListener('click', (e) => {
@@ -1021,6 +1067,13 @@ $('daftarPemain').addEventListener('click', (e) => {
 
 function infoKubu(sk, id){ return sk.kubu[id]; }
 
+function segel(sk, id, ukuran){
+  const d = sk.kubu[id];
+  return lambang(id, d.warna, ukuran, d.nama);
+}
+
+function totalRonde(p){ return (p.atur && p.atur.ronde) || M.ATURAN_AWAL.ronde; }
+
 function gambarMain(){
   const r = G.ruang;
   const p = r.permainan;
@@ -1030,7 +1083,7 @@ function gambarMain(){
   $('barJudul').textContent = sk.judul;
   $('barLatar').textContent = sk.latar;
   $('barFase').textContent = NAMA_FASE[p.fase] + (p.jeda != null ? ' (dijeda)' : '');
-  $('barRonde').textContent = p.ronde ? `Ronde ${p.ronde} dari ${M.JUMLAH_RONDE}` : 'Persiapan';
+  $('barRonde').textContent = p.ronde ? `Ronde ${p.ronde} dari ${totalRonde(p)}` : 'Persiapan';
   $('kontrolHost').hidden = !G.host || r.status !== 'main';
   const tJeda = document.querySelector('[data-aksi="jeda"]');
   if(tJeda) tJeda.textContent = p.jeda != null ? 'Lanjutkan' : 'Jeda';
@@ -1067,43 +1120,102 @@ function gambarPapan(p, sk){
     const jumlah = Object.values(p.anggota).filter(x => x === id).length;
     const bot = kubuBot(p, id);
     return `<div class="ag-papan-baris ${id === saya ? 'saya' : ''} ${k.hidup ? '' : 'keluar'}" style="--warna:${d.warna}">
-      <span class="ag-lambang" aria-hidden="true">${d.lambang}</span>
+      ${segel(sk, id, 38)}
       <span class="ag-papan-nama">${esc(d.nama)}<small>${id === saya ? 'Kubumu, ' : ''}${jumlah} anggota${bot ? `, ${bot} bot` : ''}${k.hidup ? '' : ', tereliminasi'}</small></span>
-      <span class="ag-papan-nilai">KT ${k.kt}<br>PG ${k.pg}</span>
+      <span class="ag-papan-nilai">${deretKT(k.kt, M.KT_MAKS, 11)}${nilaiPG(k.pg, 14)}</span>
     </div>`;
   }).join('');
 }
 
-function kartuKubu(sk, id, p, besar){
+/*
+  Kartu kubu. Sisi belakang berupa map berkas rahasia, sisi depan berisi isi
+  kartu. "balik" bernilai true untuk kartu yang dibuka dengan animasi flip
+  saat kartu dibagikan; kartu di tab samping langsung tampil terbuka.
+*/
+function kartuKubu(sk, id, p, balik){
   const d = infoKubu(sk, id);
   const k = p.kubu[id];
-  return `<article class="ag-kartu ${besar ? 'besar' : ''}" style="--warna:${d.warna}">
-    <span class="ag-stempel">RAHASIA</span>
-    <div class="ag-kartu-kepala">
-      <span class="ag-lambang" aria-hidden="true">${d.lambang}</span>
-      <h3>${esc(d.nama)}</h3>
+  const tujuan = TUJUAN[d.tujuan];
+  const depan = `<article class="ag-kartu-depan" style="--warna:${d.warna}">
+    <header class="ag-kartu-pita">
+      <span class="ag-kartu-label">Kartu kubu</span>
+      <span class="ag-stempel">RAHASIA</span>
+    </header>
+    <div class="ag-kartu-identitas">
+      ${segel(sk, id, 84)}
+      <div>
+        <h3>${esc(d.nama)}</h3>
+        <span class="ag-kartu-tipe">Tujuan ${esc(tujuan.nama)}</span>
+      </div>
+    </div>
+    <div class="ag-kartu-nilai">
+      <div><span class="ag-kecil-kapital">Ketahanan</span>${deretKT(k.kt, M.KT_MAKS, 16)}</div>
+      <div><span class="ag-kecil-kapital">Pengaruh</span>${nilaiPG(k.pg, 18)}</div>
     </div>
     <dl>
       <dt>Agenda</dt><dd>${esc(d.agenda)}</dd>
-      <dt>Tujuan</dt><dd>${esc(kalimatTujuan(sk, id))}</dd>
-      <dt>Risiko terbesar</dt><dd>${esc(TITIK[d.titik].kalimat)} Kubu juga tereliminasi jika Ketahanan habis.</dd>
-      <dt>Aksi khas (sekali pakai)</dt><dd><strong>${esc(d.khas.nama)}.</strong> ${esc(d.khas.ket)}${k.khas ? ' <em>(sudah dipakai)</em>' : ''}</dd>
-      <dt>Saran</dt><dd>${esc(d.saran)}</dd>
+      <dt>Tujuan</dt><dd>${esc(kalimatTujuan(sk, id, p.target))}</dd>
+      <dt>Risiko terbesar</dt><dd><strong>${esc(TITIK[d.titik].nama)}.</strong> ${esc(TITIK[d.titik].kalimat)} Kubu juga tereliminasi jika Ketahanan habis.</dd>
     </dl>
-    <div class="ag-nilai"><span>Ketahanan ${k.kt}</span><span>Pengaruh ${k.pg}</span>${k.hidup ? '' : `<span class="ag-palsu">Tereliminasi: ${esc(k.sebab)}</span>`}</div>
+    <div class="ag-keunggulan"><span class="ag-kecil-kapital">Keunggulan: ${esc(tujuan.keunggulan.nama)}</span>${esc(tujuan.keunggulan.ket)}</div>
+    <p class="ag-kartu-saran">${esc(d.saran)}</p>
+    ${k.hidup ? '' : `<p class="ag-palsu">Tereliminasi karena ${esc(k.sebab)}.</p>`}
   </article>`;
+  if(!balik) return `<div class="ag-kartu-tunggal">${depan}</div>`;
+  return `<div class="ag-flip" data-flip tabindex="0" role="button" aria-label="Balik kartu kubu">
+    <div class="ag-flip-dalam">
+      <div class="ag-flip-sisi ag-flip-belakang">
+        <div class="ag-map">
+          <span class="ag-stempel">RAHASIA</span>
+          ${lambang('saksi', '#6b5638', 96, 'Berkas rahasia')}
+          <strong>${esc(sk.judul)}</strong>
+          <span>Berkas kubu untukmu</span>
+          <small>Ketuk untuk membuka</small>
+        </div>
+      </div>
+      <div class="ag-flip-sisi ag-flip-muka">${depan}</div>
+    </div>
+  </div>`;
 }
 
-function kartuSaksi(){
-  return `<article class="ag-kartu besar">
-    <span class="ag-stempel">SAKSI</span>
-    <div class="ag-kartu-kepala"><span class="ag-lambang" aria-hidden="true">👁️</span><h3>Kamu adalah Saksi</h3></div>
+function kartuSaksi(balik){
+  const isi = `<article class="ag-kartu-depan" style="--warna:#6b5638">
+    <header class="ag-kartu-pita"><span class="ag-kartu-label">Kartu peran</span><span class="ag-stempel">SAKSI</span></header>
+    <div class="ag-kartu-identitas">${lambang('saksi', '#6b5638', 84, 'Saksi')}<div><h3>Kamu adalah Saksi</h3><span class="ag-kartu-tipe">Tanpa kubu</span></div></div>
     <dl>
       <dt>Peran</dt><dd>Kamu mengikuti jalannya kasus tanpa kubu. Kubu yang sudah tereliminasi juga menjadi Saksi.</dd>
       <dt>Yang bisa kamu lakukan</dt><dd>Pada setiap voting, para Saksi memilih satu kubu untuk didukung. Kubu dengan dukungan terbanyak mendapat tambahan 1 Pengaruh. Jika dukungan seri, tidak ada kubu yang mendapatkannya.</dd>
-      <dt>Saran</dt><dd>Dengarkan setiap juru bicara dengan cermat. Dukunganmu bisa menentukan nasib satu kubu.</dd>
     </dl>
+    <p class="ag-kartu-saran">Dengarkan setiap juru bicara dengan cermat. Dukunganmu bisa menentukan nasib satu kubu.</p>
   </article>`;
+  return balik
+    ? `<div class="ag-flip" data-flip tabindex="0" role="button" aria-label="Balik kartu"><div class="ag-flip-dalam">
+        <div class="ag-flip-sisi ag-flip-belakang"><div class="ag-map"><span class="ag-stempel">RAHASIA</span>${lambang('saksi', '#6b5638', 96, 'Berkas rahasia')}<strong>Saksi</strong><small>Ketuk untuk membuka</small></div></div>
+        <div class="ag-flip-sisi ag-flip-muka">${isi}</div></div></div>`
+    : `<div class="ag-kartu-tunggal">${isi}</div>`;
+}
+
+// Penjelasan Ketahanan dan Pengaruh beserta simbolnya.
+function htmlNilai(){
+  return `<div class="ag-legenda">
+    <div class="ag-legenda-isi">
+      <div class="ag-legenda-ikon">${ikonKT(30)}</div>
+      <div><strong>Ketahanan (KT)</strong><p>Dilambangkan tameng. Menunjukkan seberapa kuat kubu bertahan. Setiap kubu mulai dengan ${M.KT_AWAL} KT dan berkurang saat diserang. Jika KT habis, kubu tereliminasi.</p></div>
+    </div>
+    <div class="ag-legenda-isi">
+      <div class="ag-legenda-ikon">${ikonPG(30)}</div>
+      <div><strong>Pengaruh (PG)</strong><p>Dilambangkan koin. Menunjukkan sumber daya dan kekuatan tawar kubu. Setiap kubu mulai dengan ${M.PG_AWAL} PG. Banyak tujuan rahasia diukur dari jumlah PG di akhir permainan.</p></div>
+    </div>
+  </div>`;
+}
+
+function htmlDaftarAksi(lengkap){
+  return `<div class="ag-ringkas-aksi">${M.AKSI.map(a => `
+    <div class="ag-ringkas-baris">
+      <span class="ag-ringkas-ikon">${ikonAksi(a.id, 30)}</span>
+      <div><strong>${esc(a.nama)}</strong> <span class="ag-kecil">${esc(a.ket)}</span>
+        ${lengkap ? `<ul>${a.interaksi.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>
+    </div>`).join('')}</div>`;
 }
 
 function gambarPanggung(p, sk){
@@ -1112,32 +1224,39 @@ function gambarPanggung(p, sk){
   const hidup = kubuSayaHidup();
 
   if(p.fase === 'kartu'){
-    el.innerHTML = `<h2>Baca kartu kubumu</h2>
-      <p class="ag-kecil">Kartu ini rahasia. Jangan perlihatkan layarmu kepada kubu lain. Kartu tetap bisa dibuka kapan saja lewat tab Kartu kubu.</p>
-      ${saya === 'saksi' ? kartuSaksi() : kartuKubu(sk, saya, p, true)}`;
+    el.innerHTML = `<h2>Kartu kubumu sudah dibagikan</h2>
+      <p class="ag-kecil">Kartu ini rahasia. Jangan perlihatkan layarmu kepada kubu lain. Kartu tetap bisa dibuka kapan saja lewat tab Kartu.</p>
+      ${saya === 'saksi' ? kartuSaksi(true) : kartuKubu(sk, saya, p, true)}`;
+    const flip = el.querySelector('[data-flip]');
+    setTimeout(() => flip && flip.classList.add('terbuka'), 700);
     return;
   }
 
   if(p.fase === 'briefing'){
-    el.innerHTML = `<span class="ag-stempel">BERKAS KASUS</span>
+    el.innerHTML = `<span class="ag-stempel ag-stempel-pojok">BERKAS KASUS</span>
       <h2>${esc(sk.judul)}</h2>
       <p class="ag-kecil">${esc(sk.latar)}</p>
       ${sk.briefing.map(t => `<p>${esc(t)}</p>`).join('')}
       <h3>Kubu yang terlibat</h3>
       <div class="ag-kubu-grid">${Object.keys(sk.kubu).map(id => {
         const d = infoKubu(sk, id);
-        return `<div class="ag-kubu-mini" style="--warna:${d.warna}"><span aria-hidden="true">${d.lambang}</span><strong>${esc(d.nama)}</strong></div>`;
+        return `<div class="ag-kubu-mini" style="--warna:${d.warna}">${segel(sk, id, 44)}<strong>${esc(d.nama)}</strong></div>`;
       }).join('')}</div>
-      <p class="ag-kecil">Setiap kubu ingin mencapai tujuannya sendiri. Tujuan kubu lain tidak diketahui siapa pun.</p>`;
+      <h3>Cara membaca nilai kubu</h3>
+      ${htmlNilai()}
+      <h3>Enam aksi yang bisa dipilih</h3>
+      <p class="ag-kecil">Hasil sebuah aksi bergantung pada pilihan kubu yang menjadi targetnya. Rincian lengkapnya ada di tab Aturan.</p>
+      ${htmlDaftarAksi(false)}
+      <p class="ag-kecil">Permainan berlangsung ${totalRonde(p)} ronde. Setiap kubu ingin mencapai tujuannya sendiri, dan tujuan kubu lain tidak diketahui siapa pun.</p>`;
     return;
   }
 
   if(p.fase === 'bicara' || p.fase === 'bebas'){
-    const id = p.urutan[p.ronde - 1];
+    const id = p.urutan[(p.ronde - 1) % p.urutan.length];
     const d = infoKubu(sk, id);
     if(p.fase === 'bebas'){
       el.innerHTML = `<div class="ag-sorot">
-        <div class="ag-lambang-besar" aria-hidden="true">${d.lambang}</div>
+        ${segel(sk, id, 130)}
         <h2>Sesi bebas</h2>
         <p>${p.alasanBebas === 'bot'
           ? `${esc(d.nama)} dijalankan oleh bot, jadi giliran ini dipakai untuk diskusi bebas antar kubu.`
@@ -1148,15 +1267,15 @@ function gambarPanggung(p, sk){
     }
     const giliranku = id === saya;
     const juru = p.juru ? (p.juru.uid === G.uid ? 'Kamu' : p.juru.nama) : 'Siapa pun dari kubu ini';
-    el.innerHTML = `<div class="ag-sorot">
-      <div class="ag-lambang-besar" aria-hidden="true">${d.lambang}</div>
-      <p class="ag-label" style="color:var(--merah)">Giliran bicara</p>
+    el.innerHTML = `<div class="ag-sorot" style="--warna:${d.warna}">
+      ${segel(sk, id, 150)}
+      <p class="ag-label ag-label-merah">Giliran bicara</p>
       <h2>${esc(d.nama)}</h2>
       <p class="ag-juru">Juru bicara: <strong>${esc(juru)}</strong></p>
       <p>${giliranku
         ? 'Ini giliran kubumu. Sampaikan apa pun yang bisa memengaruhi kubu lain lewat kanal suara kelas. Kalian boleh jujur, boleh juga menggertak.'
         : 'Kubu lain menyimak lewat kanal suara kelas. Perhatikan mana yang fakta dan mana yang hanya klaim.'}</p>
-      ${p.juru && p.juru.uid === G.uid ? '<p class="ag-kecil">Kamu ditunjuk sebagai juru bicara. Anggota kubu lain boleh membantumu lewat obrolan kubu.</p>' : ''}
+      ${p.juru && p.juru.uid === G.uid ? '<p class="ag-kecil">Kamu ditunjuk sebagai juru bicara. Anggota kubumu boleh membantu lewat obrolan kubu.</p>' : ''}
     </div>`;
     return;
   }
@@ -1191,39 +1310,51 @@ function gambarVotingKubu(el, p, sk, saya){
   el.innerHTML = `<div class="ag-voting">
     <h2>Pilih aksi kubumu</h2>
     <p class="ag-kecil">Pilihanmu langsung tercatat dan masih bisa diganti sampai waktu habis. Aksi dengan suara terbanyak yang dijalankan. Jika seri, kubu otomatis Diam.</p>
-    <div class="ag-aksi-daftar">${M.AKSI.map(a => {
-      const info = M.infoAksi(sk, saya, a.id);
-      const kunci = M.aksiTerkunci(p, saya, a.id);
-      return `<label class="ag-aksi ${kunci ? 'terkunci' : ''}" title="${esc(kunci)}">
-        <input type="radio" name="aksi" value="${a.id}" ${kunci ? 'disabled' : ''} />
-        <span><span class="ag-aksi-nama">${esc(info.nama)}</span><span class="ag-aksi-sifat">${esc(info.sifat)}</span></span>
+    <div class="ag-kartu-aksi-daftar">${M.AKSI.map(a => `
+      <button type="button" class="ag-kartu-aksi" data-pilih-aksi="${a.id}" aria-pressed="false">
         <span class="ag-hitung" data-hitung="${a.id}">0</span>
-        <span class="ag-aksi-ket">${esc(kunci || info.ket)}</span>
-      </label>`;
-    }).join('')}</div>
+        <span class="ag-kartu-aksi-ikon">${ikonAksi(a.id, 44)}</span>
+        <span class="ag-aksi-nama">${esc(a.nama)}</span>
+        <span class="ag-aksi-sifat">${esc(a.sifat)}</span>
+        <span class="ag-aksi-ket">${esc(a.ket)}</span>
+        <span class="ag-aksi-interaksi">${a.interaksi.map(t => `<span>${esc(t)}</span>`).join('')}</span>
+      </button>`).join('')}</div>
     <div class="ag-target" id="bungkusTarget" hidden>
-      <label for="pilihTarget">Target aksi</label>
-      <select id="pilihTarget">
-        <option value="">Pilih kubu target</option>
-        ${lawan.map(id => `<option value="${id}">${sk.kubu[id].lambang} ${esc(sk.kubu[id].nama)}</option>`).join('')}
-      </select>
+      <span class="ag-kecil-kapital">Pilih kubu target</span>
+      <div class="ag-target-daftar">${lawan.map(id => `
+        <button type="button" class="ag-target-pilih" data-pilih-target="${id}" style="--warna:${sk.kubu[id].warna}">
+          ${segel(sk, id, 30)}<span>${esc(sk.kubu[id].nama)}</span><b data-hitung-target="${id}"></b>
+        </button>`).join('')}</div>
     </div>
     <p class="ag-status-suara" id="statusSuara"></p>
-    <p class="ag-kecil">Kondisi kubumu: Ketahanan ${k.kt}, Pengaruh ${k.pg}.</p>
+    <p class="ag-kecil">Kondisi kubumu: ${deretKT(k.kt, M.KT_MAKS, 13)} ${nilaiPG(k.pg, 14)}</p>
   </div>`;
-
-  el.querySelectorAll('input[name="aksi"]').forEach(inp => inp.addEventListener('change', () => {
-    const aksi = inp.value;
-    const perlu = M.butuhTarget(sk, saya, aksi);
-    $('bungkusTarget').hidden = !perlu;
-    const target = perlu ? $('pilihTarget').value : '';
-    kirimSuara(aksi, target);
+  G.pilihanAksi = '';
+  G.pilihanTarget = '';
+  el.querySelectorAll('[data-pilih-aksi]').forEach(b => b.addEventListener('click', () => {
+    G.pilihanAksi = b.dataset.pilihAksi;
+    if(!M.butuhTarget(G.pilihanAksi)) G.pilihanTarget = '';
+    tandaiPilihan();
+    kirimSuara(G.pilihanAksi, G.pilihanTarget);
   }));
-  $('pilihTarget').addEventListener('change', () => {
-    const pilih = el.querySelector('input[name="aksi"]:checked');
-    if(pilih) kirimSuara(pilih.value, $('pilihTarget').value);
-  });
+  el.querySelectorAll('[data-pilih-target]').forEach(b => b.addEventListener('click', () => {
+    G.pilihanTarget = b.dataset.pilihTarget;
+    tandaiPilihan();
+    if(G.pilihanAksi) kirimSuara(G.pilihanAksi, G.pilihanTarget);
+  }));
   perbaruiHitungan(true);
+}
+
+function tandaiPilihan(){
+  const el = $('panggung');
+  el.querySelectorAll('[data-pilih-aksi]').forEach(b => {
+    const aktif = b.dataset.pilihAksi === G.pilihanAksi;
+    b.classList.toggle('dipilih', aktif);
+    b.setAttribute('aria-pressed', aktif ? 'true' : 'false');
+  });
+  el.querySelectorAll('[data-pilih-target]').forEach(b => b.classList.toggle('dipilih', b.dataset.pilihTarget === G.pilihanTarget));
+  const bungkus = $('bungkusTarget');
+  if(bungkus) bungkus.hidden = !(G.pilihanAksi && M.butuhTarget(G.pilihanAksi));
 }
 
 function gambarVotingSaksi(el, p, sk){
@@ -1231,15 +1362,16 @@ function gambarVotingSaksi(el, p, sk){
   el.innerHTML = `<div class="ag-voting">
     <h2>Dukungan Saksi</h2>
     <p class="ag-kecil">Pilih satu kubu yang ingin kamu dukung pada ronde ini. Kubu dengan dukungan Saksi terbanyak mendapat tambahan 1 Pengaruh.</p>
-    <div class="ag-aksi-daftar">${hidup.map(id => `
-      <label class="ag-aksi">
-        <input type="radio" name="dukung" value="${id}" />
-        <span><span class="ag-aksi-nama">${sk.kubu[id].lambang} ${esc(sk.kubu[id].nama)}</span></span>
-        <span class="ag-hitung" data-hitung="${id}">0</span>
-      </label>`).join('')}</div>
+    <div class="ag-target-daftar">${hidup.map(id => `
+      <button type="button" class="ag-target-pilih" data-dukung="${id}" style="--warna:${sk.kubu[id].warna}">
+        ${segel(sk, id, 30)}<span>${esc(sk.kubu[id].nama)}</span><b data-hitung="${id}"></b>
+      </button>`).join('')}</div>
     <p class="ag-status-suara" id="statusSuara"></p>
   </div>`;
-  el.querySelectorAll('input[name="dukung"]').forEach(inp => inp.addEventListener('change', () => kirimSuara('dukung', inp.value)));
+  el.querySelectorAll('[data-dukung]').forEach(b => b.addEventListener('click', () => {
+    el.querySelectorAll('[data-dukung]').forEach(x => x.classList.toggle('dipilih', x === b));
+    kirimSuara('dukung', b.dataset.dukung);
+  }));
   perbaruiHitungan(true);
 }
 
@@ -1247,7 +1379,6 @@ function perbaruiHitungan(pasangPilihan){
   const p = permainan();
   const el = $('panggung');
   if(!p || p.fase !== 'voting' || !el.querySelector('.ag-voting')) return;
-  const sk = SKENARIO[p.skenario];
   const suara = G.suaraKubu.filter(s => s.ronde === p.ronde);
   const saksi = !kubuSayaHidup();
   const hitung = {};
@@ -1257,49 +1388,43 @@ function perbaruiHitungan(pasangPilihan){
     hitung[kunci] = (hitung[kunci] || 0) + 1;
     if(!saksi && s.target) hitungTarget[s.target] = (hitungTarget[s.target] || 0) + 1;
   }
-  el.querySelectorAll('[data-hitung]').forEach(b => { b.textContent = hitung[b.dataset.hitung] || 0; });
+  el.querySelectorAll('[data-hitung]').forEach(b => {
+    const n = hitung[b.dataset.hitung] || 0;
+    b.textContent = saksi ? (n ? `${n} suara` : '') : n;
+    b.classList.toggle('ada', n > 0);
+  });
+  el.querySelectorAll('[data-hitung-target]').forEach(b => {
+    const n = hitungTarget[b.dataset.hitungTarget] || 0;
+    b.textContent = n ? `${n} suara` : '';
+  });
 
-  if(!saksi){
-    const total = anggotaHadir(p, kubuSaya()).length;
-    $('statusSuara').textContent = `${suara.length} dari ${total} anggota kubumu sudah memilih.`;
-    const opsi = $('pilihTarget');
-    if(opsi){
-      for(const o of opsi.options){
-        if(!o.value) continue;
-        const dasar = `${sk.kubu[o.value].lambang} ${sk.kubu[o.value].nama}`;
-        o.textContent = hitungTarget[o.value] ? `${dasar} (${hitungTarget[o.value]} suara)` : dasar;
-      }
-    }
-  } else {
-    $('statusSuara').textContent = `${suara.length} Saksi sudah memilih.`;
-  }
+  $('statusSuara').textContent = saksi
+    ? `${suara.length} Saksi sudah memilih.`
+    : `${suara.length} dari ${anggotaHadir(p, kubuSaya()).length} anggota kubumu sudah memilih.`;
 
   if(pasangPilihan){
     const milik = suaraSaya();
-    if(milik){
-      const nama = saksi ? 'dukung' : 'aksi';
-      const nilai = saksi ? milik.target : milik.aksi;
-      const inp = el.querySelector(`input[name="${nama}"][value="${nilai}"]`);
-      if(inp) inp.checked = true;
-      if(!saksi && M.butuhTarget(sk, kubuSaya(), milik.aksi)){
-        $('bungkusTarget').hidden = false;
-        $('pilihTarget').value = milik.target || '';
-      }
+    if(milik && !saksi){
+      G.pilihanAksi = milik.aksi;
+      G.pilihanTarget = milik.target || '';
+      tandaiPilihan();
+    } else if(milik && saksi){
+      el.querySelectorAll('[data-dukung]').forEach(x => x.classList.toggle('dipilih', x.dataset.dukung === milik.target));
     }
   }
 }
 
 /* ---------- Laporan ---------- */
 
-function teksAksi(sk, id, aksi){
+function teksAksi(sk, aksi){
   if(!aksi) return 'Diam';
-  const nama = M.infoAksi(sk, id, aksi.aksi).nama;
+  const nama = M.infoAksi(aksi.aksi).nama;
   return aksi.target && sk.kubu[aksi.target] ? `${nama} terhadap ${sk.kubu[aksi.target].nama}` : nama;
 }
 
 function perubahan(dari, jadi){
-  if(dari === jadi) return `${jadi}`;
-  return `${dari} menjadi <b class="${jadi < dari ? 'turun' : 'naik'}">${jadi}</b>`;
+  if(dari === jadi) return `<b>${jadi}</b>`;
+  return `${dari} <span aria-hidden="true">menjadi</span> <b class="${jadi < dari ? 'turun' : 'naik'}">${jadi}</b>`;
 }
 
 function htmlLaporan(p, sk, ronde, lengkap){
@@ -1309,18 +1434,19 @@ function htmlLaporan(p, sk, ronde, lengkap){
   const hasil = p.hasil && p.hasil[saya];
   const catatan = saya !== 'saksi' ? (p.catatan[saya] || []).filter(c => c.ronde === ronde) : [];
 
-  return `<span class="ag-stempel">LAPORAN</span>
+  return `<span class="ag-stempel ag-stempel-pojok">LAPORAN</span>
     <h2>Laporan ronde ${ronde}</h2>
     <p class="ag-kecil">Laporan ini hanya menampilkan akibat. Siapa pelakunya tidak disebutkan.</p>
-    ${(lap.umum || []).map(t => `<p class="ag-umum">${esc(t)}</p>`).join('')}
     ${p.saksiKubu && lengkap ? `<p class="ag-kecil">Dukungan Saksi ronde ini jatuh kepada ${esc(sk.kubu[p.saksiKubu].nama)}.</p>` : ''}
     <div class="ag-laporan">${lap.baris.map(b => {
       const d = sk.kubu[b.kubu];
       return `<div class="ag-baris ${b.keluar ? 'keluar' : ''}" style="--warna:${d.warna}">
-        <span class="ag-lambang" aria-hidden="true">${d.lambang}</span>
-        <strong>${esc(d.nama)}</strong>
-        <span class="ag-angka">KT ${perubahan(b.ktDari, b.ktJadi)}, PG ${perubahan(b.pgDari, b.pgJadi)}</span>
-        <span class="ag-peristiwa">${b.peristiwa.length ? esc(b.peristiwa.join(', ')) + '.' : 'Tidak ada kejadian menonjol.'}${b.keluar ? ` <span class="ag-palsu">Tereliminasi karena ${esc(b.keluar)}.</span>` : ''}</span>
+        ${segel(sk, b.kubu, 44)}
+        <div>
+          <strong>${esc(d.nama)}</strong>
+          <div class="ag-angka"><span>${ikonKT(15)} ${perubahan(b.ktDari, b.ktJadi)}</span><span>${ikonPG(15)} ${perubahan(b.pgDari, b.pgJadi)}</span></div>
+          <div class="ag-peristiwa">${b.peristiwa.length ? b.peristiwa.map(t => `<span>${esc(t)}</span>`).join('') : '<em>Tidak ada kejadian menonjol</em>'}${b.keluar ? `<span class="ag-palsu">Tereliminasi karena ${esc(b.keluar)}</span>` : ''}</div>
+        </div>
       </div>`;
     }).join('')}</div>
     ${lengkap && saya !== 'saksi' && hasil ? `<div class="ag-catatan">
@@ -1345,29 +1471,31 @@ function htmlAkhir(p, sk){
     }
   }
   palsu.sort((a, b) => a.ronde - b.ronde);
+  const sisa = p.selesaiPada ? Math.max(0, p.selesaiPada + BATAS_SELESAI - sekarang()) : BATAS_SELESAI;
 
-  return `<span class="ag-stempel">DITUTUP</span>
+  return `<span class="ag-stempel ag-stempel-pojok">DITUTUP</span>
     <h2>Kasus ditutup</h2>
     <p>${berhasil} dari ${ids.length} kubu berhasil mencapai agendanya. Inilah isi kartu rahasia setiap kubu.</p>
-    <div class="ag-hasil">${ids.map(id => {
+    <p class="ag-kecil" id="infoBubarAkhir">Ruang otomatis dibubarkan dalam ${formatSisa(sisa)} jika host tidak kembali ke lobi.</p>
+    <div class="ag-hasil">${ids.map((id, i) => {
       const d = sk.kubu[id];
       const k = p.kubu[id];
-      return `<article class="ag-kartu" style="--warna:${d.warna}">
-        <div class="ag-kartu-kepala"><span class="ag-lambang" aria-hidden="true">${d.lambang}</span><h3>${esc(d.nama)}</h3></div>
+      return `<article class="ag-hasil-kartu ${akhir[id].berhasil ? 'berhasil' : 'gagal'}" style="--warna:${d.warna}; --tunda:${i * 0.18}s">
+        <div class="ag-hasil-kepala">${segel(sk, id, 56)}<h3>${esc(d.nama)}</h3></div>
         <dl>
-          <dt>Tujuan (${esc(TUJUAN[d.tujuan].nama)})</dt><dd>${esc(kalimatTujuan(sk, id))}</dd>
+          <dt>Tujuan ${esc(TUJUAN[d.tujuan].nama)}</dt><dd>${esc(kalimatTujuan(sk, id, p.target))}</dd>
           <dt>Titik lemah</dt><dd>${esc(TITIK[d.titik].nama)}</dd>
           <dt>Hasil</dt><dd>${esc(akhir[id].alasan)}</dd>
         </dl>
-        <div class="ag-nilai"><span>KT ${k.kt}</span><span>PG ${k.pg}</span></div>
+        <div class="ag-kartu-nilai">${deretKT(k.kt, M.KT_MAKS, 13)}${nilaiPG(k.pg, 15)}</div>
         <span class="ag-cap ${akhir[id].berhasil ? 'berhasil' : 'gagal'}">${akhir[id].berhasil ? 'BERHASIL' : 'GAGAL'}</span>
       </article>`;
     }).join('')}</div>
 
     <h3>Jejak keputusan</h3>
     <div class="ag-tabel-bungkus"><table class="ag-tabel">
-      <thead><tr><th>Ronde</th>${ids.map(id => `<th>${sk.kubu[id].lambang} ${esc(sk.kubu[id].nama)}</th>`).join('')}</tr></thead>
-      <tbody>${(p.riwayat || []).map(rw => `<tr><td>${rw.ronde}</td>${ids.map(id => `<td>${rw.aksi[id] ? esc(teksAksi(sk, id, rw.aksi[id])) : '<span class="ag-kecil">tereliminasi</span>'}</td>`).join('')}</tr>`).join('')}</tbody>
+      <thead><tr><th>Ronde</th>${ids.map(id => `<th><span class="ag-th-kubu">${segel(sk, id, 22)}${esc(sk.kubu[id].nama)}</span></th>`).join('')}</tr></thead>
+      <tbody>${(p.riwayat || []).map(rw => `<tr><td>${rw.ronde}</td>${ids.map(id => `<td>${rw.aksi[id] ? esc(teksAksi(sk, rw.aksi[id])) : '<span class="ag-kecil">tereliminasi</span>'}</td>`).join('')}</tr>`).join('')}</tbody>
     </table></div>
 
     <h3>Intel palsu yang beredar</h3>
@@ -1380,13 +1508,13 @@ function htmlAkhir(p, sk){
       <tbody>
         <tr><td>Critical Thinking</td><td>Intel mana yang kalian percaya? Apakah itu fakta atau hanya dugaan? Bagaimana kalian memeriksanya?</td></tr>
         <tr><td>Problem Solving</td><td>Bagaimana kubu kalian mengejar tujuan dengan informasi yang serba terbatas?</td></tr>
-        <tr><td>Decision Making</td><td>Apakah kubu kalian pernah seri saat voting? Apa alasan kalian memilih bersekutu atau berkhianat?</td></tr>
+        <tr><td>Decision Making</td><td>Kapan kalian memilih bersekutu, bertahan, atau menyerang? Apa yang kalian perkirakan akan dipilih kubu lain?</td></tr>
       </tbody>
     </table></div>
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;">
+    <div class="ag-akhir-aksi">
       ${G.host ? `<button type="button" class="ag-tombol" data-aksi="lobi">Kembali ke lobi</button>
-        <button type="button" class="ag-tombol ag-tombol-garis" style="color:var(--tinta); border-color:var(--garis)" data-aksi="bubarkan">Bubarkan ruang</button>` : ''}
+        <button type="button" class="ag-tombol ag-tombol-garis ag-tombol-gelap" data-aksi="bubarkan">Bubarkan ruang</button>` : ''}
     </div>`;
 }
 
@@ -1397,7 +1525,8 @@ function gambarTab(){
   if(!p) return;
   const sk = SKENARIO[p.skenario];
   const saya = kubuSaya();
-  $('tabKartu').innerHTML = saya === 'saksi' ? kartuSaksi() : kartuKubu(sk, saya, p, false);
+  $('tabKartu').innerHTML = saya === 'saksi' ? kartuSaksi(false) : kartuKubu(sk, saya, p, false);
+  $('tabAturan').innerHTML = `<h4>Nilai kubu</h4>${htmlNilai()}<h4 style="margin-top:14px">Enam aksi dan akibatnya</h4>${htmlDaftarAksi(true)}`;
   gambarTabIntel();
   gambarObrolan();
   pilihTab(G.tab);
@@ -1417,7 +1546,7 @@ function gambarTabIntel(){
   const akhir = p.fase === 'akhir';
   $('tabIntel').innerHTML = `
     <h4>Laporan intel</h4>
-    <p class="ag-kecil">Sebagian laporan bisa saja palsu karena rumor. Timbang sebelum mempercayainya.</p>
+    <p class="ag-kecil">Sebagian laporan bisa saja palsu, misalnya karena target sedang Bertahan. Timbang sebelum mempercayainya.</p>
     ${intel.length ? `<ul class="ag-intel">${intel.map(it => `<li><small>Ronde ${it.ronde}</small>${akhir && it.palsu ? '<span class="ag-palsu">PALSU.</span> ' : ''}${esc(it.teks)}</li>`).join('')}</ul>`
       : '<p class="ag-kecil">Belum ada laporan intel. Gunakan aksi Selidiki untuk mendapatkannya.</p>'}
     <h4 style="margin-top:14px">Catatan kubu</h4>
@@ -1460,6 +1589,7 @@ function pilihTab(nama){
   $('tabKartu').hidden = nama !== 'kartu';
   $('tabIntel').hidden = nama !== 'intel';
   $('tabObrolan').hidden = nama !== 'obrolan';
+  $('tabAturan').hidden = nama !== 'aturan';
   if(nama === 'intel'){
     const p = permainan();
     const saya = kubuSaya();
@@ -1475,6 +1605,16 @@ function pilihTab(nama){
 }
 
 document.querySelectorAll('.ag-tab [data-tab]').forEach(b => b.addEventListener('click', () => pilihTab(b.dataset.tab)));
+
+// Kartu yang bisa dibalik: ketuk atau tekan Enter untuk membalik.
+document.addEventListener('click', (e) => {
+  const kartu = e.target.closest('[data-flip]');
+  if(kartu) kartu.classList.toggle('terbuka');
+});
+document.addEventListener('keydown', (e) => {
+  const kartu = e.target.closest && e.target.closest('[data-flip]');
+  if(kartu && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); kartu.classList.toggle('terbuka'); }
+});
 
 /* ---------- Dialog pindah host ---------- */
 

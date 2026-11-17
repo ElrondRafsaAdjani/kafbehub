@@ -951,8 +951,8 @@ Akun tamu tidak membuka akses lain. Semua aturan lama memeriksa email, koleksi
 
 | Ruang | Siapa yang bisa masuk | Kapan bubar |
 |---|---|---|
-| Ruang Publik 1 sampai 3 | Siapa pun. Orang pertama yang masuk menjadi host. | Otomatis jika permainan belum dimulai dalam 10 menit, atau 15 menit setelah permainan selesai. |
-| Ruang Terkunci 1 sampai 3 | Hanya yang memegang kode akses dari asisten. | Saat asisten menutupnya lewat `/agenda-asisten`. |
+| Ruang Publik 1 sampai 3 | Siapa pun. Orang pertama yang masuk menjadi host. | Otomatis jika permainan belum dimulai dalam 10 menit, atau 5 menit setelah permainan selesai jika host tidak kembali ke lobi. |
+| Ruang Terkunci 1 sampai 3 | Hanya yang memegang kode akses dari asisten. | Saat asisten menutupnya lewat `/agenda-asisten`. Lobinya juga dikosongkan otomatis 5 menit setelah permainan selesai. |
 
 Setiap ruang menampung paling banyak 90 orang. Host bisa memindahkan
 perannya kepada pemain lain. Jika host menutup tab, pemain yang paling awal

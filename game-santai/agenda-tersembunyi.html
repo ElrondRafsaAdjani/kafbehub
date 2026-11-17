@@ -57,9 +57,10 @@
       <details class="ag-cara">
         <summary>Cara bermain</summary>
         <div class="ag-cara-isi">
-          <p>Peserta dibagi rata ke lima kubu. Setiap kubu menerima kartu rahasia berisi agenda, tujuan, titik lemah, dan satu aksi khas. Kubu lain tidak tahu isi kartumu.</p>
-          <p>Permainan berlangsung lima ronde. Pada setiap ronde satu kubu mendapat giliran bicara selama satu menit lewat kanal suara kelas. Sesudah giliran bicara, semua kubu memilih aksi lewat voting selama satu menit.</p>
-          <p>Aksi dengan suara terbanyak yang dijalankan. Jika voting seri atau tidak ada yang memilih, kubu otomatis Diam. Laporan ronde hanya menampilkan akibat tanpa menyebut pelakunya, dan sebagian laporan intel bisa saja palsu.</p>
+          <p>Peserta dibagi rata ke lima kubu. Setiap kubu menerima kartu rahasia berisi agenda, tujuan, titik lemah, dan satu keunggulan. Kubu lain tidak tahu isi kartumu.</p>
+          <p>Setiap kubu punya Ketahanan (KT), dilambangkan tameng, dan Pengaruh (PG), dilambangkan koin. Jika KT habis, kubu tereliminasi. Banyak tujuan rahasia diukur dari jumlah PG.</p>
+          <p>Permainan berlangsung 3 sampai 10 ronde sesuai pengaturan host. Pada setiap ronde satu kubu mendapat giliran bicara lewat kanal suara kelas. Sesudah giliran bicara, semua kubu memilih satu dari enam aksi lewat voting selama satu menit.</p>
+          <p>Hasil sebuah aksi bergantung pada pilihan kubu lain. Menyerang kubu yang sedang bertahan bisa merugikan diri sendiri, sedangkan dua kubu yang saling mengajak bersekutu akan sama untung. Jika voting seri atau tidak ada yang memilih, kubu otomatis Diam. Laporan ronde hanya menampilkan akibat tanpa menyebut pelakunya, dan sebagian laporan intel bisa saja palsu.</p>
           <p>Di akhir permainan semua agenda dibuka. Beberapa kubu bisa berhasil bersamaan.</p>
         </div>
       </details>
@@ -82,6 +83,33 @@
         <label for="pilihSkenario">Skenario</label>
         <select id="pilihSkenario"></select>
         <p class="ag-kecil" id="ketSkenario"></p>
+        <div class="ag-atur">
+          <div class="ag-atur-baris">
+            <span>Jumlah ronde</span>
+            <div class="ag-langkah">
+              <button type="button" data-atur="ronde" data-arah="-1" aria-label="Kurangi ronde">−</button>
+              <output id="aturRonde"></output>
+              <button type="button" data-atur="ronde" data-arah="1" aria-label="Tambah ronde">+</button>
+            </div>
+          </div>
+          <div class="ag-atur-baris">
+            <span>Lama briefing</span>
+            <div class="ag-langkah">
+              <button type="button" data-atur="briefing" data-arah="-1" aria-label="Kurangi lama briefing">−</button>
+              <output id="aturBriefing"></output>
+              <button type="button" data-atur="briefing" data-arah="1" aria-label="Tambah lama briefing">+</button>
+            </div>
+          </div>
+          <div class="ag-atur-baris">
+            <span>Lama giliran bicara tiap ronde</span>
+            <div class="ag-langkah">
+              <button type="button" data-atur="bicara" data-arah="-1" aria-label="Kurangi lama giliran bicara">−</button>
+              <output id="aturBicara"></output>
+              <button type="button" data-atur="bicara" data-arah="1" aria-label="Tambah lama giliran bicara">+</button>
+            </div>
+          </div>
+          <p class="ag-kecil" id="perkiraanDurasi"></p>
+        </div>
         <label>Bot</label>
         <div class="ag-bot">
           <button type="button" class="ag-tombol ag-tombol-garis ag-tombol-kecil" id="tombolKurangiBot">Kurangi bot</button>
@@ -130,12 +158,14 @@
           <div class="ag-papan" id="papan"></div>
 
           <div class="ag-tab" role="tablist">
-            <button type="button" role="tab" data-tab="kartu" class="aktif">Kartu kubu</button>
+            <button type="button" role="tab" data-tab="kartu" class="aktif">Kartu</button>
             <button type="button" role="tab" data-tab="intel">Intel</button>
             <button type="button" role="tab" data-tab="obrolan">Obrolan</button>
+            <button type="button" role="tab" data-tab="aturan">Aturan</button>
           </div>
           <div class="ag-isi-tab" id="tabKartu"></div>
           <div class="ag-isi-tab" id="tabIntel" hidden></div>
+          <div class="ag-isi-tab" id="tabAturan" hidden></div>
           <div class="ag-isi-tab" id="tabObrolan" hidden>
             <p class="ag-kecil" id="obrolanKet"></p>
             <ul class="ag-obrolan" id="daftarObrolan"></ul>
