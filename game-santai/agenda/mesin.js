@@ -40,15 +40,16 @@ export const MIN_PEMAIN = 5;
 export const MAKS_PEMAIN = 90;
 
 // Pengaturan yang bisa diubah host di lobi, beserta batasnya (detik).
-export const ATURAN_AWAL = { ronde: 5, briefing: 60, bicara: 60 };
+export const ATURAN_AWAL = { ronde: 5, briefing: 60, bicara: 60, voting: 60 };
 export const BATAS_ATURAN = {
   ronde: { min: 3, maks: 10, langkah: 1 },
   briefing: { min: 30, maks: 300, langkah: 30 },
   bicara: { min: 30, maks: 300, langkah: 30 },
+  voting: { min: 30, maks: 300, langkah: 30 },
 };
 
 // Lama fase yang tidak diatur host, dalam detik.
-export const DURASI = { kartu: 45, voting: 60, laporan: 20, bebas: 30 };
+export const DURASI = { kartu: 45, laporan: 20, bebas: 30 };
 
 export const AKSI = [
   {

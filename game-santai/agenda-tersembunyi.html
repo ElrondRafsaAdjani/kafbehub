@@ -59,7 +59,7 @@
         <div class="ag-cara-isi">
           <p>Peserta dibagi rata ke lima kubu. Setiap kubu menerima kartu rahasia berisi agenda, tujuan, titik lemah, dan satu keunggulan. Kubu lain tidak tahu isi kartumu.</p>
           <p>Setiap kubu punya Ketahanan (KT), dilambangkan tameng, dan Pengaruh (PG), dilambangkan koin. Jika KT habis, kubu tereliminasi. Banyak tujuan rahasia diukur dari jumlah PG.</p>
-          <p>Permainan berlangsung 3 sampai 10 ronde sesuai pengaturan host. Pada setiap ronde satu kubu mendapat giliran bicara lewat kanal suara kelas. Sesudah giliran bicara, semua kubu memilih satu dari enam aksi lewat voting selama satu menit.</p>
+          <p>Permainan berlangsung 3 sampai 10 ronde sesuai pengaturan host. Pada setiap ronde satu kubu mendapat giliran bicara lewat kanal suara kelas. Sesudah giliran bicara, semua kubu memilih satu dari enam aksi lewat voting.</p>
           <p>Hasil sebuah aksi bergantung pada pilihan kubu lain. Menyerang kubu yang sedang bertahan bisa merugikan diri sendiri, sedangkan dua kubu yang saling mengajak bersekutu akan sama untung. Jika voting seri atau tidak ada yang memilih, kubu otomatis Diam. Laporan ronde hanya menampilkan akibat tanpa menyebut pelakunya, dan sebagian laporan intel bisa saja palsu.</p>
           <p>Di akhir permainan semua agenda dibuka. Beberapa kubu bisa berhasil bersamaan.</p>
         </div>
@@ -106,6 +106,14 @@
               <button type="button" data-atur="bicara" data-arah="-1" aria-label="Kurangi lama giliran bicara">−</button>
               <output id="aturBicara"></output>
               <button type="button" data-atur="bicara" data-arah="1" aria-label="Tambah lama giliran bicara">+</button>
+            </div>
+          </div>
+          <div class="ag-atur-baris">
+            <span>Lama voting aksi tiap ronde</span>
+            <div class="ag-langkah">
+              <button type="button" data-atur="voting" data-arah="-1" aria-label="Kurangi lama voting">−</button>
+              <output id="aturVoting"></output>
+              <button type="button" data-atur="voting" data-arah="1" aria-label="Tambah lama voting">+</button>
             </div>
           </div>
           <p class="ag-kecil" id="perkiraanDurasi"></p>

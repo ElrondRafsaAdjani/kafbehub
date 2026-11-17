@@ -740,7 +740,7 @@ async function maju(kunci){
         break;
       case 'bicara':
       case 'bebas':
-        baru = { ...p, fase: 'voting', berakhir: sekarang() + M.DURASI.voting * 1000 };
+        baru = { ...p, fase: 'voting', berakhir: sekarang() + (p.atur.voting || M.ATURAN_AWAL.voting) * 1000 };
         break;
       case 'voting': {
         const { keputusan, saksiKubu } = hitungVoting(p, sk);
@@ -1039,12 +1039,13 @@ function gambarAturan(){
   $('aturRonde').textContent = `${a.ronde} ronde`;
   $('aturBriefing').textContent = formatDetik(a.briefing);
   $('aturBicara').textContent = formatDetik(a.bicara);
+  $('aturVoting').textContent = formatDetik(a.voting);
   document.querySelectorAll('[data-atur]').forEach(b => {
     const batas = M.BATAS_ATURAN[b.dataset.atur];
     const nilai = a[b.dataset.atur];
     b.disabled = Number(b.dataset.arah) < 0 ? nilai <= batas.min : nilai >= batas.maks;
   });
-  const detik = M.DURASI.kartu + a.briefing + a.ronde * (a.bicara + M.DURASI.voting + M.DURASI.laporan);
+  const detik = M.DURASI.kartu + a.briefing + a.ronde * (a.bicara + a.voting + M.DURASI.laporan);
   $('perkiraanDurasi').textContent = `Perkiraan durasi permainan sekitar ${Math.round(detik / 60)} menit, belum termasuk pembahasan di akhir.`;
 }
 
